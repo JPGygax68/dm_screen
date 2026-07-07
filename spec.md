@@ -35,24 +35,28 @@ A DM adds combatants, tracks initiative and status, and updates HP/conditions du
    - Encounter date/time or session tag
    - Optional quick notes section
 
-2. **Combatant roster**
-   - Columns:
-     - Name / label
-     - Initiative
-     - Max HP
-     - Current HP
-     - AC / defenses
-     - Status / conditions
-     - Notes
-   - Distinguish player characters from monsters/NPCs visually.
-   - Allow sorting by initiative, name, or custom order.
+2. **Combat tracker layout**
+   - The digital combat tracker is organized by round: one row per round, with combatants represented by scrollable columns.
+   - The leftmost column is frozen and contains the round number, turn phase, and any round-level controls.
+   - Each combatant gets a dedicated column containing compact current status: portrait, name/label, current HP, initiative, and a short condition summary.
+   - The rightmost column is also frozen and reserved for round-specific notes and annotations.
+   - Horizontal scrolling should reveal additional combatants while keeping the left and right frozen columns visible.
+   - The digital layout should mirror the printed layout as closely as practical, with combatant columns aligned across the digital grid.
+   - Distinguish player characters from monsters/NPCs visually in their column headers or portraits.
+   - For the digital UI, initiative sorting remains optional. 
 
 3. **Combatant details panel**
    - Optional expanded view for a selected combatant
    - Editable fields: name, type, HP, AC, initiative, conditions, description, tags
    - Auto-filled fields may be provided from an internal lookup, but every field stays editable.
 
-4. **Controls**
+4. **Printed combat tracker**
+   - A single A4 landscape sheet should provide enough columns for 5 combatants.
+   - Additional combatants may be accommodated by appending extra sheets to the right edge of the previous sheet.
+   - The printed sheet should preserve the one-row-per-round structure and include a leftmost round label column and a rightmost notes column.
+   - Use clear column headers and compact stat summaries to make the printout usable at a glance.
+
+5. **Controls**
    - Add combatant
    - Duplicate combatant
    - Remove combatant
@@ -63,18 +67,18 @@ A DM adds combatants, tracks initiative and status, and updates HP/conditions du
    - Export encounter data
    - Print encounter sheet
 
-5. **Turn progression**
+6. **Turn progression**
    - Initiative sorting is optional in the digital UI and should not be assumed for paper.
    - Ending a turn and starting the next turn are separate, user-controlled steps.
    - The app should propose a checklist for each phase, initializing items with computed updates.
    - Each checklist item must be manually overridable by the GM.
 
-6. **Annotations and overrides**
+7. **Annotations and overrides**
    - Inline editable notes for each combatant
    - Global encounter notes
    - Fields should allow manual override of auto-filled or suggested values
 
-6. **Turn shorthand notation**
+8. **Turn shorthand notation**
    - Every combat turn should be represented by a single row in the UI and on printable sheets.
    - Use a super-compact notation that is easy to parse without AI.
    - Limit the character set to US-ASCII plus optional non-US characters for readability.
@@ -109,11 +113,36 @@ Supported update tokens:
 - `note:TEXT`: record a short free-text note inline.
 - `raw:TEXT`: record any update that cannot be expressed with tokens.
 
+Consumables and resource tokens:
+
+- `use:slot:L` — consume one spell slot of level `L` (e.g. `use:slot:1`).
+- `use:slot:L:N` — consume `N` slots at level `L` (e.g. `use:slot:2:2`).
+- `set:slot:L=N` — set remaining slots of level `L` to `N` (e.g. `set:slot:3=1`).
+- `use:item:NAME` — consume one unit of `NAME` (e.g. `use:item:healing_potion`).
+- `use:item:NAME:N` — consume `N` units.
+- `set:item:NAME=N` — set remaining quantity of `NAME` to `N`.
+- `rest:short`, `rest:long` — apply short/long rest semantics (applicable to resource recovery).
+
+Rules for consumables:
+
+- When the app has explicit data fields for a combatant's consumables (for example `spellSlots[level]` or `items["healing_potion"]`), the app SHOULD prepare a checklist item with the appropriate `tokens` (e.g. `use:slot:1`) and present it for DM review. The DM must be able to edit or delete that proposed token before confirming.
+- When the app DOES NOT have a corresponding data field, the app MUST require the DM to enter a consumable token explicitly (for example `use:item:arrows:20` or `set:slot:2=0`) and confirm that they have updated any external records as needed. The UI must prevent proceeding until the DM confirms this.
+- The app NEVER assumes responsibility for enforcing rules (e.g. spellcasting legality) — it only proposes or records consumable changes and leaves final authority to the GM.
+
+UI behavior:
+
+- Proposed consumable changes appear in end/start phase checklists like other tokens.
+- The checklist entry for a proposed consumable change should show current stored value (when available), the proposed token, and the new computed value; the DM can accept, modify, or reject it.
+- If no stored value exists, the checklist entry must show a prominent "Specify and confirm" button that opens a small editor to enter the `tokens` (or choose from a short list) and then confirm.
+
+
 Rules:
 
 - Tokens are case-insensitive for names like `hp`, `ac`, `cond`, `clr`, `temp`, `stat`, `save`, `skill`, `res`, `vul`, `imm`, `cast`, `action`, `roll`, `note`, `raw`.
 - Use simple separators and avoid punctuation that conflicts with parsing.
 - If needed, use `note:` or `raw:` to capture exceptional or manual updates.
+
+- Signed numeric tokens: when a numeric token value is preceded by `+` or `-`, treat it as a delta (increase/decrease) rather than an absolute assignment. Example: `+5hp` increases current HP by 5, `-7hp` reduces current HP by 7. Use `hp=N` to set an absolute HP value. For tokens that use `:` (for example `move:10`) the unsigned value retains the per-token meaning (here: distance moved this turn); prefer the signed delta form when recording changes to an existing stored value.
 
 Example rows:
 
