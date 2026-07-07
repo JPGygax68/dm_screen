@@ -37,7 +37,8 @@ A DM adds combatants, tracks initiative and status, and updates HP/conditions du
 
 2. **Combat tracker layout**
    - The digital combat tracker is organized by round: one row per round, with combatants represented by scrollable columns.
-   - The leftmost column is frozen and contains the round number, turn phase, and any round-level controls.
+  - The leftmost column is frozen and contains the round number, turn phase, and any round-level controls.
+  - A visually separate "current state" header row (above round rows) must be present in the digital UI and may optionally be printed. This header shows each combatant's current HP and the full list of active conditions; it is the authoritative (in digital), at-a-glance current-state summary for the encounter.
    - Each combatant gets a dedicated column containing compact current status: portrait, name/label, current HP, initiative, and a short condition summary.
    - The rightmost column is also frozen and reserved for round-specific notes and annotations.
    - Horizontal scrolling should reveal additional combatants while keeping the left and right frozen columns visible.
@@ -55,6 +56,7 @@ A DM adds combatants, tracks initiative and status, and updates HP/conditions du
    - Additional combatants may be accommodated by appending extra sheets to the right edge of the previous sheet.
    - The printed sheet should preserve the one-row-per-round structure and include a leftmost round label column and a rightmost notes column.
    - Use clear column headers and compact stat summaries to make the printout usable at a glance.
+  - The printed layout MAY include the separate "current state" header row, but this is optional: the GM may choose to omit the header, include a pre-combat `turn 0` baseline row, or track current state on separate sheets/cards as preferred.
 
 5. **Controls**
    - Add combatant
@@ -82,7 +84,7 @@ A DM adds combatants, tracks initiative and status, and updates HP/conditions du
    - Every combat turn should be represented by a single row in the UI and on printable sheets.
    - Use a super-compact notation that is easy to parse without AI.
    - Limit the character set to US-ASCII plus optional non-US characters for readability.
-   - Provide a small free-text area for the GM to record encounter-wide notes that span multiple turns.
+   - Provide a small hideable free-text area for the GM to record encounter-wide notes that span multiple turns.
 
 ### Turn shorthand syntax
 
@@ -102,16 +104,23 @@ Supported update tokens:
 - `move:N`: record movement in feet.
 - `cond:NAME`: add condition `NAME`.
 - `clr:NAME`: clear condition `NAME`.
-- `cond:NAME[N]`: add condition `NAME` with duration `N` rounds/turns.
+- `cond:+NAME[N]`: add condition `NAME` with duration `N` rounds/turns.
+- `cond:-NAME`: add condition `NAME` with duration `N` rounds/turns.
+- `+NAME`, `-NAME`: add or remove condition `NAME` in a turn cell as a compact change token.
 - `temp:NAME N`: add temporary effect `NAME` lasting `N` rounds/turns.
 - `stat:STR=18`, `str=18`: set a stat value.
 - `save:WIS+2`, `skill:PER+5`: set or adjust saves/skills.
 - `res:TYPE`, `vul:TYPE`, `imm:TYPE`: add resistance, vulnerability, or immunity.
 - `cast:SPELL`: note a spell casting action.
-- `action:TEXT`, `atk:TEXT`: record an attack or action description.
+- `action:TEXT`: record an action or short description.
+- `atk:TARGET+MOD[/dmg=N][/miss]`: record an attack against `TARGET` (combatant label), optional attack modifier `+MOD`, optional damage `/dmg=N`, or `/miss` to indicate a miss. Example: `atk:Goblin1+4/dmg=7` records an attack versus `Goblin1` with +4 attack bonus dealing 7 damage.
 - `roll:TEXT`: record a notable roll or check.
 - `note:TEXT`: record a short free-text note inline.
 - `raw:TEXT`: record any update that cannot be expressed with tokens.
+ 
+Notes on targets and labels:
+- `TARGET` must match the combatant label used in the column headers. Use underscores or hyphens instead of spaces (e.g. `Big_Ogre`), or quote labels if needed when implementing a parser.
+- When an attack affects another combatant, record the provenance in the attacker's cell using `atk:...` and record the resulting deltas (HP change, conditions) in the target's cell using `+NAME`/`-NAME` or `+Nhp`/`-Nhp` tokens.
 
 Consumables and resource tokens:
 
@@ -120,6 +129,7 @@ Consumables and resource tokens:
 - `set:slot:L=N` — set remaining slots of level `L` to `N` (e.g. `set:slot:3=1`).
 - `use:item:NAME` — consume one unit of `NAME` (e.g. `use:item:healing_potion`).
 - `use:item:NAME:N` — consume `N` units.
+- `add:item:NAME:N` — add `N` units.
 - `set:item:NAME=N` — set remaining quantity of `NAME` to `N`.
 - `rest:short`, `rest:long` — apply short/long rest semantics (applicable to resource recovery).
 
@@ -158,6 +168,8 @@ Example rows:
 - The app should initialize checklist items based on current state and computed updates.
 - Each item should be editable or overridable before the phase is confirmed.
 - The shorthand notation is the compact representation used in the checklist and on printed sheets when the DM wants to capture turn-specific changes.
+
+- Actions: every turn cell should allow or include an `action:` / `atk:` / `cast:` token describing the action taken by that combatant on that turn. Action tokens provide the provenance for condition deltas and consumable changes and must be recorded in the checklist/turn cell so the GM has context for deltas applied to targets.
 
 ### Checklist item schema
 

@@ -18,6 +18,7 @@
     <section class="tracker">
       <div class="frozen-column left-column">
         <div class="column-header">Round</div>
+        <div class="current-state-label">Current state</div>
         <div class="row-label">1</div>
         <div class="row-label">2</div>
         <div class="row-label">3</div>
@@ -26,17 +27,17 @@
 
       <div class="scrollable-columns">
         <div class="combatant-column">
-          <div class="column-header clickable">
-            <div class="portrait">PC</div>
-            <div>
-              <strong>PC_A</strong>
-              <span>Init 18</span>
+            <div class="column-header clickable">
+              <div class="portrait">PC</div>
+              <div>
+                <strong>PC_A</strong>
+                <span>Init 18</span>
+              </div>
             </div>
-          </div>
-          <div class="round-cell">HP 38 / 42<br>Cond: Bless</div>
-          <div class="round-cell">HP 32 / 42<br>Cond: Shielded</div>
-          <div class="round-cell">HP 26 / 42<br>Cond: Concentrating</div>
-          <div class="round-cell">HP 20 / 42<br>Cond: None</div>
+            <div class="current-state">HP 38 / 42<br>Bless, Shield</div>
+            <div class="round-cell"><span class="action-token">action:Attack +5</span><br><span class="cond-delta">-Shield</span></div>
+            <div class="round-cell"><span class="action-token">action:Dash</span><br><span class="cond-delta">+Concentrating</span></div>
+            <div class="round-cell"><span class="action-token">action:Cast Shield</span><br><span class="cond-delta">+Shield</span></div>
         </div>
 
         <div class="combatant-column">
@@ -47,9 +48,9 @@
               <span>Init 14</span>
             </div>
           </div>
-          <div class="round-cell">HP 7 / 11<br>Cond: Prone</div>
-          <div class="round-cell">HP 0 / 11<br>Cond: Dead</div>
-          <div class="round-cell">--</div>
+          <div class="current-state">HP 7 / 11<br>Prone</div>
+          <div class="round-cell"><span class="action-token">atk:PC_A+4/dmg=7</span><br><span class="cond-delta">-Prone</span></div>
+          <div class="round-cell"><span class="action-token">raw:knocked out</span><br><span class="cond-delta">+Dead</span></div>
           <div class="round-cell">--</div>
         </div>
 
@@ -61,9 +62,9 @@
               <span>Init 12</span>
             </div>
           </div>
-          <div class="round-cell">HP 11 / 11<br>Cond: None</div>
-          <div class="round-cell">HP 4 / 11<br>Cond: Poisoned</div>
-          <div class="round-cell">HP 0 / 11<br>Cond: Dead</div>
+          <div class="current-state">HP 11 / 11<br>—</div>
+          <div class="round-cell"><span class="action-token">atk:PC_A+4/dmg=6</span><br><span class="cond-delta">+Poisoned</span></div>
+          <div class="round-cell"><span class="action-token">raw:collapsed</span><br><span class="cond-delta">+Dead</span></div>
           <div class="round-cell">--</div>
         </div>
 
@@ -75,15 +76,16 @@
               <span>Init 10</span>
             </div>
           </div>
-          <div class="round-cell">HP 49 / 59<br>Cond: Angry</div>
-          <div class="round-cell">HP 37 / 59<br>Cond: None</div>
-          <div class="round-cell">HP 29 / 59<br>Cond: Stunned</div>
-          <div class="round-cell">HP 23 / 59<br>Cond: None</div>
+          <div class="current-state">HP 49 / 59<br>Angry</div>
+          <div class="round-cell"><span class="action-token">atk:PC_A+7/dmg=12</span><br><span class="cond-delta">-</span></div>
+          <div class="round-cell"><span class="action-token">atk:PC_A+6/dmg=10</span><br><span class="cond-delta">+Stunned</span></div>
+          <div class="round-cell"><span class="action-token">action:Rage</span><br><span class="cond-delta">-</span></div>
         </div>
       </div>
 
       <div class="frozen-column right-column">
         <div class="column-header">Round Notes</div>
+        <div class="current-state-label">Notes (current)</div>
         <div class="row-label">Focus PC_A first.</div>
         <div class="row-label">Goblin1 falls.</div>
         <div class="row-label">Ogre stunned.</div>

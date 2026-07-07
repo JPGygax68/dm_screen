@@ -65,6 +65,36 @@ body {
   border-bottom: 1px solid rgba(255,255,255,0.08);
 }
 
+.current-state-label {
+  padding: 0.5rem 1rem;
+  font-weight: 600;
+  font-size: 0.9rem;
+  color: #cde;
+  background: rgba(255,255,255,0.02);
+  border-bottom: 1px dashed rgba(255,255,255,0.03);
+}
+
+.current-state {
+  padding: 0.6rem 1rem;
+  background: rgba(255,255,255,0.02);
+  border-bottom: 1px solid rgba(255,255,255,0.03);
+  font-weight: 600;
+  color: #e6f0ff;
+}
+
+.action-token {
+  display: inline-block;
+  font-size: 0.86rem;
+  color: #ffd;
+}
+
+.cond-delta {
+  display: inline-block;
+  margin-top: 0.25rem;
+  font-size: 0.82rem;
+  color: #9fe7b5;
+}
+
 .row-label,
 .round-cell {
   padding: 0.75rem 1rem;
