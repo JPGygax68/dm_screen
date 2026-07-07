@@ -1,0 +1,149 @@
+:root {
+  color-scheme: dark;
+  background: #111;
+  color: #eef;
+  font-family: Inter, system-ui, sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background: #10121a;
+}
+
+.tracker-shell {
+  max-width: 100vw;
+  min-height: 100vh;
+  padding: 1rem;
+}
+
+.tracker-title {
+  margin-bottom: 1rem;
+}
+
+.tracker-title h1 {
+  margin: 0;
+  font-size: 1.5rem;
+}
+
+.tracker-title p {
+  margin: 0.25rem 0 0;
+  color: #9ab;
+}
+
+.tracker {
+  display: grid;
+  grid-template-columns: minmax(140px, 160px) 1fr minmax(160px, 180px);
+  gap: 0.5rem;
+  overflow: hidden;
+}
+
+.frozen-column {
+  background: rgba(20, 24, 39, 0.95);
+  border: 1px solid rgba(255,255,255,0.05);
+  border-radius: 0.75rem;
+  overflow: hidden;
+}
+
+.left-column,
+.right-column {
+  display: grid;
+  grid-auto-rows: 4rem;
+}
+
+.column-header {
+  padding: 1rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  font-size: 0.85rem;
+  background: rgba(255,255,255,0.04);
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+}
+
+.row-label,
+.round-cell {
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid rgba(255,255,255,0.05);
+  font-size: 0.95rem;
+}
+
+.row-label:last-child,
+.round-cell:last-child {
+  border-bottom: none;
+}
+
+.scrollable-columns {
+  display: flex;
+  gap: 0.5rem;
+  overflow-x: auto;
+  padding-bottom: 0.25rem;
+}
+
+.combatant-column {
+  min-width: 160px;
+  width: 160px;
+  display: grid;
+  grid-auto-rows: 4rem;
+  background: rgba(22, 26, 45, 0.9);
+  border: 1px solid rgba(255,255,255,0.05);
+  border-radius: 0.75rem;
+}
+
+.combatant-column .column-header {
+  display: flex;
+  gap: 0.75rem;
+  align-items: center;
+  cursor: pointer;
+}
+
+.portrait {
+  width: 2.5rem;
+  height: 2.5rem;
+  display: grid;
+  place-items: center;
+  border-radius: 0.85rem;
+  background: linear-gradient(150deg, #5b9cff 0%, #2e49db 100%);
+  color: white;
+  font-weight: 700;
+}
+
+.combatant-column .column-header strong {
+  display: block;
+  line-height: 1.1;
+}
+
+.combatant-column .column-header span {
+  display: block;
+  margin-top: 0.25rem;
+  font-size: 0.8rem;
+  color: #aab;
+}
+
+.round-cell {
+  font-size: 0.88rem;
+  line-height: 1.4;
+  color: #d8ddf0;
+}
+
+.round-cell::before {
+  content: "";
+}
+
+@media (max-width: 900px) {
+  .tracker {
+    grid-template-columns: 1fr;
+  }
+
+  .frozen-column {
+    min-width: auto;
+  }
+
+  .scrollable-columns {
+    min-width: 100%;
+  }
+}

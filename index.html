@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DM Screen Combat Tracker Prototype</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <main class="tracker-shell">
+    <header class="tracker-title">
+      <div>
+        <h1>Combat Tracker Prototype</h1>
+        <p>One row per round, horizontally scrollable combatant columns, frozen left/right columns.</p>
+      </div>
+    </header>
+
+    <section class="tracker">
+      <div class="frozen-column left-column">
+        <div class="column-header">Round</div>
+        <div class="row-label">1</div>
+        <div class="row-label">2</div>
+        <div class="row-label">3</div>
+        <div class="row-label">4</div>
+      </div>
+
+      <div class="scrollable-columns">
+        <div class="combatant-column">
+          <div class="column-header clickable">
+            <div class="portrait">PC</div>
+            <div>
+              <strong>PC_A</strong>
+              <span>Init 18</span>
+            </div>
+          </div>
+          <div class="round-cell">HP 38 / 42<br>Cond: Bless</div>
+          <div class="round-cell">HP 32 / 42<br>Cond: Shielded</div>
+          <div class="round-cell">HP 26 / 42<br>Cond: Concentrating</div>
+          <div class="round-cell">HP 20 / 42<br>Cond: None</div>
+        </div>
+
+        <div class="combatant-column">
+          <div class="column-header clickable">
+            <div class="portrait">G1</div>
+            <div>
+              <strong>Goblin1</strong>
+              <span>Init 14</span>
+            </div>
+          </div>
+          <div class="round-cell">HP 7 / 11<br>Cond: Prone</div>
+          <div class="round-cell">HP 0 / 11<br>Cond: Dead</div>
+          <div class="round-cell">--</div>
+          <div class="round-cell">--</div>
+        </div>
+
+        <div class="combatant-column">
+          <div class="column-header clickable">
+            <div class="portrait">G2</div>
+            <div>
+              <strong>Goblin2</strong>
+              <span>Init 12</span>
+            </div>
+          </div>
+          <div class="round-cell">HP 11 / 11<br>Cond: None</div>
+          <div class="round-cell">HP 4 / 11<br>Cond: Poisoned</div>
+          <div class="round-cell">HP 0 / 11<br>Cond: Dead</div>
+          <div class="round-cell">--</div>
+        </div>
+
+        <div class="combatant-column">
+          <div class="column-header clickable">
+            <div class="portrait">O</div>
+            <div>
+              <strong>Ogre</strong>
+              <span>Init 10</span>
+            </div>
+          </div>
+          <div class="round-cell">HP 49 / 59<br>Cond: Angry</div>
+          <div class="round-cell">HP 37 / 59<br>Cond: None</div>
+          <div class="round-cell">HP 29 / 59<br>Cond: Stunned</div>
+          <div class="round-cell">HP 23 / 59<br>Cond: None</div>
+        </div>
+      </div>
+
+      <div class="frozen-column right-column">
+        <div class="column-header">Round Notes</div>
+        <div class="row-label">Focus PC_A first.</div>
+        <div class="row-label">Goblin1 falls.</div>
+        <div class="row-label">Ogre stunned.</div>
+        <div class="row-label">Press advantage.</div>
+      </div>
+    </section>
+  </main>
+</body>
+</html>
