@@ -68,12 +68,17 @@ A DM adds combatants, tracks initiative and status, and updates HP/conditions du
    - Mark/clear conditions
    - Export encounter data
    - Print encounter sheet
+   - End encounter review popup: optionally summarize conditions that were added or removed during this encounter and allow the GM to reset those conditions.
 
 6. **Turn progression**
    - Initiative sorting is optional in the digital UI and should not be assumed for paper.
    - Ending a turn and starting the next turn are separate, user-controlled steps.
    - The app should propose a checklist for each phase, initializing items with computed updates.
    - Each checklist item must be manually overridable by the GM.
+   - Turn recording should be supported by large, fixed-position input panels that remain visible during entry. The panels should appear in a consistent vertical zone and may use different horizontal alignment for start-of-round, per-turn, and end-of-turn actions.
+   - The currently edited turn cell should remain visible and should display a live shorthand preview while the panel is active. The active cell should be visually indicated, for example with a highlight or arrow cue, so the GM can clearly see which turn is being filled.
+   - For tablet use, complex or rare entries should be supported by a numbered footnote system as an alternative to typing on a virtual keyboard.
+   - The input panel should be large enough to support touch-friendly controls and fast interaction, with clear confirm, cancel, and clear actions.
 
 7. **Annotations and overrides**
    - Inline editable notes for each combatant
@@ -109,6 +114,73 @@ A DM adds combatants, tracks initiative and status, and updates HP/conditions du
 - Templates may include core fields only; custom monster persistence is deferred to later versions.
 - Instance data should remain separate from template definitions so overrides stay local to the encounter.
 - A simple internal JSON schema is sufficient; import/export is not required for the first version.
+
+### Player character data format
+
+- The app should define a flexible player-character profile schema that supports optional fields.
+- Most fields can be left empty, since the GM may choose to manage them manually.
+- The schema should support both a full profile and an encounter-specific state overlay.
+- All fields should be serializable to JSON and stored in the browser.
+
+Recommended PC profile shape:
+
+```json
+{
+  "id": "uuid",
+  "name": "Elandra Brightwood",
+  "label": "Elandra",
+  "type": "pc",
+  "race": "Half-Elf",
+  "class": ["Fighter", "Rogue"],
+  "level": 5,
+  "background": "Mercenary",
+  "currentHp": 32,
+  "maxHp": 38,
+  "tempHp": 0,
+  "ac": 17,
+  "initiative": 3,
+  "speed": "30 ft.",
+  "conditions": ["Blessed"],
+  "stats": {"str": 14, "dex": 18, "con": 14, "int": 12, "wis": 10, "cha": 13},
+  "saves": {"str": 2, "dex": 6, "con": 2, "int": 1, "wis": 0, "cha": 1},
+  "skills": {"athletics": 5, "stealth": 8, "perception": 4},
+  "spellSlots": {"1": 3, "2": 2, "3": 1},
+  "resources": {"arrows": 20, "healing_potion": 2},
+  "equipment": ["shortsword", "shield", "light crossbow"],
+  "currentWeapon": "shortsword",
+  "notes": "Uses inspiration on key attacks.",
+  "overrides": {
+    "ac": false,
+    "initiative": true,
+    "currentHp": true
+  }
+}
+```
+
+- Optional fields are expected. The profile can contain only the subset of fields that the GM wants to track digitally.
+- `overrides` should capture which values the GM has explicitly adjusted relative to defaults or templates.
+- `currentWeapon` supports weapon switch tracking and can be used to propose `switch:` tokens when the next attack uses a different weapon.
+- `spellSlots`, `resources`, and `equipment` are optional dictionaries/arrays for consumables and inventory.
+
+Encounter state overlay:
+
+```json
+{
+  "encounterId": "uuid",
+  "pcId": "uuid",
+  "currentHp": 28,
+  "tempHp": 0,
+  "conditions": ["Blessed", "Concentrating"],
+  "currentWeapon": "shortsword",
+  "initiative": 3,
+  "notes": "Holding action for the next round.",
+  "lastUpdated": "2026-07-08T10:00:00Z"
+}
+```
+
+- Encounter overlays store the active state for a combatant during a single encounter.
+- They may be sparse and only include fields that differ from the base profile.
+- When the app does not have a field, it should still allow the GM to record changes manually via shorthand tokens or free-form notes.
 
 Example template shape:
 
@@ -222,6 +294,7 @@ Example persisted object shape:
   - Conditions/status, notes, and a blank annotation area
 - Prefer a single-page printable layout for an encounter.
 - Ensure print output hides UI controls and focuses on content.
+- The app, and the print stylesheet, should also support printing completely blank forms
 
 ## Future synchronization readiness
 

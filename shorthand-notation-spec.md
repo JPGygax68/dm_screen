@@ -51,11 +51,20 @@ Each turn row uses the following structure:
 ### Actions and notes
 
 - `cast:SPELL`: note a spell casting action.
+- `switch:WEAPON`: record switching to a different weapon. Example: `switch:shortsword`.
+- `switch:FROM->TO`: record a specific weapon transition. Example: `switch:dagger->shortsword`.
 - `action:TEXT`: record an action or short description.
 - `atk:TARGET+MOD[/dmg=N][/miss]`: record an attack against `TARGET` with an optional modifier, damage, or miss flag.
 - `roll:TEXT`: record a notable roll or check.
 - `note:TEXT`: record a short free-text note inline.
 - `raw:TEXT`: record any update that cannot be expressed with the standard tokens.
+
+### Weapon switching notes
+
+- Under DnD 2024 rules, weapon switching is treated as a minor or free combat adjustment, not a full separate action.
+- Use `switch:...` to record the equipment transition without implying an extra action cost.
+- If the combatant attacks with a different weapon in the same turn, the notation should combine the switch and the attack in one row, e.g. `switch:dagger->shortsword; atk:Goblin1+6/dmg=8`.
+- The app may propose `switch:` automatically when the current weapon state differs from the weapon implied by the next attack token.
 
 ## Targets and labels
 
@@ -88,6 +97,7 @@ Each turn row uses the following structure:
 - `Goblin1: -7hp; cond:PRONE; move:10; note: fell from ledge`
 - `PC_A: +5hp; temp:BRACED 1; action:Shield spell`
 - `DM: cond:BLINDED[1]; atk:Spear +4; note: target behind cover`
+- `PC_A: switch:dagger->shortsword; atk:Goblin1+6/dmg=8; note: wielding blade for next turn`
 - `Ogre: hp=45; ac=13; res:fire; note: rage active`
 - `DM: raw:Grant inspiration; note: team advantage for next check`
 
