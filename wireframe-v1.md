@@ -24,9 +24,8 @@ The screen can be described as five stacked regions:
    - Each summary shows HP, initiative, and active conditions
 
 3. Tracker grid
-   - Left frozen column: round number, phase, and round-level controls
-   - Center area: turn cells for each combatant
-   - Right frozen column: notes and annotations
+   - A single current-state header row appears above the round rows and shows each combatant's compact summary (portrait, HP, initiative, conditions).
+   - Each round is a single stretchable row composed of a left frozen area (round label and controls), a horizontally scrollable center area with one cell per combatant, and a right frozen area for round notes.
 
 4. Lower input panel
    - Fixed in the lower part of the screen
@@ -79,9 +78,9 @@ A compact summary row showing each combatant's:
 
 ### 3. Tracker grid
 The main combat grid should include:
-- a frozen left column for round/phase and round-level controls,
-- a central area for turn cells,
-- and a frozen right column for notes and annotations.
+- a single `current-state` header row displayed once above the round rows (not repeated per round),
+- per-round rows that may expand vertically to accommodate multi-line shorthand content,
+- within each round row: a left frozen round label, a scrollable set of combatant cells, and a right notes area.
 
 ### 4. Fixed lower input panel
 This panel is always anchored in the same lower area.

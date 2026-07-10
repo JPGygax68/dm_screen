@@ -25,19 +25,8 @@
     </section>
 
     <section class="tracker">
-      <div class="frozen-column left-column">
-        <div class="column-header">Round</div>
-        <div class="current-state-label">Current state</div>
-        <div id="roundLabels"></div>
-      </div>
-
-      <div id="combatantColumns" class="scrollable-columns"></div>
-
-      <div class="frozen-column right-column">
-        <div class="column-header">Round Notes</div>
-        <div class="current-state-label">Notes (current)</div>
-        <div id="roundNotes"></div>
-      </div>
+      <div id="columnsHeader" class="columns-header"></div>
+      <div id="rowsContainer" class="rows-container"></div>
     </section>
 
     <section id="inputPanel" class="input-panel" aria-live="polite">
@@ -48,19 +37,25 @@
         </div>
         <div class="panel-actions">
           <button id="unlockEditBtn" class="secondary-btn">Unlock edit</button>
-          <button id="closePanelBtn" class="secondary-btn">Close</button>
+          <button id="closePanelBtn" class="secondary-btn">Close panel</button>
         </div>
       </div>
 
       <div class="panel-body">
         <div class="action-section">
+          <div class="section-title">Shorthand type</div>
           <div id="actionMenu" class="action-menu"></div>
-          <div id="subpanelContent" class="subpanel"></div>
         </div>
 
-        <div class="preview-section">
-          <div class="preview-label">Live shorthand preview</div>
-          <div id="previewText" class="preview-text">—</div>
+        <div class="composer-section">
+          <div class="section-title">Detail input</div>
+          <div id="subpanelContent" class="subpanel"></div>
+
+          <label style="margin-top:0.75rem; display:flex; flex-direction:column; gap:0.25rem;">
+            Raw shorthand
+            <textarea id="rawShorthand" placeholder="Add raw shorthand here (multi-line allowed)" style="min-height:4rem; resize:vertical; border-radius:0.45rem; padding:0.5rem; background:rgba(255,255,255,0.04); color:inherit; border:1px solid rgba(255,255,255,0.06);"></textarea>
+          </label>
+
           <div class="panel-footer">
             <button id="clearDraftBtn" class="secondary-btn">Clear</button>
             <button id="cancelDraftBtn" class="secondary-btn">Cancel</button>

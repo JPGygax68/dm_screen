@@ -43,6 +43,7 @@ A DM adds combatants, tracks initiative and status, and updates HP/conditions du
    - The rightmost column is also frozen and reserved for round-specific notes and annotations.
    - Horizontal scrolling should reveal additional combatants while keeping the left and right frozen columns visible.
    - The digital layout should mirror the printed layout as closely as practical, with combatant columns aligned across the digital grid.
+  - Round rows in the digital UI may expand vertically to accommodate multi-line shorthand entries; implementations may alternatively constrain row growth with internal scrollbars per cell, but the default prototype permits stretchable rows.
    - Distinguish player characters from monsters/NPCs visually in their column headers or portraits.
    - For the digital UI, initiative sorting remains optional. 
 
@@ -99,7 +100,7 @@ A DM adds combatants, tracks initiative and status, and updates HP/conditions du
 - At encounter start, the GM prepares participants and confirms that the encounter is ready to begin. The first turn cell becomes active automatically.
 - When a turn is confirmed, the next turn cell becomes active automatically. The previous turn becomes locked and remains visible as a completed record.
 - The active turn cell should open the turn-entry panel, which begins as a menu and can open sub-panels to the right for specific action types such as attack, cast, condition, damage, heal, switch, or note.
-- The turn-entry panel should support confirm, cancel, and clear actions. Confirm commits the shorthand preview to the turn cell; cancel closes the panel without changing the turn; clear removes any unsaved input.
+  - The turn-entry panel should support confirm, cancel, and clear actions. Confirm commits the shorthand preview to the turn cell; cancel closes the panel without changing the turn; clear removes any unsaved input. The panel's `Close` control closes or hides the input panel only and does not end the round or the encounter unless explicitly labelled and implemented to do so.
 - The active turn cell should display a live shorthand preview while the panel is open, and the active cell should remain visually distinguished so the GM can easily see which turn is being filled.
 
 ### Checklist-driven turn progression

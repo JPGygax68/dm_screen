@@ -26,7 +26,7 @@ for (let roundIndex = 0; roundIndex < rounds.length; roundIndex += 1) {
 }
 
 const state = {
-  encounterState: 'creating',
+  encounterState: 'recording',
   activeSlotIndex: 0,
   currentSlotIndex: 0,
   panelOpen: false,
@@ -42,7 +42,8 @@ const state = {
     damageAmount: '6',
     healAmount: '8',
     switchWeapon: 'longbow',
-    noteText: ''
+    noteText: '',
+    rawShorthand: ''
   },
   draftPreview: '',
   unlockEditing: false,
@@ -64,6 +65,8 @@ function getSlotIndex(roundIndex, combatantIndex) {
 
 function buildPreview() {
   const form = state.formState;
+  // prefer raw shorthand if present (allows multi-line entries)
+  if (form.rawShorthand && form.rawShorthand.trim().length > 0) return form.rawShorthand;
   switch (state.selectedAction) {
     case 'attack':
       return `atk:${form.attackTarget}+${form.attackMod}/dmg=${form.attackDamage}`;
@@ -94,11 +97,10 @@ function setPreview() {
 
 function render() {
   renderStatus();
-  renderRoundLabels();
-  renderCombatantColumns();
+  renderColumnsHeader();
+  renderRows();
   renderInputPanel();
 }
-
 function renderStatus() {
   document.getElementById('encounterState').textContent = state.encounterState;
   const slot = getSlot(state.activeSlotIndex);
@@ -106,17 +108,10 @@ function renderStatus() {
   document.getElementById('activeTurnLabel').textContent = `Round ${rounds[slot.roundIndex].label} · ${combatant.name}`;
 }
 
-function renderRoundLabels() {
-  const left = document.getElementById('roundLabels');
-  const right = document.getElementById('roundNotes');
-  left.innerHTML = rounds.map((round) => `<div class="row-label">${round.label}</div>`).join('');
-  right.innerHTML = rounds.map((round) => `<div class="row-label">${round.notes}</div>`).join('');
-}
-
-function renderCombatantColumns() {
-  const container = document.getElementById('combatantColumns');
-  container.innerHTML = combatants.map((combatant, combatantIndex) => {
-    const cells = rounds.map((round, roundIndex) => {
+function renderRows() {
+  const container = document.getElementById('rowsContainer');
+  container.innerHTML = rounds.map((round, roundIndex) => {
+    const combatantCells = combatants.map((combatant, combatantIndex) => {
       const slotIndex = getSlotIndex(roundIndex, combatantIndex);
       const slot = getSlot(slotIndex);
       const isActive = state.activeSlotIndex === slotIndex;
@@ -124,28 +119,47 @@ function renderCombatantColumns() {
       const classes = ['round-cell'];
       if (isActive) classes.push('active');
       if (isFilled) classes.push('filled');
+      const baseLabel = slot.value || 'Tap to fill';
+      const displayValue = (state.panelOpen && state.currentSlotIndex === slotIndex) ? (state.draftPreview || baseLabel) : baseLabel;
       return `
-        <button class="${classes.join(' ')}" data-slot-index="${slotIndex}">
-          <span class="cell-title">${round.label}</span>
-          <span class="cell-value">${slot.value || 'Tap to fill'}</span>
-        </button>
+        <div class="combatant-slot" style="min-width:180px; display:flex; flex-direction:column;">
+          <button class="${classes.join(' ')}" data-slot-index="${slotIndex}">
+            <span class="cell-value">${displayValue}</span>
+          </button>
+        </div>
       `;
     }).join('');
 
     return `
-      <div class="combatant-column">
-        <div class="column-header">
-          <div class="portrait">${combatant.portrait}</div>
-          <div>
-            <strong>${combatant.name}</strong>
-            <span>Init ${combatant.initiative}</span>
-          </div>
-        </div>
-        <div class="current-state">HP ${combatant.hp}<br>${combatant.status}</div>
-        ${cells}
+      <div class="round-row">
+        <div class="row-label">${round.label}</div>
+        <div class="row-combatants">${combatantCells}</div>
+        <div class="row-note">${round.notes}</div>
       </div>
     `;
   }).join('');
+}
+
+function renderColumnsHeader() {
+  const header = document.getElementById('columnsHeader');
+  header.innerHTML = `
+    <div class="row-label"></div>
+    <div class="row-combatants">
+      ${combatants.map((combatant) => `
+        <div class="combatant-column" style="min-width:180px;">
+          <div class="column-header">
+            <div class="portrait">${combatant.portrait}</div>
+            <div>
+              <strong>${combatant.name}</strong>
+              <span>Init ${combatant.initiative}</span>
+            </div>
+          </div>
+          <div class="current-state">HP ${combatant.hp}<br>${combatant.status}</div>
+        </div>
+      `).join('')}
+    </div>
+    <div class="row-note"></div>
+  `;
 }
 
 function renderInputPanel() {
@@ -165,7 +179,7 @@ function renderInputPanel() {
     hint.textContent = isLocked
       ? 'This completed turn is locked. Unlock it to edit.'
       : state.panelOpen
-        ? 'Fill the active turn with shorthand.'
+        ? 'Choose a shorthand type and record the turn.'
         : 'Select a turn to begin.';
   }
 
@@ -192,6 +206,10 @@ function renderInputPanel() {
   if (subpanel) {
     subpanel.innerHTML = renderSubpanel();
   }
+
+  // bind raw shorthand textarea to current form state
+  const raw = document.getElementById('rawShorthand');
+  if (raw) raw.value = state.formState.rawShorthand || '';
 
   if (panel) {
     panel.classList.toggle('open', state.panelOpen);
@@ -348,6 +366,7 @@ function handleFormInput(event) {
   if (field === 'healAmount') form.healAmount = value;
   if (field === 'switchWeapon') form.switchWeapon = value;
   if (field === 'noteText') form.noteText = value;
+  if (field === 'rawShorthand') form.rawShorthand = value;
   setPreview();
 }
 
@@ -360,13 +379,13 @@ function unlockEdit() {
 }
 
 function startEncounter() {
-  state.encounterState = 'active';
+  state.encounterState = 'recording';
   state.activeSlotIndex = 0;
   render();
 }
 
 function endEncounter() {
-  state.encounterState = 'ending';
+  state.encounterState = 'ended';
   render();
 }
 
@@ -378,7 +397,7 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('cancelDraftBtn').addEventListener('click', closePanel);
   document.getElementById('confirmDraftBtn').addEventListener('click', confirmDraft);
   document.getElementById('unlockEditBtn').addEventListener('click', unlockEdit);
-  document.getElementById('combatantColumns').addEventListener('click', (event) => {
+  document.getElementById('rowsContainer').addEventListener('click', (event) => {
     const button = event.target.closest('.round-cell');
     if (!button) return;
     const slotIndex = Number(button.dataset.slotIndex);

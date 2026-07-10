@@ -57,7 +57,7 @@ Each turn row uses the following structure:
 - `atk:TARGET+MOD[/dmg=N][/miss]`: record an attack against `TARGET` with an optional modifier, damage, or miss flag.
 - `roll:TEXT`: record a notable roll or check.
 - `note:TEXT`: record a short free-text note inline.
-- `raw:TEXT`: record any update that cannot be expressed with the standard tokens.
+- `raw:TEXT`: record any update that cannot be expressed with the standard tokens. `raw:` may contain multi-line content and free-form notes; implementations should preserve line breaks when storing and rendering `raw:` entries.
 
 ### Weapon switching notes
 
