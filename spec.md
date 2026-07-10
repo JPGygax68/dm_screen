@@ -76,6 +76,8 @@ A DM adds combatants, tracks initiative and status, and updates HP/conditions du
    - The app should propose a checklist for each phase, initializing items with computed updates.
    - Each checklist item must be manually overridable by the GM.
    - Turn recording should be supported by large, fixed-position input panels that remain visible during entry. The panels should appear in a consistent vertical zone and may use different horizontal alignment for start-of-round, per-turn, and end-of-turn actions.
+   - Turn cells should become active automatically once the previous turn has been confirmed by the GM. The first turn should activate automatically once the GM has confirmed that the round can begin.
+   - The initial turn-entry panel should behave like a menu, opening sub-panels to the right as needed for specific turn actions.
    - The currently edited turn cell should remain visible and should display a live shorthand preview while the panel is active. The active cell should be visually indicated, for example with a highlight or arrow cue, so the GM can clearly see which turn is being filled.
    - For tablet use, complex or rare entries should be supported by a numbered footnote system as an alternative to typing on a virtual keyboard.
    - The input panel should be large enough to support touch-friendly controls and fast interaction, with clear confirm, cancel, and clear actions.
@@ -92,6 +94,14 @@ A DM adds combatants, tracks initiative and status, and updates HP/conditions du
 
    See [shorthand-notation-spec.md](shorthand-notation-spec.md) for the full notation grammar, token definitions, examples, and checklist guidance.
 
+### Turn entry workflow
+
+- At encounter start, the GM prepares participants and confirms that the encounter is ready to begin. The first turn cell becomes active automatically.
+- When a turn is confirmed, the next turn cell becomes active automatically. The previous turn becomes locked and remains visible as a completed record.
+- The active turn cell should open the turn-entry panel, which begins as a menu and can open sub-panels to the right for specific action types such as attack, cast, condition, damage, heal, switch, or note.
+- The turn-entry panel should support confirm, cancel, and clear actions. Confirm commits the shorthand preview to the turn cell; cancel closes the panel without changing the turn; clear removes any unsaved input.
+- The active turn cell should display a live shorthand preview while the panel is open, and the active cell should remain visually distinguished so the GM can easily see which turn is being filled.
+
 ### Checklist-driven turn progression
 
 - The digital UI should expose separate phase checklists for end-of-turn and start-of-turn.
@@ -99,6 +109,26 @@ A DM adds combatants, tracks initiative and status, and updates HP/conditions du
 - Each item should be editable or overridable before the phase is confirmed.
 - The shorthand notation is the compact representation used in the checklist and on printed sheets when the DM wants to capture turn-specific changes.
 - Actions: every turn cell should allow or include an `action:` / `atk:` / `cast:` token describing the action taken by that combatant on that turn. Action tokens provide the provenance for condition deltas and consumable changes and must be recorded in the checklist/turn cell so the GM has context for deltas applied to targets.
+
+### Turn data model
+
+- Each turn cell should persist its data as shorthand notation text.
+- Rounds should be modeled as objects that wrap a list/array of turns plus round-level metadata that applies to all turns in that round.
+- Round-level data may include notes, phase markers, or other encounter-wide information that is shared by the turns in that round.
+
+### Encounter lifecycle
+
+- The encounter should progress through three basic states: creating, active, and ending.
+- Creating covers assembling participants, checking or adjusting initial conditions, and preparing the encounter for recording.
+- Active covers the period during which rounds and turns are being recorded.
+- Ending covers final notes, wrap-up data entry, and any encounter-end review actions.
+
+### Turn editing and validation
+
+- Existing turn entries should be editable, but only after the GM explicitly unlocks the turn for editing.
+- Undo/redo support is a future enhancement and should not be blocked by the initial spec.
+- Invalid or malformed shorthand should be made impossible by the UI wherever practical.
+- The app should still perform internal validation of shorthand input to catch bugs and prevent inconsistent data.
 
 ### Data behavior
 
