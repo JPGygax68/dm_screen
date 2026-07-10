@@ -122,6 +122,8 @@ A DM adds combatants, tracks initiative and status, and updates HP/conditions du
 - Creating covers assembling participants, checking or adjusting initial conditions, and preparing the encounter for recording.
 - Active covers the period during which rounds and turns are being recorded.
 - Ending covers final notes, wrap-up data entry, and any encounter-end review actions.
+- The app should support a small set of explicit encounter-end reasons so the GM can mark how the encounter concluded. Suggested reasons include: all hostile combatants defeated, retreat/withdrawal, objective achieved, time/scene change, or GM-defined conclusion.
+- The encounter-end reason should be stored as part of the encounter metadata and should be editable before the encounter is finalized.
 
 ### Turn editing and validation
 
