@@ -22,7 +22,11 @@ body {
 }
 
 .tracker-title {
-  margin-bottom: 1rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 0.75rem;
 }
 
 .tracker-title h1 {
@@ -33,6 +37,25 @@ body {
 .tracker-title p {
   margin: 0.25rem 0 0;
   color: #9ab;
+}
+
+.header-actions,
+.panel-actions,
+.panel-footer {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.status-bar {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.75rem 1rem;
+  margin-bottom: 0.75rem;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.05);
+  border-radius: 0.75rem;
 }
 
 .tracker {
@@ -82,28 +105,13 @@ body {
   color: #e6f0ff;
 }
 
-.action-token {
-  display: inline-block;
-  font-size: 0.86rem;
-  color: #ffd;
-}
-
-.cond-delta {
-  display: inline-block;
-  margin-top: 0.25rem;
-  font-size: 0.82rem;
-  color: #9fe7b5;
-}
-
-.row-label,
-.round-cell {
+.row-label {
   padding: 0.75rem 1rem;
   border-bottom: 1px solid rgba(255,255,255,0.05);
   font-size: 0.95rem;
 }
 
-.row-label:last-child,
-.round-cell:last-child {
+.row-label:last-child {
   border-bottom: none;
 }
 
@@ -115,10 +123,10 @@ body {
 }
 
 .combatant-column {
-  min-width: 160px;
-  width: 160px;
+  min-width: 180px;
+  width: 180px;
   display: grid;
-  grid-auto-rows: 4rem;
+  grid-auto-rows: auto;
   background: rgba(22, 26, 45, 0.9);
   border: 1px solid rgba(255,255,255,0.05);
   border-radius: 0.75rem;
@@ -155,13 +163,152 @@ body {
 }
 
 .round-cell {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  padding: 0.75rem 1rem;
+  border-top: 1px solid rgba(255,255,255,0.05);
   font-size: 0.88rem;
   line-height: 1.4;
   color: #d8ddf0;
+  text-align: left;
+  background: transparent;
+  border: none;
+  width: 100%;
+  cursor: pointer;
 }
 
-.round-cell::before {
-  content: "";
+.round-cell.active {
+  background: rgba(91, 156, 255, 0.18);
+  outline: 1px solid rgba(91, 156, 255, 0.45);
+}
+
+.round-cell.filled {
+  background: rgba(159, 231, 181, 0.12);
+}
+
+.cell-title {
+  font-size: 0.78rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: #9ab;
+}
+
+.cell-value {
+  font-size: 0.9rem;
+  color: #f2f6ff;
+}
+
+.input-panel {
+  margin-top: 1rem;
+  padding: 1rem;
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 0.9rem;
+  background: rgba(16, 21, 34, 0.95);
+  display: none;
+}
+
+.input-panel.open {
+  display: block;
+}
+
+.panel-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 0.75rem;
+}
+
+.panel-header h2 {
+  margin: 0;
+  font-size: 1rem;
+}
+
+.panel-header p {
+  margin: 0.2rem 0 0;
+  color: #9ab;
+}
+
+.panel-body {
+  display: grid;
+  grid-template-columns: 1.15fr 0.85fr;
+  gap: 1rem;
+}
+
+.action-section,
+.preview-section {
+  padding: 0.75rem;
+  border: 1px solid rgba(255,255,255,0.06);
+  border-radius: 0.75rem;
+  background: rgba(255,255,255,0.03);
+}
+
+.action-menu {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  margin-bottom: 0.75rem;
+}
+
+.action-btn,
+.primary-btn,
+.secondary-btn {
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 999px;
+  padding: 0.55rem 0.8rem;
+  background: rgba(255,255,255,0.08);
+  color: white;
+  cursor: pointer;
+}
+
+.action-btn.selected,
+.primary-btn {
+  background: linear-gradient(150deg, #5b9cff 0%, #2e49db 100%);
+  border-color: transparent;
+}
+
+.primary-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.subpanel label {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  margin-bottom: 0.6rem;
+  font-size: 0.92rem;
+}
+
+.subpanel input,
+.subpanel select,
+.subpanel textarea {
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 0.45rem;
+  padding: 0.5rem 0.6rem;
+  background: rgba(255,255,255,0.06);
+  color: white;
+}
+
+.subpanel textarea {
+  min-height: 4rem;
+  resize: vertical;
+}
+
+.preview-label {
+  font-size: 0.85rem;
+  color: #9ab;
+  margin-bottom: 0.4rem;
+}
+
+.preview-text {
+  min-height: 3rem;
+  padding: 0.75rem;
+  border-radius: 0.7rem;
+  background: rgba(255,255,255,0.05);
+  font-family: ui-monospace, SFMono-Regular, monospace;
+  font-size: 0.95rem;
 }
 
 @media (max-width: 900px) {
@@ -175,5 +322,9 @@ body {
 
   .scrollable-columns {
     min-width: 100%;
+  }
+
+  .panel-body {
+    grid-template-columns: 1fr;
   }
 }

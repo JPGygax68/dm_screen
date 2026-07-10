@@ -11,87 +11,66 @@
     <header class="tracker-title">
       <div>
         <h1>Combat Tracker Prototype</h1>
-        <p>One row per round, horizontally scrollable combatant columns, frozen left/right columns.</p>
+        <p>Interactive turn entry, active-turn focus, and a lower input panel.</p>
+      </div>
+      <div class="header-actions">
+        <button id="startEncounterBtn" class="secondary-btn">Start encounter</button>
+        <button id="endEncounterBtn" class="secondary-btn">End encounter</button>
       </div>
     </header>
+
+    <section class="status-bar">
+      <div><strong>State:</strong> <span id="encounterState">creating</span></div>
+      <div><strong>Active turn:</strong> <span id="activeTurnLabel">—</span></div>
+    </section>
 
     <section class="tracker">
       <div class="frozen-column left-column">
         <div class="column-header">Round</div>
         <div class="current-state-label">Current state</div>
-        <div class="row-label">1</div>
-        <div class="row-label">2</div>
-        <div class="row-label">3</div>
-        <div class="row-label">4</div>
+        <div id="roundLabels"></div>
       </div>
 
-      <div class="scrollable-columns">
-        <div class="combatant-column">
-            <div class="column-header clickable">
-              <div class="portrait">PC</div>
-              <div>
-                <strong>PC_A</strong>
-                <span>Init 18</span>
-              </div>
-            </div>
-            <div class="current-state">HP 38 / 42<br>Bless, Shield</div>
-            <div class="round-cell"><span class="action-token">action:Attack +5</span><br><span class="cond-delta">-Shield</span></div>
-            <div class="round-cell"><span class="action-token">action:Dash</span><br><span class="cond-delta">+Concentrating</span></div>
-            <div class="round-cell"><span class="action-token">action:Cast Shield</span><br><span class="cond-delta">+Shield</span></div>
-        </div>
-
-        <div class="combatant-column">
-          <div class="column-header clickable">
-            <div class="portrait">G1</div>
-            <div>
-              <strong>Goblin1</strong>
-              <span>Init 14</span>
-            </div>
-          </div>
-          <div class="current-state">HP 7 / 11<br>Prone</div>
-          <div class="round-cell"><span class="action-token">atk:PC_A+4/dmg=7</span><br><span class="cond-delta">-Prone</span></div>
-          <div class="round-cell"><span class="action-token">raw:knocked out</span><br><span class="cond-delta">+Dead</span></div>
-          <div class="round-cell">--</div>
-        </div>
-
-        <div class="combatant-column">
-          <div class="column-header clickable">
-            <div class="portrait">G2</div>
-            <div>
-              <strong>Goblin2</strong>
-              <span>Init 12</span>
-            </div>
-          </div>
-          <div class="current-state">HP 11 / 11<br>—</div>
-          <div class="round-cell"><span class="action-token">atk:PC_A+4/dmg=6</span><br><span class="cond-delta">+Poisoned</span></div>
-          <div class="round-cell"><span class="action-token">raw:collapsed</span><br><span class="cond-delta">+Dead</span></div>
-          <div class="round-cell">--</div>
-        </div>
-
-        <div class="combatant-column">
-          <div class="column-header clickable">
-            <div class="portrait">O</div>
-            <div>
-              <strong>Ogre</strong>
-              <span>Init 10</span>
-            </div>
-          </div>
-          <div class="current-state">HP 49 / 59<br>Angry</div>
-          <div class="round-cell"><span class="action-token">atk:PC_A+7/dmg=12</span><br><span class="cond-delta">-</span></div>
-          <div class="round-cell"><span class="action-token">atk:PC_A+6/dmg=10</span><br><span class="cond-delta">+Stunned</span></div>
-          <div class="round-cell"><span class="action-token">action:Rage</span><br><span class="cond-delta">-</span></div>
-        </div>
-      </div>
+      <div id="combatantColumns" class="scrollable-columns"></div>
 
       <div class="frozen-column right-column">
         <div class="column-header">Round Notes</div>
         <div class="current-state-label">Notes (current)</div>
-        <div class="row-label">Focus PC_A first.</div>
-        <div class="row-label">Goblin1 falls.</div>
-        <div class="row-label">Ogre stunned.</div>
-        <div class="row-label">Press advantage.</div>
+        <div id="roundNotes"></div>
+      </div>
+    </section>
+
+    <section id="inputPanel" class="input-panel" aria-live="polite">
+      <div class="panel-header">
+        <div>
+          <h2 id="panelTitle">Turn entry</h2>
+          <p id="panelHint">Select a turn to begin.</p>
+        </div>
+        <div class="panel-actions">
+          <button id="unlockEditBtn" class="secondary-btn">Unlock edit</button>
+          <button id="closePanelBtn" class="secondary-btn">Close</button>
+        </div>
+      </div>
+
+      <div class="panel-body">
+        <div class="action-section">
+          <div id="actionMenu" class="action-menu"></div>
+          <div id="subpanelContent" class="subpanel"></div>
+        </div>
+
+        <div class="preview-section">
+          <div class="preview-label">Live shorthand preview</div>
+          <div id="previewText" class="preview-text">—</div>
+          <div class="panel-footer">
+            <button id="clearDraftBtn" class="secondary-btn">Clear</button>
+            <button id="cancelDraftBtn" class="secondary-btn">Cancel</button>
+            <button id="confirmDraftBtn" class="primary-btn">Confirm</button>
+          </div>
+        </div>
       </div>
     </section>
   </main>
+
+  <script src="script.js"></script>
 </body>
 </html>

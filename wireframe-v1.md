@@ -44,21 +44,21 @@ The screen can be described as five stacked regions:
 The following sketch is illustrative only and not meant to be pixel-perfect:
 
 ```text
-+---------------------------------------------------------------+
-| Encounter header: Name | Tag | Notes | Start/End/Export       |
-+---------------------------------------------------------------+
-| Current state row: PC1 HP/Init/Cond | PC2 HP/Init/Cond ...    |
-+---------------------------------------------------------------+
-| Left column | Tracker cells (rounds/turns)    | Notes column  |
-| Round/phase | [active turn] [turn] [turn] ... | notes         |
-| Round/phase | [turn] [turn] [turn] ...        | notes         |
-| Round/phase | [turn] [turn] [turn] ...        | notes         |
-+---------------------------------------------------------------+
-| Lower input panel                                            |
++-----------------------------------------------------------------+
+| Encounter header: Name | Tag | Notes | Start/End/Export         |
++-----------------------------------------------------------------+
+| Current state row: PC1 HP/Init/Cond | PC2 HP/Init/Cond ...      |
++-----------------------------------------------------------------+
+| Left column | Tracker cells (rounds/turns)    | Notes column    |
+| Round/phase | [active turn] [turn] [turn] ... | notes           |
+| Round/phase | [turn] [turn] [turn] ...        | notes           |
+| Round/phase | [turn] [turn] [turn] ...        | notes           |
++-----------------------------------------------------------------+
+| Lower input panel                                               |
 | Menu: Attack | Cast | Condition | Damage | Heal | Switch | Note |
-| Sub-panel content / shorthand preview                         |
-| Confirm | Cancel | Clear                                      |
-+---------------------------------------------------------------+
+| Sub-panel content / shorthand preview                           |
+| Confirm | Cancel | Clear                                        |
++-----------------------------------------------------------------+
 ```
 
 ## Region details
