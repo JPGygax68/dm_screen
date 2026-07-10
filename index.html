@@ -50,10 +50,12 @@
           <div class="section-title">Detail input</div>
           <div id="subpanelContent" class="subpanel"></div>
 
-          <label style="margin-top:0.75rem; display:flex; flex-direction:column; gap:0.25rem;">
-            Raw shorthand
-            <textarea id="rawShorthand" placeholder="Add raw shorthand here (multi-line allowed)" style="min-height:4rem; resize:vertical; border-radius:0.45rem; padding:0.5rem; background:rgba(255,255,255,0.04); color:inherit; border:1px solid rgba(255,255,255,0.06);"></textarea>
-          </label>
+          <div id="rawShorthandContainer" style="margin-top:0.75rem; display:flex; flex-direction:column; gap:0.25rem;">
+            <label>
+              Raw shorthand
+              <textarea id="rawShorthand" placeholder="Add raw shorthand here (multi-line allowed)" style="min-height:4rem; resize:vertical; border-radius:0.45rem; padding:0.5rem; background:rgba(255,255,255,0.04); color:inherit; border:1px solid rgba(255,255,255,0.06);"></textarea>
+            </label>
+          </div>
 
           <div class="panel-footer">
             <button id="clearDraftBtn" class="secondary-btn">Clear</button>

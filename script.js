@@ -65,8 +65,7 @@ function getSlotIndex(roundIndex, combatantIndex) {
 
 function buildPreview() {
   const form = state.formState;
-  // prefer raw shorthand if present (allows multi-line entries)
-  if (form.rawShorthand && form.rawShorthand.trim().length > 0) return form.rawShorthand;
+  if (state.selectedAction === 'raw' && form.rawShorthand && form.rawShorthand.trim().length > 0) return form.rawShorthand;
   switch (state.selectedAction) {
     case 'attack':
       return `atk:${form.attackTarget}+${form.attackMod}/dmg=${form.attackDamage}`;
@@ -82,6 +81,8 @@ function buildPreview() {
       return `switch:${form.switchWeapon}`;
     case 'note':
       return form.noteText ? `note:${form.noteText}` : 'note:';
+    case 'raw':
+      return form.rawShorthand || '';
     default:
       return '';
   }
@@ -194,7 +195,8 @@ function renderInputPanel() {
       ['damage', 'Damage'],
       ['heal', 'Heal'],
       ['switch', 'Switch'],
-      ['note', 'Note']
+      ['note', 'Note'],
+      ['raw', 'Raw']
     ].map(([value, label]) => `
       <button class="action-btn ${state.selectedAction === value ? 'selected' : ''}" data-action="${value}">
         ${label}
@@ -207,8 +209,11 @@ function renderInputPanel() {
     subpanel.innerHTML = renderSubpanel();
   }
 
-  // bind raw shorthand textarea to current form state
+  const rawContainer = document.getElementById('rawShorthandContainer');
   const raw = document.getElementById('rawShorthand');
+  if (rawContainer) {
+    rawContainer.style.display = state.selectedAction === 'raw' ? 'flex' : 'none';
+  }
   if (raw) raw.value = state.formState.rawShorthand || '';
 
   if (panel) {
@@ -293,6 +298,10 @@ function renderSubpanel() {
           Note
           <textarea id="noteText">${form.noteText}</textarea>
         </label>
+      `;
+    case 'raw':
+      return `
+        <div class="preview-text">Enter raw shorthand in the field below.</div>
       `;
     default:
       return '';
@@ -426,7 +435,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (!button) return;
     setAction(button.dataset.action);
   });
-  document.getElementById('subpanelContent').addEventListener('input', handleFormInput);
-  document.getElementById('subpanelContent').addEventListener('change', handleFormInput);
+  document.getElementById('inputPanel').addEventListener('input', handleFormInput);
+  document.getElementById('inputPanel').addEventListener('change', handleFormInput);
   render();
 });
