@@ -128,7 +128,8 @@ A DM adds combatants, tracks initiative and status, and updates HP/conditions du
 
 ### Turn editing and validation
 
-- Existing turn entries should be editable, but only after the GM explicitly unlocks the turn for editing.
+- State changes such as damage or healing may be applied immediately even after a combatant has already acted in the round.
+- Shorthand action entry for a combatant whose turn has already completed should be discouraged; related action buttons may be grayed out or disabled for those turns, with raw entry available only as an escape hatch.
 - Undo/redo support is a future enhancement and should not be blocked by the initial spec.
 - Invalid or malformed shorthand should be made impossible by the UI wherever practical.
 - The app should still perform internal validation of shorthand input to catch bugs and prevent inconsistent data.

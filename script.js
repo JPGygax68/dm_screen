@@ -326,20 +326,38 @@ function confirmDraft() {
   if (!state.draftPreview) return;
   slot.value = state.draftPreview;
   slot.locked = true;
-  if (state.currentSlotIndex === state.activeSlotIndex) {
-    state.activeSlotIndex += 1;
-    if (state.activeSlotIndex >= slotData.length) {
-      state.activeSlotIndex = slotData.length - 1;
-    }
-  }
-  state.panelOpen = false;
-  state.unlockEditing = false;
-  state.editingLockedCell = false;
+  state.draftPreview = '';
+  state.formState.rawShorthand = '';
+  setPreview();
   render();
 }
 
 function clearDraft() {
   state.draftPreview = '';
+  state.formState.rawShorthand = '';
+  setPreview();
+  render();
+}
+
+function cancelDraft() {
+  state.draftPreview = '';
+  state.formState.rawShorthand = '';
+  setPreview();
+  renderInputPanel();
+}
+
+function nextTurn() {
+  const slot = getCurrentSlot();
+  if (state.draftPreview) {
+    slot.value = state.draftPreview;
+    slot.locked = true;
+  }
+  if (state.activeSlotIndex < slotData.length - 1) {
+    state.activeSlotIndex += 1;
+  }
+  state.currentSlotIndex = state.activeSlotIndex;
+  state.draftPreview = '';
+  state.formState.rawShorthand = '';
   setPreview();
   render();
 }
@@ -392,10 +410,10 @@ function endEncounter() {
 document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('startEncounterBtn').addEventListener('click', startEncounter);
   document.getElementById('endEncounterBtn').addEventListener('click', endEncounter);
-  document.getElementById('closePanelBtn').addEventListener('click', closePanel);
   document.getElementById('clearDraftBtn').addEventListener('click', clearDraft);
-  document.getElementById('cancelDraftBtn').addEventListener('click', closePanel);
+  document.getElementById('cancelDraftBtn').addEventListener('click', cancelDraft);
   document.getElementById('confirmDraftBtn').addEventListener('click', confirmDraft);
+  document.getElementById('nextTurnBtn').addEventListener('click', nextTurn);
   document.getElementById('unlockEditBtn').addEventListener('click', unlockEdit);
   document.getElementById('rowsContainer').addEventListener('click', (event) => {
     const button = event.target.closest('.round-cell');
