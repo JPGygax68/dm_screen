@@ -28,9 +28,9 @@ Use simple built-in sample data such as:
 Support the following interaction:
 - the first turn is active by default,
 - tapping the active turn opens the lower input panel,
-- the panel shows a menu of action types,
+- the panel shows a compact grid of shorthand-type buttons,
 - selecting an action opens a small sub-panel,
-- a shorthand preview is shown in the active turn cell,
+- shorthand content is entered directly into the active turn cell,
 - confirm commits the entry,
 - and the next turn becomes active.
 
@@ -44,7 +44,7 @@ Allow the GM to:
 Implement only enough state to support:
 - the active turn,
 - the current input draft,
-- the shorthand preview,
+- the shorthand content for the active cell,
 - and the list of completed turns.
 
 ## Out of scope for this first slice
@@ -61,8 +61,8 @@ Do not implement yet:
 
 1. Create the main shell layout.
 2. Add sample combatants and turn cells.
-3. Add the lower input panel and menu flow.
-4. Add the active-turn preview behavior.
+3. Add the lower input panel and compact shorthand-button grid.
+4. Add the active-turn entry behavior.
 5. Add turn confirmation and progression.
 6. Add turn unlock/editing.
 
@@ -71,7 +71,7 @@ Do not implement yet:
 The first slice is successful if the GM can:
 - see the main encounter screen,
 - activate a turn,
-- enter a shorthand action through the lower panel,
-- see the preview in the turn cell,
+- choose a shorthand type from the lower panel,
+- add shorthand content directly to the active turn cell,
 - confirm it,
 - and move to the next turn.

@@ -30,9 +30,9 @@ The screen can be described as five stacked regions:
 
 4. Lower input panel
    - Fixed in the lower part of the screen
-   - Starts as a menu
+   - Starts as a compact grid of shorthand-type buttons
    - Can open sub-panels for specific action types
-   - Shows a live shorthand preview for the active turn cell
+   - Shows the active turn's shorthand content directly in the turn cell
    - Includes confirm, cancel, and clear actions
 
 5. Active turn cue
@@ -55,8 +55,8 @@ The following sketch is illustrative only and not meant to be pixel-perfect:
 | Round/phase | [turn] [turn] [turn] ...        | notes           |
 +-----------------------------------------------------------------+
 | Lower input panel                                               |
-| Menu: Attack | Cast | Condition | Damage | Heal | Switch | Note |
-| Sub-panel content / shorthand preview                           |
+| Grid: Attack | Cast | Condition | Damage | Heal | Switch | Note |
+| Sub-panel content for the selected shorthand type              |
 | Confirm | Cancel | Clear                                        |
 +-----------------------------------------------------------------+
 ```
@@ -87,9 +87,9 @@ The main combat grid should include:
 This panel is always anchored in the same lower area.
 
 It should support:
-- a menu-first interaction flow,
+- a compact grid of shorthand-type buttons,
 - sub-panels for specific action types,
-- a live shorthand preview,
+- direct shorthand entry into the active turn cell,
 - and clear confirm/cancel/clear actions.
 
 ### 5. Active turn focus
@@ -109,8 +109,8 @@ Suggested cues:
 
 ### Turn recording
 - The GM opens the lower input panel.
-- The panel starts as a menu and can open sub-panels to the right.
-- The selected action generates a shorthand preview that appears directly in the active turn cell.
+- The panel starts as a compact grid of shorthand-type buttons and can open sub-panels for the selected action.
+- The selected action adds shorthand content directly to the active turn cell.
 - Confirm commits the entry.
 
 ### Turn progression
