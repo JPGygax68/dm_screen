@@ -4,13 +4,13 @@
 
 Create a web-based combat tracker for a Dungeon Master screen with an emphasis on flexibility, override capability, and printable output.
 
-The app should be a static HTML/CSS/JS application with client-side persistence and explicit export/import. It should avoid hard dependencies on internal data by allowing the DM to override any auto-filled values.
+The app should be a client-side application with persistence and explicit export/import. It should avoid hard dependencies on internal data by allowing the DM to override any auto-filled values.
 
 ## Core Principles
 
 - **User control over data**: Any value the app auto-fills from internal rules, templates, or defaults must be editable by the GM.
 - **No opaque internal dependency**: The app can provide suggestions and defaults, but those should always be visibly editable and replaceable.
-- **Print-friendly UI**: The combat tracker should produce a printable sheet or view using CSS print styles, with annotation-friendly areas.
+- **Print-friendly UI**: The combat tracker should produce a printable sheet or view with annotation-friendly areas.
 - **Client-side persistence**: Use browser storage (IndexedDB or localStorage) and explicit file export/import so the app can run without a server.
 - **Offline-capable**: The app should work without network connectivity.
 - **Future-friendly sync**: Design the data model and storage layer so later sync to other devices can be added without breaking the app.
@@ -336,7 +336,7 @@ Example persisted object shape:
 ## Next steps
 
 1. Define the first combat tracker wireframe and table layout.
-2. Choose a frontend approach: plain HTML/JS, lightweight framework, or PWA.
+2. Choose a frontend approach suitable for the target platform.
 3. Implement local persistence with IndexedDB and export/import.
 4. Add the override metadata and UI controls for manual edits.
 5. Add print styles for the encounter sheet.
