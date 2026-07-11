@@ -90,7 +90,7 @@
               </div>
             </div>
 
-            <div class="composer-column">
+            <div class="composer-block">
               <div class="composer-section">
                 <div class="subpanel">
                 <template v-if="snapshot.context.draft.selectedAction === 'attack'">
@@ -174,15 +174,14 @@
                   ></textarea>
                 </div>
               </div>
-
-              <div class="composer-actions-panel">
-                <div class="panel-footer">
-                  <ion-button class="composer-action-btn" fill="outline" size="small" @click="send({ type: 'CLEAR' })">Clear</ion-button>
-                  <ion-button class="composer-action-btn" fill="outline" size="small" @click="send({ type: 'CANCEL' })">Cancel</ion-button>
-                  <ion-button class="composer-action-btn" :disabled="!snapshot.context.draft.preview" size="small" @click="send({ type: 'CONFIRM' })">Confirm</ion-button>
-                  <ion-button class="composer-action-btn composer-action-btn--next" size="small" @click="send({ type: 'NEXT_TURN' })">Next Turn</ion-button>
+            </div>
+            <div class="turn-actions-panel">
+                <div class="panel">
+                    <ion-button class="composer-action-btn" fill="outline" size="small" @click="send({ type: 'CLEAR' })">Clear</ion-button>
+                    <ion-button class="composer-action-btn" fill="outline" size="small" @click="send({ type: 'CANCEL' })">Cancel</ion-button>
+                    <ion-button class="composer-action-btn" :disabled="!snapshot.context.draft.preview" size="small" @click="send({ type: 'CONFIRM' })">Confirm</ion-button>
+                    <ion-button class="composer-action-btn composer-action-btn--next" size="small" @click="send({ type: 'NEXT_TURN' })">Next Turn</ion-button>
                 </div>
-              </div>
             </div>
           </div>
         </section>
