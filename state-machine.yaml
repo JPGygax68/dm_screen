@@ -1,0 +1,127 @@
+version: 1
+name: combat-tracker
+initial: idle
+
+description: >-
+  XState-style YAML sketch for the DM combat tracker encounter flow.
+  The machine uses turnOrder as the canonical ordering for turns and treats
+  UI grid coordinates as derived values rather than stored state.
+
+context:
+  encounterPhase: creating
+  round: 1
+  turnOrder:
+    - pc_a
+    - goblin1
+    - goblin2
+    - ogre
+  activeTurnIndex: 0
+  selectedTurnIndex: 0
+  draft:
+    selectedAction: attack
+    preview: ""
+    rawShorthand: ""
+    form:
+      attackTarget: PC_A
+      attackMod: "+4"
+      attackDamage: "7"
+      castSpell: Shield
+      castTarget: PC_A
+      conditionName: Blessed
+      conditionMode: add
+      damageAmount: "6"
+      healAmount: "8"
+      switchWeapon: longbow
+      noteText: ""
+  recordingPanel:
+    open: false
+    editingLocked: false
+    unlockEditing: false
+
+debugContracts:
+  actions:
+    openRecordingPanel:
+      preconditions:
+        - assertRecordingPanelClosed()
+      effects:
+        - recordingPanel.open = true
+    closeRecordingPanel:
+      preconditions:
+        - assertRecordingPanelOpen()
+      effects:
+        - recordingPanel.open = false
+
+states:
+  idle:
+    on:
+      START_ENCOUNTER:
+        target: recording
+        actions:
+          - setEncounterPhase(recording)
+          - setRound(1)
+          - resetDraft()
+          - setActiveTurnIndex(0)
+          - setSelectedTurnIndex(0)
+          - openRecordingPanel()
+
+  recording:
+    on:
+      SELECT_TURN:
+        target: drafting
+        actions:
+          - setSelectedTurnIndex(event.turnIndex)
+          - hydrateDraftFromSelectedTurn()
+      NEXT_TURN:
+        actions:
+          - commitDraftIfPresent()
+          - advanceActiveTurnIndex()
+      END_ENCOUNTER:
+        target: ended
+        actions:
+          - setEncounterPhase(ended)
+          - closeRecordingPanel()
+
+  drafting:
+    on:
+      SET_ACTION:
+        actions:
+          - setSelectedAction(event.action)
+      INPUT_CHANGED:
+        actions:
+          - updateDraftField(event.field, event.value)
+      CLEAR:
+        actions:
+          - clearDraft()
+      CANCEL:
+        target: recording
+        actions:
+          - discardDraft()
+      CONFIRM:
+        target: recording
+        actions:
+          - commitDraftToTurn(selectedTurnIndex)
+          - clearDraft()
+      NEXT_TURN:
+        target: recording
+        actions:
+          - commitDraftIfPresent()
+          - advanceActiveTurnIndex()
+      UNLOCK_EDIT:
+        actions:
+          - setUnlockEditing(true)
+      SELECT_TURN:
+        target: drafting
+        actions:
+          - setSelectedTurnIndex(event.turnIndex)
+          - hydrateDraftFromSelectedTurn()
+
+  ended:
+    on:
+      START_ENCOUNTER:
+        target: recording
+        actions:
+          - resetEncounter()
+          - setRound(1)
+          - setActiveTurnIndex(0)
+          - setSelectedTurnIndex(0)
+          - openRecordingPanel()

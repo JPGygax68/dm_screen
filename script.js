@@ -29,7 +29,7 @@ const state = {
   encounterState: 'recording',
   activeSlotIndex: 0,
   currentSlotIndex: 0,
-  panelOpen: false,
+  panelOpen: true,
   selectedAction: 'attack',
   formState: {
     attackTarget: combatants[0].name,
@@ -324,7 +324,7 @@ function openPanel(slotIndex) {
 }
 
 function closePanel() {
-  state.panelOpen = false;
+  state.panelOpen = state.encounterState === 'recording';
   state.unlockEditing = false;
   state.editingLockedCell = false;
   render();
@@ -408,11 +408,14 @@ function unlockEdit() {
 function startEncounter() {
   state.encounterState = 'recording';
   state.activeSlotIndex = 0;
+  state.currentSlotIndex = 0;
+  state.panelOpen = true;
   render();
 }
 
 function endEncounter() {
   state.encounterState = 'ended';
+  state.panelOpen = false;
   render();
 }
 
