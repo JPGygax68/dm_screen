@@ -39,8 +39,8 @@ function runHarness() {
   check('initial state is idle and panel closed', (s) => String(s.value) === 'idle' && !s.context.recordingPanel.open);
 
   send({ type: 'START_ENCOUNTER' }, 'begin recording');
-  check('recording started and panel is open', (s) => (
-    String(s.value) === 'recording'
+  check('drafting started and panel is open', (s) => (
+    String(s.value) === 'drafting'
     && s.context.encounterPhase === 'recording'
     && s.context.round === 1
     && s.context.recordingPanel.open
@@ -58,8 +58,8 @@ function runHarness() {
   check('draft preview reflects raw shorthand', (s) => s.context.draft.preview === 'ready:atk:PC_A++4/dmg=7');
 
   send({ type: 'CANCEL' }, 'cancel draft');
-  check('cancel returns to recording and panel remains open', (s) => (
-    String(s.value) === 'recording' && s.context.recordingPanel.open
+  check('cancel keeps drafting and panel remains open', (s) => (
+    String(s.value) === 'drafting' && s.context.recordingPanel.open
   ));
 
   send({ type: 'SELECT_TURN', turnIndex: 0 }, 'select active turn (PC_A)');
@@ -69,7 +69,7 @@ function runHarness() {
   check('confirm commits and keeps panel open', (s) => {
     const key = `${s.context.round}:0`;
     return (
-      String(s.value) === 'recording'
+      String(s.value) === 'drafting'
       && s.context.turnEntries[key] === 'atk:Goblin 1++4/dmg=7'
       && s.context.recordingPanel.open
     );
@@ -77,7 +77,7 @@ function runHarness() {
 
   send({ type: 'NEXT_TURN' }, 'advance active turn');
   check('next turn advances selected and active indexes', (s) => (
-    String(s.value) === 'recording'
+    String(s.value) === 'drafting'
     && s.context.activeTurnOrderIndex === 1
     && s.context.selectedTurnOrderIndex === 1
   ));

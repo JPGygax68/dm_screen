@@ -41,7 +41,7 @@ export const combatMachineDefinition = {
     idle: {
       on: {
         START_ENCOUNTER: {
-          target: 'recording',
+          target: 'drafting',
           actions: [
             'setEncounterPhaseRecording',
             'setRoundOne',
@@ -73,6 +73,10 @@ export const combatMachineDefinition = {
 
     drafting: {
       on: {
+        END_ENCOUNTER: {
+          target: 'ended',
+          actions: ['setEncounterPhaseEnded', 'closeRecordingPanel']
+        },
         SET_ACTION: {
           actions: ['setSelectedActionFromEvent']
         },
@@ -83,15 +87,15 @@ export const combatMachineDefinition = {
           actions: ['clearDraft']
         },
         CANCEL: {
-          target: 'recording',
+          target: 'drafting',
           actions: ['discardDraft']
         },
         CONFIRM: {
-          target: 'recording',
+          target: 'drafting',
           actions: ['commitDraftToSelectedTurn', 'clearDraft']
         },
         NEXT_TURN: {
-          target: 'recording',
+          target: 'drafting',
           actions: ['commitDraftIfPresent', 'advanceActiveTurnOrderIndex', 'clearDraft']
         },
         UNLOCK_EDIT: {
@@ -108,7 +112,7 @@ export const combatMachineDefinition = {
     ended: {
       on: {
         START_ENCOUNTER: {
-          target: 'recording',
+          target: 'drafting',
           actions: [
             'resetEncounter',
             'setEncounterPhaseRecording',

@@ -2,8 +2,11 @@
   "name": "dm_screen",
   "version": "1.0.0",
   "description": "",
-  "main": "script.js",
+  "type": "module",
   "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
     "test": "echo \"Error: no test specified\" && exit 1",
     "harness": "node harness.mjs"
   },
@@ -20,5 +23,8 @@
   "homepage": "https://github.com/JPGygax68/dm_screen#readme",
   "dependencies": {
     "xstate": "^5.32.4"
+  },
+  "devDependencies": {
+    "vite": "^8.1.4"
   }
 }
