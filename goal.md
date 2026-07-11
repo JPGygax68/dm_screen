@@ -1,11 +1,10 @@
-# HTML/CSS based Dungeon Master Screen app
+# Dungeon Master Screen app
 
 The goal of this project is to create a digital "Dungeon Master" screen for Dungeons & Dragons game masters.
 
 ## Sub-goals
 
-- The application should be web-based, i.e. use HTML, CSS plus a server part, which could run on an actual http server or be integrated with the client using a platform such as Electron or similar
-- It should remain flexible in the sense that it should never depend on internal data, even when such data is available
+- The app should remain flexible in the sense that it should never depend on internal data, even when such data is available
 - The main, or ideally all, parts of the user interface should be made available as printable sheets for game masters to use when no computer is available
 - Both the digital ui and printed sheets should support non-standard usage by allowing overrides and annotations at every step
 

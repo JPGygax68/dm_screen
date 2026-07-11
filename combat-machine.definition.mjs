@@ -16,8 +16,8 @@ export const initialContext = {
   encounterPhase: 'creating',
   round: 1,
   turnOrder: ['pc_a', 'goblin1', 'goblin2', 'ogre'],
-  activeTurnIndex: 0,
-  selectedTurnIndex: 0,
+  activeTurnOrderIndex: 0,
+  selectedTurnOrderIndex: 0,
   draft: {
     selectedAction: 'attack',
     preview: '',
@@ -46,8 +46,8 @@ export const combatMachineDefinition = {
             'setEncounterPhaseRecording',
             'setRoundOne',
             'clearDraft',
-            'setActiveTurnIndexZero',
-            'setSelectedTurnIndexZero',
+            'setActiveTurnOrderIndexZero',
+            'setSelectedTurnOrderIndexZero',
             'openRecordingPanel'
           ]
         }
@@ -59,10 +59,10 @@ export const combatMachineDefinition = {
         SELECT_TURN: {
           guard: 'hasValidTurnIndex',
           target: 'drafting',
-          actions: ['setSelectedTurnIndexFromEvent', 'hydrateDraftFromSelectedTurn']
+          actions: ['setSelectedTurnOrderIndexFromEvent', 'hydrateDraftFromSelectedTurn']
         },
         NEXT_TURN: {
-          actions: ['commitDraftIfPresent', 'advanceActiveTurnIndex', 'clearDraft']
+          actions: ['commitDraftIfPresent', 'advanceActiveTurnOrderIndex', 'clearDraft']
         },
         END_ENCOUNTER: {
           target: 'ended',
@@ -92,7 +92,7 @@ export const combatMachineDefinition = {
         },
         NEXT_TURN: {
           target: 'recording',
-          actions: ['commitDraftIfPresent', 'advanceActiveTurnIndex', 'clearDraft']
+          actions: ['commitDraftIfPresent', 'advanceActiveTurnOrderIndex', 'clearDraft']
         },
         UNLOCK_EDIT: {
           actions: ['setUnlockEditingTrue']
@@ -100,7 +100,7 @@ export const combatMachineDefinition = {
         SELECT_TURN: {
           guard: 'hasValidTurnIndex',
           target: 'drafting',
-          actions: ['setSelectedTurnIndexFromEvent', 'hydrateDraftFromSelectedTurn']
+          actions: ['setSelectedTurnOrderIndexFromEvent', 'hydrateDraftFromSelectedTurn']
         }
       }
     },
@@ -113,8 +113,8 @@ export const combatMachineDefinition = {
             'resetEncounter',
             'setEncounterPhaseRecording',
             'setRoundOne',
-            'setActiveTurnIndexZero',
-            'setSelectedTurnIndexZero',
+            'setActiveTurnOrderIndexZero',
+            'setSelectedTurnOrderIndexZero',
             'openRecordingPanel'
           ]
         }

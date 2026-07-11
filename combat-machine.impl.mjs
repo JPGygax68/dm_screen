@@ -55,11 +55,11 @@ export const combatMachineActions = {
   setEncounterPhaseRecording: assign({ encounterPhase: 'recording' }),
   setEncounterPhaseEnded: assign({ encounterPhase: 'ended' }),
   setRoundOne: assign({ round: 1 }),
-  setActiveTurnIndexZero: assign({ activeTurnIndex: 0 }),
-  setSelectedTurnIndexZero: assign({ selectedTurnIndex: 0 }),
+  setActiveTurnOrderIndexZero: assign({ activeTurnOrderIndex: 0 }),
+  setSelectedTurnOrderIndexZero: assign({ selectedTurnOrderIndex: 0 }),
 
-  setSelectedTurnIndexFromEvent: assign({
-    selectedTurnIndex: ({ event }) => event.turnIndex
+  setSelectedTurnOrderIndexFromEvent: assign({
+    selectedTurnOrderIndex: ({ event }) => event.turnIndex
   }),
 
   setSelectedActionFromEvent: assign({
@@ -98,7 +98,7 @@ export const combatMachineActions = {
 
   hydrateDraftFromSelectedTurn: assign({
     draft: ({ context }) => {
-      const key = buildTurnKey(context.round, context.selectedTurnIndex);
+      const key = buildTurnKey(context.round, context.selectedTurnOrderIndex);
       const value = context.turnEntries[key] || '';
       if (!value) return emptyDraft();
       return {
@@ -112,7 +112,7 @@ export const combatMachineActions = {
 
   commitDraftToSelectedTurn: assign(({ context }) => {
     if (!context.draft.preview) return {};
-    const key = buildTurnKey(context.round, context.selectedTurnIndex);
+    const key = buildTurnKey(context.round, context.selectedTurnOrderIndex);
     return {
       turnEntries: {
         ...context.turnEntries,
@@ -123,7 +123,7 @@ export const combatMachineActions = {
 
   commitDraftIfPresent: assign(({ context }) => {
     if (!context.draft.preview) return {};
-    const key = buildTurnKey(context.round, context.selectedTurnIndex);
+    const key = buildTurnKey(context.round, context.selectedTurnOrderIndex);
     return {
       turnEntries: {
         ...context.turnEntries,
@@ -132,12 +132,12 @@ export const combatMachineActions = {
     };
   }),
 
-  advanceActiveTurnIndex: assign(({ context }) => {
-    const nextIndex = (context.activeTurnIndex + 1) % context.turnOrder.length;
+  advanceActiveTurnOrderIndex: assign(({ context }) => {
+    const nextIndex = (context.activeTurnOrderIndex + 1) % context.turnOrder.length;
     const wrapped = nextIndex === 0;
     return {
-      activeTurnIndex: nextIndex,
-      selectedTurnIndex: nextIndex,
+      activeTurnOrderIndex: nextIndex,
+      selectedTurnOrderIndex: nextIndex,
       round: wrapped ? context.round + 1 : context.round
     };
   }),
@@ -152,8 +152,8 @@ export const combatMachineActions = {
   resetEncounter: assign(() => ({
     encounterPhase: 'creating',
     round: 1,
-    activeTurnIndex: 0,
-    selectedTurnIndex: 0,
+    activeTurnOrderIndex: 0,
+    selectedTurnOrderIndex: 0,
     draft: emptyDraft(),
     turnEntries: {},
     recordingPanel: {
