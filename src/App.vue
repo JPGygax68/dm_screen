@@ -69,7 +69,6 @@
           <div class="panel-header">
             <div>
               <h2>{{ panelTitle }}</h2>
-              <p>{{ panelHint }}</p>
             </div>
             <div class="panel-actions">
               <ion-button fill="outline" size="small" @click="send({ type: 'UNLOCK_EDIT' })" style="display:none;">Unlock edit</ion-button>
@@ -78,7 +77,6 @@
 
           <div class="panel-body">
             <div class="action-section">
-              <div class="section-title">Shorthand type</div>
               <div class="action-menu">
                 <button
                   v-for="action in actions"
@@ -92,9 +90,9 @@
               </div>
             </div>
 
-            <div class="composer-section">
-              <div class="section-title">Detail input</div>
-              <div class="subpanel">
+            <div class="composer-column">
+              <div class="composer-section">
+                <div class="subpanel">
                 <template v-if="snapshot.context.draft.selectedAction === 'attack'">
                   <label>
                     Target
@@ -165,28 +163,25 @@
                   </label>
                 </template>
 
-                <template v-else-if="snapshot.context.draft.selectedAction === 'raw'">
-                  <div class="preview-text">Enter raw shorthand in the field below.</div>
-                </template>
-              </div>
+                </div>
 
-              <div v-if="snapshot.context.draft.selectedAction === 'raw'" style="margin-top:0.75rem; display:flex; flex-direction:column; gap:0.25rem;">
-                <label>
-                  Raw shorthand
+                <div v-if="snapshot.context.draft.selectedAction === 'raw'" class="raw-composer">
                   <textarea
+                    class="raw-textarea"
                     placeholder="Add raw shorthand here (multi-line allowed)"
-                    style="min-height:4rem; resize:vertical; border-radius:0.45rem; padding:0.5rem; background:rgba(255,255,255,0.04); color:inherit; border:1px solid rgba(255,255,255,0.06);"
                     :value="snapshot.context.draft.rawShorthand"
                     @input="updateField('rawShorthand', $event)"
                   ></textarea>
-                </label>
+                </div>
               </div>
 
-              <div class="panel-footer">
-                <ion-button fill="outline" size="small" @click="send({ type: 'CLEAR' })">Clear</ion-button>
-                <ion-button fill="outline" size="small" @click="send({ type: 'CANCEL' })">Cancel</ion-button>
-                <ion-button :disabled="!snapshot.context.draft.preview" size="small" @click="send({ type: 'CONFIRM' })">Confirm</ion-button>
-                <ion-button fill="outline" size="small" @click="send({ type: 'NEXT_TURN' })">Next Turn</ion-button>
+              <div class="composer-actions-panel">
+                <div class="panel-footer">
+                  <ion-button class="composer-action-btn" fill="outline" size="small" @click="send({ type: 'CLEAR' })">Clear</ion-button>
+                  <ion-button class="composer-action-btn" fill="outline" size="small" @click="send({ type: 'CANCEL' })">Cancel</ion-button>
+                  <ion-button class="composer-action-btn" :disabled="!snapshot.context.draft.preview" size="small" @click="send({ type: 'CONFIRM' })">Confirm</ion-button>
+                  <ion-button class="composer-action-btn composer-action-btn--next" size="small" @click="send({ type: 'NEXT_TURN' })">Next Turn</ion-button>
+                </div>
               </div>
             </div>
           </div>
@@ -245,12 +240,6 @@ const activeTurnLabel = computed(() => {
 const panelTitle = computed(() => {
   const c = combatants[snapshot.value.context.selectedTurnOrderIndex];
   return `${c.name} · Round ${snapshot.value.context.round}`;
-});
-
-const panelHint = computed(() => {
-  return snapshot.value.context.recordingPanel.open
-    ? 'Choose a shorthand type and record the turn.'
-    : 'Start encounter to begin recording.';
 });
 
 function send(event) {

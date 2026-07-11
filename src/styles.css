@@ -301,6 +301,8 @@ right-column {
 .panel-header h2 {
   margin: 0;
   font-size: 1rem;
+  color: #eef4ff;
+  font-weight: 700;
 }
 
 .panel-header p {
@@ -320,6 +322,19 @@ right-column {
   border: 1px solid rgba(255,255,255,0.06);
   border-radius: 0.75rem;
   background: rgba(255,255,255,0.03);
+}
+
+.composer-column {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  min-height: 0;
+}
+
+.composer-section {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
 }
 
 .action-menu {
@@ -363,6 +378,8 @@ right-column {
   gap: 0.25rem;
   margin-bottom: 0.6rem;
   font-size: 0.92rem;
+  color: #e8f1ff;
+  font-weight: 600;
 }
 
 .subpanel input,
@@ -372,7 +389,30 @@ right-column {
   border-radius: 0.45rem;
   padding: 0.5rem 0.6rem;
   background: rgba(255,255,255,0.06);
-  color: white;
+  color: #f4f8ff;
+  caret-color: #f4f8ff;
+}
+
+.subpanel input::placeholder,
+.subpanel textarea::placeholder {
+  color: rgba(236, 244, 255, 0.65);
+}
+
+.subpanel select option {
+  color: #f4f8ff;
+  background: #1b2236;
+}
+
+.composer-section textarea,
+.composer-section input,
+.composer-section select {
+  color: #f4f8ff;
+  caret-color: #f4f8ff;
+}
+
+.composer-section textarea::placeholder,
+.composer-section input::placeholder {
+  color: rgba(236, 244, 255, 0.65);
 }
 
 .subpanel textarea {
@@ -395,6 +435,46 @@ right-column {
   background: rgba(255,255,255,0.05);
   font-family: ui-monospace, SFMono-Regular, monospace;
   font-size: 0.95rem;
+}
+
+.raw-composer {
+  margin-top: 0.75rem;
+  flex: 1 1 auto;
+  display: flex;
+}
+
+.raw-textarea {
+  width: 100%;
+  min-height: 7rem;
+  height: 100%;
+  resize: vertical;
+  border-radius: 0.45rem;
+  padding: 0.6rem 0.7rem;
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.1);
+  color: #e7eefc;
+  caret-color: #e7eefc;
+}
+
+.raw-textarea::placeholder {
+  color: rgba(210, 220, 236, 0.55);
+}
+
+.composer-actions-panel {
+  padding: 0.65rem 0.75rem;
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 0.75rem;
+  background: rgba(255,255,255,0.04);
+}
+
+.composer-actions-panel ion-button {
+  --color: #e8f1ff;
+  --border-color: rgba(232, 241, 255, 0.45);
+}
+
+.composer-actions-panel .panel-footer {
+  justify-content: space-between;
+  align-items: center;
 }
 
 @media (max-width: 900px) {
