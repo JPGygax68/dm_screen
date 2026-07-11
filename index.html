@@ -6,66 +6,7 @@
   <title>DM Screen Combat Tracker Prototype</title>
 </head>
 <body>
-  <main class="tracker-shell">
-    <header class="tracker-title">
-      <div>
-        <h1>Combat Tracker Prototype</h1>
-        <p>Interactive turn entry, active-turn focus, and a lower input panel.</p>
-      </div>
-      <div class="header-actions">
-        <button id="startEncounterBtn" class="secondary-btn">Start encounter</button>
-        <button id="endEncounterBtn" class="secondary-btn">End encounter</button>
-      </div>
-    </header>
-
-    <section class="status-bar">
-      <div><strong>State:</strong> <span id="encounterState">creating</span></div>
-      <div><strong>Active turn:</strong> <span id="activeTurnLabel">—</span></div>
-    </section>
-
-    <section class="tracker">
-      <div id="columnsHeader" class="columns-header"></div>
-      <div id="rowsContainer" class="rows-container"></div>
-    </section>
-
-    <section id="inputPanel" class="input-panel" aria-live="polite">
-      <div class="panel-header">
-        <div>
-          <h2 id="panelTitle">Turn entry</h2>
-          <p id="panelHint">Select a turn to begin.</p>
-        </div>
-        <div class="panel-actions">
-          <button id="unlockEditBtn" class="secondary-btn">Unlock edit</button>
-        </div>
-      </div>
-
-      <div class="panel-body">
-        <div class="action-section">
-          <div class="section-title">Shorthand type</div>
-          <div id="actionMenu" class="action-menu"></div>
-        </div>
-
-        <div class="composer-section">
-          <div class="section-title">Detail input</div>
-          <div id="subpanelContent" class="subpanel"></div>
-
-          <div id="rawShorthandContainer" style="margin-top:0.75rem; display:flex; flex-direction:column; gap:0.25rem;">
-            <label>
-              Raw shorthand
-              <textarea id="rawShorthand" placeholder="Add raw shorthand here (multi-line allowed)" style="min-height:4rem; resize:vertical; border-radius:0.45rem; padding:0.5rem; background:rgba(255,255,255,0.04); color:inherit; border:1px solid rgba(255,255,255,0.06);"></textarea>
-            </label>
-          </div>
-
-          <div class="panel-footer">
-            <button id="clearDraftBtn" class="secondary-btn">Clear</button>
-            <button id="cancelDraftBtn" class="secondary-btn">Cancel</button>
-            <button id="confirmDraftBtn" class="primary-btn">Confirm</button>
-            <button id="nextTurnBtn" class="secondary-btn">Next Turn</button>
-          </div>
-        </div>
-      </div>
-    </section>
-  </main>
+  <div id="app"></div>
 
   <script type="module" src="/src/main.mjs"></script>
 </body>

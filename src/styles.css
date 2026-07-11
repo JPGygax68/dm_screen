@@ -61,7 +61,8 @@ body {
 .tracker {
   display: block;
   gap: 0.5rem;
-  overflow: hidden;
+  overflow-x: auto;
+  overflow-y: hidden;
 }
 
 .rows-container {
@@ -75,6 +76,11 @@ body {
   gap: 0.5rem;
   align-items: stretch;
   margin-bottom: 0.5rem;
+}
+
+.columns-header .row-label,
+.columns-header .row-note {
+  z-index: 4;
 }
 
 .columns-header .row-label {
@@ -102,24 +108,32 @@ body {
   border-radius: 0.75rem;
   display: flex;
   align-items: center;
+  position: sticky;
+  left: 0;
+  z-index: 3;
 }
 
 .row-combatants {
-  flex: 1 1 auto;
+  flex: 0 0 auto;
+  width: max-content;
   display: flex;
   gap: 0.5rem;
-  overflow-x: auto;
 }
 
 .row-note {
   min-width: 160px;
   max-width: 180px;
   padding: 0.75rem 1rem;
-  background: rgba(20, 24, 39, 0.95);
+  background: rgba(26, 31, 49, 0.98);
   border: 1px solid rgba(255,255,255,0.05);
   border-radius: 0.75rem;
   display: flex;
   align-items: center;
+  color: #ecf3ff;
+  font-weight: 500;
+  position: sticky;
+  right: 0;
+  z-index: 3;
 }
 
 .frozen-column {
@@ -143,6 +157,7 @@ right-column {
   font-size: 0.85rem;
   background: rgba(255,255,255,0.04);
   border-bottom: 1px solid rgba(255,255,255,0.08);
+  color: #eef4ff;
 }
 
 .current-state-label {
@@ -166,6 +181,8 @@ right-column {
   padding: 0.75rem 1rem;
   border-bottom: 1px solid rgba(255,255,255,0.05);
   font-size: 0.95rem;
+  color: #eef4ff;
+  font-weight: 600;
 }
 
 .row-label:last-child {
@@ -224,29 +241,38 @@ right-column {
   align-items: center;
   min-height: 3.5rem;
   padding: 0.75rem 1rem;
-  border-top: 1px solid rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.08);
   font-size: 0.88rem;
   line-height: 1.4;
-  color: #d8ddf0;
+  color: #f3f7ff;
   text-align: left;
-  background: transparent;
-  border: none;
+  background: rgba(18, 22, 38, 0.92);
   width: 100%;
   cursor: pointer;
 }
 
 .round-cell.active {
-  background: rgba(91, 156, 255, 0.18);
+  background: rgba(91, 156, 255, 0.28);
   outline: 1px solid rgba(91, 156, 255, 0.45);
 }
 
+.round-cell.selected:not(.active) {
+  background: rgba(255, 193, 87, 0.22);
+  outline: 1px solid rgba(255, 193, 87, 0.65);
+  color: #221609;
+}
+
+.round-cell.selected:not(.active) .cell-value {
+  color: #221609;
+}
+
 .round-cell.filled {
-  background: rgba(159, 231, 181, 0.12);
+  background: rgba(66, 139, 94, 0.42);
 }
 
 .cell-value {
   font-size: 0.9rem;
-  color: #f2f6ff;
+  color: #f7fbff;
   white-space: pre-wrap;
   overflow-wrap: anywhere;
 }
