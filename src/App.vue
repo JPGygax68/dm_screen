@@ -18,7 +18,7 @@
           <div><strong>Active turn:</strong> {{ activeTurnLabel }}</div>
         </section>
 
-        <section class="tracker">
+        <section ref="trackerRef" class="tracker">
           <div class="columns-header">
             <div class="row-label"></div>
             <div class="row-combatants">
@@ -47,6 +47,8 @@
                 >
                   <button
                     class="round-cell"
+                    :data-round="roundNumber"
+                    :data-turn-order-index="turnOrderIndex"
                     :class="{
                       active: isActive(roundNumber, turnOrderIndex),
                       selected: isSelected(roundNumber, turnOrderIndex),
@@ -190,7 +192,7 @@
 </template>
 
 <script setup>
-import { computed, onMounted, onBeforeUnmount, ref } from 'vue';
+import { computed, nextTick, onMounted, onBeforeUnmount, ref, watch } from 'vue';
 import { createActor } from 'xstate';
 import { IonApp, IonButton, IonContent } from '@ionic/vue';
 import { combatMachine } from '../combat-machine.mjs';
@@ -222,6 +224,7 @@ const actions = [
 
 const actor = createActor(combatMachine);
 const snapshot = ref(actor.getSnapshot());
+const trackerRef = ref(null);
 let subscription;
 
 const displayedRoundNumbers = computed(() => {
@@ -284,6 +287,26 @@ function eventValue(event) {
 function updateField(field, event) {
   send({ type: 'INPUT_CHANGED', field, value: eventValue(event) });
 }
+
+function scrollSelectedTurnIntoView() {
+  const tracker = trackerRef.value;
+  if (!tracker) return;
+
+  const { round, selectedTurnOrderIndex } = snapshot.value.context;
+  const selector = `.round-cell[data-round="${round}"][data-turn-order-index="${selectedTurnOrderIndex}"]`;
+  const selectedCell = tracker.querySelector(selector);
+  if (!selectedCell) return;
+
+  selectedCell.scrollIntoView({ block: 'nearest', inline: 'center' });
+}
+
+watch(
+  () => [snapshot.value.context.round, snapshot.value.context.selectedTurnOrderIndex],
+  async () => {
+    await nextTick();
+    scrollSelectedTurnIntoView();
+  }
+);
 
 onMounted(() => {
   actor.start();
