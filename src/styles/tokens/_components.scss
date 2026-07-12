@@ -1,0 +1,228 @@
+@use "sass:list";
+@use "sass:map";
+@use "semantic" as sem;
+
+@function _merge-maps($maps...) {
+	$merged: ();
+	@each $m in $maps {
+		$merged: map.merge($merged, $m);
+	}
+	@return $merged;
+}
+
+$component-app-light: (
+	app-bg: sem.semantic-color(light, background),
+	app-text: sem.semantic-color(light, on-background),
+	app-body-bg: sem.semantic-color(light, surface-container),
+	app-muted-text: sem.semantic-color(light, on-surface-variant)
+);
+
+$component-app-dark: (
+	app-bg: sem.semantic-color(dark, background),
+	app-text: sem.semantic-color(dark, on-background),
+	app-body-bg: sem.semantic-color(dark, surface-container),
+	app-muted-text: sem.semantic-color(dark, on-surface-variant)
+);
+
+$component-surface-light: (
+	surface-raised: sem.semantic-color(light, surface),
+	surface-subtle: sem.semantic-color(light, surface-container),
+	surface-strong: sem.semantic-color(light, surface-container-high),
+	border-default: sem.semantic-color(light, outline),
+	border-subtle: sem.semantic-color(light, outline-variant)
+);
+
+$component-surface-dark: (
+	surface-raised: sem.semantic-color(dark, surface),
+	surface-subtle: sem.semantic-color(dark, surface-container),
+	surface-strong: sem.semantic-color(dark, surface-container-high),
+	border-default: sem.semantic-color(dark, outline),
+	border-subtle: sem.semantic-color(dark, outline-variant)
+);
+
+$component-typography-light: (
+	heading-text: sem.semantic-color(light, on-surface),
+	panel-title-text: sem.semantic-color(light, on-surface)
+);
+
+$component-typography-dark: (
+	heading-text: sem.semantic-color(dark, on-surface),
+	panel-title-text: sem.semantic-color(dark, on-surface)
+);
+
+$component-tracker-light: (
+	tracker-row-label-bg: sem.semantic-color(light, surface-container),
+	tracker-row-note-bg: sem.semantic-color(light, surface-container-high),
+	tracker-row-text: sem.semantic-color(light, on-surface),
+	tracker-column-bg: sem.semantic-color(light, surface-container),
+	tracker-column-header-bg: sem.semantic-color(light, surface-container-high),
+	tracker-column-text: sem.semantic-color(light, on-surface),
+	tracker-column-meta-text: sem.semantic-color(light, on-surface-variant),
+	tracker-current-state-bg: sem.semantic-color(light, surface),
+	tracker-current-state-text: sem.semantic-color(light, on-surface),
+	tracker-cell-bg: sem.semantic-color(light, surface),
+	tracker-cell-text: sem.semantic-color(light, on-surface),
+	tracker-cell-hover-bg: sem.semantic-color(light, surface-container),
+	tracker-cell-active-bg: sem.semantic-color(light, primary-container),
+	tracker-cell-active-outline: sem.semantic-color(light, primary),
+	tracker-cell-selected-bg: sem.semantic-color(light, secondary-container),
+	tracker-cell-selected-text: sem.semantic-color(light, on-secondary-container),
+	tracker-cell-filled-bg: sem.semantic-color(light, surface-container-high),
+	tracker-cell-focus-outline: sem.semantic-color(light, primary)
+);
+
+$component-tracker-dark: (
+	tracker-row-label-bg: sem.semantic-color(dark, surface-container),
+	tracker-row-note-bg: sem.semantic-color(dark, surface-container-high),
+	tracker-row-text: sem.semantic-color(dark, on-surface),
+	tracker-column-bg: sem.semantic-color(dark, surface-container),
+	tracker-column-header-bg: sem.semantic-color(dark, surface-container-high),
+	tracker-column-text: sem.semantic-color(dark, on-surface),
+	tracker-column-meta-text: sem.semantic-color(dark, on-surface-variant),
+	tracker-current-state-bg: sem.semantic-color(dark, surface),
+	tracker-current-state-text: sem.semantic-color(dark, on-surface),
+	tracker-cell-bg: sem.semantic-color(dark, surface),
+	tracker-cell-text: sem.semantic-color(dark, on-surface),
+	tracker-cell-hover-bg: sem.semantic-color(dark, surface-container),
+	tracker-cell-active-bg: sem.semantic-color(dark, primary-container),
+	tracker-cell-active-outline: sem.semantic-color(dark, primary),
+	tracker-cell-selected-bg: sem.semantic-color(dark, secondary-container),
+	tracker-cell-selected-text: sem.semantic-color(dark, on-secondary-container),
+	tracker-cell-filled-bg: sem.semantic-color(dark, surface-container-high),
+	tracker-cell-focus-outline: sem.semantic-color(dark, primary)
+);
+
+$component-input-light: (
+	input-bg: sem.semantic-color(light, surface),
+	input-border: sem.semantic-color(light, outline),
+	input-border-focus: sem.semantic-color(light, primary),
+	input-text: sem.semantic-color(light, on-surface),
+	input-placeholder: sem.semantic-color(light, on-surface-variant),
+	input-label: sem.semantic-color(light, on-surface)
+);
+
+$component-input-dark: (
+	input-bg: sem.semantic-color(dark, surface),
+	input-border: sem.semantic-color(dark, outline),
+	input-border-focus: sem.semantic-color(dark, primary),
+	input-text: sem.semantic-color(dark, on-surface),
+	input-placeholder: sem.semantic-color(dark, on-surface-variant),
+	input-label: sem.semantic-color(dark, on-surface)
+);
+
+$component-button-light: (
+	button-outline-bg: sem.semantic-color(light, surface),
+	button-outline-border: sem.semantic-color(light, outline),
+	button-outline-text: sem.semantic-color(light, primary),
+	button-outline-hover-bg: sem.semantic-color(light, surface-container),
+	button-filled-bg: sem.semantic-color(light, primary),
+	button-filled-text: sem.semantic-color(light, on-primary),
+	button-filled-bg-hover: sem.semantic-color(light, primary),
+	button-filled-bg-secondary: sem.semantic-color(light, secondary),
+	button-filled-text-secondary: sem.semantic-color(light, on-secondary),
+	button-filled-bg-disabled: sem.semantic-color(light, surface-container-high),
+	button-filled-text-disabled: sem.semantic-color(light, on-surface-variant)
+);
+
+$component-button-dark: (
+	button-outline-bg: sem.semantic-color(dark, surface),
+	button-outline-border: sem.semantic-color(dark, outline),
+	button-outline-text: sem.semantic-color(dark, primary),
+	button-outline-hover-bg: sem.semantic-color(dark, surface-container),
+	button-filled-bg: sem.semantic-color(dark, primary),
+	button-filled-text: sem.semantic-color(dark, on-primary),
+	button-filled-bg-hover: sem.semantic-color(dark, primary),
+	button-filled-bg-secondary: sem.semantic-color(dark, secondary),
+	button-filled-text-secondary: sem.semantic-color(dark, on-secondary),
+	button-filled-bg-disabled: sem.semantic-color(dark, surface-container-high),
+	button-filled-text-disabled: sem.semantic-color(dark, on-surface-variant)
+);
+
+$component-gradient-light: (
+	gradient-accent-start: sem.semantic-color(light, primary),
+	gradient-accent-end: sem.semantic-color(light, secondary)
+);
+
+$component-gradient-dark: (
+	gradient-accent-start: sem.semantic-color(dark, primary),
+	gradient-accent-end: sem.semantic-color(dark, secondary)
+);
+
+$component-ionic-light: (
+	ionic-outline-button-text: sem.semantic-color(light, on-surface),
+	ionic-outline-button-border: sem.semantic-color(light, outline),
+	ionic-primary-button-bg: sem.semantic-color(light, primary),
+	ionic-primary-button-text: sem.semantic-color(light, on-primary)
+);
+
+$component-ionic-dark: (
+	ionic-outline-button-text: sem.semantic-color(dark, on-surface),
+	ionic-outline-button-border: sem.semantic-color(dark, outline),
+	ionic-primary-button-bg: sem.semantic-color(dark, primary),
+	ionic-primary-button-text: sem.semantic-color(dark, on-primary)
+);
+
+$component-alert-light: (
+	alert-error-bg: sem.semantic-color(light, error-container),
+	alert-error-text: sem.semantic-color(light, on-error-container)
+);
+
+$component-alert-dark: (
+	alert-error-bg: sem.semantic-color(dark, error-container),
+	alert-error-text: sem.semantic-color(dark, on-error-container)
+);
+
+$component-tokens-light: _merge-maps(
+	$component-app-light,
+	$component-surface-light,
+	$component-typography-light,
+	$component-tracker-light,
+	$component-input-light,
+	$component-button-light,
+	$component-gradient-light,
+	$component-ionic-light,
+	$component-alert-light
+);
+
+$component-tokens-dark: _merge-maps(
+	$component-app-dark,
+	$component-surface-dark,
+	$component-typography-dark,
+	$component-tracker-dark,
+	$component-input-dark,
+	$component-button-dark,
+	$component-gradient-dark,
+	$component-ionic-dark,
+	$component-alert-dark
+);
+
+@function component-token-map($theme) {
+	@if $theme == light {
+		@return $component-tokens-light;
+	}
+	@if $theme == dark {
+		@return $component-tokens-dark;
+	}
+	@error "Unknown component theme '#{$theme}'. Use light or dark.";
+}
+
+@function component-token($theme, $name) {
+	$value: map.get(component-token-map($theme), $name);
+	@if $value == null {
+		@error "Unknown component token '#{$name}' for theme '#{$theme}'.";
+	}
+	@return $value;
+}
+
+@function component-var($name) {
+	@return var(--dm-#{$name});
+}
+
+@mixin emit-component-css-vars($theme, $selector) {
+	#{$selector} {
+		color-scheme: $theme;
+		@each $name, $value in component-token-map($theme) {
+			--dm-#{$name}: #{$value};
+		}
+	}
+}

@@ -12,7 +12,13 @@ import '@ionic/vue/css/text-transformation.css';
 import '@ionic/vue/css/flex-utils.css';
 import '@ionic/vue/css/display.css';
 
-import './styles.scss';
+import './styles/main.scss';
 import App from './App.vue';
+
+const THEME_STORAGE_KEY = 'dm-screen-theme';
+const VALID_THEMES = new Set(['light', 'dark', 'auto']);
+const storedTheme = localStorage.getItem(THEME_STORAGE_KEY);
+const initialTheme = VALID_THEMES.has(storedTheme) ? storedTheme : 'auto';
+document.documentElement.dataset.theme = initialTheme;
 
 createApp(App).use(IonicVue).mount('#app');

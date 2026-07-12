@@ -26,6 +26,11 @@ This document captures implementation principles for maintainability and consist
 - Verify key invariants after each major transition.
 - Run machine verification after each behavior change.
 
+## Appearance considerations
+
+- Use semantic colors
+- Consider using a token-based color architecture
+
 ## Change discipline
 
 - Prefer adding or updating named actions and guards over embedding ad hoc transition logic.

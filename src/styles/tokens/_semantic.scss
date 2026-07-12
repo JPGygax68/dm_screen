@@ -1,0 +1,70 @@
+@use "sass:map";
+@use "palette" as *;
+
+$semantic-colors-light: (
+	primary: $md-ref-palette-primary-40,
+	on-primary: $md-ref-palette-primary-100,
+	primary-container: $md-ref-palette-primary-90,
+	on-primary-container: $md-ref-palette-primary-10,
+	secondary: $md-ref-palette-secondary-40,
+	on-secondary: $md-ref-palette-secondary-100,
+	secondary-container: $md-ref-palette-secondary-90,
+	on-secondary-container: $md-ref-palette-secondary-10,
+	background: $md-ref-palette-neutral-99,
+	on-background: $md-ref-palette-neutral-10,
+	surface: $md-ref-palette-neutral-100,
+	surface-container: $md-ref-palette-neutral-95,
+	surface-container-high: $md-ref-palette-neutral-90,
+	surface-variant: $md-ref-palette-neutral-90,
+	on-surface: $md-ref-palette-neutral-10,
+	on-surface-variant: $md-ref-palette-neutral-30,
+	outline: $md-ref-palette-neutral-50,
+	outline-variant: $md-ref-palette-neutral-80,
+	error: $md-ref-palette-error-40,
+	on-error: $md-ref-palette-error-100,
+	error-container: $md-ref-palette-error-90,
+	on-error-container: $md-ref-palette-neutral-10
+);
+
+$semantic-colors-dark: (
+	primary: $md-ref-palette-primary-80,
+	on-primary: $md-ref-palette-primary-20,
+	primary-container: $md-ref-palette-primary-30,
+	on-primary-container: $md-ref-palette-primary-90,
+	secondary: $md-ref-palette-secondary-80,
+	on-secondary: $md-ref-palette-secondary-20,
+	secondary-container: $md-ref-palette-secondary-30,
+	on-secondary-container: $md-ref-palette-secondary-90,
+	background: $md-ref-palette-neutral-10,
+	on-background: $md-ref-palette-neutral-90,
+	surface: $md-ref-palette-neutral-10,
+	surface-container: $md-ref-palette-neutral-20,
+	surface-container-high: $md-ref-palette-neutral-30,
+	surface-variant: $md-ref-palette-neutral-30,
+	on-surface: $md-ref-palette-neutral-90,
+	on-surface-variant: $md-ref-palette-neutral-80,
+	outline: $md-ref-palette-neutral-80,
+	outline-variant: $md-ref-palette-neutral-40,
+	error: $md-ref-palette-error-80,
+	on-error: $md-ref-palette-error-40,
+	error-container: $md-ref-palette-error-40,
+	on-error-container: $md-ref-palette-error-100
+);
+
+@function semantic-color-map($theme) {
+	@if $theme == light {
+		@return $semantic-colors-light;
+	}
+	@if $theme == dark {
+		@return $semantic-colors-dark;
+	}
+	@error "Unknown semantic theme '#{$theme}'. Use light or dark.";
+}
+
+@function semantic-color($theme, $role) {
+	$value: map.get(semantic-color-map($theme), $role);
+	@if $value == null {
+		@error "Unknown semantic role '#{$role}' for theme '#{$theme}'.";
+	}
+	@return $value;
+}

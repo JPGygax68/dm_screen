@@ -1,7 +1,19 @@
+@use "tokens" as *;
+
+@include emit-component-css-vars(light, ":root");
+@include emit-component-css-vars(dark, ":root[data-theme='dark']");
+
+:root[data-theme='auto'] {
+  color-scheme: light;
+}
+
+@media (prefers-color-scheme: dark) {
+  @include emit-component-css-vars(dark, ":root[data-theme='auto']");
+}
+
 :root {
-  color-scheme: dark;
-  background: #111;
-  color: #eef;
+  background: component-var(app-bg);
+  color: component-var(app-text);
   font-family: Inter, system-ui, sans-serif;
 }
 
@@ -12,13 +24,15 @@
 body {
   margin: 0;
   min-height: 100vh;
-  background: #10121a;
+  background: component-var(app-body-bg);
+  color: component-var(app-text);
 }
 
 .tracker-shell {
   max-width: 100vw;
   min-height: 100vh;
   padding: 1rem;
+
   .tracker-title {
     display: flex;
     justify-content: space-between;
@@ -29,11 +43,12 @@ body {
     h1 {
       margin: 0;
       font-size: 1.5rem;
+      color: component-var(heading-text);
     }
 
     p {
       margin: 0.25rem 0 0;
-      color: #9ab;
+      color: component-var(app-muted-text);
     }
 
     .header-actions {
@@ -49,9 +64,10 @@ body {
     gap: 1rem;
     padding: 0.75rem 1rem;
     margin-bottom: 0.75rem;
-    background: rgba(255,255,255,0.04);
-    border: 1px solid rgba(255,255,255,0.05);
+    background: component-var(surface-subtle);
+    border: 1px solid component-var(border-subtle);
     border-radius: 0.75rem;
+    color: component-var(tracker-row-text);
   }
 
   .tracker {
@@ -69,8 +85,8 @@ body {
       .row-label,
       .row-note {
         z-index: 4;
-        background: transparent;
-        border: none;
+        background: component-var(app-body-bg);
+        border: 1px solid component-var(app-body-bg);
       }
     }
 
@@ -90,17 +106,17 @@ body {
       min-width: 140px;
       max-width: 160px;
       padding: 0.75rem 1rem;
-      background: rgba(20, 24, 39, 0.95);
-      border: 1px solid rgba(255,255,255,0.05);
+      background: component-var(tracker-row-label-bg);
+      border: 1px solid component-var(border-subtle);
       border-radius: 0.75rem;
       display: flex;
       align-items: center;
       position: sticky;
       left: 0;
       z-index: 3;
-      border-bottom: 1px solid rgba(255,255,255,0.05);
+      border-bottom: 1px solid component-var(border-subtle);
       font-size: 0.95rem;
-      color: #eef4ff;
+      color: component-var(tracker-row-text);
       font-weight: 600;
 
       &:last-child {
@@ -119,12 +135,12 @@ body {
       min-width: 160px;
       max-width: 180px;
       padding: 0.75rem 1rem;
-      background: rgba(26, 31, 49, 0.98);
-      border: 1px solid rgba(255,255,255,0.05);
+      background: component-var(tracker-row-note-bg);
+      border: 1px solid component-var(border-subtle);
       border-radius: 0.75rem;
       display: flex;
       align-items: center;
-      color: #ecf3ff;
+      color: component-var(tracker-row-text);
       font-weight: 500;
       position: sticky;
       right: 0;
@@ -136,9 +152,10 @@ body {
       width: 180px;
       display: grid;
       grid-auto-rows: 3.5rem;
-      background: rgba(22, 26, 45, 0.9);
-      border: 1px solid rgba(255,255,255,0.05);
+      background: component-var(tracker-column-bg);
+      border: 1px solid component-var(border-subtle);
       border-radius: 0.75rem;
+      overflow: hidden;
 
       .column-header {
         display: flex;
@@ -150,9 +167,9 @@ body {
         letter-spacing: 0.02em;
         text-transform: uppercase;
         font-size: 0.85rem;
-        background: rgba(255,255,255,0.04);
-        border-bottom: 1px solid rgba(255,255,255,0.08);
-        color: #eef4ff;
+        background: component-var(tracker-column-header-bg);
+        border-bottom: 1px solid component-var(border-default);
+        color: component-var(tracker-column-text);
 
         strong {
           display: block;
@@ -163,7 +180,7 @@ body {
           display: block;
           margin-top: 0.25rem;
           font-size: 0.8rem;
-          color: #aab;
+          color: component-var(tracker-column-meta-text);
         }
       }
     }
@@ -174,17 +191,21 @@ body {
       display: grid;
       place-items: center;
       border-radius: 0.85rem;
-      background: linear-gradient(150deg, #5b9cff 0%, #2e49db 100%);
-      color: white;
+      background: linear-gradient(150deg, component-var(gradient-accent-start) 0%, component-var(gradient-accent-end) 100%);
+      color: component-var(button-filled-text);
       font-weight: 700;
     }
 
     .current-state {
       padding: 0.6rem 1rem;
-      background: rgba(255,255,255,0.02);
-      border-bottom: 1px solid rgba(255,255,255,0.03);
+      background: component-var(tracker-current-state-bg);
+      border-bottom: 1px solid component-var(border-subtle);
       font-weight: 600;
-      color: #e6f0ff;
+      color: component-var(tracker-current-state-text);
+
+      &:last-child {
+        border-bottom: none;
+      }
     }
 
     .round-cell {
@@ -192,38 +213,47 @@ body {
       align-items: center;
       min-height: 3.5rem;
       padding: 0.75rem 1rem;
-      border: 1px solid rgba(255,255,255,0.08);
+      border: 1px solid component-var(border-default);
       font-size: 0.88rem;
       line-height: 1.4;
-      color: #f3f7ff;
+      color: component-var(tracker-cell-text);
       text-align: left;
-      background: rgba(18, 22, 38, 0.92);
+      background: component-var(tracker-cell-bg);
       width: 100%;
       cursor: pointer;
 
+      &:hover {
+        background: component-var(tracker-cell-hover-bg);
+      }
+
+      &:focus-visible {
+        outline: 2px solid component-var(tracker-cell-focus-outline);
+        outline-offset: 1px;
+      }
+
       &.active {
-        background: rgba(91, 156, 255, 0.28);
-        outline: 1px solid rgba(91, 156, 255, 0.45);
+        background: component-var(tracker-cell-active-bg);
+        outline: 1px solid component-var(tracker-cell-active-outline);
       }
 
       &.selected:not(.active) {
-        background: rgba(255, 193, 87, 0.22);
-        outline: 1px solid rgba(255, 193, 87, 0.65);
-        color: #221609;
+        background: component-var(tracker-cell-selected-bg);
+        outline: 1px solid component-var(tracker-cell-active-outline);
+        color: component-var(tracker-cell-selected-text);
 
         .cell-value {
-          color: #221609;
+          color: component-var(tracker-cell-selected-text);
         }
       }
 
       &.filled {
-        background: rgba(66, 139, 94, 0.42);
+        background: component-var(tracker-cell-filled-bg);
       }
     }
 
     .cell-value {
       font-size: 0.9rem;
-      color: #f7fbff;
+      color: component-var(tracker-cell-text);
       white-space: pre-wrap;
       overflow-wrap: anywhere;
     }
@@ -232,9 +262,9 @@ body {
   .input-panel {
     margin-top: 1rem;
     padding: 1rem;
-    border: 1px solid rgba(255,255,255,0.08);
+    border: 1px solid component-var(border-default);
     border-radius: 0.9rem;
-    background: rgba(16, 21, 34, 0.95);
+    background: component-var(surface-subtle);
     display: none;
 
     &.open {
@@ -251,13 +281,8 @@ body {
       h2 {
         margin: 0;
         font-size: 1rem;
-        color: #eef4ff;
+        color: component-var(panel-title-text);
         font-weight: 700;
-      }
-
-      p {
-        margin: 0.2rem 0 0;
-        color: #9ab;
       }
 
       .panel-actions {
@@ -273,11 +298,12 @@ body {
       gap: 1rem;
 
       .action-section,
-      .composer-block {
+      .composer-block,
+      .turn-actions-panel {
         padding: 0.75rem;
-        border: 1px solid rgba(255,255,255,0.06);
+        border: 1px solid component-var(border-subtle);
         border-radius: 0.75rem;
-        background: rgba(255,255,255,0.03);
+        background: component-var(surface-raised);
       }
 
       .action-menu {
@@ -290,12 +316,13 @@ body {
       .action-btn,
       .primary-btn,
       .secondary-btn {
-        border: 1px solid rgba(255,255,255,0.08);
+        border: 1px solid component-var(button-outline-border);
         border-radius: 999px;
         padding: 0.55rem 0.8rem;
-        background: rgba(255,255,255,0.08);
-        color: white;
+        background: component-var(button-outline-bg);
+        color: component-var(button-outline-text);
         cursor: pointer;
+        transition: background-color 120ms ease, border-color 120ms ease, color 120ms ease;
       }
 
       .action-btn {
@@ -303,18 +330,36 @@ body {
         justify-content: center;
         text-align: center;
 
+        &:hover {
+          background: component-var(button-outline-hover-bg);
+        }
+
+        &:focus-visible {
+          outline: 2px solid component-var(tracker-cell-focus-outline);
+          outline-offset: 1px;
+        }
+
         &.selected {
-          background: linear-gradient(150deg, #5b9cff 0%, #2e49db 100%);
-          border-color: transparent;
+          background: linear-gradient(150deg, component-var(gradient-accent-start) 0%, component-var(gradient-accent-end) 100%);
+          border-color: component-var(button-filled-bg);
+          color: component-var(button-filled-text);
         }
       }
 
       .primary-btn {
-        background: linear-gradient(150deg, #5b9cff 0%, #2e49db 100%);
-        border-color: transparent;
+        background: component-var(button-filled-bg);
+        border-color: component-var(button-filled-bg);
+        color: component-var(button-filled-text);
+
+        &:hover {
+          background: component-var(button-filled-bg-hover);
+          border-color: component-var(button-filled-bg-hover);
+        }
 
         &:disabled {
-          opacity: 0.4;
+          background: component-var(button-filled-bg-disabled);
+          border-color: component-var(button-filled-bg-disabled);
+          color: component-var(button-filled-text-disabled);
           cursor: not-allowed;
         }
       }
@@ -333,13 +378,13 @@ body {
           textarea,
           input,
           select {
-            color: #f4f8ff;
-            caret-color: #f4f8ff;
+            color: component-var(input-text);
+            caret-color: component-var(input-text);
           }
 
           textarea::placeholder,
           input::placeholder {
-            color: rgba(236, 244, 255, 0.65);
+            color: component-var(input-placeholder);
           }
 
           .subpanel {
@@ -349,29 +394,34 @@ body {
               gap: 0.25rem;
               margin-bottom: 0.6rem;
               font-size: 0.92rem;
-              color: #e8f1ff;
+              color: component-var(input-label);
               font-weight: 600;
             }
 
             input,
             select,
             textarea {
-              border: 1px solid rgba(255,255,255,0.08);
+              border: 1px solid component-var(input-border);
               border-radius: 0.45rem;
               padding: 0.5rem 0.6rem;
-              background: rgba(255,255,255,0.06);
-              color: #f4f8ff;
-              caret-color: #f4f8ff;
+              background: component-var(input-bg);
+              color: component-var(input-text);
+              caret-color: component-var(input-text);
+
+              &:focus-visible {
+                outline: 2px solid component-var(input-border-focus);
+                outline-offset: 1px;
+              }
             }
 
             input::placeholder,
             textarea::placeholder {
-              color: rgba(236, 244, 255, 0.65);
+              color: component-var(input-placeholder);
             }
 
             select option {
-              color: #f4f8ff;
-              background: #1b2236;
+              color: component-var(input-text);
+              background: component-var(surface-raised);
             }
 
             textarea {
@@ -392,14 +442,19 @@ body {
               resize: vertical;
               border-radius: 0.45rem;
               padding: 0.6rem 0.7rem;
-              background: rgba(255,255,255,0.06);
-              border: 1px solid rgba(255,255,255,0.1);
-              color: #e7eefc;
-              caret-color: #e7eefc;
+              background: component-var(input-bg);
+              border: 1px solid component-var(input-border);
+              color: component-var(input-text);
+              caret-color: component-var(input-text);
+
+              &:focus-visible {
+                outline: 2px solid component-var(input-border-focus);
+                outline-offset: 1px;
+              }
             }
 
             .raw-textarea::placeholder {
-              color: rgba(210, 220, 236, 0.55);
+              color: component-var(input-placeholder);
             }
           }
         }
@@ -410,14 +465,19 @@ body {
           display: flex;
           flex-direction: column;
           gap: 0.5rem;
-          flex-wrap: wrap;
           justify-content: space-between;
-          // make items fill horizontal space
           align-items: stretch;
 
           .composer-action-btn {
-            --color: #e8f1ff;
-            --border-color: rgba(232, 241, 255, 0.45);
+            --color: #{component-var(ionic-outline-button-text)};
+            --border-color: #{component-var(ionic-outline-button-border)};
+            --background: #{component-var(button-outline-bg)};
+          }
+
+          .composer-action-btn--next {
+            --background: #{component-var(ionic-primary-button-bg)};
+            --color: #{component-var(ionic-primary-button-text)};
+            --border-color: #{component-var(ionic-primary-button-bg)};
           }
         }
       }
@@ -426,8 +486,8 @@ body {
 }
 
 .frozen-column {
-  background: rgba(20, 24, 39, 0.95);
-  border: 1px solid rgba(255,255,255,0.05);
+  background: component-var(surface-subtle);
+  border: 1px solid component-var(border-subtle);
   border-radius: 0.75rem;
   overflow: hidden;
 }
@@ -442,9 +502,9 @@ right-column {
   padding: 0.5rem 1rem;
   font-weight: 600;
   font-size: 0.9rem;
-  color: #cde;
-  background: rgba(255,255,255,0.02);
-  border-bottom: 1px dashed rgba(255,255,255,0.03);
+  color: component-var(app-muted-text);
+  background: component-var(surface-raised);
+  border-bottom: 1px dashed component-var(border-subtle);
 }
 
 .scrollable-columns {
@@ -456,7 +516,7 @@ right-column {
 
 .section-title {
   font-size: 0.8rem;
-  color: #9ab;
+  color: component-var(app-muted-text);
   margin-bottom: 0.5rem;
   text-transform: uppercase;
   letter-spacing: 0.05em;
@@ -466,7 +526,8 @@ right-column {
   min-height: 3rem;
   padding: 0.75rem;
   border-radius: 0.7rem;
-  background: rgba(255,255,255,0.05);
+  background: component-var(surface-subtle);
+  color: component-var(app-text);
   font-family: ui-monospace, SFMono-Regular, monospace;
   font-size: 0.95rem;
 }
