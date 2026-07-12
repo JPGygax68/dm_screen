@@ -214,8 +214,8 @@ const combatants = [
 ];
 
 const baseRounds = [
-  { notes: 'Focus PC_A first.' },
-  { notes: 'Goblin 1 falls.' },
+  // { notes: 'Focus PC_A first.' },
+  // { notes: 'Goblin 1 falls.' },
   // { notes: 'Ogre is stunned.' },
   // { notes: 'Press advantage.' }
 ];
@@ -237,7 +237,7 @@ const trackerRef = ref(null);
 let subscription;
 
 const displayedRoundNumbers = computed(() => {
-  const count = Math.max(baseRounds.length, snapshot.value.context.round + 1);
+  const count = Math.max(baseRounds.length, snapshot.value.context.round);
   return Array.from({ length: count }, (_, idx) => idx + 1);
 });
 
