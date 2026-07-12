@@ -22,8 +22,11 @@
           <div class="columns-header">
             <div class="row-label"></div>
             <div class="row-combatants">
-              <div v-for="combatant in combatants" :key="combatant.id" class="combatant-column" style="min-width:180px;">
-                <div class="column-header">
+              <div v-for="(combatant, turnOrderIndex) in combatants" :key="combatant.id" class="combatant-column" style="min-width:180px;">
+                <div class="column-header" 
+                  :data-turn-order-index="turnOrderIndex" 
+                  @click="send({ type: 'SELECT_TURN', turnIndex: turnOrderIndex })"
+                >
                   <div class="portrait">{{ combatant.portrait }}</div>
                   <div>
                     <strong>{{ combatant.name }}</strong>
