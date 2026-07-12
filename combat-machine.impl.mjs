@@ -92,6 +92,13 @@ export const combatMachineActions = {
     draft: () => emptyDraft()
   }),
 
+  clearTurn: assign(({ context, event }) => {
+    console.log(`Clearing turn for round ${context.round}, turn index ${context.selectedTurnOrderIndex}`);
+    const key = buildTurnKey(context.round, context.selectedTurnOrderIndex);
+    const { [key]: _, ...rest } = context.turnEntries;
+    return { turnEntries: rest };
+  }),
+
   discardDraft: assign({
     draft: () => emptyDraft()
   }),
@@ -110,13 +117,13 @@ export const combatMachineActions = {
     }
   }),
 
-  commitDraftToSelectedTurn: assign(({ context }) => {
+  addDraftToSelectedTurn: assign(({ context }) => {
     if (!context.draft.preview) return {};
     const key = buildTurnKey(context.round, context.selectedTurnOrderIndex);
     return {
       turnEntries: {
         ...context.turnEntries,
-        [key]: context.draft.preview
+        [key]: [...(context.turnEntries[key] || []), context.draft.preview]
       }
     };
   }),

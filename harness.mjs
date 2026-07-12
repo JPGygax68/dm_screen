@@ -65,7 +65,7 @@ function runHarness() {
   send({ type: 'SELECT_TURN', turnIndex: 0 }, 'select active turn (PC_A)');
   send({ type: 'SET_ACTION', action: 'raw' }, 'raw mode for current actor');
   send({ type: 'INPUT_CHANGED', field: 'rawShorthand', value: 'atk:Goblin 1++4/dmg=7' }, 'enter attack shorthand');
-  send({ type: 'CONFIRM' }, 'commit turn');
+  send({ type: 'ADD_SHORTHAND' }, 'commit turn');
   check('confirm commits and keeps panel open', (s) => {
     const key = `${s.context.round}:0`;
     return (

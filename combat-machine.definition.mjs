@@ -67,15 +67,15 @@ export const combatMachineDefinition = {
           actions: ['updateDraftFieldFromEvent']
         },
         CLEAR: {
-          actions: ['clearDraft']
+          actions: ['clearTurn']
         },
         CANCEL: {
           target: 'editingTurn',
           actions: ['discardDraft']
         },
-        CONFIRM: {
+        ADD_SHORTHAND: {
           target: 'editingTurn',
-          actions: ['commitDraftToSelectedTurn', 'clearDraft']
+          actions: ['addDraftToSelectedTurn', 'clearDraft']
         },
         NEXT_TURN: {
           target: 'editingTurn',

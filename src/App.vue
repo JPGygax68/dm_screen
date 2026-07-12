@@ -52,7 +52,7 @@
                   :key="`${roundNumber}-${combatant.id}`"
                   class="combatant-slot"
                 >
-                  <button
+                  <div
                     class="round-cell"
                     :data-round="roundNumber"
                     :data-turn-order-index="turnOrderIndex"
@@ -64,8 +64,13 @@
                     :disabled="roundNumber !== snapshot.context.round"
                     @click="selectTurn(roundNumber, turnOrderIndex)"
                   >
-                    <span class="cell-value">{{ getDisplayValue(roundNumber, turnOrderIndex) }}</span>
-                  </button>
+                    <div v-for="(line, index) in getTurnValue(roundNumber, turnOrderIndex)" :key="index"
+                      class="shorthand-line"
+                    >
+                      {{ line }}
+                    </div>
+                    <!-- <span class="cell-value">{{ getDisplayValue(roundNumber, turnOrderIndex) }}</span> -->
+                  </div>
                 </div>
               </div>
               <div class="row-note">{{ getRoundNote(roundNumber) }}</div>
@@ -187,7 +192,7 @@
                 <div class="panel">
                     <ion-button class="composer-action-btn" fill="outline" size="small" @click="send({ type: 'CLEAR' })">Clear</ion-button>
                     <ion-button class="composer-action-btn" fill="outline" size="small" @click="send({ type: 'CANCEL' })">Cancel</ion-button>
-                    <ion-button class="composer-action-btn" :disabled="!snapshot.context.draft.preview" size="small" @click="send({ type: 'CONFIRM' })">Confirm</ion-button>
+                    <ion-button class="composer-action-btn" :disabled="!snapshot.context.draft.preview" size="small" @click="send({ type: 'ADD_SHORTHAND' })">Add</ion-button>
                     <ion-button class="composer-action-btn composer-action-btn--next" size="small" @click="send({ type: 'NEXT_TURN' })">Next Turn</ion-button>
                 </div>
             </div>
@@ -285,7 +290,7 @@ function getDisplayValue(roundNumber, turnOrderIndex) {
   if (iseditingTurn && isSelected(roundNumber, turnOrderIndex) && snapshot.value.context.draft.preview) {
     return snapshot.value.context.draft.preview;
   }
-  return value || 'Tap to fill';
+  return value || '...';
 }
 
 function selectTurn(roundNumber, turnOrderIndex) {
