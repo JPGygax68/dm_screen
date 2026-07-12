@@ -183,5 +183,20 @@ export const combatMachineActions = {
         open: false
       };
     }
+  }),
+
+  // NEW STUFF, appending here for simplicity
+  initializeNewRound: assign(({ context }) => {
+    console.log(`Initializing new round. Current round: ${context.round}`);
+    const nextRound = context.round + 1;
+    return {
+      round: nextRound,
+      activeTurnOrderIndex: 0,
+      selectedTurnOrderIndex: 0,
+      draft: emptyDraft()
+    }
   })
+
 };
+
+

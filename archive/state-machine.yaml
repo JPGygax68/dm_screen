@@ -67,7 +67,7 @@ states:
   recording:
     on:
       SELECT_TURN:
-        target: drafting
+        target: editingTurn
         actions:
           - setSelectedTurnIndex(event.turnIndex)
           - hydrateDraftFromSelectedTurn()
@@ -81,7 +81,7 @@ states:
           - setEncounterPhase(ended)
           - closeRecordingPanel()
 
-  drafting:
+  editingTurn:
     on:
       SET_ACTION:
         actions:
@@ -110,7 +110,7 @@ states:
         actions:
           - setUnlockEditing(true)
       SELECT_TURN:
-        target: drafting
+        target: editingTurn
         actions:
           - setSelectedTurnIndex(event.turnIndex)
           - hydrateDraftFromSelectedTurn()

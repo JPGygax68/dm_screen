@@ -52,6 +52,7 @@ $component-typography-dark: (
 
 $component-tracker-light: (
 	tracker-row-label-bg: sem.semantic-color(light, surface-container),
+    tracker-row-label-bg-active: sem.semantic-color(light, surface-container-high),
 	tracker-row-note-bg: sem.semantic-color(light, surface-container-high),
 	tracker-row-text: sem.semantic-color(light, on-surface),
 	tracker-column-bg: sem.semantic-color(light, surface-container),
@@ -73,6 +74,7 @@ $component-tracker-light: (
 
 $component-tracker-dark: (
 	tracker-row-label-bg: sem.semantic-color(dark, surface-container),
+    tracker-row-label-bg-active: sem.semantic-color(dark, surface-container-high),
 	tracker-row-note-bg: sem.semantic-color(dark, surface-container-high),
 	tracker-row-text: sem.semantic-color(dark, on-surface),
 	tracker-column-bg: sem.semantic-color(dark, surface-container),

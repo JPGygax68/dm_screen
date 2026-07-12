@@ -113,6 +113,9 @@ body {
       max-width: 160px;
       padding: 0.75rem 1rem;
       background: component-var(tracker-row-label-bg);
+      &.active {
+        background: component-var(tracker-row-label-bg-active);
+      }
       //border: 1px solid component-var(border-subtle);
       //border-radius: 0.75rem;
       border: fancy;

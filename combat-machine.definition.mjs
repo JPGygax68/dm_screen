@@ -1,5 +1,5 @@
 export const initialDraftForm = {
-  attackTarget: 'PC_A',
+  attackTarget: 'goblin1',
   attackMod: '+4',
   attackDamage: '7',
   castSpell: 'Shield',
@@ -15,7 +15,7 @@ export const initialDraftForm = {
 export const initialContext = {
   encounterPhase: 'creating',
   round: 1,
-  turnOrder: ['pc_a', 'goblin1', 'goblin2', 'ogre'],
+  turnOrder: ['pc_a', 'goblin1', 'goblin2', 'ogre', 'snake'],
   activeTurnOrderIndex: 0,
   selectedTurnOrderIndex: 0,
   draft: {
@@ -41,7 +41,7 @@ export const combatMachineDefinition = {
     idle: {
       on: {
         START_ENCOUNTER: {
-          target: 'drafting',
+          target: 'editingTurn',
           actions: [
             'setEncounterPhaseRecording',
             'setRoundOne',
@@ -54,29 +54,12 @@ export const combatMachineDefinition = {
       }
     },
 
-    recording: {
+    editingTurn: {
       on: {
-        SELECT_TURN: {
-          guard: 'hasValidTurnIndex',
-          target: 'drafting',
-          actions: ['setSelectedTurnOrderIndexFromEvent', 'hydrateDraftFromSelectedTurn']
-        },
-        NEXT_TURN: {
-          actions: ['commitDraftIfPresent', 'advanceActiveTurnOrderIndex', 'clearDraft']
-        },
-        END_ENCOUNTER: {
-          target: 'ended',
-          actions: ['setEncounterPhaseEnded', 'closeRecordingPanel']
-        }
-      }
-    },
-
-    drafting: {
-      on: {
-        END_ENCOUNTER: {
-          target: 'ended',
-          actions: ['setEncounterPhaseEnded', 'closeRecordingPanel']
-        },
+        // END_ENCOUNTER: {
+        //   target: 'ended',
+        //   actions: ['setEncounterPhaseEnded', 'closeRecordingPanel']
+        // },
         SET_ACTION: {
           actions: ['setSelectedActionFromEvent']
         },
@@ -87,15 +70,15 @@ export const combatMachineDefinition = {
           actions: ['clearDraft']
         },
         CANCEL: {
-          target: 'drafting',
+          target: 'editingTurn',
           actions: ['discardDraft']
         },
         CONFIRM: {
-          target: 'drafting',
+          target: 'editingTurn',
           actions: ['commitDraftToSelectedTurn', 'clearDraft']
         },
         NEXT_TURN: {
-          target: 'drafting',
+          target: 'editingTurn',
           actions: ['commitDraftIfPresent', 'advanceActiveTurnOrderIndex', 'clearDraft']
         },
         UNLOCK_EDIT: {
@@ -103,7 +86,7 @@ export const combatMachineDefinition = {
         },
         SELECT_TURN: {
           guard: 'hasValidTurnIndex',
-          target: 'drafting',
+          target: 'editingTurn',
           actions: ['setSelectedTurnOrderIndexFromEvent', 'hydrateDraftFromSelectedTurn']
         }
       }
@@ -112,7 +95,7 @@ export const combatMachineDefinition = {
     ended: {
       on: {
         START_ENCOUNTER: {
-          target: 'drafting',
+          target: 'editingTurn',
           actions: [
             'resetEncounter',
             'setEncounterPhaseRecording',

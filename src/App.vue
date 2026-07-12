@@ -41,7 +41,11 @@
 
           <div class="rows-container">
             <div v-for="roundNumber in displayedRoundNumbers" :key="roundNumber" class="round-row">
-              <div class="row-label">{{ roundNumber }}</div>
+              <div class="row-label"
+                :class="{
+                  active: isRoundActive(roundNumber)
+                }"
+              >{{ roundNumber }}</div>
               <div class="row-combatants">
                 <div
                   v-for="(combatant, turnOrderIndex) in combatants"
@@ -53,7 +57,7 @@
                     :data-round="roundNumber"
                     :data-turn-order-index="turnOrderIndex"
                     :class="{
-                      active: isActive(roundNumber, turnOrderIndex),
+                      active: isTurnActive(roundNumber, turnOrderIndex),
                       selected: isSelected(roundNumber, turnOrderIndex),
                       filled: !!getTurnValue(roundNumber, turnOrderIndex)
                     }"
@@ -200,18 +204,20 @@ import { createActor } from 'xstate';
 import { IonApp, IonButton, IonContent } from '@ionic/vue';
 import { combatMachine } from '../combat-machine.mjs';
 
+// TODO: must be loaded a data source, not hardcoded
 const combatants = [
-  { id: 'pc_a', name: 'PC_A', portrait: 'PC', initiative: '18', hp: '38/42', status: 'Bless, Shield' },
+  { id: 'pc_a', name: 'PC_A', portrait: 'PC', initiative: '18', hp: '38/42', status: 'Blessed, Shielded' },
   { id: 'goblin1', name: 'Goblin 1', portrait: 'G1', initiative: '14', hp: '7/11', status: 'Prone' },
   { id: 'goblin2', name: 'Goblin 2', portrait: 'G2', initiative: '12', hp: '11/11', status: 'Hidden' },
-  { id: 'ogre', name: 'Ogre', portrait: 'O', initiative: '10', hp: '49/59', status: 'Angry' }
+  { id: 'ogre', name: 'Ogre', portrait: 'O', initiative: '10', hp: '49/59', status: 'Angry' },
+  { id: 'snake', name: 'Snake', portrait: 'S', initiative: '8', hp: '5/5', status: 'Poisoned' }
 ];
 
 const baseRounds = [
   { notes: 'Focus PC_A first.' },
   { notes: 'Goblin 1 falls.' },
-  { notes: 'Ogre is stunned.' },
-  { notes: 'Press advantage.' }
+  // { notes: 'Ogre is stunned.' },
+  // { notes: 'Press advantage.' }
 ];
 
 const actions = [
@@ -250,6 +256,10 @@ function send(event) {
   actor.send(event);
 }
 
+function isRoundActive(roundNumber) {
+  return snapshot.value.context.round === roundNumber;
+}
+
 function getRoundNote(roundNumber) {
   return baseRounds[roundNumber - 1]?.notes || '';
 }
@@ -259,7 +269,7 @@ function getTurnValue(roundNumber, turnOrderIndex) {
   return snapshot.value.context.turnEntries[key] || '';
 }
 
-function isActive(roundNumber, turnOrderIndex) {
+function isTurnActive(roundNumber, turnOrderIndex) {
   return snapshot.value.context.round === roundNumber
     && snapshot.value.context.activeTurnOrderIndex === turnOrderIndex;
 }
@@ -271,8 +281,8 @@ function isSelected(roundNumber, turnOrderIndex) {
 
 function getDisplayValue(roundNumber, turnOrderIndex) {
   const value = getTurnValue(roundNumber, turnOrderIndex);
-  const isDrafting = String(snapshot.value.value) === 'drafting';
-  if (isDrafting && isSelected(roundNumber, turnOrderIndex) && snapshot.value.context.draft.preview) {
+  const iseditingTurn = String(snapshot.value.value) === 'editingTurn';
+  if (iseditingTurn && isSelected(roundNumber, turnOrderIndex) && snapshot.value.context.draft.preview) {
     return snapshot.value.context.draft.preview;
   }
   return value || 'Tap to fill';
