@@ -137,6 +137,8 @@ body {
       gap: 0.5rem;
 
       .combatant-slot {
+        min-width: 180px;
+        width: 180px;
         display: flex;
         flex-direction: column;
         gap: 0.1rem;
