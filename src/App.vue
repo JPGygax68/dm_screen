@@ -44,7 +44,6 @@
                   v-for="(combatant, turnOrderIndex) in combatants"
                   :key="`${roundNumber}-${combatant.id}`"
                   class="combatant-slot"
-                  style="min-width:180px; display:flex; flex-direction:column;"
                 >
                   <button
                     class="round-cell"
