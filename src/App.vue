@@ -65,9 +65,9 @@
             </div>
           </div>
       
-          <TurnInputPanel :snapshot="snapshot" :combatants="combatants" :actions="actions" @send="send"/>
         </section>
 
+        <TurnInputPanel :snapshot="snapshot" :combatants="combatants"/>
       </main>
     </ion-content>
   </ion-app>
@@ -94,17 +94,6 @@ const baseRounds = [
   // { notes: 'Goblin 1 falls.' },
   // { notes: 'Ogre is stunned.' },
   // { notes: 'Press advantage.' }
-];
-
-const actions = [
-  { value: 'attack', label: 'Attack' },
-  { value: 'cast', label: 'Cast' },
-  { value: 'condition', label: 'Condition' },
-  { value: 'damage', label: 'Damage' },
-  { value: 'heal', label: 'Heal' },
-  { value: 'switch', label: 'Switch' },
-  { value: 'note', label: 'Note' },
-  { value: 'raw', label: 'Raw' }
 ];
 
 const actor = createActor(combatMachine);

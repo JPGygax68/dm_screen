@@ -134,10 +134,21 @@
 import { IonButton } from '@ionic/vue';
 import { computed } from 'vue';
 
+const actions = [
+  { value: 'attack', label: 'Attack' },
+  { value: 'cast', label: 'Cast' },
+  { value: 'condition', label: 'Condition' },
+  { value: 'damage', label: 'Damage' },
+  { value: 'heal', label: 'Heal' },
+  { value: 'switch', label: 'Switch' },
+  { value: 'note', label: 'Note' },
+  { value: 'raw', label: 'Raw' }
+];
+
+
 const props = defineProps<{
     snapshot: any;
     combatants: any[];
-    actions: { label: string; value: string }[];
 }>();
 
 const emit = defineEmits<{
