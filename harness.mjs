@@ -1,5 +1,5 @@
 import { createActor } from 'xstate';
-import { combatMachine } from './combat-machine.mjs';
+import { combatMachine } from './combat-machine.ts';
 
 function snapshotSummary(snapshot) {
   return {
@@ -68,9 +68,11 @@ function runHarness() {
   send({ type: 'ADD_SHORTHAND' }, 'commit turn');
   check('confirm commits and keeps panel open', (s) => {
     const key = `${s.context.round}:0`;
+    const entries = s.context.turnEntries[key] || [];
     return (
       String(s.value) === 'editingTurn'
-      && s.context.turnEntries[key] === 'atk:Goblin 1++4/dmg=7'
+      && Array.isArray(entries)
+      && entries.includes('atk:Goblin 1++4/dmg=7')
       && s.context.recordingPanel.open
     );
   });

@@ -20,12 +20,11 @@ export const initialContext = {
   selectedTurnOrderIndex: 0,
   draft: {
     selectedAction: 'attack',
-    preview: '',
-    rawShorthand: '',
     form: { ...initialFormFieldValues }
   },
-  // Committed shorthand per turn key: "<round>:<turnIndex>" -> shorthand text.
   turnEntries: {},
+  // Committed shorthand per turn key: "<round>:<turnIndex>" -> shorthand text.
+  rounds: [],
   recordingPanel: {
     open: false,
     editingLocked: false,
@@ -56,10 +55,10 @@ export const combatMachineDefinition = {
 
     editingTurn: {
       on: {
-        // END_ENCOUNTER: {
-        //   target: 'ended',
-        //   actions: ['setEncounterPhaseEnded', 'closeRecordingPanel']
-        // },
+        END_ENCOUNTER: {
+          target: 'ended',
+          actions: ['setEncounterPhaseEnded', 'closeRecordingPanel']
+        },
         SET_ACTION: {
           actions: ['setSelectedActionFromEvent']
         },

@@ -7,8 +7,9 @@
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
+    "typecheck": "vue-tsc --noEmit -p tsconfig.json",
     "test": "echo \"Error: no test specified\" && exit 1",
-    "harness": "node harness.mjs"
+    "harness": "tsx harness.mjs"
   },
   "repository": {
     "type": "git",
@@ -25,6 +26,7 @@
     "@ionic/vue": "^8.8.13",
     "@ionic/vue-router": "^8.8.13",
     "ionicons": "^8.0.13",
+    "pinia": "^3.0.4",
     "vue": "^3.5.39",
     "vue-router": "^4.6.4",
     "xstate": "^5.32.4"
@@ -32,6 +34,9 @@
   "devDependencies": {
     "@vitejs/plugin-vue": "^6.0.7",
     "sass": "^1.101.0",
-    "vite": "^8.1.4"
+    "tsx": "^4.20.6",
+    "typescript": "^5.9.3",
+    "vite": "^8.1.4",
+    "vue-tsc": "^3.1.1"
   }
 }

@@ -40,28 +40,28 @@
           </div>
 
           <div class="rows-container">
-            <div v-for="roundNumber in displayedRoundNumbers" :key="roundNumber" class="round-row">
+            <div v-for="(round, roundIndex) in snapshot.rounds" :key="roundIndex" class="round-row">
               <div class="row-label" :class="{
-                active: isRoundActive(roundNumber)
-              }">{{ roundNumber }}</div>
+                active: isRoundActive(roundIndex)
+              }">{{ roundIndex + 1 }}</div>
               <div class="row-combatants">
-                <div v-for="(combatant, turnOrderIndex) in combatants" :key="`${roundNumber}-${combatant.id}`"
+                <div v-for="(combatant, turnOrderIndex) in combatants"
                   class="combatant-slot">
-                  <div class="round-cell" :data-round="roundNumber" :data-turn-order-index="turnOrderIndex" :class="{
-                    active: isTurnActive(roundNumber, turnOrderIndex),
-                    selected: isSelected(roundNumber, turnOrderIndex),
-                    filled: !!getTurnValue(roundNumber, turnOrderIndex)
-                  }" :disabled="roundNumber !== snapshot.context.round"
-                    @click="selectTurn(roundNumber, turnOrderIndex)">
-                    <div v-for="(line, index) in getTurnValue(roundNumber, turnOrderIndex)" :key="index"
+                  <div class="round-cell" :data-round="roundIndex" :data-turn-order-index="turnOrderIndex" :class="{
+                    active: isTurnActive(roundIndex, turnOrderIndex),
+                    selected: isSelected(roundIndex, turnOrderIndex),
+                    filled: !!getTurnValue(roundIndex, turnOrderIndex)
+                  }" :disabled="roundIndex !== snapshot.context.round"
+                    @click="selectTurn(roundIndex, turnOrderIndex)">
+                    <div v-for="(line, index) in getTurnValue(roundIndex, turnOrderIndex)" :key="index"
                       class="shorthand-line">
                       {{ line }}
                     </div>
-                    <!-- <span class="cell-value">{{ getDisplayValue(roundNumber, turnOrderIndex) }}</span> -->
+                    <!-- <span class="cell-value">{{ getDisplayValue(roundIndex, turnOrderIndex) }}</span> -->
                   </div>
                 </div>
               </div>
-              <div class="row-note">{{ getRoundNote(roundNumber) }}</div>
+              <div class="row-note">{{ getRoundNote(roundIndex) }}</div>
             </div>
           </div>
       
@@ -77,7 +77,7 @@
 import { computed, nextTick, onMounted, onBeforeUnmount, ref, watch } from 'vue';
 import { createActor } from 'xstate';
 import { IonApp, IonButton, IonContent } from '@ionic/vue';
-import { combatMachine } from '../combat-machine.mjs';
+import { combatMachine } from '../combat-machine';
 import TurnInputPanel from './components/TurnInputPanel.vue';
 
 // TODO: must be loaded a data source, not hardcoded

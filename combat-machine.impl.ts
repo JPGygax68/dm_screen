@@ -1,5 +1,5 @@
 import { assign } from 'xstate';
-import { initialContext } from './combat-machine.definition.mjs';
+import { initialContext } from './combat-machine.definition';
 
 function assertInvariant(condition, message) {
   if (!condition) {
