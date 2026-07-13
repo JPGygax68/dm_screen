@@ -91,7 +91,7 @@ states:
           - updateDraftField(event.field, event.value)
       CLEAR:
         actions:
-          - clearDraft()
+          - resetActionInput()
       CANCEL:
         target: recording
         actions:
@@ -100,7 +100,7 @@ states:
         target: recording
         actions:
           - commitDraftToTurn(selectedTurnIndex)
-          - clearDraft()
+          - resetActionInput()
       NEXT_TURN:
         target: recording
         actions:

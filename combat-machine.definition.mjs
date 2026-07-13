@@ -1,4 +1,4 @@
-export const initialDraftForm = {
+export const initialFormFieldValues = {
   attackTarget: 'goblin1',
   attackMod: '+4',
   attackDamage: '7',
@@ -22,7 +22,7 @@ export const initialContext = {
     selectedAction: 'attack',
     preview: '',
     rawShorthand: '',
-    form: { ...initialDraftForm }
+    form: { ...initialFormFieldValues }
   },
   // Committed shorthand per turn key: "<round>:<turnIndex>" -> shorthand text.
   turnEntries: {},
@@ -45,7 +45,7 @@ export const combatMachineDefinition = {
           actions: [
             'setEncounterPhaseRecording',
             'setRoundOne',
-            'clearDraft',
+            'clearTurn',
             'setActiveTurnOrderIndexZero',
             'setSelectedTurnOrderIndexZero',
             'openRecordingPanel'
@@ -75,11 +75,11 @@ export const combatMachineDefinition = {
         },
         ADD_SHORTHAND: {
           target: 'editingTurn',
-          actions: ['addDraftToSelectedTurn', 'clearDraft']
+          actions: ['addDraftToSelectedTurn']
         },
         NEXT_TURN: {
           target: 'editingTurn',
-          actions: ['commitDraftIfPresent', 'advanceActiveTurnOrderIndex', 'clearDraft']
+          actions: ['advanceActiveTurnOrderIndex', 'clearTurn']
         },
         UNLOCK_EDIT: {
           actions: ['setUnlockEditingTrue']

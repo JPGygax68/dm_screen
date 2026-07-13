@@ -8,7 +8,8 @@
             <p>Interactive turn entry, active-turn focus, and a lower input panel.</p>
           </div>
           <div class="header-actions">
-            <ion-button fill="outline" size="small" @click="send({ type: 'START_ENCOUNTER' })">Start encounter</ion-button>
+            <ion-button fill="outline" size="small" @click="send({ type: 'START_ENCOUNTER' })">Start
+              encounter</ion-button>
             <ion-button fill="outline" size="small" @click="send({ type: 'END_ENCOUNTER' })">End encounter</ion-button>
           </div>
         </header>
@@ -22,11 +23,10 @@
           <div class="columns-header">
             <div class="row-label"></div>
             <div class="row-combatants">
-              <div v-for="(combatant, turnOrderIndex) in combatants" :key="combatant.id" class="combatant-column" style="min-width:180px;">
-                <div class="column-header" 
-                  :data-turn-order-index="turnOrderIndex" 
-                  @click="send({ type: 'SELECT_TURN', turnIndex: turnOrderIndex })"
-                >
+              <div v-for="(combatant, turnOrderIndex) in combatants" :key="combatant.id" class="combatant-column"
+                style="min-width:180px;">
+                <div class="column-header" :data-turn-order-index="turnOrderIndex"
+                  @click="send({ type: 'SELECT_TURN', turnIndex: turnOrderIndex })">
                   <div class="portrait">{{ combatant.portrait }}</div>
                   <div>
                     <strong>{{ combatant.name }}</strong>
@@ -41,32 +41,20 @@
 
           <div class="rows-container">
             <div v-for="roundNumber in displayedRoundNumbers" :key="roundNumber" class="round-row">
-              <div class="row-label"
-                :class="{
-                  active: isRoundActive(roundNumber)
-                }"
-              >{{ roundNumber }}</div>
+              <div class="row-label" :class="{
+                active: isRoundActive(roundNumber)
+              }">{{ roundNumber }}</div>
               <div class="row-combatants">
-                <div
-                  v-for="(combatant, turnOrderIndex) in combatants"
-                  :key="`${roundNumber}-${combatant.id}`"
-                  class="combatant-slot"
-                >
-                  <div
-                    class="round-cell"
-                    :data-round="roundNumber"
-                    :data-turn-order-index="turnOrderIndex"
-                    :class="{
-                      active: isTurnActive(roundNumber, turnOrderIndex),
-                      selected: isSelected(roundNumber, turnOrderIndex),
-                      filled: !!getTurnValue(roundNumber, turnOrderIndex)
-                    }"
-                    :disabled="roundNumber !== snapshot.context.round"
-                    @click="selectTurn(roundNumber, turnOrderIndex)"
-                  >
+                <div v-for="(combatant, turnOrderIndex) in combatants" :key="`${roundNumber}-${combatant.id}`"
+                  class="combatant-slot">
+                  <div class="round-cell" :data-round="roundNumber" :data-turn-order-index="turnOrderIndex" :class="{
+                    active: isTurnActive(roundNumber, turnOrderIndex),
+                    selected: isSelected(roundNumber, turnOrderIndex),
+                    filled: !!getTurnValue(roundNumber, turnOrderIndex)
+                  }" :disabled="roundNumber !== snapshot.context.round"
+                    @click="selectTurn(roundNumber, turnOrderIndex)">
                     <div v-for="(line, index) in getTurnValue(roundNumber, turnOrderIndex)" :key="index"
-                      class="shorthand-line"
-                    >
+                      class="shorthand-line">
                       {{ line }}
                     </div>
                     <!-- <span class="cell-value">{{ getDisplayValue(roundNumber, turnOrderIndex) }}</span> -->
@@ -76,128 +64,10 @@
               <div class="row-note">{{ getRoundNote(roundNumber) }}</div>
             </div>
           </div>
+      
+          <TurnInputPanel :snapshot="snapshot" :combatants="combatants" :actions="actions" @send="send"/>
         </section>
 
-        <section class="input-panel" :class="{ open: snapshot.context.recordingPanel.open }" aria-live="polite">
-          <div class="panel-header">
-            <div>
-              <h2>{{ panelTitle }}</h2>
-            </div>
-            <div class="panel-actions">
-              <ion-button fill="outline" size="small" @click="send({ type: 'UNLOCK_EDIT' })" style="display:none;">Unlock edit</ion-button>
-            </div>
-          </div>
-
-          <div class="panel-body">
-            <div class="action-section">
-              <div class="action-menu">
-                <button
-                  v-for="action in actions"
-                  :key="action.value"
-                  class="action-btn"
-                  :class="{ selected: snapshot.context.draft.selectedAction === action.value }"
-                  @click="send({ type: 'SET_ACTION', action: action.value })"
-                >
-                  {{ action.label }}
-                </button>
-              </div>
-            </div>
-
-            <div class="composer-block">
-              <div class="composer-section">
-                <div class="subpanel">
-                <template v-if="snapshot.context.draft.selectedAction === 'attack'">
-                  <label>
-                    Target
-                    <select :value="snapshot.context.draft.form.attackTarget" @input="updateField('attackTarget', $event)">
-                      <option v-for="combatant in combatants" :key="combatant.id" :value="combatant.name">{{ combatant.name }}</option>
-                    </select>
-                  </label>
-                  <label>
-                    Modifier
-                    <input :value="snapshot.context.draft.form.attackMod" @input="updateField('attackMod', $event)" />
-                  </label>
-                  <label>
-                    Damage
-                    <input :value="snapshot.context.draft.form.attackDamage" @input="updateField('attackDamage', $event)" />
-                  </label>
-                </template>
-
-                <template v-else-if="snapshot.context.draft.selectedAction === 'cast'">
-                  <label>
-                    Spell
-                    <input :value="snapshot.context.draft.form.castSpell" @input="updateField('castSpell', $event)" />
-                  </label>
-                  <label>
-                    Target
-                    <input :value="snapshot.context.draft.form.castTarget" @input="updateField('castTarget', $event)" />
-                  </label>
-                </template>
-
-                <template v-else-if="snapshot.context.draft.selectedAction === 'condition'">
-                  <label>
-                    Condition
-                    <input :value="snapshot.context.draft.form.conditionName" @input="updateField('conditionName', $event)" />
-                  </label>
-                  <label>
-                    Mode
-                    <select :value="snapshot.context.draft.form.conditionMode" @input="updateField('conditionMode', $event)">
-                      <option value="add">Add</option>
-                      <option value="remove">Remove</option>
-                    </select>
-                  </label>
-                </template>
-
-                <template v-else-if="snapshot.context.draft.selectedAction === 'damage'">
-                  <label>
-                    Damage
-                    <input :value="snapshot.context.draft.form.damageAmount" @input="updateField('damageAmount', $event)" />
-                  </label>
-                </template>
-
-                <template v-else-if="snapshot.context.draft.selectedAction === 'heal'">
-                  <label>
-                    Healing
-                    <input :value="snapshot.context.draft.form.healAmount" @input="updateField('healAmount', $event)" />
-                  </label>
-                </template>
-
-                <template v-else-if="snapshot.context.draft.selectedAction === 'switch'">
-                  <label>
-                    Weapon
-                    <input :value="snapshot.context.draft.form.switchWeapon" @input="updateField('switchWeapon', $event)" />
-                  </label>
-                </template>
-
-                <template v-else-if="snapshot.context.draft.selectedAction === 'note'">
-                  <label>
-                    Note
-                    <textarea :value="snapshot.context.draft.form.noteText" @input="updateField('noteText', $event)"></textarea>
-                  </label>
-                </template>
-
-                </div>
-
-                <div v-if="snapshot.context.draft.selectedAction === 'raw'" class="raw-composer">
-                  <textarea
-                    class="raw-textarea"
-                    placeholder="Add raw shorthand here (multi-line allowed)"
-                    :value="snapshot.context.draft.rawShorthand"
-                    @input="updateField('rawShorthand', $event)"
-                  ></textarea>
-                </div>
-              </div>
-            </div>
-            <div class="turn-actions-panel">
-                <div class="panel">
-                    <ion-button class="composer-action-btn" fill="outline" size="small" @click="send({ type: 'CLEAR' })">Clear</ion-button>
-                    <ion-button class="composer-action-btn" fill="outline" size="small" @click="send({ type: 'CANCEL' })">Cancel</ion-button>
-                    <ion-button class="composer-action-btn" :disabled="!snapshot.context.draft.preview" size="small" @click="send({ type: 'ADD_SHORTHAND' })">Add</ion-button>
-                    <ion-button class="composer-action-btn composer-action-btn--next" size="small" @click="send({ type: 'NEXT_TURN' })">Next Turn</ion-button>
-                </div>
-            </div>
-          </div>
-        </section>
       </main>
     </ion-content>
   </ion-app>
@@ -208,6 +78,7 @@ import { computed, nextTick, onMounted, onBeforeUnmount, ref, watch } from 'vue'
 import { createActor } from 'xstate';
 import { IonApp, IonButton, IonContent } from '@ionic/vue';
 import { combatMachine } from '../combat-machine.mjs';
+import TurnInputPanel from './components/TurnInputPanel.vue';
 
 // TODO: must be loaded a data source, not hardcoded
 const combatants = [
@@ -250,11 +121,6 @@ const activeTurnLabel = computed(() => {
   const c = combatants[snapshot.value.context.activeTurnOrderIndex];
   if (!c) return '—';
   return `Round ${snapshot.value.context.round} · ${c.name}`;
-});
-
-const panelTitle = computed(() => {
-  const c = combatants[snapshot.value.context.selectedTurnOrderIndex];
-  return `${c.name} · Round ${snapshot.value.context.round}`;
 });
 
 function send(event) {
@@ -337,4 +203,5 @@ onBeforeUnmount(() => {
   if (subscription) subscription.unsubscribe();
   actor.stop();
 });
+
 </script>
