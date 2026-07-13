@@ -109,11 +109,10 @@ A DM adds combatants, tracks initiative and status, and updates HP/conditions du
 - The app should initialize checklist items based on current state and computed updates.
 - Each item should be editable or overridable before the phase is confirmed.
 - The shorthand notation is the compact representation used in the checklist and on printed sheets when the DM wants to capture turn-specific changes.
-- Actions: every turn cell should allow or include an `action:` / `atk:` / `cast:` token describing the action taken by that combatant on that turn. Action tokens provide the provenance for condition deltas and consumable changes and must be recorded in the checklist/turn cell so the GM has context for deltas applied to targets.
 
 ### Turn data model
 
-- Each turn cell should persist its data as shorthand notation text.
+- Each turn cell should persist its data as an array of Note objects
 - Rounds should be modeled as objects that wrap a list/array of turns plus round-level metadata that applies to all turns in that round.
 - Round-level data may include notes, phase markers, or other encounter-wide information that is shared by the turns in that round.
 
