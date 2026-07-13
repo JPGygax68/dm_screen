@@ -33,7 +33,7 @@
                     <span>Init {{ combatant.initiative }}</span>
                   </div>
                 </div>
-                <div class="current-state">HP {{ combatant.hp }}<br>{{ combatant.status }}</div>
+                <div class="current-state">HP {{ combatant.hp }}/{{ combatant.maxHp }}<br>{{ combatant.conditions.join(', ') }}</div>
               </div>
             </div>
             <div class="row-note"></div>
@@ -80,13 +80,15 @@ import { IonApp, IonButton, IonContent } from '@ionic/vue';
 import { combatMachine } from '../combat-machine.mjs';
 import TurnInputPanel from './components/TurnInputPanel.vue';
 
-// TODO: must be loaded a data source, not hardcoded
+// TODO: must be loaded from a data source, not hardcoded
+// JSDoc: @type {Combatant[]}
+// Must be sorted by initiative descending, then by name ascending.
 const combatants = [
-  { id: 'pc_a', name: 'PC_A', portrait: 'PC', initiative: '18', hp: '38/42', status: 'Blessed, Shielded' },
-  { id: 'goblin1', name: 'Goblin 1', portrait: 'G1', initiative: '14', hp: '7/11', status: 'Prone' },
-  { id: 'goblin2', name: 'Goblin 2', portrait: 'G2', initiative: '12', hp: '11/11', status: 'Hidden' },
-  { id: 'ogre', name: 'Ogre', portrait: 'O', initiative: '10', hp: '49/59', status: 'Angry' },
-  { id: 'snake', name: 'Snake', portrait: 'S', initiative: '8', hp: '5/5', status: 'Poisoned' }
+  { id: 'pc_a', name: 'PC_A', portrait: 'PC', initiative: 18, hp: 38, maxHp: 42, conditions: ['Blessed', 'Shielded'] },
+  { id: 'goblin1', name: 'Goblin 1', portrait: 'G1', initiative: 14, hp: 7, maxHp: 11, conditions: ['Prone'] },
+  { id: 'goblin2', name: 'Goblin 2', portrait: 'G2', initiative: 14, hp: 11, maxHp: 11, conditions: ['Hidden'] },
+  { id: 'ogre', name: 'Ogre', portrait: 'O', initiative: 10, hp: 49, maxHp: 59, conditions: ['Angry'] },
+  { id: 'snake', name: 'Snake', portrait: 'S', initiative: 8, hp: 5, maxHp: 5, conditions: ['Poisoned'] }
 ];
 
 const baseRounds = [
