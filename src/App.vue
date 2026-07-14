@@ -48,12 +48,13 @@ import { campaignEditorMachine } from './models/campaign-editor.machine.mjs';
 import { ionicRenderers } from './renderers/jsonforms/renderers.mjs';
 import '@jsonforms/vue-vanilla/vanilla.css';
 
-const campaignSchemaDocument = YAML.parse(campaignSchemaRaw);
-const campaignSchema = {
-  ...campaignSchemaDocument.$defs.Campaign,
-  $schema: campaignSchemaDocument.$schema,
-  $defs: campaignSchemaDocument.$defs
-};
+// const campaignSchemaDocument = YAML.parse(campaignSchemaRaw);
+// const campaignSchema = {
+//   ...campaignSchemaDocument.$defs.Campaign,
+//   $schema: campaignSchemaDocument.$schema,
+//   $defs: campaignSchemaDocument.$defs
+// };
+const campaignSchema = YAML.parse(campaignSchemaRaw);
 const campaignUiSchema = YAML.parse(campaignUiSchemaRaw);
 
 const renderers = Object.freeze([...ionicRenderers, ...vanillaRenderers]);
