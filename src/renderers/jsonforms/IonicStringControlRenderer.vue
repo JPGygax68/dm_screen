@@ -1,19 +1,17 @@
-<template>
-  <ion-item v-if="control.visible" class="jf-ion-item" lines="none">
-    <ion-label class="jf-ion-label" position="stacked">
-      {{ control.label }}
-    </ion-label>
-    <ion-input
-      class="jf-ion-input"
+<template lang="pug">
+
+  ion-item(v-if="control.visible" class="jf-ion-item" lines="none")
+    ion-label(class="jf-ion-label" position="stacked")
+      | {{ control.label }}
+    ion-input(class="jf-ion-input"
       :value="control.data"
       :disabled="!control.enabled"
       :placeholder="control.description || ''"
       @ionInput="onInput"
-    />
-    <ion-note v-if="control.errors" color="danger" class="jf-ion-error">
-      {{ control.errors }}
-    </ion-note>
-  </ion-item>
+    )
+    ion-note(v-if="control.errors" color="danger" class="jf-ion-error")
+      | {{ control.errors }}
+      
 </template>
 
 <script setup>

@@ -1,37 +1,34 @@
-<template>
-  <ion-app>
-    <ion-content class="ion-padding app-content" fullscreen>
-      <main class="campaign-shell campaign-editor-shell">
-        <header class="campaign-title">
-          <div>
-            <h1>Campaign Editor</h1>
-            <p>Campaign slice only (name) with schema-driven rendering.</p>
-          </div>
-          <div class="header-actions">
-            <ion-button fill="outline" size="small" @click="send({ type: 'RESET_CAMPAIGN' })">
-              Reset
-            </ion-button>
-          </div>
-        </header>
+<template lang="pug">
 
-        <section class="status-bar">
-          <div><strong>Slice:</strong> campaign</div>
-          <div><strong>Validation errors:</strong> {{ formErrorCount }}</div>
-        </section>
+ion-app
+  ion-content(class="ion-padding app-content" fullscreen)
+    main.campaign-shell.campaign-editor-shell
+      header.campaign-title
+        div
+          h1 Campaign Editor
+          p Campaign slice only (name) with schema-driven rendering.
+        div.header-actions
+          ion-button(fill="outline" size="small" @click="send({ type: 'RESET_CAMPAIGN' })")
+            | Reset
 
-        <section class="input-panel open">
-          <JsonForms
-            :data="snapshot.context.campaignData"
-            :schema="campaignSchema"
-            :uischema="campaignUiSchema"
-            :renderers="renderers"
-            :ajv="ajv"
-            @change="onFormChange"
-          />
-        </section>
-      </main>
-    </ion-content>
-  </ion-app>
+      section.status-bar
+        div
+          strong Slice:
+          |  campaign
+        div
+          strong Validation errors:
+          |  {{ formErrorCount }}
+
+      section.input-panel.open
+        JsonForms(
+          :data="snapshot.context.campaignData"
+          :schema="campaignSchema"
+          :uischema="campaignUiSchema"
+          :renderers="renderers"
+          :ajv="ajv"
+          @change="onFormChange"
+        )
+
 </template>
 
 <script setup>

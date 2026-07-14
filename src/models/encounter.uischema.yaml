@@ -3,7 +3,6 @@
 # Target renderer: JSON Forms (Vue/React)
 # Data validity remains defined by campaign.schema.yaml.
 
-$schema: "https://jsonforms.io/schemas/uischema"
 $id: "https://dm-screen.local/schema/encounter.uischema.yaml"
 
 type: VerticalLayout

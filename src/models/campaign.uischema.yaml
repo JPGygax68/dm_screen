@@ -4,7 +4,6 @@
 # Purpose: layout, grouping, ordering, and control hints only.
 # Data validity remains defined by campaign.schema.yaml.
 
-$schema: "https://jsonforms.io/schemas/uischema"
 $id: "https://dm-screen.local/schema/campaign.uischema.yaml"
 
 # Root resolves to Campaign.
