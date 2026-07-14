@@ -1,0 +1,81 @@
+%YAML 1.2
+---
+# This file defines the data structure used by DM Screen application.
+# It is used to generate the user interface and manage the state of the application.
+
+# This is the root of the data structure.
+# It contains all the information needed to generate the user interface and manage the state of the application.
+Campaign:
+  name: string
+  party: set of PlayerCharacter
+  encounters: list of Encounter
+
+PlayerId: string, non-empty, unique
+
+PlayerCharacter: # aka PC
+  id: PlayerId, required
+  name: string, required
+  race: string, recommended
+  classes: list, recommended
+  hitPoints: integer, required
+  maxHitPoints: integer, required
+  conditions: list of string, required (can be empty)
+
+NonPlayerCharacter:
+  id: string, required
+  name: string, required
+
+Encounter:
+  combatants: lookup list of Combatants, keyed by id string, required, non-empty
+  initiativeOrder: list of string, required # list of combatant ids in initiative order
+  currentRound: integer, required
+  currentTurn: integer, required
+  rounds: list of Round, required # Can be implemented as indexed array or dictionary with round number as key
+
+# Combatant is a participant in an encounter. It can be a player character (PC), a non-player character (NPC), or a creature.
+# Lifecyle: current encounter
+Combatant:
+  type: string, required # one of "pc", "npc", "creature" to guide UI behavior
+  id: string, required, unique per encounter # PC/NPC id, creature id
+  initiativeRoll: integer, required
+  # The combat stats are initialized from PlayerCharacter, NonPlayerCharacter or a monster stat block
+  # Storing them back after the encounter is required only for PCs.
+  hitPoints: integer, required
+  temporaryHitPoints: integer, optional
+  conditions: list of string, required
+
+Round:
+  number: integer, required # must be in sync with index in encounter.rounds
+  turns: list of Turn
+
+CreatureId: string, non-empty, unique
+
+Turn:
+  combatantId: string, required # must match a combatant id in encounter.combatants
+  events: list of Event, required (can be empty)
+
+Event:
+  type: EventType, required
+  data: Action | Effect | Movement | Other, required
+
+EventType: enum [action, effect, movement, other]
+
+Action:
+  type: ActionType, required
+  description: string, optional
+
+ActionType: enum [attack, cast_spell, interact, dash, disengage, dodge, help, hide, ready, search, use_object]
+
+AttackAction:
+  targetId: string, required # must match a combatant id in encounter.combatants
+  hit: boolean, required
+  damage: integer, optional
+  damageType: string, optional
+
+CastSpellAction:
+  spellName: string, required
+  target: string, optional # can be a combatant id or a designation like "area" or "self" 
+  targetIds: list of string, optional # if present, must match combatant ids in encounter.combatants
+  hit: boolean, optional
+  damage: integer, optional
+  damageType: string, optional
