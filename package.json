@@ -4,6 +4,9 @@
   "description": "",
   "type": "module",
   "scripts": {
+    "generate:models": "node scripts/generate-model-json.mjs",
+    "predev": "npm run generate:models",
+    "prebuild": "npm run generate:models",
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",

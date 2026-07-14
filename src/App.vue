@@ -41,21 +41,11 @@ import { IonApp, IonButton, IonContent } from '@ionic/vue';
 import { JsonForms } from '@jsonforms/vue';
 import { vanillaRenderers } from '@jsonforms/vue-vanilla';
 import Ajv2020 from 'ajv/dist/2020';
-import YAML from 'yaml';
-import campaignSchemaRaw from './models/campaign.schema.yaml?raw';
-import campaignUiSchemaRaw from './models/campaign.uischema.yaml?raw';
+import campaignSchema from './generated/models/campaign.schema.json';
+import campaignUiSchema from './generated/models/campaign.uischema.json';
 import { campaignEditorMachine } from './models/campaign-editor.machine.mjs';
 import { ionicRenderers } from './renderers/jsonforms/renderers.mjs';
 import '@jsonforms/vue-vanilla/vanilla.css';
-
-// const campaignSchemaDocument = YAML.parse(campaignSchemaRaw);
-// const campaignSchema = {
-//   ...campaignSchemaDocument.$defs.Campaign,
-//   $schema: campaignSchemaDocument.$schema,
-//   $defs: campaignSchemaDocument.$defs
-// };
-const campaignSchema = YAML.parse(campaignSchemaRaw);
-const campaignUiSchema = YAML.parse(campaignUiSchemaRaw);
 
 const renderers = Object.freeze([...ionicRenderers, ...vanillaRenderers]);
 const ajv = new Ajv2020({
