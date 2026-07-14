@@ -1,5 +1,5 @@
 ---
-# Companion UI schema scaffold for campaign.schema.yaml
+# Campaign shell UI schema
 # Target renderer: JSON Forms (Vue/React)
 # Purpose: layout, grouping, ordering, and control hints only.
 # Data validity remains defined by campaign.schema.yaml.
@@ -7,7 +7,7 @@
 $schema: "https://jsonforms.io/schemas/uischema"
 $id: "https://dm-screen.local/schema/campaign.uischema.yaml"
 
-# Root currently resolves to Campaign in campaign.schema.yaml (oneOf with Campaign).
+# Root resolves to Campaign.
 type: VerticalLayout
 elements:
   - type: Group
@@ -16,144 +16,6 @@ elements:
       - type: Control
         label: Campaign Name
         scope: "#/properties/name"
-
-  - type: Group
-    label: Party
-    elements:
-      - type: Control
-        scope: "#/properties/party"
-        label: Player Characters
-        options:
-          showSortButtons: true
-          detail:
-            type: VerticalLayout
-            elements:
-              - type: Group
-                label: Identity
-                elements:
-                  - type: Control
-                    scope: "#/properties/id"
-                  - type: Control
-                    scope: "#/properties/name"
-                  - type: Control
-                    scope: "#/properties/race"
-                  - type: 'HorizontalLayout'
-                    elements:
-                      - type: Control
-                        scope: "#/properties/classes"
-              - type: Group
-                label: Hit Points
-                elements:
-                  - type: HorizontalLayout
-                    elements:
-                      - type: Control
-                        scope: "#/properties/hitPoints"
-                      - type: Control
-                        scope: "#/properties/maxHitPoints"
-              - type: Group
-                label: Conditions
-                elements:
-                  - type: Control
-                    scope: "#/properties/conditions"
-
-  - type: Group
-    label: Encounters
-    rule: { "effect": "HIDE" } # we'll deal with that later
-    elements:
-      - type: Control
-        scope: "#/properties/encounters"
-        options:
-          showSortButtons: true
-          detail:
-            type: VerticalLayout
-            elements:
-              - type: Group
-                label: Encounter State
-                elements:
-                  - type: HorizontalLayout
-                    elements:
-                      - type: Control
-                        scope: "#/properties/currentRound"
-                      - type: Control
-                        scope: "#/properties/currentTurn"
-
-              - type: Group
-                label: Combatants
-                elements:
-                  - type: Control
-                    scope: "#/properties/combatants"
-                    options:
-                      # Combatants is a map object in schema; keep generic for scaffold.
-                      format: "table"
-
-              - type: Group
-                label: Initiative
-                elements:
-                  - type: Control
-                    scope: "#/properties/initiativeOrder"
-                    label: Initiative Order (Combatant IDs)
-
-              - type: Group
-                label: Rounds
-                elements:
-                  - type: Control
-                    scope: "#/properties/rounds"
-                    options:
-                      showSortButtons: true
-                      detail:
-                        type: VerticalLayout
-                        elements:
-                          - type: Group
-                            label: Round
-                            elements:
-                              - type: Control
-                                scope: "#/properties/number"
-
-                          - type: Group
-                            label: Turns
-                            elements:
-                              - type: Control
-                                scope: "#/properties/turns"
-                                options:
-                                  showSortButtons: true
-                                  detail:
-                                    type: VerticalLayout
-                                    elements:
-                                      - type: Group
-                                        label: Turn Header
-                                        elements:
-                                          - type: Control
-                                            scope: "#/properties/combatantId"
-                                            label: Combatant ID
-
-                                      - type: Group
-                                        label: Events
-                                        elements:
-                                          - type: Control
-                                            scope: "#/properties/events"
-                                            options:
-                                              showSortButtons: true
-                                              detail:
-                                                type: VerticalLayout
-                                                elements:
-                                                  - type: Control
-                                                    scope: "#/properties/type"
-
-                                                  - type: Control
-                                                    scope: "#/properties/comment"
-
-                                                  - type: Group
-                                                    label: Event Data
-                                                    elements:
-                                                      - type: Control
-                                                        scope: "#/properties/data"
-                                                        options:
-                                                          # oneOf branch picker for Action/Effect/Movement/Other
-                                                          format: "oneOf"
-                                                          # TODO: If your renderer supports per-branch detail,
-                                                          # add dedicated layouts for each data subtype here.
-                                                          
-# Optional renderer-level defaults used by some JSON Forms integrations.
 
 options:
   showUnfocusedDescription: true

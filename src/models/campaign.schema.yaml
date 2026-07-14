@@ -124,6 +124,31 @@ type: object
     - creature
     description: Combatant type to guide UI behavior
 
+  CombatantRef:
+    type: object
+    properties:
+      type: { "$ref": "#/$defs/CombatantType" }
+      id:
+        oneOf: [ { "$ref": "#/$defs/PlayerId" }, { "$ref": "#/$defs/NpcId" }, { "$ref": "#/$defs/CreatureId" } ]
+        description: 'Unique identifier PC, NPC or Creature'
+    description: Unique identifier for a combatant (must match a combatant id in Encounter.combatants)
+
+  ActionType:
+    type: string
+    enum:
+    - attack
+    - cast_spell
+    - interact
+    - dash
+    - disengage
+    - dodge
+    - help
+    - hide
+    - ready
+    - search
+    - use_object
+    description: Type of action taken
+    
   Round:
     type: object
     title: Combat Round
@@ -146,7 +171,7 @@ type: object
     description: A single combatant's turn in a round
     properties:
       combatantId:
-        "$ref": "#/$defs/CombatantId"
+        "$ref": "#/$defs/CombatantRef"
         description: ID of the combatant taking this turn (must match a combatant
           id in Encounter.combatants)
       events:
@@ -202,10 +227,10 @@ type: object
       type: { "$ref": "#/$defs/EventType" }
       data:
         oneOf:
-        - "$ref": "#/$defs/Action"
-        - "$ref": "#/$defs/Effect"
-        - "$ref": "#/$defs/Movement"
-        - "$ref": "#/$defs/Other"
+        - "$ref": "#/$defs/ActionEvent"
+        - "$ref": "#/$defs/EffectEvent"
+        - "$ref": "#/$defs/MovementEvent"
+        - "$ref": "#/$defs/OtherEvent"
         description: Event-specific data
       comment:
         type: string
@@ -215,23 +240,7 @@ type: object
     - data
     additionalProperties: false
 
-  ActionType:
-    type: string
-    enum:
-    - attack
-    - cast_spell
-    - interact
-    - dash
-    - disengage
-    - dodge
-    - help
-    - hide
-    - ready
-    - search
-    - use_object
-    description: Type of action taken
-    
-  Action:
+  ActionEvent:
     type: object
     title: Action
     description: An action taken by a combatant
@@ -253,7 +262,7 @@ type: object
       type:
         const: attack
       targetId:
-        "$ref": "#/$defs/CombatantId"
+        "$ref": "#/$defs/CombatantRef"
         description: ID of target combatant (must match a combatant id in Encounter.combatants)
       hit: { "$ref": "#/$defs/Success", description: Whether the attack hit }
       damage: {type: integer, minimum: 0, description: Damage dealt (optional)}
@@ -277,7 +286,7 @@ type: object
         description: List of target combatant IDs (must match combatant ids in Encounter.combatants
           if present)
         items:
-          "$ref": "#/$defs/CombatantId"
+          "$ref": "#/$defs/CombatantRef"
       hit: { "$ref": "#/$defs/Success", description: Whether the spell hit/affected targets (optional) }
       damage: { type: integer, minimum: 0, description: Damage dealt (optional) }
       damageType: { "$ref": "#/$defs/DamageType", description: Type of damage (optional) }
@@ -339,7 +348,7 @@ type: object
     properties:
       type: { const: help }
       targetId:
-        "$ref": "#/$defs/CombatantId"
+        "$ref": "#/$defs/CombatantRef"
         description: ID of the combatant being helped (must match a combatant id in
           Encounter.combatants)
     required:
@@ -396,7 +405,7 @@ type: object
     - type
     additionalProperties: false
 
-  Effect:
+  EffectEvent:
     type: object
     title: Effect
     description: A magical or environmental effect
@@ -411,7 +420,7 @@ type: object
         type: array
         description: IDs of affected combatants
         items:
-          "$ref": "#/$defs/CombatantId"
+          "$ref": "#/$defs/CombatantRef"
     required:
     - name
     additionalProperties: false
@@ -447,13 +456,13 @@ type: object
     properties:
       combatants:
         type: object
-        description: Map of combatants by ID (required, non-empty)
+        description: Map of combatants by CombatantRef (Combatant type + ID)
         minProperties: 1
       initiativeOrder:
         type: array
         description: List of combatant IDs in initiative order
         items:
-          "$ref": "#/$defs/CombatantId"
+          "$ref": "#/$defs/CombatantRef"
         minItems: 1
       currentRound:
         type: integer

@@ -1,0 +1,108 @@
+---
+# Encounter editor UI schema
+# Target renderer: JSON Forms (Vue/React)
+# Data validity remains defined by campaign.schema.yaml.
+
+$schema: "https://jsonforms.io/schemas/uischema"
+$id: "https://dm-screen.local/schema/encounter.uischema.yaml"
+
+type: VerticalLayout
+elements:
+  - type: Group
+    label: Encounters
+    elements:
+      - type: Control
+        scope: "#/properties/encounters"
+        options:
+          showSortButtons: true
+          detail:
+            type: VerticalLayout
+            elements:
+              - type: Group
+                label: Encounter State
+                elements:
+                  - type: HorizontalLayout
+                    elements:
+                      - type: Control
+                        scope: "#/properties/currentRound"
+                      - type: Control
+                        scope: "#/properties/currentTurn"
+
+              - type: Group
+                label: Combatants
+                elements:
+                  - type: Control
+                    scope: "#/properties/combatants"
+                    options:
+                      # Combatants is a map object in schema; keep generic for scaffold.
+                      format: "table"
+
+              - type: Group
+                label: Initiative
+                elements:
+                  - type: Control
+                    scope: "#/properties/initiativeOrder"
+                    label: Initiative Order (Combatant IDs)
+
+              - type: Group
+                label: Rounds
+                elements:
+                  - type: Control
+                    scope: "#/properties/rounds"
+                    options:
+                      showSortButtons: true
+                      detail:
+                        type: VerticalLayout
+                        elements:
+                          - type: Group
+                            label: Round
+                            elements:
+                              - type: Control
+                                scope: "#/properties/number"
+
+                          - type: Group
+                            label: Turns
+                            elements:
+                              - type: Control
+                                scope: "#/properties/turns"
+                                options:
+                                  showSortButtons: true
+                                  detail:
+                                    type: VerticalLayout
+                                    elements:
+                                      - type: Group
+                                        label: Turn Header
+                                        elements:
+                                          - type: Control
+                                            scope: "#/properties/combatantId"
+                                            label: Combatant ID
+
+                                      - type: Group
+                                        label: Events
+                                        elements:
+                                          - type: Control
+                                            scope: "#/properties/events"
+                                            options:
+                                              showSortButtons: true
+                                              detail:
+                                                type: VerticalLayout
+                                                elements:
+                                                  - type: Control
+                                                    scope: "#/properties/type"
+
+                                                  - type: Control
+                                                    scope: "#/properties/comment"
+
+                                                  - type: Group
+                                                    label: Event Data
+                                                    elements:
+                                                      - type: Control
+                                                        scope: "#/properties/data"
+                                                        options:
+                                                          # oneOf branch picker for Action/Effect/Movement/Other
+                                                          format: "oneOf"
+                                                          # TODO: add per-branch detail layouts as needed.
+
+options:
+  showUnfocusedDescription: true
+  trim: true

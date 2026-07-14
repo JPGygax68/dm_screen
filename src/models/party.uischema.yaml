@@ -1,0 +1,52 @@
+---
+# Party editor UI schema
+# Target renderer: JSON Forms (Vue/React)
+# Data validity remains defined by campaign.schema.yaml.
+
+$schema: "https://jsonforms.io/schemas/uischema"
+$id: "https://dm-screen.local/schema/party.uischema.yaml"
+
+type: VerticalLayout
+elements:
+  - type: Group
+    label: Party
+    elements:
+      - type: Control
+        scope: "#/properties/party"
+        label: Player Characters
+        options:
+          showSortButtons: true
+          detail:
+            type: VerticalLayout
+            elements:
+              - type: Group
+                label: Identity
+                elements:
+                  - type: Control
+                    scope: "#/properties/id"
+                  - type: Control
+                    scope: "#/properties/name"
+                  - type: Control
+                    scope: "#/properties/race"
+                  - type: HorizontalLayout
+                    elements:
+                      - type: Control
+                        scope: "#/properties/classes"
+              - type: Group
+                label: Hit Points
+                elements:
+                  - type: HorizontalLayout
+                    elements:
+                      - type: Control
+                        scope: "#/properties/hitPoints"
+                      - type: Control
+                        scope: "#/properties/maxHitPoints"
+              - type: Group
+                label: Conditions
+                elements:
+                  - type: Control
+                    scope: "#/properties/conditions"
+
+options:
+  showUnfocusedDescription: true
+  trim: true

@@ -28,14 +28,14 @@ body {
   color: component-var(app-text);
 }
 
-.tracker-shell {
+.campaign-shell{
   max-width: 100%;
   min-height: 100%;
   display: grid;
   grid-template-rows: 1fr 0.5fr 4fr 4.5fr;
   grid-row-gap: 5px;
 
-  .tracker-title {
+  .campaign-title {
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -566,7 +566,7 @@ right-column {
 }
 
 @media (max-width: 900px) {
-  .tracker-shell {
+  .campaign-shell{
     .tracker {
       grid-template-columns: 1fr;
     }
