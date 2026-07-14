@@ -11,6 +11,29 @@ type: object
   NpcId: { type: string, minLength: 1, description: "Unique non-player character identifier" }
   CreatureId: { type: string, minLength: 1, description: "Unique creature identifier" } 
 
+  Campaign:
+    type: object
+    title: Campaign
+    description: The root data structure containing all campaign information
+    properties:
+      name: { type: string, description: "Campaign name" }
+      party:
+        type: array
+        description: Set of player characters
+        items:
+          "$ref": "#/$defs/PlayerCharacter"
+        uniqueItems: true
+      encounters:
+        type: array
+        description: List of encounters in the campaign
+        items:
+          "$ref": "#/$defs/Encounter"
+    required: 
+    - name
+    - party
+    - encounters
+    additionalProperties: false
+
   PlayerCharacter:
     type: object
     title: Player Character
@@ -22,8 +45,7 @@ type: object
       classes:
         type: array
         description: Character classes (recommended)
-        items:
-          type: string
+        items: { type: string }
       hitPoints:
         type: integer
         minimum: 0
@@ -453,31 +475,6 @@ type: object
     - currentRound
     - currentTurn
     - rounds
-    additionalProperties: false
-
-  Campaign:
-    type: object
-    title: Campaign
-    description: The root data structure containing all campaign information
-    properties:
-      name:
-        type: string
-        description: Campaign name
-      party:
-        type: array
-        description: Set of player characters
-        items:
-          "$ref": "#/$defs/PlayerCharacter"
-        uniqueItems: true
-      encounters:
-        type: array
-        description: List of encounters in the campaign
-        items:
-          "$ref": "#/$defs/Encounter"
-    required:
-    - name
-    - party
-    - encounters
     additionalProperties: false
 
 oneOf:

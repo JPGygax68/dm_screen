@@ -77,7 +77,7 @@
 import { computed, nextTick, onMounted, onBeforeUnmount, ref, watch } from 'vue';
 import { createActor } from 'xstate';
 import { IonApp, IonButton, IonContent } from '@ionic/vue';
-import { combatMachine } from '../combat-machine.mjs';
+import { combatMachine } from './combat-machine.mjs';
 import TurnInputPanel from './components/TurnInputPanel.vue';
 
 // TODO: must be loaded from a data source, not hardcoded

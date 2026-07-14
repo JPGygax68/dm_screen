@@ -1,5 +1,5 @@
 import { createActor } from 'xstate';
-import { combatMachine } from './combat-machine.mjs';
+import { combatMachine } from '../src/combat-machine.mjs';
 
 function snapshotSummary(snapshot) {
   return {
