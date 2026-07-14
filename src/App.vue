@@ -45,6 +45,7 @@ import YAML from 'yaml';
 import campaignSchemaRaw from './models/campaign.schema.yaml?raw';
 import campaignUiSchemaRaw from './models/campaign.uischema.yaml?raw';
 import { campaignEditorMachine } from './models/campaign-editor.machine.mjs';
+import { ionicRenderers } from './renderers/jsonforms/renderers.mjs';
 import '@jsonforms/vue-vanilla/vanilla.css';
 
 const campaignSchemaDocument = YAML.parse(campaignSchemaRaw);
@@ -55,7 +56,7 @@ const campaignSchema = {
 };
 const campaignUiSchema = YAML.parse(campaignUiSchemaRaw);
 
-const renderers = Object.freeze([...vanillaRenderers]);
+const renderers = Object.freeze([...ionicRenderers, ...vanillaRenderers]);
 const ajv = new Ajv2020({
   allErrors: true,
   strict: false

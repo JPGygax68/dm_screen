@@ -14,8 +14,12 @@ elements:
     label: Campaign
     elements:
       - type: Control
-        label: Campaign Name
+        #label: Campaign Name
         scope: "#/properties/name"
+      - type: Control
+        #label: Campaign Description
+        scope: "#/properties/description"
+        options: { multi: true, rows: 5 }
 
 options:
   showUnfocusedDescription: true
