@@ -1,0 +1,16 @@
+---
+"$schema": https://json-schema.org/draft/2020-12/schema
+"$id": https://dm-screen.local/schema/ui.schema.yaml
+
+title: DM Screen Application Data Schema
+description: Root can be either a Campaign or a single Encounter
+type: object
+
+Campaigns:
+  type: array
+  description: Campaigns available to the DM Screen application
+  items:
+    "$ref": "#/$defs/Campaign"
+  #minItems: 0
+
+"$ref": "#/$defs/Campaigns"

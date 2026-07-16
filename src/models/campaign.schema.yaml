@@ -2,8 +2,8 @@
 "$schema": https://json-schema.org/draft/2020-12/schema
 "$id": https://dm-screen.local/schema/ui.schema.yaml
 
-title: DM Screen Application Data Schema
-description: Root can be either a Campaign or a single Encounter
+title: Campaign Data Schema
+description: Describes a TTRPG (DnD) campaign.
 type: object
 
 "$defs":

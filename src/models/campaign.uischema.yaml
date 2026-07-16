@@ -6,19 +6,25 @@
 
 $id: "https://dm-screen.local/schema/campaign.uischema.yaml"
 
-# Root resolves to Campaign.
-type: VerticalLayout
+# Root resolves to Campaign (for now)
+type: Group
+label: Campaign
 elements:
-  - type: Group
-    label: Campaign
-    elements:
-      - type: Control
-        #label: Campaign Name
-        scope: "#/properties/name"
-      - type: Control
-        #label: Campaign Description
-        scope: "#/properties/description"
-        options: { multi: true, rows: 5 }
+  - type: Control
+    label: Campaign Name
+    scope: "#/properties/name"
+  - type: Control
+    label: Campaign description
+    scope: "#/properties/description"
+    options: { multi: true, rows: 5 }
+
+x-actions:
+  - id: back-to-campaign-list
+    command: nav.backToCampaignList
+    label: Back
+    placement: header-left
+    style: secondary
+    when: always
 
 options:
   showUnfocusedDescription: true

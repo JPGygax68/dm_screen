@@ -1,8 +1,29 @@
 <template lang="pug">
 
 ion-app
+
   ion-content(class="ion-padding app-content" fullscreen)
-    main.campaign-shell.campaign-editor-shell
+
+    main.campaign-shell
+      ion-breadcrumbs.breadcrumbs
+        ion-breadcrumb(
+          v-for="(crumb, index) in breadcrumbs"
+          :key="index"
+          :href="crumb.href"
+        )
+          | {{ crumb.label }}
+
+      section.status-bar
+        div
+          strong Slice:
+          |  {{ sliceName }}
+        div
+          strong Renderer:
+          |  {{ activeRendererLabel }}
+        div
+          strong Validation errors:
+          |  {{ formErrorCount }}
+
       header.campaign-title
         div
           h1 Campaign Editor
@@ -11,50 +32,81 @@ ion-app
           ion-button(fill="outline" size="small" @click="send({ type: 'RESET_CAMPAIGN' })")
             | Reset
 
-      section.status-bar
-        div
-          strong Slice:
-          |  campaign
-        div
-          strong Validation errors:
-          |  {{ formErrorCount }}
-
       section.input-panel.open
-        JsonForms(
-          :data="snapshot.context.campaignData"
-          :schema="campaignSchema"
-          :uischema="campaignUiSchema"
-          :renderers="renderers"
-          :ajv="ajv"
-          @change="onFormChange"
-        )
+        template(v-if="useGeneratedRenderer")
+          ion-note(v-if="campaignFormWarnings.length" color="warning")
+            | Form spec warnings: {{ campaignFormWarnings.join(' | ') }}
+          CampaignFormGenerated(
+            :data="snapshot.context.campaignData"
+            :error-by-path="errorsByPath"
+            @update-field="onSpecFieldUpdate"
+          )
+        template(v-else-if="useFormSpecRenderer")
+          ion-note(v-if="campaignFormWarnings.length" color="warning")
+            | Form spec warnings: {{ campaignFormWarnings.join(' | ') }}
+          FormSpecNode(
+            :node="campaignFormSpec.form"
+            :data="snapshot.context.campaignData"
+            :error-by-path="errorsByPath"
+            @update-field="onSpecFieldUpdate"
+          )
+        template(v-else)
+          JsonForms(
+            :data="snapshot.context.campaignData"
+            :schema="campaignSchema"
+            :uischema="campaignUiSchema"
+            :renderers="renderers"
+            :ajv="ajv"
+            @change="onFormChange"
+          )
 
 </template>
 
 <script setup>
 import { computed, onMounted, onBeforeUnmount, ref } from 'vue';
 import { createActor } from 'xstate';
-import { IonApp, IonButton, IonContent } from '@ionic/vue';
+import { IonApp, IonBreadcrumbs, IonBreadcrumb, IonButton, IonContent, IonNote } from '@ionic/vue';
 import { JsonForms } from '@jsonforms/vue';
 import { vanillaRenderers } from '@jsonforms/vue-vanilla';
 import Ajv2020 from 'ajv/dist/2020';
 import campaignSchema from './generated/models/campaign.schema.json';
 import campaignUiSchema from './generated/models/campaign.uischema.json';
+import campaignFormSpec from './generated/forms/campaign.form-spec.json';
+import CampaignFormGenerated from './generated/forms/CampaignForm.generated.vue';
 import { campaignEditorMachine } from './models/campaign-editor.machine.mjs';
 import { ionicRenderers } from './renderers/jsonforms/renderers.mjs';
+import FormSpecNode from './components/FormSpecNode.vue';
 import '@jsonforms/vue-vanilla/vanilla.css';
+
+const sliceName = 'campaign';
+
+const breadcrumbs = computed(() => [
+  { label: 'Home', href: '/' },
+  { label: 'Campaign Editor', href: '/campaign-editor' }
+]);
 
 const renderers = Object.freeze([...ionicRenderers, ...vanillaRenderers]);
 const ajv = new Ajv2020({
   allErrors: true,
   strict: false
 });
+const validateCampaign = ajv.compile(campaignSchema);
+
+const selectedRenderer =
+  new URLSearchParams(window.location.search).get('renderer') || import.meta.env.VITE_FORM_RENDERER;
+const useFormSpecRenderer = selectedRenderer === 'spec';
+const useGeneratedRenderer = selectedRenderer === 'generated';
+const activeRendererLabel = useGeneratedRenderer
+  ? 'generated-vue'
+  : (useFormSpecRenderer ? 'form-spec' : 'jsonforms');
+const campaignFormWarnings = Array.isArray(campaignFormSpec.warnings) ? campaignFormSpec.warnings : [];
 
 const actor = createActor(campaignEditorMachine);
 const snapshot = ref(actor.getSnapshot());
 let subscription;
 
 const formErrorCount = computed(() => snapshot.value.context.formErrors.length);
+const errorsByPath = computed(() => mapErrorsByPath(snapshot.value.context.formErrors));
 
 function send(event) {
   actor.send(event);
@@ -62,6 +114,76 @@ function send(event) {
 
 function onFormChange({ data, errors }) {
   send({ type: 'FORM_CHANGED', data, errors });
+}
+
+function onSpecFieldUpdate({ path, value }) {
+  if (!path || typeof path !== 'string') {
+    return;
+  }
+
+  const nextData = setValueAtPath(snapshot.value.context.campaignData, path, value);
+  const valid = validateCampaign(nextData);
+  send({
+    type: 'FORM_CHANGED',
+    data: nextData,
+    errors: valid ? [] : (validateCampaign.errors || [])
+  });
+}
+
+function setValueAtPath(source, dataPath, value) {
+  const clone = structuredClone(source || {});
+  const segments = dataPath.split('.').filter(Boolean);
+  if (segments.length === 0) {
+    return clone;
+  }
+
+  let current = clone;
+  for (let i = 0; i < segments.length - 1; i += 1) {
+    const key = segments[i];
+    if (!current[key] || typeof current[key] !== 'object') {
+      current[key] = {};
+    }
+    current = current[key];
+  }
+
+  current[segments[segments.length - 1]] = value;
+  return clone;
+}
+
+function mapErrorsByPath(errors) {
+  const mapped = {};
+  if (!Array.isArray(errors)) {
+    return mapped;
+  }
+
+  for (const error of errors) {
+    const path = instancePathToDataPath(error?.instancePath);
+    const message = error?.message || 'Invalid value';
+    if (!path) {
+      continue;
+    }
+
+    if (mapped[path]) {
+      mapped[path] = `${mapped[path]} | ${message}`;
+    } else {
+      mapped[path] = message;
+    }
+  }
+
+  return mapped;
+}
+
+function instancePathToDataPath(instancePath) {
+  if (typeof instancePath !== 'string' || instancePath.length === 0) {
+    return '';
+  }
+
+  return instancePath
+    .replace(/^\//, '')
+    .split('/')
+    .filter(Boolean)
+    .map((segment) => segment.replace(/~1/g, '/').replace(/~0/g, '~'))
+    .join('.');
 }
 
 onMounted(() => {
