@@ -3,6 +3,9 @@
   "version": "1.0.0",
   "description": "",
   "type": "module",
+  "imports": {
+    "#lib/*": "./lib/*"
+  },
   "scripts": {
     "generate:models": "node scripts/generate-model-json.mjs",
     "predev": "npm run generate:models",
