@@ -4,7 +4,7 @@ ion-app
 
   ion-content(class="ion-padding app-content" fullscreen)
 
-    main.campaign-shell
+    main.ui-shell
       ion-breadcrumbs.breadcrumbs
         ion-breadcrumb(
           v-for="(crumb, index) in breadcrumbs"
@@ -24,41 +24,42 @@ ion-app
           strong Validation errors:
           |  {{ formErrorCount }}
 
-      header.campaign-title
-        div
-          h1 Campaign Editor
-          p Campaign slice only (name) with schema-driven rendering.
-        div.header-actions
-          ion-button(fill="outline" size="small" @click="send({ type: 'RESET_CAMPAIGN' })")
-            | Reset
+      div.campaign
+        header.campaign-title
+          div
+            h1 Campaign Editor
+            p Campaign slice only (name) with schema-driven rendering.
+          div.header-actions
+            ion-button(fill="outline" size="small" @click="send({ type: 'RESET_CAMPAIGN' })")
+              | Reset
 
-      section.input-panel.open
-        template(v-if="useGeneratedRenderer")
-          ion-note(v-if="campaignFormWarnings.length" color="warning")
-            | Form spec warnings: {{ campaignFormWarnings.join(' | ') }}
-          CampaignForm(
-            :data="snapshot.context.campaignData"
-            :error-by-path="errorsByPath"
-            @update-field="onSpecFieldUpdate"
-          )
-        template(v-else-if="useFormSpecRenderer")
-          ion-note(v-if="campaignFormWarnings.length" color="warning")
-            | Form spec warnings: {{ campaignFormWarnings.join(' | ') }}
-          FormSpecNode(
-            :node="campaignFormSpec.form"
-            :data="snapshot.context.campaignData"
-            :error-by-path="errorsByPath"
-            @update-field="onSpecFieldUpdate"
-          )
-        template(v-else)
-          JsonForms(
-            :data="snapshot.context.campaignData"
-            :schema="campaignSchema"
-            :uischema="campaignUiSchema"
-            :renderers="renderers"
-            :ajv="ajv"
-            @change="onFormChange"
-          )
+        section.input-panel.open
+          template(v-if="useGeneratedRenderer")
+            ion-note(v-if="campaignFormWarnings.length" color="warning")
+              | Form spec warnings: {{ campaignFormWarnings.join(' | ') }}
+            CampaignForm(
+              :data="snapshot.context.campaignData"
+              :error-by-path="errorsByPath"
+              @update-field="onSpecFieldUpdate"
+            )
+          template(v-else-if="useFormSpecRenderer")
+            ion-note(v-if="campaignFormWarnings.length" color="warning")
+              | Form spec warnings: {{ campaignFormWarnings.join(' | ') }}
+            FormSpecNode(
+              :node="campaignFormSpec.form"
+              :data="snapshot.context.campaignData"
+              :error-by-path="errorsByPath"
+              @update-field="onSpecFieldUpdate"
+            )
+          template(v-else)
+            JsonForms(
+              :data="snapshot.context.campaignData"
+              :schema="campaignSchema"
+              :uischema="campaignUiSchema"
+              :renderers="renderers"
+              :ajv="ajv"
+              @change="onFormChange"
+            )
 
 </template>
 

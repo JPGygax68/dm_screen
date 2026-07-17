@@ -6,7 +6,7 @@ title: DM Screen Application Data Schema
 description: Root can be either a Campaign or a single Encounter
 type: object
 
-Campaigns:
+campaigns:
   type: array
   description: Campaigns available to the DM Screen application
   items:
