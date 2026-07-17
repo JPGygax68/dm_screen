@@ -8,18 +8,13 @@ const configFile = fileURLToPath(import.meta.url);
 const repoRoot = path.dirname(configFile);
 const modelsDir = path.join(repoRoot, 'src', 'models');
 
-function generateModels() {
-  execFileSync(process.execPath, [path.join('scripts', 'generate-model-json.mjs')], {
-    cwd: repoRoot,
-    stdio: 'inherit'
-  });
-}
-
-function regenerateOnYamlChange() {
+/** Equivalent to the "generate:models" NPM script, but runs automatically when a model YAML file changes during development.
+ */
+function regenerateModels() {
   let queued = null;
 
   return {
-    name: 'regenerate-models-on-yaml-change',
+    name: 'regenerate-models',
     apply: 'serve',
     configureServer(server) {
       server.watcher.add(path.join(modelsDir, '**/*.yaml'));
@@ -33,7 +28,10 @@ function regenerateOnYamlChange() {
           queued = null;
 
           try {
-            generateModels();
+            execFileSync(process.execPath, [path.join('scripts', 'generate-model-json.mjs')], {
+              cwd: repoRoot,
+              stdio: 'inherit'
+            });
             server.ws.send({ type: 'full-reload' });
           } catch (error) {
             console.error('[vite] Failed to regenerate model artifacts:', error);
@@ -58,7 +56,7 @@ function regenerateOnYamlChange() {
 
 export default defineConfig({
   root: 'src',
-  plugins: [vue(), regenerateOnYamlChange()],
+  plugins: [vue(), regenerateModels()],
   build: {
     outDir: '../dist',
     emptyOutDir: true
