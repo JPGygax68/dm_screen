@@ -35,27 +35,110 @@ const fieldList = collectFields(normalizedRoot);
 const formName = 'Campaign';
 
 const formSpec = generateFormSpec(formName, schema, uiSchema, normalizedRoot, fieldList, formWarnings);
+writeFormSpecToFile(formName, formSpec);
 
-const formSpecOutput = path.join(repoRoot, `src/generated/forms/${slugify(formName)}.form-spec.json`);
-fs.mkdirSync(path.dirname(formSpecOutput), { recursive: true });
-fs.writeFileSync(formSpecOutput, `${JSON.stringify(formSpec, null, 2)}\n`, 'utf8');
-console.log(`Generated ${path.relative(repoRoot, formSpecOutput)}`);
+const generatedVueComponent = generateVueComponent(formName, formSpec);
+writeComponentSourceToFile(`${formName}Form`, generatedVueComponent, formWarnings);
 
-const generatedTemplateLines = renderGeneratedNode(formSpec.form, 0);
-const generatedVueComponent = `<template lang="pug">\n${generatedTemplateLines.join('\n')}\n</template>\n\n<script setup>\nimport {\n  IonCard,\n  IonCardContent,\n  IonCardHeader,\n  IonCardTitle,\n  IonInput,\n  IonItem,\n  IonLabel,\n  IonNote,\n  IonTextarea\n} from '@ionic/vue';\n\nconst props = defineProps({\n  data: {\n    type: Object,\n    required: true\n  },\n  errorByPath: {\n    type: Object,\n    default: () => ({})\n  }\n});\n\nconst emit = defineEmits(['update-field']);\n\nfunction emitFieldUpdate(path, event) {\n  emit('update-field', {\n    path,\n    value: event?.detail?.value ?? ''\n  });\n}\n\nfunction getValueAtPath(target, dataPath) {\n  if (!dataPath || typeof dataPath !== 'string') {\n    return '';\n  }\n\n  const segments = dataPath.split('.').filter(Boolean);\n  let current = target;\n\n  for (const segment of segments) {\n    if (current == null || typeof current !== 'object') {\n      return '';\n    }\n    current = current[segment];\n  }\n\n  return current == null ? '' : current;\n}\n</script>\n`;
+// Main functions -----------------------------------
 
-const generatedComponentOutput = path.join(
-  repoRoot,
-  `src/generated/forms/${slugify(formName)}.generated.vue`
-);
-fs.mkdirSync(path.dirname(generatedComponentOutput), { recursive: true });
-fs.writeFileSync(generatedComponentOutput, generatedVueComponent, 'utf8');
-console.log(`Generated ${path.relative(repoRoot, generatedComponentOutput)}`);
+function writeFormSpecToFile(formName, formSpec) {
+  console.log(`Writing generated form spec for form "${formName}"...`);
+  const formSpecOutput = path.join(repoRoot, `src/generated/forms/${slugify(formName)}.form-spec.json`);
+  fs.mkdirSync(path.dirname(formSpecOutput), { recursive: true });
+  fs.writeFileSync(formSpecOutput, `${JSON.stringify(formSpec, null, 2)}\n`, 'utf8');
+  console.log(`Wrote ${path.relative(repoRoot, formSpecOutput)}`);
+}
 
-if (formWarnings.length > 0) {
-  console.warn('Form spec warnings:');
-  for (const warning of formWarnings) {
-    console.warn(`- ${warning}`);
+/**
+ * Generates a Vue component based on the provided form specification.
+ * @param {Object} formSpec - The form specification object.
+ * @returns {string} - The generated Vue component source code.
+ */
+function generateVueComponent(formName, formSpec) {
+  const { schema, uiSchema, normalizedRoot, fieldList, formWarnings } = formSpec;
+
+  const templateLines = renderGeneratedNode(formSpec.form, 0);
+  const componentSource = `
+  <template lang="pug">${templateLines.join('\n')}
+  </template>
+  <script setup>
+  import {
+    IonCard,
+    IonCardContent,
+    IonCardHeader,
+    IonCardTitle,
+    IonInput,
+    IonItem,
+    IonLabel,
+    IonNote,
+    IonTextarea
+  } from '@ionic/vue';
+  
+  const props = defineProps({
+    data: {
+      type: Object,
+      required: true
+    },
+    errorByPath: {
+      type: Object,
+      default: () => ({})
+    }
+  });
+  
+  const emit = defineEmits(['update-field']);
+  
+  function emitFieldUpdate(path, event) {
+    emit('update-field', {
+      path,
+      value: event?.detail?.value ?? ''
+    });
+  }
+    
+  function getValueAtPath(target, dataPath) {
+    if (!dataPath || typeof dataPath !== 'string') {
+      return '';
+    }
+      
+    const segments = dataPath.split('.').filter(Boolean);
+    let current = target;
+    for (const segment of segments) {
+      if (current == null || typeof current !== 'object') {
+        return '';
+      }
+      current = current[segment];
+    }
+      
+    return current == null ? '' : current;
+  }
+</script>
+`;
+
+  return componentSource;
+}
+
+/**
+ * Writes (Vue) component source code to a file.
+ * @param {string} fileName - The name of the form file (without extension).
+ * @param {string} generatedVueComponent - The generated Vue component source code.
+ * @param {string[]} formWarnings - Array of form warnings to display.
+ */
+function writeComponentSourceToFile(fileName, generatedVueComponent, formWarnings) {
+  console.log(`Writing generated component source to file "${fileName}"...`);
+
+  const generatedComponentOutput = path.join(
+    repoRoot,
+    `src/generated/forms/${fileName}.vue`
+  );
+  fs.mkdirSync(path.dirname(generatedComponentOutput), { recursive: true });
+  fs.writeFileSync(generatedComponentOutput, generatedVueComponent, 'utf8');
+  console.log(`Generated ${path.relative(repoRoot, generatedComponentOutput)}`);
+
+  if (formWarnings.length > 0) {
+    console.warn('Form spec warnings:');
+    for (const warning of formWarnings) {
+      console.warn(`- ${warning}`);
+    }
   }
 }
 

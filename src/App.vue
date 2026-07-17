@@ -36,7 +36,7 @@ ion-app
         template(v-if="useGeneratedRenderer")
           ion-note(v-if="campaignFormWarnings.length" color="warning")
             | Form spec warnings: {{ campaignFormWarnings.join(' | ') }}
-          CampaignFormGenerated(
+          CampaignForm(
             :data="snapshot.context.campaignData"
             :error-by-path="errorsByPath"
             @update-field="onSpecFieldUpdate"
@@ -72,7 +72,7 @@ import Ajv2020 from 'ajv/dist/2020';
 import campaignSchema from './generated/models/campaign.schema.json';
 import campaignUiSchema from './generated/models/campaign.uischema.json';
 import campaignFormSpec from './generated/forms/campaign.form-spec.json';
-import CampaignFormGenerated from './generated/forms/CampaignForm.generated.vue';
+import CampaignForm from './generated/forms/CampaignForm.vue';
 import { campaignEditorMachine } from './models/campaign-editor.machine.mjs';
 import { ionicRenderers } from './renderers/jsonforms/renderers.mjs';
 import FormSpecNode from './components/FormSpecNode.vue';
