@@ -7,16 +7,17 @@
 $id: "https://dm-screen.local/schema/campaign.uischema.yaml"
 
 # Root resolves to Campaign (for now)
-type: Group
-label: Campaign
+type: VerticalLayout
 elements:
-  - type: Control
-    label: Campaign Name
-    scope: "#/properties/name"
-  - type: Control
-    label: Campaign description
-    scope: "#/properties/description"
-    options: { multi: true, rows: 5 }
+  - type: VerticalLayout
+    elements:
+      - type: Control
+        label: Campaign Name
+        scope: "#/properties/name"
+      - type: Control
+        label: Campaign description
+        scope: "#/properties/description"
+        options: { multi: true, rows: 5 }
 
 x-actions:
   - id: back-to-campaign-list

@@ -13,8 +13,7 @@ const repoRoot = path.resolve(__dirname, '..');
 // Convert all YAML model files to JSON and write them to the "generated" directory
 
 const yamlSchemaFiles = [
-  'dmscreen.uischema',
-  'campaign.schema',
+  'data.schema',
   'campaign.uischema'
 ];
 
@@ -22,7 +21,7 @@ const schemas = await parseYamlSchemaFiles(yamlSchemaFiles, path.join(repoRoot, 
 console.log(`Schemas: ${Object.keys(schemas).join(', ')}`);
 await writeSchemasAsJson(schemas, path.join(repoRoot, 'src', 'generated', 'models'));
 
-const schema = schemas['campaign.schema'];
+const schema = schemas['dmscreen.schema'];
 const uiSchema = schemas['campaign.uischema'];
 
 const rootSchema = schema?.$defs?.Campaign ?? schema;

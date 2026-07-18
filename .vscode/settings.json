@@ -1,15 +1,11 @@
 {
-    "files.associations": {
-        "*.vue": "vue",
-        "*.pug": "pug"
-    },
     "editor.semanticHighlighting.enabled": true,
-    "editor.foldingStrategy": "auto",
-    "editor.language.colorizedBracketPairs": [],
     "[vue]": {
-        "editor.foldingStrategy": "indentation"
+        "editor.foldingStrategy": "indentation",
+        "editor.showFoldingControls": "always"
     },
     "[pug]": {
         "editor.foldingStrategy": "indentation"
-    }
+    },
+    "editor.foldingStrategy": "auto"
 }

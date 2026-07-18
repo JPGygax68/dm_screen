@@ -1,0 +1,16 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "type": "chrome",
+      "request": "launch",
+      "name": "Launch App with DevTools",
+      "url": "http://localhost:5173/", 
+      "webRoot": "${workspaceFolder}",
+      "runtimeArgs": [
+        "--auto-open-devtools-for-tabs",
+        "--user-data-dir=${workspaceFolder}/.vscode/chrome-session"
+      ]
+    }
+  ]
+}

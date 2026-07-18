@@ -70,7 +70,7 @@ import { IonApp, IonBreadcrumbs, IonBreadcrumb, IonButton, IonContent, IonNote }
 import { JsonForms } from '@jsonforms/vue';
 import { vanillaRenderers } from '@jsonforms/vue-vanilla';
 import Ajv2020 from 'ajv/dist/2020';
-import campaignSchema from './generated/models/campaign.schema.json';
+import dataSchema from './generated/models/data.schema.json';
 import campaignUiSchema from './generated/models/campaign.uischema.json';
 import campaignFormSpec from './generated/forms/campaign.form-spec.json';
 import CampaignForm from './generated/forms/CampaignForm.vue';
@@ -91,6 +91,9 @@ const ajv = new Ajv2020({
   allErrors: true,
   strict: false
 });
+
+// Extract the Campaign schema from the data schema and include all definitions for validation
+const campaignSchema = { ...dataSchema.$defs.Campaign, $defs: dataSchema.$defs };
 const validateCampaign = ajv.compile(campaignSchema);
 
 const selectedRenderer =
