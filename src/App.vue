@@ -17,9 +17,9 @@ ion-app
         div
           strong Slice:
           |  {{ sliceName }}
-        div
-          strong Validation errors:
-          |  {{ formErrorCount }}
+        //- div
+        //-   strong Validation errors:
+        //-   |  {{ formErrorCount }}
 
       //- div.campaign
       //-   header.campaign-title
@@ -31,9 +31,10 @@ ion-app
       //-         | Reset
 
       JsonForms(
-        :schema="campaignSchema"
-        :uischema="campaignUiSchema"
+        :schema="topLevelSchema"
+        :uischema="topLevelUiSchema"
         :renderers="renderers"
+        :ajv="ajv"
         @change="store.update"
       )
       
@@ -60,11 +61,9 @@ import '@jsonforms/vue-vanilla/vanilla.css';
 
 const store = useDmScreenStore();
 
-const sliceName = 'campaign';
-
 const breadcrumbs = computed(() => [
   { label: 'Home', href: '/' },
-  { label: 'Campaign Editor', href: '/campaign-editor' }
+  { label: 'Campaign List', href: '/campaign-list' }
 ]);
 
 const ajv = new Ajv2020({
@@ -72,106 +71,11 @@ const ajv = new Ajv2020({
   strict: false
 });
 
-// Extract the Campaign schema from the data schema and include all definitions for validation
-const campaignSchema = { ...dataSchema.$defs.Campaign, $defs: dataSchema.$defs };
-const validateCampaign = ajv.compile(campaignSchema);
+const sliceName = 'campaigns';
 
+const topLevelSchema = { ...dataSchema.$defs.Campaigns, $defs: dataSchema.$defs };
+const topLevelUiSchema = null;
+const validateData = ajv.compile(topLevelSchema);
 const renderers = Object.freeze([...ionicRenderers, ...vanillaRenderers]);
 
-const actor = createActor(campaignEditorMachine);
-const snapshot = ref(actor.getSnapshot());
-let subscription;
-
-const formErrorCount = computed(() => snapshot.value.context.formErrors.length);
-const errorsByPath = computed(() => mapErrorsByPath(snapshot.value.context.formErrors));
-
-function send(event) {
-  actor.send(event);
-}
-
-function onFormChange({ data, errors }) {
-  send({ type: 'FORM_CHANGED', data, errors });
-}
-
-function onSpecFieldUpdate({ path, value }) {
-  if (!path || typeof path !== 'string') {
-    return;
-  }
-
-  const nextData = setValueAtPath(snapshot.value.context.campaignData, path, value);
-  const valid = validateCampaign(nextData);
-  send({
-    type: 'FORM_CHANGED',
-    data: nextData,
-    errors: valid ? [] : (validateCampaign.errors || [])
-  });
-}
-
-function setValueAtPath(source, dataPath, value) {
-  const clone = structuredClone(source || {});
-  const segments = dataPath.split('.').filter(Boolean);
-  if (segments.length === 0) {
-    return clone;
-  }
-
-  let current = clone;
-  for (let i = 0; i < segments.length - 1; i += 1) {
-    const key = segments[i];
-    if (!current[key] || typeof current[key] !== 'object') {
-      current[key] = {};
-    }
-    current = current[key];
-  }
-
-  current[segments[segments.length - 1]] = value;
-  return clone;
-}
-
-function mapErrorsByPath(errors) {
-  const mapped = {};
-  if (!Array.isArray(errors)) {
-    return mapped;
-  }
-
-  for (const error of errors) {
-    const path = instancePathToDataPath(error?.instancePath);
-    const message = error?.message || 'Invalid value';
-    if (!path) {
-      continue;
-    }
-
-    if (mapped[path]) {
-      mapped[path] = `${mapped[path]} | ${message}`;
-    } else {
-      mapped[path] = message;
-    }
-  }
-
-  return mapped;
-}
-
-function instancePathToDataPath(instancePath) {
-  if (typeof instancePath !== 'string' || instancePath.length === 0) {
-    return '';
-  }
-
-  return instancePath
-    .replace(/^\//, '')
-    .split('/')
-    .filter(Boolean)
-    .map((segment) => segment.replace(/~1/g, '/').replace(/~0/g, '~'))
-    .join('.');
-}
-
-onMounted(() => {
-  actor.start();
-  subscription = actor.subscribe((next) => {
-    snapshot.value = next;
-  });
-});
-
-onBeforeUnmount(() => {
-  if (subscription) subscription.unsubscribe();
-  actor.stop();
-});
 </script>

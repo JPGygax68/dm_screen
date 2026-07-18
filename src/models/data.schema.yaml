@@ -11,6 +11,13 @@ type: object
   NpcId: { type: string, minLength: 1, description: "Unique non-player character identifier" }
   CreatureId: { type: string, minLength: 1, description: "Unique creature identifier" } 
 
+  Campaigns:
+    type: array
+    description: List of campaigns
+    items:
+      "$ref": "#/$defs/Campaign"
+    uniqueItems: true
+
   Campaign:
     type: object
     title: Campaign
@@ -487,4 +494,4 @@ type: object
     - rounds
     additionalProperties: false
 
-"$ref": "#/$defs/Campaign"
+"$ref": "#/$defs/Campaigns"
