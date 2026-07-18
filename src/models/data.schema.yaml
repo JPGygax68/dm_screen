@@ -25,21 +25,21 @@ type: object
     properties:
       name: { type: string, description: "Campaign name" }
       description: { type: string, description: "Campaign description (optional)", optional: true }
-      party:
-        type: array
-        description: Set of player characters
-        items:
-          "$ref": "#/$defs/PlayerCharacter"
-        uniqueItems: true
-      encounters:
-        type: array
-        description: List of encounters in the campaign
-        items:
-          "$ref": "#/$defs/Encounter"
+      # party:
+      #   type: array
+      #   description: Set of player characters
+      #   items:
+      #     "$ref": "#/$defs/PlayerCharacter"
+      #   uniqueItems: true
+      # encounters:
+      #   type: array
+      #   description: List of encounters in the campaign
+      #   items:
+      #     "$ref": "#/$defs/Encounter"
     required: 
     - name
-    - party
-    - encounters
+    # - party
+    # - encounters
     additionalProperties: false
 
   PlayerCharacter:

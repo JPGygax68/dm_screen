@@ -31,6 +31,7 @@ ion-app
       //-         | Reset
 
       JsonForms(
+        :data="store.data"
         :schema="topLevelSchema"
         :uischema="topLevelUiSchema"
         :renderers="renderers"
@@ -59,6 +60,12 @@ import { campaignEditorMachine } from './models/campaign-editor.machine.mjs';
 import { ionicRenderers } from './renderers/jsonforms/renderers.mjs';
 import '@jsonforms/vue-vanilla/vanilla.css';
 
+const ajv = new Ajv2020({
+  allErrors: true,
+  strict: false
+});
+ajv.addSchema(dataSchema, 'dataSchema');
+
 const store = useDmScreenStore();
 
 const breadcrumbs = computed(() => [
@@ -66,15 +73,14 @@ const breadcrumbs = computed(() => [
   { label: 'Campaign List', href: '/campaign-list' }
 ]);
 
-const ajv = new Ajv2020({
-  allErrors: true,
-  strict: false
-});
-
 const sliceName = 'campaigns';
 
 const topLevelSchema = { ...dataSchema.$defs.Campaigns, $defs: dataSchema.$defs };
-const topLevelUiSchema = null;
+console.log('Top-level schema:', topLevelSchema);
+const topLevelUiSchema = {
+  type: 'Control',
+  scope: '#/$defs/Campaigns'
+};
 const validateData = ajv.compile(topLevelSchema);
 const renderers = Object.freeze([...ionicRenderers, ...vanillaRenderers]);
 
