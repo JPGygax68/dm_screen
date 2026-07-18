@@ -12,6 +12,8 @@ import '@ionic/vue/css/text-transformation.css';
 import '@ionic/vue/css/flex-utils.css';
 import '@ionic/vue/css/display.css';
 
+import { createPinia } from 'pinia';
+
 import './styles/main.scss';
 import App from './App.vue';
 
@@ -21,4 +23,4 @@ const storedTheme = localStorage.getItem(THEME_STORAGE_KEY);
 const initialTheme = VALID_THEMES.has(storedTheme) ? storedTheme : 'auto';
 document.documentElement.dataset.theme = initialTheme;
 
-createApp(App).use(IonicVue).mount('#app');
+createApp(App).use(IonicVue).use(createPinia()).mount('#app');

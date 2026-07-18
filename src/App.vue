@@ -18,66 +18,47 @@ ion-app
           strong Slice:
           |  {{ sliceName }}
         div
-          strong Renderer:
-          |  {{ activeRendererLabel }}
-        div
           strong Validation errors:
           |  {{ formErrorCount }}
 
-      div.campaign
-        header.campaign-title
-          div
-            h1 Campaign Editor
-            p Campaign slice only (name) with schema-driven rendering.
-          div.header-actions
-            ion-button(fill="outline" size="small" @click="send({ type: 'RESET_CAMPAIGN' })")
-              | Reset
+      //- div.campaign
+      //-   header.campaign-title
+      //-     div
+      //-       h1 Campaign Editor
+      //-       p Campaign slice only (name) with schema-driven rendering.
+      //-     div.header-actions
+      //-       ion-button(fill="outline" size="small" @click="send({ type: 'RESET_CAMPAIGN' })")
+      //-         | Reset
 
-        section.input-panel.open
-          template(v-if="useGeneratedRenderer")
-            ion-note(v-if="campaignFormWarnings.length" color="warning")
-              | Form spec warnings: {{ campaignFormWarnings.join(' | ') }}
-            CampaignForm(
-              :data="snapshot.context.campaignData"
-              :error-by-path="errorsByPath"
-              @update-field="onSpecFieldUpdate"
-            )
-          template(v-else-if="useFormSpecRenderer")
-            ion-note(v-if="campaignFormWarnings.length" color="warning")
-              | Form spec warnings: {{ campaignFormWarnings.join(' | ') }}
-            FormSpecNode(
-              :node="campaignFormSpec.form"
-              :data="snapshot.context.campaignData"
-              :error-by-path="errorsByPath"
-              @update-field="onSpecFieldUpdate"
-            )
-          template(v-else)
-            JsonForms(
-              :data="snapshot.context.campaignData"
-              :schema="campaignSchema"
-              :uischema="campaignUiSchema"
-              :renderers="renderers"
-              :ajv="ajv"
-              @change="onFormChange"
-            )
-
+      JsonForms(
+        :schema="campaignSchema"
+        :uischema="campaignUiSchema"
+        :renderers="renderers"
+        @change="store.update"
+      )
+      
 </template>
 
 <script setup>
 import { computed, onMounted, onBeforeUnmount, ref } from 'vue';
+import { DispatchRenderer, rendererProps, useJsonFormsLayout } from '@jsonforms/vue';
 import { createActor } from 'xstate';
 import { IonApp, IonBreadcrumbs, IonBreadcrumb, IonButton, IonContent, IonNote } from '@ionic/vue';
 import { JsonForms } from '@jsonforms/vue';
 import { vanillaRenderers } from '@jsonforms/vue-vanilla';
 import Ajv2020 from 'ajv/dist/2020';
+
+import useDmScreenStore from './stores/dmScreenStore';
+
 import dataSchema from './generated/models/data.schema.json';
 import campaignUiSchema from './generated/models/campaign.uischema.json';
 import campaignFormSpec from './generated/forms/campaign.form-spec.json';
 import CampaignForm from './generated/forms/CampaignForm.vue';
 import { campaignEditorMachine } from './models/campaign-editor.machine.mjs';
 import { ionicRenderers } from './renderers/jsonforms/renderers.mjs';
-import FormSpecNode from './components/FormSpecNode.vue';
 import '@jsonforms/vue-vanilla/vanilla.css';
+
+const store = useDmScreenStore();
 
 const sliceName = 'campaign';
 
@@ -86,7 +67,6 @@ const breadcrumbs = computed(() => [
   { label: 'Campaign Editor', href: '/campaign-editor' }
 ]);
 
-const renderers = Object.freeze([...ionicRenderers, ...vanillaRenderers]);
 const ajv = new Ajv2020({
   allErrors: true,
   strict: false
@@ -96,14 +76,7 @@ const ajv = new Ajv2020({
 const campaignSchema = { ...dataSchema.$defs.Campaign, $defs: dataSchema.$defs };
 const validateCampaign = ajv.compile(campaignSchema);
 
-const selectedRenderer =
-  new URLSearchParams(window.location.search).get('renderer') || import.meta.env.VITE_FORM_RENDERER;
-const useFormSpecRenderer = selectedRenderer === 'spec';
-const useGeneratedRenderer = selectedRenderer === 'generated';
-const activeRendererLabel = useGeneratedRenderer
-  ? 'generated-vue'
-  : (useFormSpecRenderer ? 'form-spec' : 'jsonforms');
-const campaignFormWarnings = Array.isArray(campaignFormSpec.warnings) ? campaignFormSpec.warnings : [];
+const renderers = Object.freeze([...ionicRenderers, ...vanillaRenderers]);
 
 const actor = createActor(campaignEditorMachine);
 const snapshot = ref(actor.getSnapshot());
