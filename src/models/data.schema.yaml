@@ -1,9 +1,9 @@
 ---
-"$schema": https://json-schema.org/draft/2020-12/schema
-"$id": https://dm-screen.local/schema/ui.schema.yaml
+"$schema": "https://json-schema.org/draft/2020-12/schema"
+"$id": "https://dm-screen.local/schema/data.schema.yaml"
 
-title: Campaign Data Schema
-description: Describes a TTRPG (DnD) campaign.
+title: DMScreen Data Schema
+description: Holds data recorded by DnD Dungeon Masters.
 type: object
 
 "$defs":
@@ -494,4 +494,6 @@ type: object
     - rounds
     additionalProperties: false
 
-"$ref": "#/$defs/Campaigns"
+properties:
+  campaigns:
+    "$ref": "#/$defs/Campaigns"

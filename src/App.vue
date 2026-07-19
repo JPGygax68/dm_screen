@@ -30,8 +30,13 @@ ion-app
       //-       ion-button(fill="outline" size="small" @click="send({ type: 'RESET_CAMPAIGN' })")
       //-         | Reset
 
+      div.debug
+        h4 Store data
+        pre {{ JSON.stringify(store.data, null, 2) }}
+
       JsonForms(
         :data="store.data"
+        :rootSchema="dataSchema"
         :schema="topLevelSchema"
         :uischema="topLevelUiSchema"
         :renderers="renderers"
@@ -48,6 +53,7 @@ import { createActor } from 'xstate';
 import { IonApp, IonBreadcrumbs, IonBreadcrumb, IonButton, IonContent, IonNote } from '@ionic/vue';
 import { JsonForms } from '@jsonforms/vue';
 import { vanillaRenderers } from '@jsonforms/vue-vanilla';
+import '@jsonforms/vue-vanilla/vanilla.css';
 import Ajv2020 from 'ajv/dist/2020';
 
 import useDmScreenStore from './stores/dmScreenStore';
@@ -57,8 +63,7 @@ import campaignUiSchema from './generated/models/campaign.uischema.json';
 import campaignFormSpec from './generated/forms/campaign.form-spec.json';
 import CampaignForm from './generated/forms/CampaignForm.vue';
 import { campaignEditorMachine } from './models/campaign-editor.machine.mjs';
-import { ionicRenderers } from './renderers/jsonforms/renderers.mjs';
-import '@jsonforms/vue-vanilla/vanilla.css';
+import { myRenderers } from './renderers/jsonforms/renderers.mjs';
 
 const ajv = new Ajv2020({
   allErrors: true,
@@ -76,12 +81,12 @@ const breadcrumbs = computed(() => [
 const sliceName = 'campaigns';
 
 const topLevelSchema = { ...dataSchema.$defs.Campaigns, $defs: dataSchema.$defs };
-console.log('Top-level schema:', topLevelSchema);
+// console.log('Top-level schema:', topLevelSchema);
 const topLevelUiSchema = {
   type: 'Control',
-  scope: '#/$defs/Campaigns'
+  scope: '#/properties/campaigns'
 };
 const validateData = ajv.compile(topLevelSchema);
-const renderers = Object.freeze([...ionicRenderers, ...vanillaRenderers]);
+const renderers = Object.freeze([...myRenderers, ...vanillaRenderers]);
 
 </script>

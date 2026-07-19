@@ -1,20 +1,19 @@
-import { and, isArrayObjectControl, isLayout, isStringControl, rankWith, uiTypeIs } from '@jsonforms/core';
+import { and, scopeEndsWith, isLayout, isStringControl, rankWith, uiTypeIs } from '@jsonforms/core';
 import IonicStringControlRenderer from './IonicStringControlRenderer.vue';
 import IonicGroupRenderer from './IonicGroupRenderer.vue';
-import IonicListRenderer from './IonicListRenderer.vue';
+import CampaignListRenderer from './CampaignListRenderer.vue';
 
-export const ionicRenderers = [
+export const myRenderers = [
   {
     tester: rankWith(5, isStringControl),
     renderer: IonicStringControlRenderer
   },
   {
-    tester: rankWith(6, and(isLayout, uiTypeIs('Group'))),
+    tester: rankWith(5, and(isLayout, uiTypeIs('Group'))),
     renderer: IonicGroupRenderer
   },
-  // // For arrays/lists:
-  // {
-  //   tester: rankWith(5, isArrayObjectControl),
-  //   renderer: IonicListRenderer
-  // }
+  {
+    tester: rankWith(5, scopeEndsWith('campaigns')),
+    renderer: CampaignListRenderer
+  }
 ];

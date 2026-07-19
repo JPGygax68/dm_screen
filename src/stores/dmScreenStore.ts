@@ -3,7 +3,7 @@ import { defineStore } from 'pinia';
 export const useDmScreenStore = defineStore('dmscreen', {
   state: () => ({
     data: {
-      Campaigns: [],
+      campaigns: [{ name: 'Campaign 1' }],
     }
   }),
   actions: {

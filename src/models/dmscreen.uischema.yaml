@@ -13,4 +13,4 @@ campaigns:
     "$ref": "#/$defs/Campaign"
   #minItems: 0
 
-"$ref": "#/$defs/Campaigns"
+"properties": "#/properties/campaigns"
