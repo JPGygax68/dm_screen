@@ -30,9 +30,9 @@ ion-app
       //-       ion-button(fill="outline" size="small" @click="send({ type: 'RESET_CAMPAIGN' })")
       //-         | Reset
 
-      div.debug
-        h4 Store data
-        pre {{ JSON.stringify(store.data, null, 2) }}
+      //- div.debug
+      //-   h4 Store data
+      //-   pre {{ JSON.stringify(store.data, null, 2) }}
 
       JsonForms(
         :data="store.data"
@@ -80,8 +80,8 @@ const breadcrumbs = computed(() => [
 
 const sliceName = 'campaigns';
 
-const topLevelSchema = { ...dataSchema.$defs.Campaigns, $defs: dataSchema.$defs };
-// console.log('Top-level schema:', topLevelSchema);
+const topLevelSchema = { ...dataSchema.properties.campaigns, $defs: dataSchema.$defs };
+console.log('Top-level schema:', topLevelSchema);
 const topLevelUiSchema = {
   type: 'Control',
   scope: '#/properties/campaigns'
