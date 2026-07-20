@@ -12,7 +12,7 @@ export const useDmScreenStore = defineStore('dmscreen', {
   }),
   actions: {
     update(change: { data: any; formErrors: any }) {
-      console.log('Store update:', change);
+      //console.log('Store update:', change);
       this.data = change.data;
     },
   }

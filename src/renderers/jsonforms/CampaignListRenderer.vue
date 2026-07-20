@@ -5,7 +5,7 @@ import {
   rendererProps,
   DispatchRenderer 
 } from '@jsonforms/vue';
-import { IonButton, IonList, IonItem, IonLabel, IonCard } from '@ionic/vue';
+import { IonButton, IonIcon, IonList, IonItem, IonLabel, IonCard } from '@ionic/vue';
 import { addIcons } from 'ionicons';
 import { 
   trashOutline, 
@@ -19,10 +19,8 @@ const props = defineProps<{
   schema: any,
   path: string
 }>();
-console.log('props', props);
 
 const usage = useJsonFormsArrayControl(props);
-console.log('usage', usage);
 const { control, removeItems, addItem, moveUp, moveDown } = usage;
 
 function appendNewItem() {

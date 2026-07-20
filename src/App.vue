@@ -81,7 +81,7 @@ const breadcrumbs = computed(() => [
 const sliceName = 'campaigns';
 
 const topLevelSchema = { ...dataSchema.properties.campaigns, $defs: dataSchema.$defs };
-console.log('Top-level schema:', topLevelSchema);
+//console.log('Top-level schema:', topLevelSchema);
 const topLevelUiSchema = {
   type: 'Control',
   scope: '#/properties/campaigns'
