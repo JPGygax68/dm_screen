@@ -5,8 +5,14 @@ import {
   rendererProps,
   DispatchRenderer 
 } from '@jsonforms/vue';
-import { IonButton, IonList, IonItem, IonLabel } from '@ionic/vue';
-import { computed, ref } from 'vue';
+import { IonButton, IonList, IonItem, IonLabel, IonCard } from '@ionic/vue';
+import { addIcons } from 'ionicons';
+import { 
+  trashOutline, 
+  arrowUpOutline, 
+  arrowDownOutline, 
+  addOutline 
+} from 'ionicons/icons';
 
 const props = defineProps<{
   uischema: any,
@@ -26,20 +32,27 @@ function appendNewItem() {
   addItem(control.value.path, defaultItemValue)();
 }
 
+// Load all required icons for the buttons
+addIcons({
+  'trash': trashOutline,
+  'up': arrowUpOutline,
+  'down': arrowDownOutline,
+  'add': addOutline
+});
 </script>
 
 <template lang="pug">
 div
-  h4 Data
-  pre {{ JSON.stringify(control.path, null, 2) }}
-
-  div(v-for="(item, index) in control.data" :key="control.path + '-' + index" class="array-item-row")
+  ion-card(v-for="(item, index) in control.data" :key="control.path + '-' + index" class="array-item-row")
     ion-item
       IonLabel
         | Item {{ index + 1 }}: {{ item.name || 'Unnamed Campaign' }}
-      ion-button(@click="removeItems(control.path, [index])()") Remove
-      ion-button(@click="moveUp(control.path, index)()") Move Up
-      ion-button(@click="moveDown(control.path, index)()") Move Down
+      ion-button(@click="removeItems(control.path, [index])()")
+        ion-icon(name="trash")
+      ion-button(@click="moveUp(control.path, index)()")
+        ion-icon(name="up")
+      ion-button(@click="moveDown(control.path, index)()")
+        ion-icon(name="down")
     //- dispatch-renderer(
     //-     :schema="control.schema.items"
     //-     :uischema="control.uischema.options"
@@ -49,6 +62,6 @@ div
     //-     :cells="control.cells"
     //-   )
 
-  ion-button(@click="appendNewItem()()") Add New Item
+  ion-button(@click="appendNewItem()()" icon="add" expand="block") Add New Item
 
 </template>
