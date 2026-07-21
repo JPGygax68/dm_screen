@@ -1,6 +1,8 @@
 import { createApp } from 'vue';
 import { IonicVue } from '@ionic/vue';
 
+import { createRouter, createWebHistory } from 'vue-router';
+
 import '@ionic/vue/css/core.css';
 import '@ionic/vue/css/normalize.css';
 import '@ionic/vue/css/structure.css';
@@ -23,4 +25,11 @@ const storedTheme = localStorage.getItem(THEME_STORAGE_KEY);
 const initialTheme = VALID_THEMES.has(storedTheme) ? storedTheme : 'auto';
 document.documentElement.dataset.theme = initialTheme;
 
-createApp(App).use(IonicVue).use(createPinia()).mount('#app');
+const router = createRouter({
+  history: createWebHistory(),
+  routes: [
+    { path: '/', component: App },
+  ]
+});
+
+createApp(App).use(IonicVue).use(createPinia()).use(router).mount('#app');

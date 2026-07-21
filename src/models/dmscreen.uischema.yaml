@@ -8,9 +8,12 @@ type: object
 
 campaigns:
   type: array
+  scope: "#/properties/campaigns"
   description: Campaigns available to the DM Screen application
   items:
     "$ref": "#/$defs/Campaign"
+  options:
+    detail: "GENERATED"
   #minItems: 0
 
 "properties": "#/properties/campaigns"

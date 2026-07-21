@@ -14,15 +14,15 @@ const repoRoot = path.resolve(__dirname, '..');
 
 const yamlSchemaFiles = [
   'data.schema',
-  'campaign.uischema'
+  'dmscreen.uischema'
 ];
 
 const schemas = await parseYamlSchemaFiles(yamlSchemaFiles, path.join(repoRoot, 'src', 'models'));
 console.log(`Schemas: ${Object.keys(schemas).join(', ')}`);
 await writeSchemasAsJson(schemas, path.join(repoRoot, 'src', 'generated', 'models'));
 
-const schema = schemas['dmscreen.schema'];
-const uiSchema = schemas['campaign.uischema'];
+const schema = schemas['data.schema'];
+const uiSchema = schemas['dmscreen.uischema'];
 
 const rootSchema = schema?.$defs?.Campaign ?? schema;
 const formWarnings = [];
