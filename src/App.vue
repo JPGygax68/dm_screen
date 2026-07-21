@@ -85,12 +85,21 @@ const breadcrumbs = computed(() => [
 const sliceName = 'campaigns';
 
 const topLevelSchema = { ...dataSchema.properties.campaigns, $defs: dataSchema.$defs };
-const topLevelUiSchema = { ...uiSchema, ...uiSchema.campaigns };
-//console.log('Top-level schema:', topLevelSchema);
-// const topLevelUiSchema = {
-//   type: 'Control',
-//   scope: '#/properties/campaigns'
-// };
+//const topLevelUiSchema = { ...uiSchema, ...uiSchema.campaigns };
+const topLevelUiSchema = {
+  type: 'array',
+  scope: '#/properties/campaigns',
+  options: {
+    detail: {
+      type: 'Group',
+      label: 'Campaign details',
+      //scope: '#/$defs/Campaign'
+    },
+    showSortButtons: true
+  }
+};
+console.log('Top-level UI schema:', topLevelUiSchema);
+
 const validateData = ajv.compile(topLevelSchema);
 const renderers = Object.freeze([...myRenderers, ...vanillaRenderers]);
 

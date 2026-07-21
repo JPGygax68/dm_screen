@@ -26,4 +26,7 @@ const props = defineProps({
 });
 
 const { layout } = useJsonFormsLayout(props);
+
+console.log('IonicGroupRenderer.vue: rendering group with layout:', layout);
+
 </script>

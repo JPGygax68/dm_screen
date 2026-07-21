@@ -25,32 +25,37 @@ const props = defineProps<{
 const usage = useJsonFormsArrayControl(props);
 const { control, removeItems, addItem, moveUp, moveDown } = usage;
 //console.log('CampaignListRenderer control:', control);
+//console.log('schema:', control.value.arraySchema);
 
-console.log('schema:', control.value.arraySchema);
 // Process the child element schemas safely inside the script block
 
 const getChildUiSchema = () => {
   const arrayControl = control.value;
   const itemSchema = arrayControl.schema;
-  console.log('detail option:', arrayControl.uischema?.options?.detail);
   const detailOption = arrayControl.uischema?.options?.detail;
 
   // If detail option says "GENERATED", pass undefined to force a full fallback generation pass
   const targetDetail = detailOption === 'GENERATED' ? undefined : detailOption;
+  console.log('CampaignListRenderer: resolved target detail option:', targetDetail);
 
-  console.log('calling findUISchema with:', {
-    uischemas: arrayControl.uischemas,
-    itemSchema,
-    targetDetail,
-  });
-  const uiSchema = findUISchema(
+  const childUiSchema = findUISchema(
     arrayControl.uischemas,
     itemSchema,
     targetDetail,
     arrayControl.path
   );
-  console.log('found uiSchema:', uiSchema);
-  return uiSchema;
+  return childUiSchema;
+
+  console.log('CampaignListRenderer: found child UI schema:', childUiSchema);
+
+  if (childUiSchema && childUiSchema.elements) {
+    return {
+      type: 'Group',                                          // Satisfies uiTypeIs('Group')
+      label: detailOption?.label || '<no label>',  
+      elements: childUiSchema.elements                        // Passes down the generated input controls safely
+    };
+  }
+  return childUiSchema;
 };
 
 const router = useRouter();
@@ -82,21 +87,12 @@ addIcons({
 <template lang="pug">
 
 div
-  //pre {{ control.uischema }}
   ion-card(v-for="(item, index) in control.data" :key="control.path + '-' + index" class="array-item-row")
     //ion-item(@click="() => $emit('itemClicked', { index })")
     ion-item
       //(@click="() => goToDetailView(item, index)")
-      ion-label
-        | Item {{ index + 1 }}: {{ item.name || 'Unnamed Campaign' }}
-      div(slot="end" class="array-item-actions")
-        ion-button(@click="removeItems(control.path, [index])()")
-          ion-icon(name="trash")
-        ion-button(@click="moveUp(control.path, index)()" :disabled="index === 0")
-          ion-icon(name="up")
-        ion-button(@click="moveDown(control.path, index)()" :disabled="index === control.data.length - 1")
-          ion-icon(name="down")
-      // pre {{ control.uischema.options }}
+      //- ion-label
+      //-   | Item {{ index + 1 }}: {{ item.name || 'Unnamed Campaign' }}
       dispatch-renderer(
           :schema="control.schema"
           :uischema="getChildUiSchema()"
@@ -105,6 +101,13 @@ div
           :renderers="control.renderers"
           :cells="control.cells"
         )
+      div(slot="end" class="array-item-actions")
+        ion-button(@click="removeItems(control.path, [index])()")
+          ion-icon(name="trash")
+        ion-button(@click="moveUp(control.path, index)()" :disabled="index === 0")
+          ion-icon(name="up")
+        ion-button(@click="moveDown(control.path, index)()" :disabled="index === control.data.length - 1")
+          ion-icon(name="down")
 
   ion-button(@click="appendNewItem()()" icon="add" expand="block") Add New Item
 

@@ -13,7 +13,20 @@ campaigns:
   items:
     "$ref": "#/$defs/Campaign"
   options:
-    detail: "GENERATED"
+    #detail: "GENERATED"
+    detail:
+      type: "Group"
+      #scope: "#/$defs/Campaigns"
+    showSortButtons: true
   #minItems: 0
+
+Campaign:
+  type: Group
+  #scope: "#/$defs/Campaign"
+  elements:
+    - type: Control
+      scope: "#/$defs/Campaign/properties/name"
+    - type: Control
+      scope: "#/$defs/Campaign/properties/description"
 
 "properties": "#/properties/campaigns"
