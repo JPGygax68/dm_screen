@@ -497,3 +497,8 @@ type: object
 properties:
   campaigns:
     "$ref": "#/$defs/Campaigns"
+    # type: array
+    # description: List of campaigns
+    # items:
+    #   "$ref": "#/$defs/Campaign"
+    # uniqueItems: true

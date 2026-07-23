@@ -53,7 +53,7 @@ import { DispatchRenderer, rendererProps, useJsonFormsLayout } from '@jsonforms/
 import { createActor } from 'xstate';
 import { IonApp, IonBreadcrumbs, IonBreadcrumb, IonButton, IonContent, IonNote } from '@ionic/vue';
 import { JsonForms } from '@jsonforms/vue';
-import { vanillaRenderers } from '@jsonforms/vue-vanilla';
+import { vanillaRenderers, arrayRenderers } from '@jsonforms/vue-vanilla';
 import '@jsonforms/vue-vanilla/vanilla.css';
 import Ajv2020 from 'ajv/dist/2020';
 
@@ -61,10 +61,6 @@ import useDmScreenStore from './stores/dmScreenStore';
 
 import dataSchema from './generated/models/data.schema.json';
 import uiSchema from './generated/models/dmscreen.uischema.json';
-// import campaignUiSchema from './generated/models/campaign.uischema.json';
-// import campaignFormSpec from './generated/forms/campaign.form-spec.json';
-// import CampaignForm from './generated/forms/CampaignForm.vue';
-// import { campaignEditorMachine } from './models/campaign-editor.machine.mjs';
 import { myRenderers } from './renderers/jsonforms/renderers.mjs';
 
 const ajv = new Ajv2020({
@@ -84,23 +80,19 @@ const breadcrumbs = computed(() => [
 
 const sliceName = 'campaigns';
 
-const topLevelSchema = { ...dataSchema.properties.campaigns, $defs: dataSchema.$defs };
-//const topLevelUiSchema = { ...uiSchema, ...uiSchema.campaigns };
-const topLevelUiSchema = {
-  type: 'array',
-  scope: '#/properties/campaigns',
-  options: {
-    detail: {
-      type: 'Group',
-      label: 'Campaign details',
-      //scope: '#/$defs/Campaign'
-    },
-    showSortButtons: true
-  }
-};
+const topLevelSchema = { ...dataSchema.$defs.Campaigns, $defs: dataSchema.$defs };
+console.log('Top-level schema:', topLevelSchema);
+const topLevelUiSchema = { ...uiSchema.campaigns };
 console.log('Top-level UI schema:', topLevelUiSchema);
 
 const validateData = ajv.compile(topLevelSchema);
-const renderers = Object.freeze([...myRenderers, ...vanillaRenderers]);
+ajv.addSchema(topLevelUiSchema, 'topLevelUiSchema');
+
+//const renderers = Object.freeze([...myRenderers, ...vanillaRenderers]);
+const renderers = Object.freeze([
+  //...myRenderers,
+  ...vanillaRenderers,
+  ...arrayRenderers
+]);
 
 </script>

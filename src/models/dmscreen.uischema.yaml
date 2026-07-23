@@ -10,23 +10,21 @@ campaigns:
   type: array
   scope: "#/properties/campaigns"
   description: Campaigns available to the DM Screen application
-  items:
-    "$ref": "#/$defs/Campaign"
-  options:
-    #detail: "GENERATED"
-    detail:
-      type: "Group"
-      #scope: "#/$defs/Campaigns"
-    showSortButtons: true
+  # items:
+  #   "$ref": "#/$defs/Campaign"
+  # options:
+  #   #detail: "GENERATED"
+  #   detail:
+  #     type: "Group"
+  #     #scope: "#/$defs/Campaigns"
+  #   showSortButtons: true
   #minItems: 0
 
-Campaign:
-  type: Group
-  #scope: "#/$defs/Campaign"
-  elements:
-    - type: Control
-      scope: "#/$defs/Campaign/properties/name"
-    - type: Control
-      scope: "#/$defs/Campaign/properties/description"
-
-"properties": "#/properties/campaigns"
+# Campaign:
+#   type: Group
+#   #scope: "#/$defs/Campaign"
+#   elements:
+#     - type: Control
+#       scope: "#/$defs/Campaign/properties/name"
+#     - type: Control
+#       scope: "#/$defs/Campaign/properties/description"
