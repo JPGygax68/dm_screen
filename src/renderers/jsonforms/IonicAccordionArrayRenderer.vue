@@ -9,7 +9,8 @@
       )
         ion-item(slot="header")
           ion-label(slot="start")
-            | Item {{ index + 1 }}: {{ element.name || 'Unnamed Campaign' }}
+            | {{ computedHelpers.campaignSummary(element, props.uischema) }}
+            // Item {{ index + 1 }}: {{ element.name || 'Unnamed Campaign' }}
           div(slot="end" class="array-item-actions" @click.stop)
             ion-button(@click="removeItem(control.path, index)()")
               ion-icon(name="trash")
@@ -20,22 +21,25 @@
         ion-item(slot="content")
           dispatch-renderer(
             :schema="control.schema"
-            :uischema="getChildUiSchema()"
+            :uischema="childUiSchema"
             :path="composePaths(control.path, `${index}`)"
             :enabled="control.enabled"
             :renderers="control.renderers"
             :cells="control.cells"
           )
 
-  ion-button(@click="appendNewItem()()" icon="add" expand="block") {{ control.uischema?.options?.addNewItemLabel || 'Add New Item' }}
+    ion-button(@click="appendNewItem()()" icon="add" expand="block") {{ control.uischema?.options?.addNewItemLabel || 'Add New Item' }}
 
 </template>
 <script setup lang="ts">
 import { findUISchema, composePaths } from '@jsonforms/core';
 import { DispatchRenderer, rendererProps, useJsonFormsLayout, useJsonFormsArrayControl } from '@jsonforms/vue';
-import { IonAccordionGroup, IonAccordion, IonItem, IonLabel, alertController } from '@ionic/vue';
+import { computed } from 'vue';
+import { IonAccordionGroup, IonAccordion, IonItem, IonLabel, IonIcon, IonButton, alertController } from '@ionic/vue';
 import { addIcons } from 'ionicons';
 import { trashOutline, arrowUpOutline, arrowDownOutline, addOutline } from 'ionicons/icons';
+
+import { computedHelpers } from '../../computedHelpers';
 
 const props = defineProps<{
   uischema: any,
@@ -44,7 +48,6 @@ const props = defineProps<{
 }>();
 
 const usage = useJsonFormsArrayControl(props);
-
 const { control, removeItems, addItem, moveUp, moveDown } = usage;
 
 const removeItem = (path: string, value: any) => {
@@ -71,22 +74,16 @@ const removeItem = (path: string, value: any) => {
   };
 };
 
-// Load all required icons for the buttons
-addIcons({
-  'trash': trashOutline,
-  'up': arrowUpOutline,
-  'down': arrowDownOutline,
-  'add': addOutline
-});
-
-const getChildUiSchema = () => {
+const childUiSchema = computed(() => {
   const arrayControl = control.value;
   const itemSchema = arrayControl.schema;
+  console.log('itemSchema', itemSchema);
   const detailOption = arrayControl.uischema?.options?.detail;
 
   // If detail option says "GENERATED", pass undefined to force a full fallback generation pass
   const targetDetail = detailOption === 'GENERATED' ? undefined : detailOption;
 
+  console.log('arrayControl.uischemas', arrayControl.uischemas);
   const childUiSchema = findUISchema(
     arrayControl.uischemas,
     itemSchema,
@@ -94,6 +91,15 @@ const getChildUiSchema = () => {
     arrayControl.path
   );
   return childUiSchema;
-};
+});
+console.log('childUiSchema', childUiSchema.value);
+
+// Load all required icons for the buttons
+addIcons({
+  'trash': trashOutline,
+  'up': arrowUpOutline,
+  'down': arrowDownOutline,
+  'add': addOutline
+});
 
 </script>
