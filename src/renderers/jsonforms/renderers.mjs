@@ -1,6 +1,6 @@
 import { and, scopeEndsWith, isLayout, isStringControl, rankWith, uiTypeIs } from '@jsonforms/core';
 import IonicGroupRenderer from './IonicGroupRenderer.vue';
-import IonicListRenderer from './IonicListRenderer.vue';
+import IonicAccordionArrayRenderer from './IonicAccordionArrayRenderer.vue';
 import IonicStringControlRenderer from './IonicStringControlRenderer.vue';
 import MyArrayRenderer from './MyArrayRenderer.vue';
 
@@ -15,7 +15,7 @@ export const myRenderers = [
   },
   {
     tester: rankWith(5, uiTypeIs('array')),
-    renderer: IonicListRenderer
+    renderer: IonicAccordionArrayRenderer
   },
   // {
   //   tester: rankWith(5, uiTypeIs('array')),
