@@ -1,30 +1,33 @@
 <template lang="pug">
-  ion-accordion-group
-    ion-accordion(
-      v-for="(element, index) in control.data"
-      :key="`${control.path}-${index}`"
-      :value="element.options?.value || undefined"
-      :disabled="!control.enabled"
-    )
-      ion-item(slot="header")
-        ion-label(slot="start")
-          | Item {{ index + 1 }}: {{ element.name || 'Unnamed Campaign' }}
-        div(slot="end" class="array-item-actions" @click.stop)
-          ion-button(@click="removeItem(control.path, index)()")
-            ion-icon(name="trash")
-          ion-button(@click="moveUp(control.path, index)()" :disabled="index === 0")
-            ion-icon(name="up")
-          ion-button(@click="moveDown(control.path, index)()" :disabled="index === control.data.length - 1")
-            ion-icon(name="down")
-      ion-item(slot="content")
-        dispatch-renderer(
-          :schema="control.schema"
-          :uischema="getChildUiSchema()"
-          :path="composePaths(control.path, `${index}`)"
-          :enabled="control.enabled"
-          :renderers="control.renderers"
-          :cells="control.cells"
-        )
+  div
+    ion-accordion-group
+      ion-accordion(
+        v-for="(element, index) in control.data"
+        :key="`${control.path}-${index}`"
+        :value="element.options?.value || undefined"
+        :disabled="!control.enabled"
+      )
+        ion-item(slot="header")
+          ion-label(slot="start")
+            | Item {{ index + 1 }}: {{ element.name || 'Unnamed Campaign' }}
+          div(slot="end" class="array-item-actions" @click.stop)
+            ion-button(@click="removeItem(control.path, index)()")
+              ion-icon(name="trash")
+            ion-button(@click="moveUp(control.path, index)()" :disabled="index === 0")
+              ion-icon(name="up")
+            ion-button(@click="moveDown(control.path, index)()" :disabled="index === control.data.length - 1")
+              ion-icon(name="down")
+        ion-item(slot="content")
+          dispatch-renderer(
+            :schema="control.schema"
+            :uischema="getChildUiSchema()"
+            :path="composePaths(control.path, `${index}`)"
+            :enabled="control.enabled"
+            :renderers="control.renderers"
+            :cells="control.cells"
+          )
+
+  ion-button(@click="appendNewItem()()" icon="add" expand="block") {{ control.uischema?.options?.addNewItemLabel || 'Add New Item' }}
 
 </template>
 <script setup lang="ts">

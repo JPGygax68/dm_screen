@@ -10,6 +10,8 @@ campaigns:
   type: array
   scope: "#/properties/campaigns"
   description: Campaigns available to the DM Screen application
+  options:
+    addNewItemLabel: "Add New Campaign"
   # items:
   #   "$ref": "#/$defs/Campaign"
   # options:
