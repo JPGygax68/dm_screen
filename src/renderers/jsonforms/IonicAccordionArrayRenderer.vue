@@ -7,10 +7,10 @@
       :disabled="!control.enabled"
     )
       ion-item(slot="header")
-        ion-label
+        ion-label(slot="start")
           | Item {{ index + 1 }}: {{ element.name || 'Unnamed Campaign' }}
-        div(slot="end" class="array-item-actions")
-          ion-button(@click="removeItems(control.path, [index])()")
+        div(slot="end" class="array-item-actions" @click.stop)
+          ion-button(@click="removeItem(control.path, index)()")
             ion-icon(name="trash")
           ion-button(@click="moveUp(control.path, index)()" :disabled="index === 0")
             ion-icon(name="up")
@@ -30,7 +30,7 @@
 <script setup lang="ts">
 import { findUISchema, composePaths } from '@jsonforms/core';
 import { DispatchRenderer, rendererProps, useJsonFormsLayout, useJsonFormsArrayControl } from '@jsonforms/vue';
-import { IonAccordionGroup, IonAccordion, IonItem, IonLabel } from '@ionic/vue';
+import { IonAccordionGroup, IonAccordion, IonItem, IonLabel, alertController } from '@ionic/vue';
 import { addIcons } from 'ionicons';
 import { trashOutline, arrowUpOutline, arrowDownOutline, addOutline } from 'ionicons/icons';
 
@@ -43,7 +43,31 @@ const props = defineProps<{
 const usage = useJsonFormsArrayControl(props);
 
 const { control, removeItems, addItem, moveUp, moveDown } = usage;
-    
+
+const removeItem = (path: string, value: any) => {
+  return async () => {
+    const alert = await alertController.create({
+      header: 'Delete Campaign?',
+      message: 'Are you sure?',
+      buttons: [
+        {
+          text: 'Cancel',
+          role: 'cancel'
+        },
+        {
+          text: 'Delete',
+          role: 'confirm',
+          handler: () => {
+            removeItems(path, [value])();
+          }
+        }
+      ]
+    });
+
+    await alert.present();
+  };
+};
+
 // Load all required icons for the buttons
 addIcons({
   'trash': trashOutline,
