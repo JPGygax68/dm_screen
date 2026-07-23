@@ -1,71 +1,51 @@
-<script setup lang="ts">
-import { IonList, IonItem, IonLabel, IonButton } from '@ionic/vue'
-import { ref } from 'vue'
+<template lang="pug">
+  ion-list
+    ion-item(
+      v-for="(element, index) in control.data"
+      :key="`${control.path}-${index}`"
+      :value="element.options?.value || undefined"
+      :disabled="!control.enabled"
+    )
+      dispatch-renderer(
+        :schema="control.schema"
+        :uischema="getChildUiSchema()"
+        :path="composePaths(control.path, `${index}`)"
+        :enabled="control.enabled"
+        :renderers="control.renderers"
+        :cells="control.cells"
+      )
 
-console.log('IonicListRenderer.vue loaded')
+</template>
+<script setup lang="ts">
+import { findUISchema, composePaths } from '@jsonforms/core';
+import { DispatchRenderer, rendererProps, useJsonFormsLayout, useJsonFormsArrayControl } from '@jsonforms/vue';
+import { IonList, IonItem, IonLabel } from '@ionic/vue';
 
 const props = defineProps<{
-  data: any[]
+  uischema: any,
+  schema: any,
   path: string
-  schema: any
-  uischema: any
-  handleChange: (path: string, value: any) => void
-}>()
+}>();
 
-let selectedIndex = ref<number | null>(null)
+const usage = useJsonFormsArrayControl(props);
 
-function selectItem(index: number) {
-  selectedIndex.value = index
-}
+const { control, removeItems, addItem, moveUp, moveDown } = usage;
+    
+const getChildUiSchema = () => {
+  const arrayControl = control.value;
+  const itemSchema = arrayControl.schema;
+  const detailOption = arrayControl.uischema?.options?.detail;
 
-function addItem() {
-  const itemSchema = props.schema.items
-  const newItem = createDefault(itemSchema)
+  // If detail option says "GENERATED", pass undefined to force a full fallback generation pass
+  const targetDetail = detailOption === 'GENERATED' ? undefined : detailOption;
 
-  const newArray = [...props.data, newItem]
-
-  props.handleChange(props.path, newArray)
-}
-
-function removeItem(index: number) {
-  const newArray = [...props.data]
-  newArray.splice(index, 1)
-
-  props.handleChange(props.path, newArray)
-}
-
-function createDefault(schema: any): any {
-  switch (schema.type) {
-    case 'string':
-      return schema.default ?? ''
-    case 'number':
-    case 'integer':
-      return schema.default ?? 0
-    case 'boolean':
-      return schema.default ?? false
-    case 'array':
-      return []
-    case 'object':
-      const obj: any = {}
-      for (const [key, propSchema] of Object.entries(schema.properties ?? {})) {
-        obj[key] = createDefault(propSchema)
-      }
-      return obj
-    default:
-      return null
-  }
-}
+  const childUiSchema = findUISchema(
+    arrayControl.uischemas,
+    itemSchema,
+    targetDetail,
+    arrayControl.path
+  );
+  return childUiSchema;
+};
 
 </script>
-<template lang="pug">
-  IonButton(@click="addItem()" v-if="selectedIndex !== null") Add Item
-  IonButton(@click="removeItem(selectedIndex)" v-if="selectedIndex !== null") Remove Selected Item
-  IonList(inset="true")
-    IonItem(
-      v-for="(item, index) in props.data"
-      :key="index"
-      button
-      @click="selectItem(index)"
-    )
-      IonLabel {{ item.name ?? 'Item ' + index }}
-</template>

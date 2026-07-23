@@ -51,7 +51,7 @@ import { computed, onMounted, onBeforeUnmount, ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { DispatchRenderer, rendererProps, useJsonFormsLayout } from '@jsonforms/vue';
 import { createActor } from 'xstate';
-import { IonApp, IonBreadcrumbs, IonBreadcrumb, IonButton, IonContent, IonNote } from '@ionic/vue';
+import { IonApp, IonBreadcrumbs, IonBreadcrumb, IonButton, IonContent, IonNote, IonAccordion, IonAccordionGroup } from '@ionic/vue';
 import { JsonForms } from '@jsonforms/vue';
 import { vanillaRenderers, arrayRenderers } from '@jsonforms/vue-vanilla';
 import '@jsonforms/vue-vanilla/vanilla.css';
@@ -90,9 +90,9 @@ ajv.addSchema(topLevelUiSchema, 'topLevelUiSchema');
 
 //const renderers = Object.freeze([...myRenderers, ...vanillaRenderers]);
 const renderers = Object.freeze([
-  //...myRenderers,
+  ...myRenderers,
   ...vanillaRenderers,
-  ...arrayRenderers
+  //...arrayRenderers
 ]);
 
 </script>
