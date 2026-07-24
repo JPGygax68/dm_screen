@@ -13,7 +13,7 @@ type: object
 
   Campaigns:
     type: array
-    description: List of campaigns
+    description: Set of campaigns
     items:
       "$ref": "#/$defs/Campaign"
     uniqueItems: true
@@ -495,6 +495,7 @@ type: object
     additionalProperties: false
 
 properties:
+  dummy: { type: string, description: "Dummy property to satisfy JSON Schema requirements" }
   campaigns:
     "$ref": "#/$defs/Campaigns"
     # type: array

@@ -8,6 +8,7 @@ export const useDmScreenStore = defineStore('dmscreen', {
         { name: 'Campaign 2' },
         { name: 'Campaign 3' }
       ],
+      dummy: 'This is a dummy property for testing purposes'
     }
   }),
   actions: {

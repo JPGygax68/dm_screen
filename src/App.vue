@@ -32,13 +32,12 @@ ion-app
 
       //- div.debug
       //-   h4 Store data
-      //-   pre {{ JSON.stringify(store.data, null, 2) }}
+      //-   pre(style="font-size: 50%;") {{ JSON.stringify(store.data, null, 2) }}
 
       JsonForms(
         :data="store.data"
-        :rootSchema="dataSchema"
-        :schema="topLevelSchema"
-        :uischema="topLevelUiSchema"
+        :schema="dataSchema"
+        :uischema="uischema"
         :renderers="renderers"
         :ajv="ajv"
         @change="store.update"
@@ -67,7 +66,8 @@ const ajv = new Ajv2020({
   allErrors: true,
   strict: false
 });
-ajv.addSchema(dataSchema, 'dataSchema');
+
+const validate = ajv.compile(dataSchema);
 
 const store = useDmScreenStore();
 
@@ -80,19 +80,19 @@ const breadcrumbs = computed(() => [
 
 const sliceName = 'campaigns';
 
-const topLevelSchema = { ...dataSchema.$defs.Campaigns, $defs: dataSchema.$defs };
-// console.log('Top-level schema:', topLevelSchema);
-const topLevelUiSchema = { ...uiSchema.campaigns };
-// console.log('Top-level UI schema:', topLevelUiSchema);
+const uischema = Object.freeze({
+  type: 'array',
+  scope: '#/properties/campaigns',
+  options: {
+    addNewItemLabel: 'Add New Campaign'
+  }
+});
+// const uischema = Object.freeze(uiSchema);
 
-const validateData = ajv.compile(topLevelSchema);
-ajv.addSchema(topLevelUiSchema, 'topLevelUiSchema');
-
-//const renderers = Object.freeze([...myRenderers, ...vanillaRenderers]);
 const renderers = Object.freeze([
   ...myRenderers,
   ...vanillaRenderers,
-  //...arrayRenderers
+  ...arrayRenderers
 ]);
 
 </script>
