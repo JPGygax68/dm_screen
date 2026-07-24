@@ -75,6 +75,9 @@ const removeItem = (path: string, value: any) => {
 };
 
 const childUiSchema = computed(() => {
+  console.log('control.value.uischema.items', control.value.uischema.items);
+  return control.value.uischema.items;
+
   const arrayControl = control.value;
   const itemSchema = arrayControl.schema;
   // console.log('itemSchema', itemSchema);
@@ -83,13 +86,14 @@ const childUiSchema = computed(() => {
   // If detail option says "GENERATED", pass undefined to force a full fallback generation pass
   const targetDetail = detailOption === 'GENERATED' ? undefined : detailOption;
 
-  // console.log('arrayControl.uischemas', arrayControl.uischemas);
+  console.log('finding childUiSchema for arrayControl:', arrayControl, '\nwith itemSchema:', itemSchema, '\nwith targetDetail:', targetDetail, '\nand arrayControl.path:', arrayControl.path);
   const childUiSchema = findUISchema(
     arrayControl.uischemas,
     itemSchema,
     targetDetail,
     arrayControl.path
   );
+  console.log('childUiSchema', childUiSchema);
   return childUiSchema;
 });
 // console.log('childUiSchema', childUiSchema.value);

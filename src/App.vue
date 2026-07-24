@@ -60,7 +60,6 @@ import Ajv2020 from 'ajv/dist/2020';
 import useDmScreenStore from './stores/dmScreenStore';
 
 import dataSchema from './generated/models/data.schema.json';
-import uiSchema from './generated/models/campaign-list.uischema.json';
 import { myRenderers } from './renderers/jsonforms/renderers.mjs';
 
 const ajv = new Ajv2020({
@@ -84,6 +83,19 @@ const sliceName = 'campaigns';
 const uischema = Object.freeze({
   type: 'array',
   scope: '#/properties/campaigns',
+  items: {
+    type: 'Control',
+    elements: [
+      {
+        type: 'Control',
+        scope: '#/properties/name'
+      },
+      {
+        type: 'Control',
+        scope: '#/properties/description'
+      }
+    ],
+  },
   options: {
     addNewItemLabel: 'Add New Campaign'
   }
