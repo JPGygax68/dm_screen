@@ -1,6 +1,6 @@
 ---
 "$schema": https://json-schema.org/draft/2020-12/schema
-"$id": https://dm-screen.local/schema/dmscreen.uischema.yaml
+"$id": https://dm-screen.local/schema/campaign-list.uischema.yaml
 
 title: DM Screen Application Data Schema
 description: Root can be either a Campaign or a single Encounter

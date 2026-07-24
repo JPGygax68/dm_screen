@@ -60,7 +60,7 @@ import Ajv2020 from 'ajv/dist/2020';
 import useDmScreenStore from './stores/dmScreenStore';
 
 import dataSchema from './generated/models/data.schema.json';
-import uiSchema from './generated/models/dmscreen.uischema.json';
+import uiSchema from './generated/models/campaign-list.uischema.json';
 import { myRenderers } from './renderers/jsonforms/renderers.mjs';
 
 const ajv = new Ajv2020({
