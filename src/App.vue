@@ -39,6 +39,7 @@ ion-app
         :schema="dataSchema"
         :uischema="uischema"
         :renderers="renderers"
+        :validate="validate"
         :ajv="ajv"
         @change="store.update"
       )
