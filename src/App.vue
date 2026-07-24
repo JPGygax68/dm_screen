@@ -81,9 +81,9 @@ const breadcrumbs = computed(() => [
 const sliceName = 'campaigns';
 
 const topLevelSchema = { ...dataSchema.$defs.Campaigns, $defs: dataSchema.$defs };
-console.log('Top-level schema:', topLevelSchema);
+// console.log('Top-level schema:', topLevelSchema);
 const topLevelUiSchema = { ...uiSchema.campaigns };
-console.log('Top-level UI schema:', topLevelUiSchema);
+// console.log('Top-level UI schema:', topLevelUiSchema);
 
 const validateData = ajv.compile(topLevelSchema);
 ajv.addSchema(topLevelUiSchema, 'topLevelUiSchema');

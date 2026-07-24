@@ -77,13 +77,13 @@ const removeItem = (path: string, value: any) => {
 const childUiSchema = computed(() => {
   const arrayControl = control.value;
   const itemSchema = arrayControl.schema;
-  console.log('itemSchema', itemSchema);
+  // console.log('itemSchema', itemSchema);
   const detailOption = arrayControl.uischema?.options?.detail;
 
   // If detail option says "GENERATED", pass undefined to force a full fallback generation pass
   const targetDetail = detailOption === 'GENERATED' ? undefined : detailOption;
 
-  console.log('arrayControl.uischemas', arrayControl.uischemas);
+  // console.log('arrayControl.uischemas', arrayControl.uischemas);
   const childUiSchema = findUISchema(
     arrayControl.uischemas,
     itemSchema,
@@ -92,7 +92,7 @@ const childUiSchema = computed(() => {
   );
   return childUiSchema;
 });
-console.log('childUiSchema', childUiSchema.value);
+// console.log('childUiSchema', childUiSchema.value);
 
 // Load all required icons for the buttons
 addIcons({
