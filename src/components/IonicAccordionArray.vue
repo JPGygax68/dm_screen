@@ -2,30 +2,28 @@
   div
     ion-accordion-group
       ion-accordion(
-        v-for="(element, index) in control.data"
-        :key="`${control.path}-${index}`"
-        :value="element.options?.value || undefined"
-        :disabled="!control.enabled"
+        v-for="(item, index) in items"
+        :key="`${path}-${index}`"
+        :value="item.options?.value || undefined"
+        :disabled="disabled"
       )
         ion-item(slot="header")
           ion-label(slot="start")
-            | {{ element.name }} 
+            | {{ item.name }} 
             // Item {{ index + 1 }}: {{ element.name || 'Unnamed Campaign' }}
           div(slot="end" class="array-item-actions" @click.stop)
-            ion-button(@click="removeItem(control.path, index)()")
+            ion-button(@click="removeItem(path, index)()")
               ion-icon(name="trash")
-            ion-button(@click="moveUp(control.path, index)()" :disabled="index === 0")
+            ion-button(@click="moveUp(path, index)()" :disabled="index === 0")
               ion-icon(name="up")
-            ion-button(@click="moveDown(control.path, index)()" :disabled="index === control.data.length - 1")
+            ion-button(@click="moveDown(path, index)()" :disabled="index === items.length - 1")
               ion-icon(name="down")
         ion-item(slot="content")
-          div(
-            :path="control.path + '/' + index"
-            :data="control.data[index]"
-          ) 
-            | PLACEHOLDER FOR DETAIL VIEW
+          slot(:item="item" :index="index")
+          //- div
+          //-   | {{ item.name }} - {{ item.description }}
 
-    ion-button(@click="appendNewItem()()" icon="add" expand="block") {{ control.uischema?.options?.addNewItemLabel || 'Add New Item' }}
+    ion-button(@click="appendNewItem()()" icon="add" expand="block") {{ addNewLabel?? 'Add New Item' }}
 
 </template>
 <script setup lang="ts">
@@ -34,18 +32,12 @@ import { IonAccordionGroup, IonAccordion, IonItem, IonLabel, IonIcon, IonButton,
 import { addIcons } from 'ionicons';
 import { trashOutline, arrowUpOutline, arrowDownOutline, addOutline } from 'ionicons/icons';
 
-const props = defineProps<{
+const { items, path, disabled } = defineProps<{
+  items: any[],
   path: string,
-  data: any[],
+  disabled?: boolean,
+  addNewLabel?: string,
 }>();
-
-const control = computed(() => {
-  return {
-    path: props.path,
-    data: props.data,
-    enabled: true
-  };
-});
 
 const removeItem = (path: string, value: any) => {
   return async () => {
