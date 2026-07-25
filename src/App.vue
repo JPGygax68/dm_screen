@@ -37,10 +37,10 @@ ion-app
         //- pre(style="font-size: 50%;") {{ JSON.stringify(store.data, null, 2) }}
 
       IonicAccordionArray(
-        :items="store.data.campaigns"
-        :path="'/campaigns'"
+        :items="store.campaigns"
+        :path="'campaigns'"
         :addNewLabel="'Add New Campaign'"
-        @change="store.update($event.path, $event.value)"
+        @change="store.updateByPath($event.path, $event.value)"
       )
         template(v-slot="{ item, index }")
           div {{ index + 1 }}: {{ item.name }} - {{ item.description }}

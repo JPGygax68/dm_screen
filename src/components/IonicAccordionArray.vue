@@ -20,8 +20,6 @@
               ion-icon(name="down")
         ion-item(slot="content")
           slot(:item="item" :index="index")
-          //- div
-          //-   | {{ item.name }} - {{ item.description }}
 
     ion-button(@click="appendNewItem()()" icon="add" expand="block") {{ addNewLabel?? 'Add New Item' }}
 
@@ -32,14 +30,41 @@ import { IonAccordionGroup, IonAccordion, IonItem, IonLabel, IonIcon, IonButton,
 import { addIcons } from 'ionicons';
 import { trashOutline, arrowUpOutline, arrowDownOutline, addOutline } from 'ionicons/icons';
 
-const { items, path, disabled } = defineProps<{
+const props = defineProps<{
   items: any[],
   path: string,
   disabled?: boolean,
   addNewLabel?: string,
 }>();
+console.log('props', props);
 
-const removeItem = (path: string, value: any) => {
+const emit = defineEmits<{
+  (e: 'change', payload: { path: string, value: any[] }): void
+}>();
+console.log('emit', emit);
+
+const moveUp = (path: string, index: number) => {
+  console.log('moveUp called with path:', path, 'index:', index);
+  return () => {
+    const newItems = [...props.items];
+    const temp = newItems[index - 1];
+    newItems[index - 1] = newItems[index];
+    newItems[index] = temp;
+    emit('change', { path, value: newItems });
+  };
+};
+
+const moveDown = (path: string, index: number) => {
+  return () => {
+    const newItems = [...props.items];
+    const temp = newItems[index + 1];
+    newItems[index + 1] = newItems[index];
+    newItems[index] = temp;
+    emit('change', { path, value: newItems });
+  };
+};
+
+const removeItem = (path: string, index: number) => {
   return async () => {
     const alert = await alertController.create({
       header: 'Delete Campaign?',
@@ -53,7 +78,9 @@ const removeItem = (path: string, value: any) => {
           text: 'Delete',
           role: 'confirm',
           handler: () => {
-            removeItems(path, [value])();
+            const newItems = [...props.items];
+            newItems.splice(index, 1);
+            emit('change', { path, value: newItems });
           }
         }
       ]

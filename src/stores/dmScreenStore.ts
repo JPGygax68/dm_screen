@@ -2,25 +2,35 @@ import { defineStore } from 'pinia';
 
 export const useDmScreenStore = defineStore('dmscreen', {
   state: () => ({
-    data: {
-      campaigns: [
-        { name: 'Campaign 1', description: '' },
-        { name: 'Campaign 2', description: '' },
-        { name: 'Campaign 3', description: '' }
-      ],
-      dummy: 'This is a dummy property for testing purposes'
-    }
+    campaigns: [
+      { name: 'Campaign 1', description: '' },
+      { name: 'Campaign 2 - heroes!', description: '' },
+      { name: 'Campaign 3', description: '' }
+    ],
   }),
   actions: {
 
     updateByPath(path: string, value: any) {
-      const { parent, key } = resolvePath(this, path);
-      parent[key] = value; // Vue reactivity handles this
+      console.log('Updating path:', path, 'with value:', value);
+      this.$patch(state => {
+        const { parent, key } = resolvePath(state, path);
+        parent[key] = value;
+        console.log(parent[key], 'updated to', value);
+      });
     },
-    
-    updateCampaign(change: any) {
-      //console.log('Store update:', change);
-      this.data = change.data;
+
+    pushByPath(path: string, item: any) {
+      this.$patch(state => {
+        const { parent, key } = resolvePath(state, path);
+        parent[key].push(item);
+      });
+    },
+
+    removeByPath(path: string, index: number) {
+      this.$patch(state => {
+        const { parent, key } = resolvePath(state, path);
+        parent[key].splice(index, 1);
+      });
     },
   }
 });
@@ -30,6 +40,7 @@ export default useDmScreenStore;
 //-----------------------
 
 function resolvePath(root: any, path: string) {
+  console.log('Resolving path:', path, 'on root:', root);
   const segments = path.split('/');
   let obj: any = root; // TODO: use a type obtained from the schema to type this properly
 
