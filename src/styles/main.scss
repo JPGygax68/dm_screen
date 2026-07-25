@@ -31,7 +31,7 @@ body {
 
 .ui-shell {
   width: 100%;
-  min-height: 100%;
+  height: 100%; // necessary for scrolling to work properly in vertical flex layout
   display: flex;
   flex-direction: column;
   gap: 0.5rem;

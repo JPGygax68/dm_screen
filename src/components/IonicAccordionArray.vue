@@ -1,5 +1,6 @@
 <template lang="pug">
-  div
+div.top-level
+  div.accordion-container
     IonAccordionGroup
       IonAccordion(
         v-for="(item, index) in items"
@@ -20,9 +21,24 @@
         IonItem(slot="content")
           slot(:item="item" :index="index")
 
-    IonButton(@click="appendNewItem()()" icon="add" expand="block") {{ addNewLabel ?? 'Add New Item' }}
+  IonButton(@click="addNewItem()()" icon="add" expand="block") {{ addNewLabel ?? 'Add New Item' }}
 
 </template>
+<style scoped lang="scss">
+.top-level {
+  display: flex;
+  flex-direction: column;
+  max-height: 100%;
+  overflow-y: auto;
+
+  .accordion-container {
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+    max-height: 100%;
+  }
+}
+</style>
 <script setup lang="ts">
 import { computed } from 'vue';
 import { IonAccordionGroup, IonAccordion, IonItem, IonLabel, IonIcon, IonButton, alertController } from '@ionic/vue';
@@ -34,6 +50,7 @@ const props = defineProps<{
   path: string,
   disabled?: boolean,
   addNewLabel?: string,
+  append?: boolean,
 }>();
 
 const emit = defineEmits<{
@@ -60,11 +77,12 @@ const moveDown = (path: string, index: number) => {
   };
 };
 
-const appendNewItem = () => {
+const addNewItem = () => {
   return () => {
     // TODO: define a callback or prop to generate a new item based on the schema or a default value
-    const newItem = { name: 'New Campaign', description: '' };
-    emit('change', { path: props.path, value: [...props.items, newItem] });
+    const newItem = { name: '(New Item)', description: '-' };
+    const newItems = props.append ? [...props.items, newItem] : [newItem, ...props.items];
+    emit('change', { path: props.path, value: newItems });
   };
 };
 

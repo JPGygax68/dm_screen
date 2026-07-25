@@ -17,15 +17,6 @@ ion-app
         div
           strong Slice:
           |  {{ sliceName }}
-        //- div
-        //-   strong Validation errors:
-        //-   |  {{ formErrorCount }}
-
-      div.debug Debug
-        //- div {{ activeData }}
-        //- div {{ activeUiSchema}}
-        //- h4 Store data
-        //- pre(style="font-size: 50%;") {{ JSON.stringify(store.data, null, 2) }}
 
       IonicAccordionArray(
         :items="store.campaigns"
@@ -47,7 +38,14 @@ ion-app
               )
       
 </template>
-
+<style scoped lang="scss">
+.app-content {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow: hidden;
+}
+</style>
 <script setup lang="ts">
 import { computed, onMounted, onBeforeUnmount, ref } from 'vue';
 import { useRouter } from 'vue-router';
@@ -85,77 +83,5 @@ const breadcrumbs = computed(() => [
 ]);
 
 const sliceName = computed(() => uiStore.activeSlice);
-
-const campaignListUiSchema = Object.freeze({
-  type: 'array',
-  scope: '#/properties/campaigns',
-  items: {
-    type: 'Control',
-    options: { readOnly: true },
-    elements: [
-      {
-        type: 'Control',
-        scope: '#/properties/name'
-      },
-      {
-        type: 'Control',
-        scope: '#/properties/description'
-      }
-    ],
-  },
-  options: {
-    addNewItemLabel: 'Add New Campaign'
-  }
-});
-
-const campaignDetailUiSchema = Object.freeze({
-  type: 'Group',
-  // scope: '#/properties/campaigns/items/' + uiStore.activeCampaignIndex,
-  scope: '#',
-  elements: [
-    {
-      type: 'Control',
-      scope: '#/properties/name'
-    },
-    {
-      type: 'Control',
-      scope: '#/properties/description'
-    }
-  ],
-});
-
-const activeData = computed(() => {
-  console.log('store.data', store.data);
-  switch (uiStore.activeSlice) {
-    case 'campaigns':
-      return store.data;
-    case 'campaign':
-      return store.data.campaigns[uiStore.activeCampaignIndex];
-    default:
-      return store.data;
-  }
-});
-
-const activeDataSchema = computed(() => {
-  switch (uiStore.activeSlice) {
-    case 'campaigns':
-      return dataSchema;
-    case 'campaign':
-      return dataSchema.properties.campaigns.items;
-    default:
-      return dataSchema;
-  }
-});
-
-const activeUiSchema = computed(() => {
-  switch (uiStore.activeSlice) {
-    case 'campaigns':
-      return campaignListUiSchema;
-    case 'campaign':
-      return campaignDetailUiSchema; // You need to define campaignDetailUiSchema somewhere
-    default:
-      return campaignListUiSchema;
-  }
-});
 
 </script>

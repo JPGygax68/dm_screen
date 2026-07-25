@@ -26,7 +26,7 @@ export default useDmScreenStore;
 //-----------------------
 
 function resolvePath(root: any, path: string) {
-  console.log('Resolving path:', path, 'on root:', root);
+  //console.log('Resolving path:', path, 'on root:', root);
   const segments = path.split('/');
   let obj: any = root; // TODO: use a type obtained from the schema to type this properly
 
