@@ -21,15 +21,6 @@ ion-app
         //-   strong Validation errors:
         //-   |  {{ formErrorCount }}
 
-      //- div.campaign
-      //-   header.campaign-title
-      //-     div
-      //-       h1 Campaign Editor
-      //-       p Campaign slice only (name) with schema-driven rendering.
-      //-     div.header-actions
-      //-       ion-button(fill="outline" size="small" @click="send({ type: 'RESET_CAMPAIGN' })")
-      //-         | Reset
-
       div.debug Debug
         //- div {{ activeData }}
         //- div {{ activeUiSchema}}
@@ -43,15 +34,29 @@ ion-app
         @change="store.updateByPath($event.path, $event.value)"
       )
         template(v-slot="{ item, index }")
-          div {{ index + 1 }}: {{ item.name }} - {{ item.description }}
+          IonList
+            IonItem
+              IonInput(:value="item.name" label="Name" label-placement="stacked" :placeholder="'Name'")
+            IonItem
+              IonInput(
+                :value="item.description" 
+                label="Description" 
+                label-placement="stacked" 
+                placeholder="Description"
+                @ionInput="store.updateByPath(`campaigns/${index}/description`, $event.target.value)"
+              )
       
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { computed, onMounted, onBeforeUnmount, ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { createActor } from 'xstate';
-import { IonApp, IonBreadcrumbs, IonBreadcrumb, IonButton, IonContent, IonNote, IonAccordion } from '@ionic/vue';
+import { 
+  IonApp, IonBreadcrumbs, IonBreadcrumb, IonButton, IonContent, IonNote, 
+  IonCard, IonCardContent, IonCardHeader, IonCardTitle, IonInput, 
+  IonItem, IonLabel, IonIcon, IonList
+} from '@ionic/vue';
 import IonicAccordionArray from './components/IonicAccordionArray.vue';
 import Ajv2020 from 'ajv/dist/2020';
 

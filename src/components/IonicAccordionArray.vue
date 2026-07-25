@@ -1,27 +1,26 @@
 <template lang="pug">
   div
-    ion-accordion-group
-      ion-accordion(
+    IonAccordionGroup
+      IonAccordion(
         v-for="(item, index) in items"
         :key="`${path}-${index}`"
         :value="item.options?.value || undefined"
         :disabled="disabled"
       )
-        ion-item(slot="header")
-          ion-label(slot="start")
+        IonItem(slot="header")
+          IonLabel(slot="start")
             | {{ item.name }} 
-            // Item {{ index + 1 }}: {{ element.name || 'Unnamed Campaign' }}
           div(slot="end" class="array-item-actions" @click.stop)
-            ion-button(@click="removeItem(path, index)()")
-              ion-icon(name="trash")
-            ion-button(@click="moveUp(path, index)()" :disabled="index === 0")
-              ion-icon(name="up")
-            ion-button(@click="moveDown(path, index)()" :disabled="index === items.length - 1")
-              ion-icon(name="down")
-        ion-item(slot="content")
+            IonButton(@click="removeItem(path, index)()")
+              IonIcon(name="trash")
+            IonButton(@click="moveUp(path, index)()" :disabled="index === 0")
+              IonIcon(name="up")
+            IonButton(@click="moveDown(path, index)()" :disabled="index === items.length - 1")
+              IonIcon(name="down")
+        IonItem(slot="content")
           slot(:item="item" :index="index")
 
-    ion-button(@click="appendNewItem()()" icon="add" expand="block") {{ addNewLabel ?? 'Add New Item' }}
+    IonButton(@click="appendNewItem()()" icon="add" expand="block") {{ addNewLabel ?? 'Add New Item' }}
 
 </template>
 <script setup lang="ts">
@@ -36,13 +35,10 @@ const props = defineProps<{
   disabled?: boolean,
   addNewLabel?: string,
 }>();
-console.log('props', props);
 
 const emit = defineEmits<{
-  (e: 'change', payload: { path: string, value: any[] }): void,
-  (e: 'append', payload: { path: string, value: any }): void,
+  (e: 'change', payload: { path: string, value: any[] }): void
 }>();
-console.log('emit', emit);
 
 const moveUp = (path: string, index: number) => {
   return () => {

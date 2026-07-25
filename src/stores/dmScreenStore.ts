@@ -11,7 +11,7 @@ export const useDmScreenStore = defineStore('dmscreen', {
   actions: {
 
     updateByPath(path: string, value: any) {
-      console.log('Updating path:', path, 'with value:', value);
+      //console.log('Updating path:', path, 'with value:', value);
       this.$patch(state => {
         const { parent, key } = resolvePath(state, path);
         parent[key] = value;
