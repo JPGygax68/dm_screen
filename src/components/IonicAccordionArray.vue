@@ -21,7 +21,7 @@
         ion-item(slot="content")
           slot(:item="item" :index="index")
 
-    ion-button(@click="appendNewItem()()" icon="add" expand="block") {{ addNewLabel?? 'Add New Item' }}
+    ion-button(@click="appendNewItem()()" icon="add" expand="block") {{ addNewLabel ?? 'Add New Item' }}
 
 </template>
 <script setup lang="ts">
@@ -39,12 +39,12 @@ const props = defineProps<{
 console.log('props', props);
 
 const emit = defineEmits<{
-  (e: 'change', payload: { path: string, value: any[] }): void
+  (e: 'change', payload: { path: string, value: any[] }): void,
+  (e: 'append', payload: { path: string, value: any }): void,
 }>();
 console.log('emit', emit);
 
 const moveUp = (path: string, index: number) => {
-  console.log('moveUp called with path:', path, 'index:', index);
   return () => {
     const newItems = [...props.items];
     const temp = newItems[index - 1];
@@ -61,6 +61,14 @@ const moveDown = (path: string, index: number) => {
     newItems[index + 1] = newItems[index];
     newItems[index] = temp;
     emit('change', { path, value: newItems });
+  };
+};
+
+const appendNewItem = () => {
+  return () => {
+    // TODO: define a callback or prop to generate a new item based on the schema or a default value
+    const newItem = { name: 'New Campaign', description: '' };
+    emit('change', { path: props.path, value: [...props.items, newItem] });
   };
 };
 

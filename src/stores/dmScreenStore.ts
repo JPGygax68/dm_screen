@@ -18,20 +18,6 @@ export const useDmScreenStore = defineStore('dmscreen', {
         console.log(parent[key], 'updated to', value);
       });
     },
-
-    pushByPath(path: string, item: any) {
-      this.$patch(state => {
-        const { parent, key } = resolvePath(state, path);
-        parent[key].push(item);
-      });
-    },
-
-    removeByPath(path: string, index: number) {
-      this.$patch(state => {
-        const { parent, key } = resolvePath(state, path);
-        parent[key].splice(index, 1);
-      });
-    },
   }
 });
 

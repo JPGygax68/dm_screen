@@ -30,9 +30,9 @@ ion-app
       //-       ion-button(fill="outline" size="small" @click="send({ type: 'RESET_CAMPAIGN' })")
       //-         | Reset
 
-      div.debug
-        div {{ activeData }}
-        div {{ activeUiSchema}}
+      div.debug Debug
+        //- div {{ activeData }}
+        //- div {{ activeUiSchema}}
         //- h4 Store data
         //- pre(style="font-size: 50%;") {{ JSON.stringify(store.data, null, 2) }}
 
