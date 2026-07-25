@@ -25,15 +25,23 @@ ion-app
         @change="store.updateByPath($event.path, $event.value)"
       )
         template(v-slot="{ item, index }")
-          IonList
-            IonItem
-              IonInput(:value="item.name" label="Name" label-placement="stacked" :placeholder="'Name'")
+          IonList.main-fields
             IonItem
               IonInput(
+                :value="item.name"
+                @ionInput="store.updateByPath(`campaigns/${index}/name`, $event.target.value)"
+                label="Name" 
+                label-placement="stacked" 
+                placeholder="Name"
+                :ref="(el) => nameInputRefs[`campaign-${index}`] = el"
+              )
+            IonItem
+              IonTextarea(
                 :value="item.description" 
                 label="Description" 
                 label-placement="stacked" 
                 placeholder="Description"
+                rows="3"
                 @ionInput="store.updateByPath(`campaigns/${index}/description`, $event.target.value)"
               )
       
@@ -44,16 +52,20 @@ ion-app
   flex-direction: column;
   height: 100%;
   overflow: hidden;
+
+  .main-fields {
+    width: 100%;
+  }
 }
 </style>
 <script setup lang="ts">
-import { computed, onMounted, onBeforeUnmount, ref } from 'vue';
+import { computed, onMounted, onBeforeUnmount, ref, useTemplateRef, watch } from 'vue';
 import { useRouter } from 'vue-router';
 import { createActor } from 'xstate';
-import { 
-  IonApp, IonBreadcrumbs, IonBreadcrumb, IonButton, IonContent, IonNote, 
-  IonCard, IonCardContent, IonCardHeader, IonCardTitle, IonInput, 
-  IonItem, IonLabel, IonIcon, IonList
+import {
+  IonApp, IonBreadcrumbs, IonBreadcrumb, IonButton, IonContent, IonNote,
+  IonCard, IonCardContent, IonCardHeader, IonCardTitle, IonInput,
+  IonItem, IonLabel, IonIcon, IonList, IonTextarea
 } from '@ionic/vue';
 import IonicAccordionArray from './components/IonicAccordionArray.vue';
 import Ajv2020 from 'ajv/dist/2020';
@@ -84,4 +96,15 @@ const breadcrumbs = computed(() => [
 
 const sliceName = computed(() => uiStore.activeSlice);
 
+const nameInputRefs = ref<{ [key: string]: IonInput | null }>({});
+
+watch(nameInputRefs, (newValue) => {
+  console.log('Current name input value:', newValue);
+  if (newValue) {
+    const firstKey = Object.keys(nameInputRefs.value)[0];
+    const firstInput = nameInputRefs.value[firstKey];
+    console.log('Focusing on name input:', firstInput?.$el);
+    firstInput?.$el.setFocus();
+  }
+});
 </script>

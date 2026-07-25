@@ -1,11 +1,10 @@
 <template lang="pug">
 div.top-level
   div.accordion-container
-    IonAccordionGroup
+    IonAccordionGroup(:value="selectedItemIndex")
       IonAccordion(
         v-for="(item, index) in items"
-        :key="`${path}-${index}`"
-        :value="item.options?.value || undefined"
+        :value="`item-${index}`"
         :disabled="disabled"
       )
         IonItem(slot="header")
@@ -30,6 +29,7 @@ div.top-level
   flex-direction: column;
   max-height: 100%;
   overflow-y: auto;
+  gap: 0.5rem;
 
   .accordion-container {
     display: flex;
@@ -40,7 +40,8 @@ div.top-level
 }
 </style>
 <script setup lang="ts">
-import { computed } from 'vue';
+import { nextTick } from 'vue';
+import { computed, ref } from 'vue';
 import { IonAccordionGroup, IonAccordion, IonItem, IonLabel, IonIcon, IonButton, alertController } from '@ionic/vue';
 import { addIcons } from 'ionicons';
 import { trashOutline, arrowUpOutline, arrowDownOutline, addOutline } from 'ionicons/icons';
@@ -56,6 +57,8 @@ const props = defineProps<{
 const emit = defineEmits<{
   (e: 'change', payload: { path: string, value: any[] }): void
 }>();
+
+const selectedItemIndex = ref('');
 
 const moveUp = (path: string, index: number) => {
   return () => {
@@ -81,8 +84,23 @@ const addNewItem = () => {
   return () => {
     // TODO: define a callback or prop to generate a new item based on the schema or a default value
     const newItem = { name: '(New Item)', description: '-' };
-    const newItems = props.append ? [...props.items, newItem] : [newItem, ...props.items];
-    emit('change', { path: props.path, value: newItems });
+    if (props.append) {
+      const newItems = [...props.items, newItem];
+      emit('change', { path: props.path, value: newItems });
+      selectedItemIndex.value = `item-${props.items.length}`; // select the newly added item
+    } else {
+      const newItems = [newItem, ...props.items];
+      emit('change', { path: props.path, value: newItems });
+      selectedItemIndex.value = `item-0`; // select the newly added item
+    }
+    nextTick(() => {
+      // Scroll to the newly added item if needed
+      const accordionGroup = document.querySelector(`#item-${selectedItemIndex.value}`);
+      console.log('Scrolling to newly added item:', accordionGroup);
+      if (accordionGroup) {
+        accordionGroup.scrollTop = accordionGroup.scrollHeight;
+      }
+    });
   };
 };
 
