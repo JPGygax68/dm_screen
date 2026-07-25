@@ -40,7 +40,7 @@ div.top-level
 }
 </style>
 <script setup lang="ts">
-import { nextTick } from 'vue';
+import { nextTick, watch } from 'vue';
 import { computed, ref } from 'vue';
 import { IonAccordionGroup, IonAccordion, IonItem, IonLabel, IonIcon, IonButton, alertController } from '@ionic/vue';
 import { addIcons } from 'ionicons';
@@ -55,10 +55,29 @@ const props = defineProps<{
 }>();
 
 const emit = defineEmits<{
-  (e: 'change', payload: { path: string, value: any[] }): void
+  (e: 'change', payload: { path: string, value: any[] }): void,
+  (e: 'focus', index: number): void,
 }>();
 
 const selectedItemIndex = ref('');
+
+const indexToFocus = ref(-1);
+
+// Watch a specific value in your store
+watch(() => props.items, async (newItems, oldItems) => {
+  console.log('items changed to:', newItems, 'Previous value was:', oldItems);
+
+  if (indexToFocus.value >= 0 && indexToFocus.value < newItems.length) {
+    window.requestAnimationFrame(() => {
+      window.requestAnimationFrame(() => {
+        // SAFE: DOM is completely rendered, elements have physical heights
+        console.log("UI layout completely finished rendering!");
+        emit('focus', indexToFocus.value);
+        indexToFocus.value = -1; // Reset after focusing
+      });
+    });
+  }
+});
 
 const moveUp = (path: string, index: number) => {
   return () => {
@@ -82,25 +101,20 @@ const moveDown = (path: string, index: number) => {
 
 const addNewItem = () => {
   return () => {
-    // TODO: define a callback or prop to generate a new item based on the schema or a default value
     const newItem = { name: '(New Item)', description: '-' };
+    let index = -1;
+    let newItems: any[] = [];
     if (props.append) {
-      const newItems = [...props.items, newItem];
-      emit('change', { path: props.path, value: newItems });
-      selectedItemIndex.value = `item-${props.items.length}`; // select the newly added item
+      newItems = [...props.items, newItem];
+      index = props.items.length; // index of the newly added item
     } else {
-      const newItems = [newItem, ...props.items];
-      emit('change', { path: props.path, value: newItems });
-      selectedItemIndex.value = `item-0`; // select the newly added item
+      newItems = [newItem, ...props.items];
+      index = 0; // index of the newly added item
     }
-    nextTick(() => {
-      // Scroll to the newly added item if needed
-      const accordionGroup = document.querySelector(`#item-${selectedItemIndex.value}`);
-      console.log('Scrolling to newly added item:', accordionGroup);
-      if (accordionGroup) {
-        accordionGroup.scrollTop = accordionGroup.scrollHeight;
-      }
-    });
+    selectedItemIndex.value = `item-${index}`; // select the newly added item
+    emit('change', { path: props.path, value: newItems });
+    indexToFocus.value = index; // set the index to focus on
+    //nextTick(() => emit('focus', index));
   };
 };
 

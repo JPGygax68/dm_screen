@@ -23,6 +23,7 @@ ion-app
         :path="'campaigns'"
         :addNewLabel="'Add New Campaign'"
         @change="store.updateByPath($event.path, $event.value)"
+        @focus="focusNameInput($event)"
       )
         template(v-slot="{ item, index }")
           IonList.main-fields
@@ -33,7 +34,7 @@ ion-app
                 label="Name" 
                 label-placement="stacked" 
                 placeholder="Name"
-                :ref="(el) => nameInputRefs[`campaign-${index}`] = el"
+                :ref="(el) => registerNameInputField(el, index)"
               )
             IonItem
               IonTextarea(
@@ -59,9 +60,8 @@ ion-app
 }
 </style>
 <script setup lang="ts">
-import { computed, onMounted, onBeforeUnmount, ref, useTemplateRef, watch } from 'vue';
+import { computed, onMounted, onBeforeUnmount, ref, useTemplateRef, watch, nextTick } from 'vue';
 import { useRouter } from 'vue-router';
-import { createActor } from 'xstate';
 import {
   IonApp, IonBreadcrumbs, IonBreadcrumb, IonButton, IonContent, IonNote,
   IonCard, IonCardContent, IonCardHeader, IonCardTitle, IonInput,
@@ -82,7 +82,7 @@ const ajv = computed(() => new Ajv2020({
   strict: false
 }));
 
-const validate = ref(() => ajv.value.compile(dataSchema));
+const validate = ajv.value.compile(dataSchema);
 
 const store = useDmScreenStore();
 const uiStore = useUiStore();
@@ -96,15 +96,20 @@ const breadcrumbs = computed(() => [
 
 const sliceName = computed(() => uiStore.activeSlice);
 
-const nameInputRefs = ref<{ [key: string]: IonInput | null }>({});
+const nameInputRefs = ref<{ [key: string]: any | null }>({});
 
-watch(nameInputRefs, (newValue) => {
-  console.log('Current name input value:', newValue);
-  if (newValue) {
-    const firstKey = Object.keys(nameInputRefs.value)[0];
-    const firstInput = nameInputRefs.value[firstKey];
-    console.log('Focusing on name input:', firstInput?.$el);
-    firstInput?.$el.setFocus();
-  }
-});
+const registerNameInputField = (el: any, index: number) => {
+  nameInputRefs.value[index] = el;
+};
+
+const focusNameInput = (index: number) => {
+  const input = nameInputRefs.value[index];
+  setTimeout(() => input?.$el.setFocus(), 1); // Delay to ensure the input is rendered and ready
+  // nextTick(() => {
+  //   const input = nameInputRefs.value[index];
+  //   console.log(`Focusing on name input field for index: ${index}`, input?.$el);
+  //   input?.$el.setFocus();
+  // });
+};
+
 </script>
