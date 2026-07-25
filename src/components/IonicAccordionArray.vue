@@ -68,14 +68,8 @@ watch(() => props.items, async (newItems, oldItems) => {
   console.log('items changed to:', newItems, 'Previous value was:', oldItems);
 
   if (indexToFocus.value >= 0 && indexToFocus.value < newItems.length) {
-    window.requestAnimationFrame(() => {
-      window.requestAnimationFrame(() => {
-        // SAFE: DOM is completely rendered, elements have physical heights
-        console.log("UI layout completely finished rendering!");
-        emit('focus', indexToFocus.value);
-        indexToFocus.value = -1; // Reset after focusing
-      });
-    });
+    emit('focus', indexToFocus.value);
+    indexToFocus.value = -1; // Reset after focusing
   }
 });
 
@@ -113,8 +107,8 @@ const addNewItem = () => {
     }
     selectedItemIndex.value = `item-${index}`; // select the newly added item
     emit('change', { path: props.path, value: newItems });
-    indexToFocus.value = index; // set the index to focus on
-    //nextTick(() => emit('focus', index));
+    //indexToFocus.value = index; // set the index to focus on
+    emit('focus', index); // directly emit focus event for the newly added item
   };
 };
 
@@ -134,6 +128,7 @@ const removeItem = (path: string, index: number) => {
           handler: () => {
             const newItems = [...props.items];
             newItems.splice(index, 1);
+            selectedItemIndex.value = ''; // clear selection if the selected item was removed
             emit('change', { path, value: newItems });
           }
         }
