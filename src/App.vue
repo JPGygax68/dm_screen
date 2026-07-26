@@ -1,17 +1,14 @@
 <script setup lang="ts">
   import { computed, onMounted, onBeforeUnmount, ref, useTemplateRef, watch, nextTick } from 'vue';
   import { useRouter } from 'vue-router';
-  import {
-    IonApp, IonBreadcrumbs, IonBreadcrumb, IonButton, IonContent, IonNote,
-    IonCard, IonCardContent, IonCardHeader, IonCardTitle, IonInput,
-    IonItem, IonLabel, IonIcon, IonList, IonTextarea
-  } from '@ionic/vue';
-  import IonicAccordionArray from './components/IonicAccordionArray.vue';
+  import { IonApp, IonBreadcrumbs, IonBreadcrumb, IonContent } from '@ionic/vue';
   import Ajv2020 from 'ajv/dist/2020';
 
   import { focusIonicInput, focusAndSelectIonicInput } from './lib/vue-ionic-utils';
   import useDmScreenStore from './stores/dmScreenStore';
   import { useUiStore } from './stores/uiStateStore';
+
+  import CampaignListView from './views/CampaignListView.vue';
 
   import _dataSchema from './generated/models/data.schema.json';
 
@@ -42,13 +39,13 @@
 
 <template lang="pug">
 
-ion-app
+IonApp
 
-  ion-content(class="ion-padding app-content" fullscreen)
+  IonContent(class="ion-padding app-content" fullscreen)
 
     main.ui-shell
-      ion-breadcrumbs.breadcrumbs
-        ion-breadcrumb(
+      IonBreadcrumbs(class="breadcrumbs")
+        IonBreadcrumb(
           v-for="(crumb, index) in breadcrumbs"
           :key="index"
           :href="crumb.href"
@@ -60,44 +57,6 @@ ion-app
           strong Slice:
           |  {{ sliceName }}
 
-      IonicAccordionArray(
-        :items="store.campaigns"
-        :path="'campaigns'"
-        :addNewLabel="'Add New Campaign'"
-        @change="store.updateByPath($event.path, $event.value)"
-        @focus="focusAndSelectIonicInput(nameInputRefs[$event])"
-      )
-        template(v-slot="{ item, index }")
-          IonList.main-fields
-            IonItem
-              IonInput(
-                :value="item.name"
-                @ionInput="store.updateByPath(`campaigns/${index}/name`, $event.target.value)"
-                label="Name" 
-                label-placement="stacked" 
-                placeholder="Name"
-                :ref="(el) => nameInputRefs[index] = el"
-              )
-            IonItem
-              IonTextarea(
-                :value="item.description" 
-                label="Description" 
-                label-placement="stacked" 
-                placeholder="Description"
-                rows="5"
-                @ionInput="store.updateByPath(`campaigns/${index}/description`, $event.target.value)"
-              )
-      
-</template>
-<style scoped lang="scss">
-  .app-content {
-    display: flex;
-    flex-direction: column;
-    height: 100%;
-    overflow: hidden;
+      CampaignListView
 
-    .main-fields {
-      width: 100%;
-    }
-  }
-</style>
+</template>
