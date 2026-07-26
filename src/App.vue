@@ -60,3 +60,14 @@ IonApp
       CampaignListView
 
 </template>
+
+<style scoped lang="scss">
+  .ui-shell {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+  }
+  campaign-list-view {
+    flex: 1;
+  }
+</style>
