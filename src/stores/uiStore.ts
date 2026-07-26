@@ -9,14 +9,17 @@ export const useUiStore = defineStore('ui', {
   actions: {
     startCampaignDraft() {
       console.log('Starting new campaign draft');
-      this.campaignDraft = {
-        name: '(New Campaign)',
-        description: '',
-      };
+      if (!this.campaignDraft) {
+        this.campaignDraft = {
+          name: '(New Campaign)',
+          description: '',
+        };
+      }
       return this.campaignDraft;
     },
 
     clearCampaignDraft() {
+      console.log('Clearing campaign draft');
       this.campaignDraft = null;
     }
   }

@@ -23,8 +23,8 @@ type: object
     title: Campaign
     description: The root data structure containing all campaign information
     properties:
-      name: { type: string, description: "Campaign name", default: "New Campaign" }
-      description: { type: string, description: "Campaign description (optional)", optional: true }
+      name: { type: string, description: "Campaign name", default: "New Campaign", minLength: 1 }
+      description: { type: string, description: "Campaign description (optional)" }
       party:
         type: array
         description: Set of player characters
