@@ -15,7 +15,7 @@ export const useDmScreenStore = defineStore('dmscreen', {
       this.$patch(state => {
         const { parent, key } = resolvePath(state, path);
         parent[key] = value;
-        console.log(parent[key], 'updated to', value);
+        //console.log(parent[key], 'updated to', value);
       });
     },
   }

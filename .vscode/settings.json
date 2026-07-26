@@ -1,11 +1,12 @@
 {
     "editor.semanticHighlighting.enabled": true,
     "[vue]": {
-        "editor.foldingStrategy": "indentation",
+        "editor.foldingStrategy": "auto",
         "editor.showFoldingControls": "always"
     },
     "[pug]": {
         "editor.foldingStrategy": "indentation"
     },
-    "editor.foldingStrategy": "auto"
+    "editor.foldingStrategy": "auto",
+    "editor.defaultFoldingRangeProvider": "Vue.volar"
 }

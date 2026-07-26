@@ -40,7 +40,7 @@ div.top-level
 }
 </style>
 <script setup lang="ts">
-import { nextTick, watch } from 'vue';
+import { watch } from 'vue';
 import { computed, ref } from 'vue';
 import { IonAccordionGroup, IonAccordion, IonItem, IonLabel, IonIcon, IonButton, alertController } from '@ionic/vue';
 import { addIcons } from 'ionicons';
