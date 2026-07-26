@@ -31,4 +31,10 @@ const router = createRouter({
   routes: routes
 });
 
-createApp(App).use(IonicVue).use(createPinia()).use(router).mount('#app');
+const app = createApp(App)
+  .use(IonicVue)
+  .use(router)
+  .use(createPinia())
+
+await router.isReady();
+app.mount('#app');

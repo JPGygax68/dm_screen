@@ -18,6 +18,15 @@ export const useDmScreenStore = defineStore('dmscreen', {
         //console.log(parent[key], 'updated to', value);
       });
     },
+
+    // Dedicated function to add a new campaign to the campaigns array
+    // TODO: try to obtain a type for the campaign from the schema instead of using 'any'
+    addCampaign(campaign: any) {
+      this.$patch(state => {
+        state.campaigns = [ campaign, ...state.campaigns];
+      });
+      console.log('Added new campaign, new list:', this.$state.campaigns);
+    }
   }
 });
 

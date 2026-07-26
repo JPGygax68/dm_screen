@@ -13,11 +13,11 @@ const routes: RouteRecordRaw[] = [
     name: 'campaigns-list',
     component: CampaignListView
   },
-  // {
-  //   path: '/campaigns/new',
-  //   name: 'campaigns-new',
-  //   component: CampaignCreateView
-  // },
+  {
+    path: '/campaigns/new',
+    name: 'campaigns-new',
+    component: CampaignCreateView
+  },
   // {
   //   path: '/campaigns/:id',
   //   name: 'campaigns-detail',
