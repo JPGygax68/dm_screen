@@ -19,6 +19,7 @@ export const useUiStore = defineStore('ui', {
     },
 
     clearCampaignDraft() {
+      console.assert(!!this.campaignDraft, 'No campaign draft to clear');
       console.log('Clearing campaign draft');
       this.campaignDraft = null;
     }

@@ -7,8 +7,10 @@
       ion-list
         ion-item(:class="{ 'ion-invalid': true ||errors.name, 'ion-touched': errors.name }")
           ion-input(
+            ref="nameInput"
             v-model="draft.name" label="Name" label-placement="stacked" 
             placeholder="Campaign Name"
+            autofocus
             :class="{ 'ion-invalid': errors.name, 'ion-touched': errors.name }"
             :error-text="errors.name"
           )
@@ -28,10 +30,12 @@
 </style>
 
 <script setup lang="ts">
-  import { computed } from 'vue';
-  import { IonPage, IonHeader, IonContent, IonList, IonItem, IonInput, IonTextarea, IonButton,
+  import { computed, ref } from 'vue';
+  import {
+    IonPage, IonHeader, IonContent, IonList, IonItem, IonInput, IonTextarea, IonButton,
     IonNote
-   } from '@ionic/vue';
+  } from '@ionic/vue';
+  import { onIonViewWillEnter, onIonViewWillLeave, onIonViewDidEnter } from '@ionic/vue';
   import { useUiStore } from '../stores/uiStore.ts';
   import useDataStore from '../stores/dataStore.ts';
   import { useRouter } from 'vue-router';
@@ -47,7 +51,31 @@
 
   const router = useRouter();
 
-  const draft = ui.startCampaignDraft();
+  const draft = ref<any>({});
+  // import { onIonViewWillEnter } from '@ionic/vue';
+
+  const nameInput = ref<any>(null);
+
+  onIonViewWillEnter(() => {
+    draft.value = ui.startCampaignDraft();
+  });
+
+  onIonViewDidEnter(async () => {
+    if (nameInput.value) {
+      // 1. Wait for Ionic to expose the inner native HTMLInputElement
+      const nativeInput = await nameInput.value.$el.getInputElement();
+      // 2. Focus the field
+      nativeInput.focus();
+      // 3. Select the text content (works for both empty strings and edits)
+      nativeInput.select();
+    }
+  });
+
+  onIonViewWillLeave(() => {
+    if (document.activeElement instanceof HTMLElement) {
+      document.activeElement.blur();
+    }
+  });
 
   // Initialize AJV validator
   const ajv = new Ajv({ allErrors: true });
@@ -55,7 +83,7 @@
 
   // Compute errors reactively based on JSON Schema
   const validationResult = computed(() => {
-    const valid = validateCampaign(draft);
+    const valid = validateCampaign(draft.value);
     const errorsMap: Record<string, string> = {};
 
     if (!valid && validateCampaign.errors) {
