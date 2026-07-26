@@ -33,18 +33,18 @@
 </style>
 
 <script setup lang="ts">
-import { IonList, IonItem, IonTextarea, IonButton } from '@ionic/vue';
-import useDmScreenStore from '../stores/dmScreenStore';
-import type { Ref } from 'vue';
-import IonicAccordionArray from '../components/IonicAccordionArray.vue';
+  import { IonList, IonItem, IonTextarea, IonButton } from '@ionic/vue';
+  import useDmScreenStore from '../stores/dmScreenStore';
+  import type { Ref } from 'vue';
+  import IonicAccordionArray from '../components/IonicAccordionArray.vue';
 
-const store = useDmScreenStore();
+  const store = useDmScreenStore();
 
-const addNewCampaign = () => {
-  return () => {
-    const newCampaign = { name: '(New Campaign)' };
-    const newCampaigns = [newCampaign, ...store.campaigns];
-    store.updateByPath('campaigns', newCampaigns);
+  const addNewCampaign = () => {
+    return () => {
+      const newCampaign = { name: '(New Campaign)' };
+      const newCampaigns = [newCampaign, ...store.campaigns];
+      store.updateByPath('campaigns', newCampaigns);
+    };
   };
-};
 </script>

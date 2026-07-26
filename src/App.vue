@@ -1,7 +1,6 @@
 <script setup lang="ts">
-  import { computed, onMounted, onBeforeUnmount, ref, useTemplateRef, watch, nextTick } from 'vue';
-  import { useRouter } from 'vue-router';
-  import { IonApp, IonBreadcrumbs, IonBreadcrumb, IonContent } from '@ionic/vue';
+  import { computed, ref } from 'vue';
+  import { IonApp, IonRouterOutlet } from '@ionic/vue';
   import Ajv2020 from 'ajv/dist/2020';
 
   import { focusIonicInput, focusAndSelectIonicInput } from './lib/vue-ionic-utils';
@@ -24,8 +23,6 @@
   const store = useDmScreenStore();
   const uiStore = useUiStore();
 
-  const router = useRouter();
-
   const breadcrumbs = computed(() => [
     { label: 'Home', href: '/' },
     { label: 'Campaign List', href: '/campaign-list' }
@@ -39,35 +36,17 @@
 
 <template lang="pug">
 
-IonApp
-
-  IonContent(class="ion-padding app-content" fullscreen)
-
-    main.ui-shell
-      IonBreadcrumbs(class="breadcrumbs")
-        IonBreadcrumb(
-          v-for="(crumb, index) in breadcrumbs"
-          :key="index"
-          :href="crumb.href"
-        )
-          | {{ crumb.label }}
-
-      section.status-bar
-        div
-          strong Slice:
-          |  {{ sliceName }}
-
-      CampaignListView
+IonApp   
+  IonRouterOutlet
 
 </template>
 
 <style scoped lang="scss">
-  .ui-shell {
+  ion-app {
+    height: 100%;
+    border: none;
+    padding: 0;
     display: flex;
     flex-direction: column;
-    height: 100%;
-  }
-  campaign-list-view {
-    flex: 1;
   }
 </style>

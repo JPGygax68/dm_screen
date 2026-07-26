@@ -1,7 +1,7 @@
 import { createApp } from 'vue';
 import { IonicVue } from '@ionic/vue';
 
-import { createRouter, createWebHistory } from 'vue-router';
+import { createRouter, createWebHistory } from '@ionic/vue-router';
 
 import '@ionic/vue/css/core.css';
 import '@ionic/vue/css/normalize.css';
@@ -18,6 +18,7 @@ import { createPinia } from 'pinia';
 
 import './styles/main.scss';
 import App from './App.vue';
+import routes from './router/index';
 
 const THEME_STORAGE_KEY = 'dm-screen-theme';
 const VALID_THEMES = new Set(['light', 'dark', 'auto']);
@@ -27,9 +28,7 @@ document.documentElement.dataset.theme = initialTheme;
 
 const router = createRouter({
   history: createWebHistory(),
-  routes: [
-    { path: '/', component: App },
-  ]
+  routes: routes
 });
 
 createApp(App).use(IonicVue).use(createPinia()).use(router).mount('#app');
