@@ -1,42 +1,42 @@
 <script setup lang="ts">
-import { computed, onMounted, onBeforeUnmount, ref, useTemplateRef, watch, nextTick } from 'vue';
-import { useRouter } from 'vue-router';
-import {
-  IonApp, IonBreadcrumbs, IonBreadcrumb, IonButton, IonContent, IonNote,
-  IonCard, IonCardContent, IonCardHeader, IonCardTitle, IonInput,
-  IonItem, IonLabel, IonIcon, IonList, IonTextarea
-} from '@ionic/vue';
-import IonicAccordionArray from './components/IonicAccordionArray.vue';
-import Ajv2020 from 'ajv/dist/2020';
+  import { computed, onMounted, onBeforeUnmount, ref, useTemplateRef, watch, nextTick } from 'vue';
+  import { useRouter } from 'vue-router';
+  import {
+    IonApp, IonBreadcrumbs, IonBreadcrumb, IonButton, IonContent, IonNote,
+    IonCard, IonCardContent, IonCardHeader, IonCardTitle, IonInput,
+    IonItem, IonLabel, IonIcon, IonList, IonTextarea
+  } from '@ionic/vue';
+  import IonicAccordionArray from './components/IonicAccordionArray.vue';
+  import Ajv2020 from 'ajv/dist/2020';
 
-import { focusIonicInput } from './lib/vue-ionic-utils';
-import useDmScreenStore from './stores/dmScreenStore';
-import { useUiStore } from './stores/uiStateStore';
+  import { focusIonicInput, focusAndSelectIonicInput } from './lib/vue-ionic-utils';
+  import useDmScreenStore from './stores/dmScreenStore';
+  import { useUiStore } from './stores/uiStateStore';
 
-import _dataSchema from './generated/models/data.schema.json';
+  import _dataSchema from './generated/models/data.schema.json';
 
-const dataSchema = Object.freeze(_dataSchema);
+  const dataSchema = Object.freeze(_dataSchema);
 
-const ajv = computed(() => new Ajv2020({
-  allErrors: true,
-  strict: false
-}));
+  const ajv = computed(() => new Ajv2020({
+    allErrors: true,
+    strict: false
+  }));
 
-const validate = ajv.value.compile(dataSchema);
+  const validate = ajv.value.compile(dataSchema);
 
-const store = useDmScreenStore();
-const uiStore = useUiStore();
+  const store = useDmScreenStore();
+  const uiStore = useUiStore();
 
-const router = useRouter();
+  const router = useRouter();
 
-const breadcrumbs = computed(() => [
-  { label: 'Home', href: '/' },
-  { label: 'Campaign List', href: '/campaign-list' }
-]);
+  const breadcrumbs = computed(() => [
+    { label: 'Home', href: '/' },
+    { label: 'Campaign List', href: '/campaign-list' }
+  ]);
 
-const sliceName = computed(() => uiStore.activeSlice);
+  const sliceName = computed(() => uiStore.activeSlice);
 
-const nameInputRefs = ref<{ [key: string]: any | null }>({});
+  const nameInputRefs = ref<{ [key: string]: any | null }>({});
 
 </script>
 
@@ -65,7 +65,7 @@ ion-app
         :path="'campaigns'"
         :addNewLabel="'Add New Campaign'"
         @change="store.updateByPath($event.path, $event.value)"
-        @focus="focusIonicInput(nameInputRefs[$event])"
+        @focus="focusAndSelectIonicInput(nameInputRefs[$event])"
       )
         template(v-slot="{ item, index }")
           IonList.main-fields
@@ -90,14 +90,14 @@ ion-app
       
 </template>
 <style scoped lang="scss">
-.app-content {
-  display: flex;
-  flex-direction: column;
-  height: 100%;
-  overflow: hidden;
+  .app-content {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    overflow: hidden;
 
-  .main-fields {
-    width: 100%;
+    .main-fields {
+      width: 100%;
+    }
   }
-}
 </style>
