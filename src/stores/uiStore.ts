@@ -3,7 +3,8 @@ import schema from '../generated/models/data.schema.json';
 
 export const useUiStore = defineStore('ui', {
   state: () => ({
-    campaignDraft: null as null | { id: string; name: string; description: string },
+    // TODO: try to obtain a type for the campaign from the schema instead of using 'any'
+    campaignDraft: null as any, // used for both creating and editing campaigns
     openCampaignAccordions: [] as string[]
   }),
 
@@ -29,6 +30,20 @@ export const useUiStore = defineStore('ui', {
     setOpenCampaignAccordions(ids: string[] | null) {
       console.log('Setting open campaign accordions to:', ids);
       this.openCampaignAccordions = ids ?? [];
+    },
+
+    loadCampaignIntoDraft(campaign: any) {
+      console.log('Loading campaign draft for campaign ID:', campaign.id);
+      this.campaignDraft = { ...campaign };
+    },
+
+    removeCharacterFromParty(characterId: string) {
+      console.log(`Removing character with ID ${characterId} from campaign draft`);
+      console.assert(!!this.campaignDraft, 'No campaign draft to remove character from');
+      console.assert(!!this.campaignDraft?.party, 'No party found in campaign draft');
+      this.campaignDraft.party = this.campaignDraft.party.filter((char: any) => char.id !== characterId);
     }
   }
 });
+
+export default useUiStore;

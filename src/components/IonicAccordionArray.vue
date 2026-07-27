@@ -13,6 +13,7 @@
         IonLabel(slot="start")
           | {{ item.name }} 
         div(slot="end" class="array-item-actions" @click.stop)
+          slot(name="header" :item="item" :index="index")
           IonButton(@click="removeItem(path, index)()")
             IonIcon(name="trash")
           IonButton(@click="moveUp(path, index)()" :disabled="index === 0")
@@ -20,7 +21,7 @@
           IonButton(@click="moveDown(path, index)()" :disabled="index === items.length - 1")
             IonIcon(name="down")
       IonItem(slot="content")
-        slot(:item="item" :index="index")
+        slot(name="content" :item="item" :index="index")
 
 </template>
 
@@ -85,6 +86,7 @@
 
   const removeItem = (path: string, index: number) => {
     return async () => {
+      // TODO: confirmation should be delegated back to the parent component
       const alert = await alertController.create({
         header: 'Delete Campaign?',
         message: 'Are you sure?',
@@ -99,7 +101,7 @@
             handler: () => {
               const newItems = [...props.items];
               newItems.splice(index, 1);
-              selectedItemIndex.value = ''; // clear selection if the selected item was removed
+              // TODO: Inform the parent that the item has been removed (by id)
               emit('change', { path, value: newItems });
             }
           }

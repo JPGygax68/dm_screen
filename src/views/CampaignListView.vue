@@ -1,10 +1,9 @@
 <template lang="pug">
-  IonPage
-    IonHeader
+  ion-page
+    ion-header
       Breadcrumbs
-
-    IonContent
-      IonButton(
+    ion-content
+      ion-button(
         @click="addNewCampaign()" 
         expand="block" 
         class="ion-margin-horizontal ion-margin-top"
@@ -14,18 +13,31 @@
         :items="store.campaigns"
         :path="'campaigns'"
         v-model:openValues="openAccordions"
-        @change="store.updateByPath($event.path, $event.value)"
+        @change="handleAccordionChange"
       )
-        template(v-slot="{ item, index }")
-          IonList.main-fields
-            IonItem
-              IonTextarea(
+        template(v-slot:header="{ item, index }")
+          ion-button(
+            @click="router.push(`/campaigns/${item.id}/edit`)"
+          )
+            ion-icon(name="open")
+
+        template(v-slot:content="{ item, index }")
+          ion-list.main-fields
+            ion-item
+              ion-textarea(
               :value="item.description" 
               label-placement="stacked" 
               placeholder="Description"
               rows="5"
               readOnly
             )
+
+    ion-footer
+      ion-button(
+        @click="router.push('/')" 
+        class="ion-margin-horizontal ion-margin-bottom"
+      ) Back to Home
+
 </template>
 
 <style scoped lang="scss">
@@ -42,13 +54,20 @@
 </style>
 
 <script setup lang="ts">
-  import { IonPage, IonHeader, IonContent, IonList, IonItem, IonTextarea, IonButton } from '@ionic/vue';
+  import { IonPage, IonHeader, IonContent, IonFooter, IonList, IonItem, IonTextarea,
+     IonButton, IonIcon } from '@ionic/vue';
+  import { addIcons } from 'ionicons';
+  import { openOutline } from 'ionicons/icons';
   import { useRouter } from 'vue-router';
   import useDmScreenStore from '../stores/dataStore.ts';
   import type { Ref } from 'vue';
   import IonicAccordionArray from '../components/IonicAccordionArray.vue';
   import Breadcrumbs from '../components/Breadcrumbs.vue';
   import { useUiStore } from '../stores/uiStore.ts';
+
+  addIcons({
+    'open': openOutline
+  });
 
   const router = useRouter();
   const store = useDmScreenStore();
@@ -65,8 +84,8 @@
     router.push('/campaigns/new');
   };
 
-  function handleAccordionChange(newValue: string | null) {
+  function handleAccordionChange(newValue: string[] | null) {
     console.log('Accordion change event received with value:', newValue);
-    ui.setOpenCampaignAccordionId(newValue);
+    ui.setOpenCampaignAccordions(newValue);
   }
 </script>
