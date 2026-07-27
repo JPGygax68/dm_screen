@@ -23,6 +23,7 @@ type: object
     title: Campaign
     description: The root data structure containing all campaign information
     properties:
+      id: { type: string, description: "Unique campaign identifier" }
       name: { type: string, description: "Campaign name", default: "New Campaign", minLength: 1 }
       description: { type: string, description: "Campaign description (optional)" }
       party:
@@ -37,6 +38,7 @@ type: object
         items:
           "$ref": "#/$defs/Encounter"
     required: 
+    - id
     - name
     # - party
     # - encounters

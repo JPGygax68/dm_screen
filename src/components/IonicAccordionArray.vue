@@ -3,7 +3,7 @@
   IonAccordionGroup.group(:value="selectedItemIndex")
     IonAccordion(
       v-for="(item, index) in items"
-      :value="`item-${index}`"
+      :value="item[props.idField] || console.assert(false, `Item at index ${index} is missing the id field '${props.idField}'`)"
       :disabled="disabled"
     )
       IonItem(slot="header")
@@ -35,11 +35,15 @@
   import { addIcons } from 'ionicons';
   import { trashOutline, arrowUpOutline, arrowDownOutline, addOutline } from 'ionicons/icons';
 
-  const props = defineProps<{
+  const props = withDefaults(defineProps<{
+    idField?: string,
     items: any[],
     path: string,
     disabled?: boolean,
-  }>();
+  }>(), {
+    idField: 'id',
+    disabled: false
+  });
 
   const emit = defineEmits<{
     (e: 'change', payload: { path: string, value: any[] }): void

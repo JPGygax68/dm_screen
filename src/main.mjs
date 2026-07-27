@@ -18,7 +18,7 @@ import { createPinia } from 'pinia';
 
 import './styles/main.scss';
 import App from './App.vue';
-import routes from './router/index';
+import routes from './router';
 
 const THEME_STORAGE_KEY = 'dm-screen-theme';
 const VALID_THEMES = new Set(['light', 'dark', 'auto']);

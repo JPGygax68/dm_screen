@@ -3,9 +3,9 @@ import { defineStore } from 'pinia';
 export const useDmScreenStore = defineStore('dmscreen', {
   state: () => ({
     campaigns: [
-      { name: 'Campaign 1', description: '' },
-      { name: 'Campaign 2 - heroes!', description: '' },
-      { name: 'Campaign 3', description: '' }
+      { id: crypto.randomUUID(), name: 'Campaign 1', description: '' },
+      { id: crypto.randomUUID(), name: 'Campaign 2 - heroes!', description: '' },
+      { id: crypto.randomUUID(), name: 'Campaign 3', description: '' }
     ],
   }),
   actions: {

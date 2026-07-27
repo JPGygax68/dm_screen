@@ -3,7 +3,8 @@ import schema from '../generated/models/data.schema.json';
 
 export const useUiStore = defineStore('ui', {
   state: () => ({
-    campaignDraft: null as null | { name: string; description: string },
+    campaignDraft: null as null | { id: string; name: string; description: string },
+    openCampaignAccordionId: null as null | string
   }),
 
   actions: {
@@ -11,6 +12,7 @@ export const useUiStore = defineStore('ui', {
       console.log('Starting new campaign draft');
       if (!this.campaignDraft) {
         this.campaignDraft = {
+          id: crypto.randomUUID(),
           name: '',
           description: '',
         };
