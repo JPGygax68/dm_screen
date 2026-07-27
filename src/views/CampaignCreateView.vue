@@ -151,6 +151,16 @@
   }
 
   function cancel() {
+    if (document.activeElement instanceof HTMLElement) {
+      document.activeElement.blur();
+    }
+    // touchedFields.value = {
+    //   name: false,
+    //   description: false
+    // };
+    // TODO: Consider prompting the user to confirm discarding changes if the draft has been modified
     ui.clearCampaignDraft();
+    touchedFields.value = {};
+    router.push('/campaigns');
   }
 </script>

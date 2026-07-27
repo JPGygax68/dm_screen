@@ -4,7 +4,7 @@ import schema from '../generated/models/data.schema.json';
 export const useUiStore = defineStore('ui', {
   state: () => ({
     campaignDraft: null as null | { id: string; name: string; description: string },
-    openCampaignAccordionId: null as null | string
+    openCampaignAccordions: [] as string[]
   }),
 
   actions: {
@@ -24,6 +24,11 @@ export const useUiStore = defineStore('ui', {
       console.assert(!!this.campaignDraft, 'No campaign draft to clear');
       console.log('Clearing campaign draft');
       this.campaignDraft = null;
+    },
+
+    setOpenCampaignAccordions(ids: string[] | null) {
+      console.log('Setting open campaign accordions to:', ids);
+      this.openCampaignAccordions = ids ?? [];
     }
   }
 });

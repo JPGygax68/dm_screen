@@ -1,6 +1,9 @@
 <template lang="pug">
 
-  IonAccordionGroup.group(:value="selectedItemIndex")
+  IonAccordionGroup.group(
+    :value="props.openValues"
+    @ionChange="onAccordionChange($event)"
+  )
     IonAccordion(
       v-for="(item, index) in items"
       :value="item[props.idField] || console.assert(false, `Item at index ${index} is missing the id field '${props.idField}'`)"
@@ -40,16 +43,25 @@
     items: any[],
     path: string,
     disabled?: boolean,
+    openValue?: string
   }>(), {
     idField: 'id',
-    disabled: false
+    disabled: false,
+    openValues: null
   });
 
   const emit = defineEmits<{
-    (e: 'change', payload: { path: string, value: any[] }): void
+    (e: 'change', payload: { path: string, value: any[] }): void,
+    (e: 'update:openValues', value: string[]): void
   }>();
 
-  const selectedItemIndex = ref('');
+  function onAccordionChange(event: CustomEvent) {
+    const currentOpenValues = Array.isArray(event.detail.value) 
+      ? event.detail.value 
+      : [event.detail.value].filter(Boolean);
+
+    emit('update:openValues', currentOpenValues);
+  }
 
   const moveUp = (path: string, index: number) => {
     return () => {

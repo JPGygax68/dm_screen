@@ -13,6 +13,7 @@
       IonicAccordionArray(
         :items="store.campaigns"
         :path="'campaigns'"
+        v-model:openValues="openAccordions"
         @change="store.updateByPath($event.path, $event.value)"
       )
         template(v-slot="{ item, index }")
@@ -53,6 +54,8 @@
   const store = useDmScreenStore();
   const ui = useUiStore();
 
+  const { openCampaignAccordions: openAccordions } = ui;
+
   const addNewCampaign = () => {
     // return () => {
     //   const newCampaign = { name: '(New Campaign)' };
@@ -61,4 +64,9 @@
     // };
     router.push('/campaigns/new');
   };
+
+  function handleAccordionChange(newValue: string | null) {
+    console.log('Accordion change event received with value:', newValue);
+    ui.setOpenCampaignAccordionId(newValue);
+  }
 </script>
