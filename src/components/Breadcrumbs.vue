@@ -2,9 +2,12 @@
   import { useRoute, useRouter } from 'vue-router';
   import { computed } from 'vue';
   import { IonToolbar, IonButtons, IonButton } from '@ionic/vue';
+  import { useDmScreenStore } from '../stores/dataStore';
 
   const route = useRoute();
   const router = useRouter();
+
+  const store = useDmScreenStore();
 
   // Map routes to breadcrumb labels
   const crumbs = computed(() => {
@@ -27,8 +30,8 @@
     if (path.startsWith('/campaigns/')) {
       const id = route.params.id;
       return [
-        { label: 'Campaigns', to: '/campaigns' },
-        { label: `Campaign ${id}`, to: `/campaigns/${id}` }
+        { label: 'Campaigns:', to: '/campaigns' },
+        { label: `"${store.campaigns.find(c => c.id === id)?.name}"`, to: `/campaigns/${id}` }
       ];
     }
 
