@@ -11,7 +11,7 @@ export const useUiStore = defineStore('ui', {
       console.log('Starting new campaign draft');
       if (!this.campaignDraft) {
         this.campaignDraft = {
-          name: '(New Campaign)',
+          name: '',
           description: '',
         };
       }
