@@ -16,6 +16,7 @@
               :class="{ 'ion-invalid': visibleErrors.name, 'ion-touched': touchedFields.name }"
               :error-text="visibleErrors.name"
               required="true"
+              enterkeyhint="next"
               @ionBlur="markAsTouched('name')"
             )
               div(slot="label")

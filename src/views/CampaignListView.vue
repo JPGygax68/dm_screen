@@ -4,7 +4,11 @@
       Breadcrumbs
 
     IonContent
-      IonButton(@click="addNewCampaign()" icon="add" expand="block") Add New Campaign
+      IonButton(
+        @click="addNewCampaign()" 
+        expand="block" 
+        class="ion-margin-horizontal ion-margin-top"
+      ) Add New Campaign
 
       IonicAccordionArray(
         :items="store.campaigns"
