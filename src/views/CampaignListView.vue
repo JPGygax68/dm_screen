@@ -2,6 +2,7 @@
   ion-page
     ion-header
       Breadcrumbs
+    
     ion-content
       ion-button(
         @click="addNewCampaign()" 

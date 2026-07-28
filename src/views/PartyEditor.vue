@@ -7,11 +7,11 @@
       form
         ion-list
           //- Header row with an aligned inline add button
-          ion-item(lines="none" class="ion-no-padding")
+          ion-item(lines="none" slot="header")
             ion-label
               h2(style="font-weight: bold;") Party Members
-            ion-button(slot="end" fill="clear" @click="addCharacter")
-              ion-icon(slot="start" name="person-add-outline")
+            ion-button(slot="end" fill="solid" @click="addCharacter")
+              ion-icon(slot="start" name="person-add")
               | Add Member
 
           //- Character List
@@ -33,7 +33,7 @@
               //- Swipe Actions (Tablet UX)
               ion-item-options(side="end")
                 ion-item-option(color="danger" @click="removeCharacter(pc.id)")
-                  ion-icon(slot="icon-only" name="trash-outline")
+                  ion-icon(slot="icon-only" name="trash")
 
 </template>
 <style scoped lang="scss">
@@ -68,8 +68,8 @@
   const route = useRoute();
 
   addIcons({
-    'person-add-outline': personAddOutline,
-    'trash-outline': trashOutline
+    'person-add': personAddOutline,
+    'trash': trashOutline
   });
 
   // Grab the string ID directly from the URL parameter
@@ -88,7 +88,7 @@
 
 
   function addCharacter() {
-    router.push('/characters/new');
+    router.push(`/campaign/${campaignId}/characters/new`);
   }
 
   function removeCharacter(characterId: string) {
