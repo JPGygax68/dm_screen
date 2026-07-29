@@ -52,6 +52,7 @@ export const useUiStore = defineStore('ui', {
           id: crypto.randomUUID(),
           name: '',
           description: '',
+          classes: []
         };
       }
       return this.playerCharacterDraft;

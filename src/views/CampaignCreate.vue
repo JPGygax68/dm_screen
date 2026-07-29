@@ -6,7 +6,7 @@
     ion-content
       form(@submit.prevent="save")
         ion-list
-          ion-item(:class="{ 'ion-invalid': true || visibleErrors.name, 'ion-touched': touchedFields.name }")
+          ion-item(:class="{ 'ion-invalid': !isValid || visibleErrors.name, 'ion-touched': touchedFields.name }")
             //- ion-icon(slot="start" name="create" color="primary")
             ion-input(
               ref="nameInput"
