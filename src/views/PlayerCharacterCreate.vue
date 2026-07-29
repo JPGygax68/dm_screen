@@ -60,6 +60,7 @@
 
 <script setup lang="ts">
   import { computed, ref } from 'vue';
+  import { useRoute } from 'vue-router';
   import {
     IonPage, IonHeader, IonContent, IonList, IonItem, IonInput, IonTextarea, IonButton,
     IonNote, IonIcon, IonText, IonLabel, IonChip
@@ -91,6 +92,8 @@
   const ui = useUiStore();
 
   const router = useRouter();
+  const route = useRoute(); // Access the current route to get parameters
+  const campaignId = route.params.campaign_id as string;
 
   const draft = ref<any>({ classes: [] });
 

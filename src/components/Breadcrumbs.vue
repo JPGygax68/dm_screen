@@ -27,9 +27,9 @@
     }
 
     // /campaigns/:id/player-characters/new
-    if (path.startsWith('/campaigns/') && path.endsWith('/player-characters/new')) {
+    if (path.match(/\/campaigns\/[^/]+\/player-characters\/new/)) {
       console.log('Generating breadcrumbs for path:', path);
-      const campaign_id = route.params.id;
+      const campaign_id = route.params.campaign_id;
       const campaign = store.campaigns.find(c => c.id === campaign_id);
       if (!campaign) {
         console.error(`No campaign found with ID: ${campaign_id}`);
@@ -43,10 +43,10 @@
     }
 
     // /campaigns/:id
-    if (path.startsWith('/campaigns/')) {
+    if (path.match(/\/campaigns\/[^/]+$/)) {
       const id = route.params.id;
       return [
-        { label: 'Campaigns:', to: '/campaigns' },
+        { label: 'Campaigns', to: '/campaigns' },
         { label: `"${store.campaigns.find(c => c.id === id)?.name}"`, to: `/campaigns/${id}` }
       ];
     }

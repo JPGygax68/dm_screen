@@ -50,7 +50,7 @@ type: object
     description: A player character (PC) in the campaign
     properties:
       id: { "$ref": "#/$defs/PlayerId" }
-      name: { type: string, description: "Character name" }
+      name: { type: string, description: "Character name", minLength: 1 }
       race: { type: string, description: "Character race (recommended)" }
       classes:
         type: array

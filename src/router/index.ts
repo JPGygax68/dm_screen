@@ -27,7 +27,7 @@ const routes: RouteRecordRaw[] = [
     component: PartyEditor
   },
   {
-    path: '/campaigns/:id/player-characters/new',
+    path: '/campaigns/:campaign_id/player-characters/new',
     name: 'player-character-new',
     // TODO: a Campaign is more than just a Party, so we should probably have a CampaignDetailView 
     // that includes the PartyEditor as a sub-component. For now, we'll just use the PartyEditor directly.

@@ -72,7 +72,7 @@
     'trash': trashOutline
   });
 
-  // Grab the string ID directly from the URL parameter
+  // Grab the campaign id from the URL parameter
   const campaignId = route.params.id as string;
 
   const party = ref(ui.campaignDraft?.party ?? []);
