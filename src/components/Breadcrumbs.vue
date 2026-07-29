@@ -26,6 +26,22 @@
       ];
     }
 
+    // /campaigns/:id/player-characters/new
+    if (path.startsWith('/campaigns/') && path.endsWith('/player-characters/new')) {
+      console.log('Generating breadcrumbs for path:', path);
+      const campaign_id = route.params.id;
+      const campaign = store.campaigns.find(c => c.id === campaign_id);
+      if (!campaign) {
+        console.error(`No campaign found with ID: ${campaign_id}`);
+        return [];
+      }
+      return [
+        { label: 'Player Characters', to: `/campaigns/${campaign_id}/player-characters` },
+        { label: `"${campaign.name }"`, to: `/campaigns/${campaign_id}` },
+        { label: 'New Player Character', to: `/campaigns/${campaign_id}/player-characters/new` }
+      ];
+    }
+
     // /campaigns/:id
     if (path.startsWith('/campaigns/')) {
       const id = route.params.id;

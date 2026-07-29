@@ -5,6 +5,7 @@ export const useUiStore = defineStore('ui', {
   state: () => ({
     // TODO: try to obtain a type for the campaign from the schema instead of using 'any'
     campaignDraft: null as any, // used for both creating and editing campaigns
+    playerCharacterDraft: null as any, // used for both creating and editing player characters
     openCampaignAccordions: [] as string[]
   }),
 
@@ -42,7 +43,24 @@ export const useUiStore = defineStore('ui', {
       console.assert(!!this.campaignDraft, 'No campaign draft to remove character from');
       console.assert(!!this.campaignDraft?.party, 'No party found in campaign draft');
       this.campaignDraft.party = this.campaignDraft.party.filter((char: any) => char.id !== characterId);
-    }
+    },
+
+    startPlayerCharacterDraft() {
+      console.log('Starting new player character draft');
+      if (!this.playerCharacterDraft) {
+        this.playerCharacterDraft = {
+          id: crypto.randomUUID(),
+          name: '',
+          description: '',
+        };
+      }
+      return this.playerCharacterDraft;
+    },
+    clearPlayerCharacterDraft() {
+      console.assert(!!this.playerCharacterDraft, 'No player character draft to clear');
+      console.log('Clearing player character draft');
+      this.playerCharacterDraft = null;
+    },
   }
 });
 

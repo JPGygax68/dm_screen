@@ -88,7 +88,7 @@
 
 
   function addCharacter() {
-    router.push(`/campaign/${campaignId}/characters/new`);
+    router.push(`/campaigns/${campaignId}/player-characters/new`);
   }
 
   function removeCharacter(characterId: string) {
