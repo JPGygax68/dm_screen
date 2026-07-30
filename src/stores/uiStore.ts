@@ -1,6 +1,8 @@
 import { defineStore } from 'pinia';
 import schema from '../generated/models/data.schema.json';
 
+const pcSchema = { ...schema.$defs.PlayerCharacter, $defs: schema.$defs };
+
 export const useUiStore = defineStore('ui', {
   state: () => ({
     // TODO: try to obtain a type for the campaign from the schema instead of using 'any'
@@ -52,6 +54,7 @@ export const useUiStore = defineStore('ui', {
           id: crypto.randomUUID(),
           name: '',
           description: '',
+          maxHitPoints: pcSchema.properties.maxHitPoints.default,
           classes: []
         };
       }

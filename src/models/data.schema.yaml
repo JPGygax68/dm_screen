@@ -58,11 +58,12 @@ type: object
         items: { type: string }
       hitPoints:
         type: integer
-        minimum: 0
         description: Current hit points
       maxHitPoints:
         type: integer
-        minimum: 0
+        minimum: 1
+        maximum: 300
+        default: 10
         description: Maximum hit points
       conditions:
         type: array

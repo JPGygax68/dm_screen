@@ -28,7 +28,7 @@
 
     // /campaigns/:id/player-characters/new
     if (path.match(/\/campaigns\/[^/]+\/player-characters\/new/)) {
-      console.log('Generating breadcrumbs for path:', path);
+      // console.log('Generating breadcrumbs for path:', path);
       const campaign_id = route.params.campaign_id;
       const campaign = store.campaigns.find(c => c.id === campaign_id);
       if (!campaign) {

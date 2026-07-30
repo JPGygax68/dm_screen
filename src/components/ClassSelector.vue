@@ -30,7 +30,7 @@
       @ionChange="handleSelectChange"
       :interface-options="selectorOptions"
       multiple="true"
-      interface="action-sheet"
+      interface="alert"
       ok-text="Apply"
       cancel-text="Dismiss"
       style="display: none; visibility: hidden; position: absolute;"

@@ -39,14 +39,51 @@
             )
 
           ion-item
+            div(style="display: flex; flex-direction: column; width: 100%; padding: 10px 0;")
+              div(style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;")
+                ion-note(style="font-size: 13px; font-weight: 500; color: var(--ion-color-step-600);")
+                  | Max Hit Points
+                //- Floating badge showing active numerical data
+                //- Interconnected Stepper Control Group
+                div.badge
+                  //- Down (Left Arrow) Button
+                  ion-button(fill="clear" @click="adjustHp(-1)" style="margin: 0; --padding-start: 4px; --padding-end: 4px;")
+                    ion-icon(slot="icon-only" :icon="chevronBackOutline" style="font-size: 16px;")
+                  //- Your clean, permanent value badge
+                  ion-badge(color="primary" style="font-size: 14px; padding: 6px 10px;")
+                    | {{ draft.maxHitPoints || 10 }} HP
+                  //- Up (Right Arrow) Button
+                  ion-button(fill="clear" @click="adjustHp(1)" style="margin: 0; --padding-start: 4px; --padding-end: 4px;")
+                    ion-icon(slot="icon-only" :icon="chevronForwardOutline" style="font-size: 16px;")
+
+              //- Native Ionic Range Slider Component
+              ion-range(
+                v-model="draft.maxHitPoints"
+                :min="schema.properties.maxHitPoints.minimum"
+                :max="schema.properties.maxHitPoints.maximum"
+                step="1"
+                snaps="false"
+                pin="false"
+                style="padding-top: 0; padding-bottom: 0;"
+              )
+                //- Optional: Add clear heart or metric contextual indicators to the edges
+                ion-icon(slot="start" size="small" name="heart-dislike-outline" color="medium")
+                ion-icon(slot="end" size="small" name="heart-outline" color="primary")
+                
+          ion-item
             ion-button(type="submit" :disabled="!isValid") Save
             ion-button(@click="cancel" color="medium") Cancel
 
 </template>
 
 <style scoped lang="scss">
-  div {
-    color: darkred;
+  .badge {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    ion-button > ion-icon {
+      width: 40px; height: 40px;
+    }
   }
 
   .loose-label {
@@ -62,24 +99,33 @@
   import { useRoute } from 'vue-router';
   import {
     IonPage, IonHeader, IonContent, IonList, IonItem, IonInput, IonTextarea, IonButton,
-    IonNote, IonIcon, IonText, IonLabel, IonChip, IonSelect, IonSelectOption
+    IonNote, IonIcon, IonText, IonLabel, IonChip, IonSelect, IonSelectOption, IonRange, IonBadge
   } from '@ionic/vue';
   import { addIcons } from 'ionicons';
-  import { createOutline } from 'ionicons/icons';
+  import { createOutline, removeOutline, addOutline, 
+    chevronBackOutline, chevronForwardOutline,
+    heartOutline, heartDislikeOutline
+  } from 'ionicons/icons';
   import { onIonViewWillEnter, onIonViewWillLeave, onIonViewDidEnter } from '@ionic/vue';
   import { useUiStore } from '../stores/uiStore.ts';
   import useDataStore from '../stores/dataStore.ts';
   import { useRouter } from 'vue-router';
   import Breadcrumbs from '../components/Breadcrumbs.vue';
   import Ajv from 'ajv';
-  import schema from '../generated/models/data.schema.json';
+  import fullSchema from '../generated/models/data.schema.json';
   import ClassSelector from '../components/ClassSelector.vue';
 
   addIcons({
-    'create-outline': createOutline,
+    createOutline,
+    removeOutline,
+    addOutline,
+    heartOutline,
+    heartDislikeOutline,
+    chevronBackOutline,
+    chevronForwardOutline
   });
 
-  const characterSchema = { ...schema.$defs.PlayerCharacter, $defs: schema.$defs };
+  const schema = { ...fullSchema.$defs.PlayerCharacter, $defs: fullSchema.$defs };
   //console.log('Campaign schema:', campaignSchema);
 
   const dataStore = useDataStore();
@@ -128,15 +174,16 @@
 
   // Initialize AJV validator
   const ajv = new Ajv({ allErrors: true });
-  const validateCharacter = ajv.compile(characterSchema);
+  const validatePlayerCharacter = ajv.compile(schema);
 
   // Compute errors reactively based on JSON Schema
   const validationResult = computed(() => {
-    const valid = validateCharacter(draft.value);
+    const valid = validatePlayerCharacter(draft.value);
+    console.log('Validation result for draft:', valid);
     const errorsMap: Record<string, string> = {};
 
-    if (!valid && validateCharacter.errors) {
-      validateCharacter.errors.forEach((err) => {
+    if (!valid && validatePlayerCharacter.errors) {
+      validatePlayerCharacter.errors.forEach((err) => {
         // err.instancePath looks like "/name"
         const fieldName = err.instancePath.replace('/', '') || err.params.missingProperty;
         if (fieldName) {
@@ -164,7 +211,7 @@
   });
 
   // Helpers for structural clarity in template
-  const isValid = computed(() => validationResult.value.isValid || true);
+  const isValid = computed(() => validationResult.value.isValid);
   // const errors = computed(() => validationResult.value.errors);
 
   function toggleClass(className: string) {
@@ -177,7 +224,6 @@
       draft.value.classes.splice(index, 1);
     }
   }
-
 
   // Reference pointer targeting the hidden select web component
   const classSelectRef = ref<any>(null);
@@ -195,6 +241,15 @@
     if (draft.value.classes) {
       draft.value.classes = draft.value.classes.filter((c: string) => c !== className);
     }
+  }
+
+  function adjustHp(delta: number) {
+    const minHp = schema.properties.maxHitPoints.minimum || 1;
+    const maxHp = schema.properties.maxHitPoints.maximum || 300;
+    let newHp = (draft.value.maxHitPoints || 10) + delta;
+    if (newHp < minHp) newHp = minHp;
+    if (newHp > maxHp) newHp = maxHp;
+    draft.value.maxHitPoints = newHp;
   }
 
   function save() {
