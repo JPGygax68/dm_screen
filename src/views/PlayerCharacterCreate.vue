@@ -25,21 +25,59 @@
           ion-item
             ion-textarea(v-model="draft.description" label="Description" label-placement="stacked" 
               placeholder="Character Description")
-              
-          ion-item
+
+          ion-item            
             div(style="display: flex; flex-direction: column; width: 100%; padding: 10px 0;")
+  
               ion-label.loose-label Character Classes
 
-              div(style="display: flex; flex-wrap: wrap; gap: 8px;")
-                //- Render a chip for each available class, highlighting selected ones
-                ion-chip(
-                  v-for="dndClass in availableClasses" 
-                  :key="dndClass"
-                  :color="draft.classes.includes(dndClass) ? 'primary' : 'medium'"
-                  :outline="!draft.classes.includes(dndClass)"
-                  @click="toggleClass(dndClass)"
-                )
-                  ion-label {{ dndClass }}
+              //- Header Row with an action trigger button
+              div(style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;")
+                div(style="display: flex; flex-wrap: wrap; gap: 8px;")
+                  //- Fallback text if array is empty
+                  ion-text(color="medium" style="font-size: 14px;" v-if="!draft.classes || draft.classes.length === 0")
+                    | No classes selected yet.                 
+                  //- Render chips for selected targets with a click-to-remove function
+                  ion-chip(
+                    v-for="selectedClass in draft.classes" 
+                    :key="selectedClass"
+                    color="primary"
+                  )
+                    ion-label {{ selectedClass }}
+                    ion-icon(name="close-circle" @click="removeClass(selectedClass)")
+
+                ion-button(fill="clear" size="small" @click="openClassSelector")
+                  ion-icon(slot="start" name="options-outline")
+                  | Manage Classes
+
+            //- 1. Hidden Ionic Select control that handles the data state
+            ion-select(
+              ref="classSelectRef"
+              v-model="draft.classes"
+              multiple="true"
+              interface="alert"
+              ok-text="Apply"
+              cancel-text="Dismiss"
+              style="display: none; visibility: hidden; position: absolute;"
+            )
+              ion-select-option(v-for="dndClass in availableClasses" :key="dndClass" :value="dndClass")
+                | {{ dndClass }}
+
+
+          //- ion-item
+          //-   div(style="display: flex; flex-direction: column; width: 100%; padding: 10px 0;")
+          //-     ion-label.loose-label Character Classes
+
+          //-     div(style="display: flex; flex-wrap: wrap; gap: 8px;")
+          //-       //- Render a chip for each available class, highlighting selected ones
+          //-       ion-chip(
+          //-         v-for="dndClass in availableClasses" 
+          //-         :key="dndClass"
+          //-         :color="draft.classes.includes(dndClass) ? 'primary' : 'medium'"
+          //-         :outline="!draft.classes.includes(dndClass)"
+          //-         @click="toggleClass(dndClass)"
+          //-       )
+          //-         ion-label {{ dndClass }}
           ion-item
             ion-button(type="submit" :disabled="!isValid") Save
             ion-button(@click="cancel" color="medium") Cancel
@@ -50,6 +88,7 @@
   div {
     color: darkred;
   }
+
   .loose-label {
     font-size: 13px;
     margin-bottom: 8px;
@@ -63,10 +102,10 @@
   import { useRoute } from 'vue-router';
   import {
     IonPage, IonHeader, IonContent, IonList, IonItem, IonInput, IonTextarea, IonButton,
-    IonNote, IonIcon, IonText, IonLabel, IonChip
+    IonNote, IonIcon, IonText, IonLabel, IonChip, IonSelect, IonSelectOption
   } from '@ionic/vue';
   import { addIcons } from 'ionicons';
-  import { createOutline } from 'ionicons/icons';
+  import { createOutline, optionsOutline, closeCircle } from 'ionicons/icons';
   import { onIonViewWillEnter, onIonViewWillLeave, onIonViewDidEnter } from '@ionic/vue';
   import { useUiStore } from '../stores/uiStore.ts';
   import useDataStore from '../stores/dataStore.ts';
@@ -82,7 +121,9 @@
   ];
 
   addIcons({
-    'create': createOutline
+    'create-outline': createOutline,
+    'options-outline': optionsOutline,
+    'close-circle': closeCircle
   });
 
   const characterSchema = { ...schema.$defs.PlayerCharacter, $defs: schema.$defs };
@@ -181,6 +222,25 @@
     } else {
       // Remove class if tapped again
       draft.value.classes.splice(index, 1);
+    }
+  }
+
+
+  // Reference pointer targeting the hidden select web component
+  const classSelectRef = ref<any>(null);
+
+  // Open the native Ionic popup window programmatically
+  function openClassSelector(event: Event) {
+    if (classSelectRef.value) {
+      // Passes the physical pointer event so the popover aligns cleanly near the button on tablet
+      classSelectRef.value.$el.open(event);
+    }
+  }
+
+  // Inline helper to let users remove a class straight from the chip row
+  function removeClass(className: string) {
+    if (draft.value.classes) {
+      draft.value.classes = draft.value.classes.filter((c: string) => c !== className);
     }
   }
 
