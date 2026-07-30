@@ -28,8 +28,9 @@
       ref="classSelectRef"
       :value="classes"
       @ionChange="handleSelectChange"
+      :interface-options="selectorOptions"
       multiple="true"
-      interface="alert"
+      interface="action-sheet"
       ok-text="Apply"
       cancel-text="Dismiss"
       style="display: none; visibility: hidden; position: absolute;"
@@ -69,6 +70,11 @@
     'close-circle': closeCircle
   });
 
+  const selectorOptions = {
+    header: 'Select Character Classes',
+    subHeader: 'Choose one or more classes for your character'
+  };
+  
   const props = defineProps<{
     classes: string[];
     // TODO: additional classes?
