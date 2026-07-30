@@ -12,6 +12,7 @@
               v-model="draft.name" 
               label-placement="stacked" 
               placeholder="Character Name"
+              autocapitalize="words"
               :class="{ 'ion-invalid': visibleErrors.name, 'ion-touched': touchedFields.name }"
               :error-text="visibleErrors.name"
               required="true"
@@ -27,57 +28,16 @@
               placeholder="Character Description")
 
           ion-item            
-            div(style="display: flex; flex-direction: column; width: 100%; padding: 10px 0;")
-  
-              ion-label.loose-label Character Classes
-
-              //- Header Row with an action trigger button
-              div(style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;")
-                div(style="display: flex; flex-wrap: wrap; gap: 8px;")
-                  //- Fallback text if array is empty
-                  ion-text(color="medium" style="font-size: 14px;" v-if="!draft.classes || draft.classes.length === 0")
-                    | No classes selected yet.                 
-                  //- Render chips for selected targets with a click-to-remove function
-                  ion-chip(
-                    v-for="selectedClass in draft.classes" 
-                    :key="selectedClass"
-                    color="primary"
-                  )
-                    ion-label {{ selectedClass }}
-                    ion-icon(name="close-circle" @click="removeClass(selectedClass)")
-
-                ion-button(fill="clear" size="small" @click="openClassSelector")
-                  ion-icon(slot="start" name="options-outline")
-                  | Manage Classes
-
-            //- 1. Hidden Ionic Select control that handles the data state
-            ion-select(
+            ClassSelector(
               ref="classSelectRef"
-              v-model="draft.classes"
-              multiple="true"
-              interface="alert"
-              ok-text="Apply"
-              cancel-text="Dismiss"
-              style="display: none; visibility: hidden; position: absolute;"
+              label="Character Classes"
+              label-placement="stacked"
+              placeholder="Select Character Classes"
+              :classes="draft.classes"
+              @update:classes="draft.classes = $event"
+              multiple
             )
-              ion-select-option(v-for="dndClass in availableClasses" :key="dndClass" :value="dndClass")
-                | {{ dndClass }}
 
-
-          //- ion-item
-          //-   div(style="display: flex; flex-direction: column; width: 100%; padding: 10px 0;")
-          //-     ion-label.loose-label Character Classes
-
-          //-     div(style="display: flex; flex-wrap: wrap; gap: 8px;")
-          //-       //- Render a chip for each available class, highlighting selected ones
-          //-       ion-chip(
-          //-         v-for="dndClass in availableClasses" 
-          //-         :key="dndClass"
-          //-         :color="draft.classes.includes(dndClass) ? 'primary' : 'medium'"
-          //-         :outline="!draft.classes.includes(dndClass)"
-          //-         @click="toggleClass(dndClass)"
-          //-       )
-          //-         ion-label {{ dndClass }}
           ion-item
             ion-button(type="submit" :disabled="!isValid") Save
             ion-button(@click="cancel" color="medium") Cancel
@@ -105,7 +65,7 @@
     IonNote, IonIcon, IonText, IonLabel, IonChip, IonSelect, IonSelectOption
   } from '@ionic/vue';
   import { addIcons } from 'ionicons';
-  import { createOutline, optionsOutline, closeCircle } from 'ionicons/icons';
+  import { createOutline } from 'ionicons/icons';
   import { onIonViewWillEnter, onIonViewWillLeave, onIonViewDidEnter } from '@ionic/vue';
   import { useUiStore } from '../stores/uiStore.ts';
   import useDataStore from '../stores/dataStore.ts';
@@ -113,17 +73,10 @@
   import Breadcrumbs from '../components/Breadcrumbs.vue';
   import Ajv from 'ajv';
   import schema from '../generated/models/data.schema.json';
-
-  // The static source of truth for standard SRD D&D 5e classes
-  const availableClasses = [
-    'Barbarian', 'Bard', 'Cleric', 'Druid', 'Fighter', 'Monk',
-    'Paladin', 'Ranger', 'Rogue', 'Sorcerer', 'Warlock', 'Wizard'
-  ];
+  import ClassSelector from '../components/ClassSelector.vue';
 
   addIcons({
     'create-outline': createOutline,
-    'options-outline': optionsOutline,
-    'close-circle': closeCircle
   });
 
   const characterSchema = { ...schema.$defs.PlayerCharacter, $defs: schema.$defs };
