@@ -85,7 +85,7 @@
     router.push('/campaigns/new');
   };
 
-  function handleAccordionChange(newValue: string[] | null) {
+  function handleAccordionChange(newValue: string[]) {
     console.log('Accordion change event received with value:', newValue);
     ui.setOpenCampaignAccordions(newValue);
   }
