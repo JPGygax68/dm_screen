@@ -48,15 +48,22 @@
     height: 100%;
     overflow-y: auto;
 
-    ionic-accordion-array {
-      flex: 1;
-    }
+    // ionic-accordion-array {
+    //   flex: 1;
+    // }
+
+  }
+
+  .main-fields {
+    width: 100%;
   }
 </style>
 
 <script setup lang="ts">
-  import { IonPage, IonHeader, IonContent, IonFooter, IonList, IonItem, IonTextarea,
-     IonButton, IonIcon } from '@ionic/vue';
+  import {
+    IonPage, IonHeader, IonContent, IonFooter, IonList, IonItem, IonTextarea,
+    IonButton, IonIcon
+  } from '@ionic/vue';
   import { addIcons } from 'ionicons';
   import { openOutline } from 'ionicons/icons';
   import { useRouter } from 'vue-router';

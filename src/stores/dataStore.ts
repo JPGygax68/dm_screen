@@ -8,9 +8,9 @@ export const useDmScreenStore = defineStore('dmscreen', {
         id: "mock-campaign-1",
         name: "Critical Role: Phandelver",
         description: `A gritty exploration into the Lost Mine. Testing long paragraphs here to see if the accordion text wraps nicely on tablet layouts without breaking line heights.\
-        This is a second paragraph to test the wrapping and line height behavior of the accordion text. It should be long enough to wrap onto multiple lines, and we want to ensure \
-        that it doesn't break the layout or cause any unexpected overflow issues. The goal is to simulate a real-world scenario where a campaign description might be quite verbose \
-        and require careful handling in the UI.`,
+          This is a second paragraph to test the wrapping and line height behavior of the accordion text. It should be long enough to wrap onto multiple lines, and we want to ensure\
+          that it doesn't break the layout or cause any unexpected overflow issues. The goal is to simulate a real-world scenario where a campaign description might be quite verbose\
+          and require careful handling in the UI.`,
         party: [
           {
             id: "pc-1",
