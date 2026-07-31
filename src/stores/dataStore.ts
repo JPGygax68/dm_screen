@@ -19,13 +19,27 @@ export const useDmScreenStore = defineStore('dmscreen', {
       });
     },
 
-    // Dedicated function to add a new campaign to the campaigns array
-    // TODO: try to obtain a type for the campaign from the schema instead of using 'any'
-    addCampaign(campaign: any) {
+    addOrUpdateCampaign(campaign: any) {
+      console.log('Adding or updating campaign:', campaign);
       this.$patch(state => {
-        state.campaigns = [ campaign, ...state.campaigns];
+        const index = state.campaigns.findIndex(c => c.id === campaign.id);
+        if (index !== -1) {
+          // Update existing campaign
+          state.campaigns[index] = campaign;
+          console.log('Updated campaign, new list:', this.$state.campaigns);
+        } else {
+          // Add new campaign
+          state.campaigns = [campaign, ...state.campaigns];
+          console.log('Added new campaign, new list:', this.$state.campaigns);
+        }
       });
-      console.log('Added new campaign, new list:', this.$state.campaigns);
+    },
+
+    removeCampaign(campaignId: string) {
+      this.$patch(state => {
+        state.campaigns = state.campaigns.filter(c => c.id !== campaignId);
+      });
+      console.log('Removed campaign, new list:', this.$state.campaigns);
     }
   }
 });

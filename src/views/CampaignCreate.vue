@@ -32,9 +32,6 @@
 </template>
 
 <style scoped lang="scss">
-  div {
-    color: darkred;
-  }
 </style>
 
 <script setup lang="ts">

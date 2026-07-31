@@ -42,6 +42,22 @@
       ];
     }
 
+    // /campaigns/:id/edit
+    if (path.match(/\/campaigns\/[^/]+\/edit/)) {
+      console.log('Generating breadcrumbs for Campaign edit path:', path);
+      const id = route.params.id;
+      const campaign = store.campaigns.find(c => c.id === id);
+      if (!campaign) {
+        console.error(`No campaign found with ID: ${id}`);
+        return [];
+      }
+      return [
+        { label: 'Campaigns', to: '/campaigns' },
+        { label: `"${campaign.name }"`, to: `/campaigns/${id}` },
+        { label: 'Edit Campaign', to: `/campaigns/${id}/edit` }
+      ];
+    }
+
     // /campaigns/:id
     if (path.match(/\/campaigns\/[^/]+$/)) {
       const id = route.params.id;

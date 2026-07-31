@@ -64,7 +64,6 @@
                 step="1"
                 snaps="false"
                 pin="false"
-                style="padding-top: 0; padding-bottom: 0;"
               )
                 //- Optional: Add clear heart or metric contextual indicators to the edges
                 ion-icon(slot="start" size="small" name="heart-dislike-outline" color="medium")
@@ -129,16 +128,34 @@
   const schema = { ...fullSchema.$defs.PlayerCharacter, $defs: fullSchema.$defs };
   //console.log('Campaign schema:', campaignSchema);
 
-  const dataStore = useDataStore();
-  const ui = useUiStore();
+  // const dataStore = useDataStore();
+  // const ui = useUiStore();
 
-  const router = useRouter();
-  const route = useRoute(); // Access the current route to get parameters
-  const campaignId = route.params.campaign_id as string;
+  // const router = useRouter();
+  // const route = useRoute(); // Access the current route to get parameters
+  // const campaignId = route.params.campaign_id as string;
 
-  const draft = ref<any>({ classes: [] });
+  // const draft = ref<any>({ classes: [] });
 
   const nameInput = ref<any>(null);
+
+  const emit = defineEmits<{
+    (e: 'save', payload: any): void;
+    (e: 'cancel'): void;
+  }>();
+
+  const draft = ref<{
+    id: string;
+    name: string;
+    maxHitPoints: number;
+    classes: any[];
+  }>({
+    id: crypto.randomUUID() as string,
+    name: '',
+    maxHitPoints: 10,
+    classes: []
+  });
+
 
   // Keep track of user interaction state per field
   const touchedFields = ref<Record<string, boolean>>({});
@@ -150,13 +167,10 @@
   }
 
   onIonViewWillEnter(() => {
-    draft.value = ui.startPlayerCharacterDraft();
-    console.log('Starting new player character draft:', draft.value);
     touchedFields.value = {};
   });
 
   onIonViewDidEnter(async () => {
-    console.log('PlayerCharacterCreate.vue: onIonViewDidEnter');
     if (nameInput.value) {
       // Wait for Ionic to expose the inner native HTMLInputElement
       const nativeInput = await nameInput.value.$el.getInputElement();
@@ -252,26 +266,16 @@
   }
 
   function save() {
-    console.log
-    console.assert(isValid.value, 'Cannot save invalid player character draft', visibleErrors.value);
-    console.assert(!!ui.playerCharacterDraft, 'No player character draft to save');
-
+    console.assert(!!draft.value, 'No player character draft to save');
+    emit('save', { ...draft.value });
     unfocusActiveElement();
-
-    // Save the draft into the campaign's player character list
-    ui.commitCharacterDraftToCampaignDraft();
-
-    touchedFields.value = {};
-
-    router.back();
+    touchedFields.value = {}; 
   }
 
   function cancel() {
     console.assert(!!draft.value, 'No player character draft to cancel');
+    emit('cancel');
     unfocusActiveElement();
-    ui.clearPlayerCharacterDraft();
     touchedFields.value = {};
-
-    router.back();
   }
 </script>
