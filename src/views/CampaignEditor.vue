@@ -113,6 +113,7 @@
 
   // Initialize AJV validator
   const schema = { ...fullSchema.$defs.Campaign, $defs: fullSchema.$defs };
+  console.log('Campaign schema:', schema);
   const ajv = new Ajv({ allErrors: true });
   const validate = ajv.compile(schema);
 
@@ -152,7 +153,7 @@
 
   // Helpers for structural clarity in template
   const isValid = computed(() => validationResult.value.isValid);
-  // const errors = computed(() => validationResult.value.errors);
+  const errors = computed(() => validationResult.value.errors);
 
   onIonViewWillEnter(() => {
     console.log('CampaignEditor view will enter');
@@ -160,6 +161,7 @@
     const existingCampaign = dataStore.campaigns.find(c => c.id === campaignId);
     if (existingCampaign) {
       draft.value = JSON.parse(JSON.stringify(existingCampaign)); // Clone the existing campaign data
+      console.log('Loaded existing campaign into draft:', draft.value);
     } else {
       console.warn(`No existing campaign found with ID: ${campaignId}, initializing new campaign draft`);
       draft.value = {

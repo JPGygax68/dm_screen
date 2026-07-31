@@ -15,13 +15,13 @@ export const useDmScreenStore = defineStore('dmscreen', {
           {
             id: "pc-1",
             name: "Growl Stormjaw",
-            maxHp: 45,
+            maxHitPoints: 45,
             classes: ["Fighter", "Barbarian"] // Tests your multi-chip rendering logic!
           },
           {
             id: "pc-2",
             name: "Elrond Half-Elven",
-            maxHp: 28,
+            maxHitPoints: 28,
             classes: ["Wizard"]
           }
         ]
