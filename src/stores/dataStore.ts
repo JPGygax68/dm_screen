@@ -3,10 +3,37 @@ import { defineStore } from 'pinia';
 export const useDmScreenStore = defineStore('dmscreen', {
   state: () => ({
     campaigns: [
-      { id: '123', name: 'Campaign 1', description: '' },
-      { id: '456', name: 'Campaign 2 - heroes!', description: '' },
-      { id: '789', name: 'Campaign 3', description: '' }
-    ],
+      // Mock Campaign 1: A rich dataset to test layouts, text truncation, and deep looping
+      {
+        id: "mock-campaign-1",
+        name: "Critical Role: Phandelver",
+        description: `A gritty exploration into the Lost Mine. Testing long paragraphs here to see if the accordion text wraps nicely on tablet layouts without breaking line heights.\
+        This is a second paragraph to test the wrapping and line height behavior of the accordion text. It should be long enough to wrap onto multiple lines, and we want to ensure \
+        that it doesn't break the layout or cause any unexpected overflow issues. The goal is to simulate a real-world scenario where a campaign description might be quite verbose \
+        and require careful handling in the UI.`,
+        party: [
+          {
+            id: "pc-1",
+            name: "Growl Stormjaw",
+            maxHp: 45,
+            classes: ["Fighter", "Barbarian"] // Tests your multi-chip rendering logic!
+          },
+          {
+            id: "pc-2",
+            name: "Elrond Half-Elven",
+            maxHp: 28,
+            classes: ["Wizard"]
+          }
+        ]
+      },
+      // Mock Campaign 2: An empty dataset to explicitly test your "Empty State" UI screens
+      {
+        id: "mock-campaign-2",
+        name: "Empty Sandbox Campaign",
+        description: "No party members here. Used to verify that the 'No characters added yet' text displays cleanly.",
+        party: []
+      }
+    ] as any[],
   }),
   actions: {
 

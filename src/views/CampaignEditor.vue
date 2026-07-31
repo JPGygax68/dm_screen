@@ -67,24 +67,26 @@
   import { useRoute, useRouter } from 'vue-router';
   import {
     IonButton, IonButtons, IonContent, IonHeader, IonInput, IonItem, IonList, IonPage,
-    IonTextarea, IonToolbar, IonText, IonNote, IonBadge, IonRange, IonIcon, IonModal
+    IonTextarea, IonToolbar, IonText, IonNote, IonBadge, IonRange, IonIcon, IonModal,
+    IonListHeader, IonLabel
   } from '@ionic/vue';
   import { useDmScreenStore } from '../stores/dataStore';
   import { addIcons } from 'ionicons';
-  import { personAddOutline } from 'ionicons/icons';
+  import { personAddOutline, trashOutline } from 'ionicons/icons';
   import Breadcrumbs from '../components/Breadcrumbs.vue';
   import PlayerCharacterCreate from './PlayerCharacterCreate.vue';
   import fullSchema from '../generated/models/data.schema.json';
 
   addIcons({
-    'person-add-outline': personAddOutline
+    personAddOutline,
+    trashOutline
   });
 
   const route = useRoute();
   const router = useRouter();
   const dataStore = useDmScreenStore();
 
-  const campaignId = route.params.campaign_id as string;
+  const campaignId = route.params.id as string;
 
   const isCharacterModalOpen = ref(false);
 
