@@ -114,7 +114,8 @@
   import Ajv from 'ajv';
   import fullSchema from '../generated/models/data.schema.json';
   import ClassSelector from '../components/ClassSelector.vue';
-
+  import { unfocusActiveElement } from '../lib/domHelpers';
+  
   addIcons({
     createOutline,
     removeOutline,
@@ -167,9 +168,7 @@
   });
 
   onIonViewWillLeave(() => {
-    if (document.activeElement instanceof HTMLElement) {
-      document.activeElement.blur();
-    }
+    unfocusActiveElement();
   });
 
   // Initialize AJV validator
@@ -253,25 +252,26 @@
   }
 
   function save() {
-    console.assert(!!ui.campaignDraft, 'No campaign draft to save');
-    console.assert(isValid.value, 'Cannot save invalid campaign draft', visibleErrors.value);
-    // Save the draft to the store
-    dataStore.addCampaign(ui.campaignDraft);
-    ui.clearCampaignDraft();
-    router.push('/campaigns');
+    console.log
+    console.assert(isValid.value, 'Cannot save invalid player character draft', visibleErrors.value);
+    console.assert(!!ui.playerCharacterDraft, 'No player character draft to save');
+
+    unfocusActiveElement();
+
+    // Save the draft into the campaign's player character list
+    ui.commitCharacterDraftToCampaignDraft();
+
+    touchedFields.value = {};
+
+    router.back();
   }
 
   function cancel() {
-    if (document.activeElement instanceof HTMLElement) {
-      document.activeElement.blur();
-    }
-    // touchedFields.value = {
-    //   name: false,
-    //   description: false
-    // };
-    // TODO: Consider prompting the user to confirm discarding changes if the draft has been modified
-    ui.clearCampaignDraft();
+    console.assert(!!draft.value, 'No player character draft to cancel');
+    unfocusActiveElement();
+    ui.clearPlayerCharacterDraft();
     touchedFields.value = {};
-    router.push('/campaigns');
+
+    router.back();
   }
 </script>

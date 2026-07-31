@@ -73,9 +73,7 @@ type: object
     required:
     - id
     - name
-    - hitPoints
     - maxHitPoints
-    - conditions
     additionalProperties: true
 
   NonPlayerCharacter:

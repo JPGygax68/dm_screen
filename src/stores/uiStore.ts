@@ -60,6 +60,22 @@ export const useUiStore = defineStore('ui', {
       }
       return this.playerCharacterDraft;
     },
+    
+    commitCharacterDraftToCampaignDraft() {
+      console.assert(!!this.playerCharacterDraft, 'No player character draft to commit');
+      console.log('Committing player character draft to campaign draft:', this.playerCharacterDraft);
+      if (!this.campaignDraft) return;
+      if (!this.campaignDraft.party) {
+        this.campaignDraft.party = [];
+      }
+      
+      // Push a deep copy of the character draft into the active campaign draft
+      this.campaignDraft.party.push({ ...this.playerCharacterDraft });
+      
+      // Wipe the character draft clean for next time
+      this.playerCharacterDraft = null;
+    },
+
     clearPlayerCharacterDraft() {
       console.assert(!!this.playerCharacterDraft, 'No player character draft to clear');
       console.log('Clearing player character draft');
