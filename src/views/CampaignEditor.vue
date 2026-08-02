@@ -27,34 +27,50 @@
             ion-textarea(v-model="draft.description" label="Description" label-placement="stacked" 
               placeholder="Campaign Description")
 
-          ion-item.ion-no-padding
-            ion-list
-              ion-list-header
-                div.list-header-inner
-                  | Player Characters 
-                  span.annotation (Optional)
+          ion-item
+            ion-list(style="width: 100%;")
+              h4
+                | Player Characters 
+                span.inline-annotation (Optional)
 
-              ion-item(v-for="(pc, index) in draft.party" :key="pc.id")
-                //- 1. Left side: Character primary metadata info
-                ion-label
-                  h3(style="font-weight: 500; font-size: 16px; margin: 0 0 4px 0;") {{ pc.name }}
-                  //- Inline flex container tracking character stats summary
-                  div(style="display: flex; align-items: center; gap: 12px;")
-                    //- HP Badge Indicator
-                    ion-note(style="font-size: 13px; color: var(--ion-color-step-600); font-weight: 500;")
-                      | {{ pc.maxHitPoints || 10 }}&nbsp;HP                    
-                    //- Visual Class labels loop running horizontally
-                    div(style="display: flex; gap: 4px;" v-if="pc.classes && pc.classes.length > 0")
-                      span(
-                        v-for="cls in pc.classes" 
-                        :key="cls" 
-                        style="font-size: 11px; background: var(--ion-color-primary-tight, rgba(56, 128, 255, 0.1)); color: var(--ion-color-primary); padding: 2px 6px; border-radius: 4px; font-weight: 500;"
-                      ) {{ cls }}
-                //- ion-label
-                //-   h2 {{ pc.name }}
-                //-   p {{ pc.description || 'No description provided' }}
-                ion-button(slot="end" fill="clear" color="danger" @click="draft.party.splice(index, 1)")
-                  ion-icon(name="trash-outline")
+              //- If list is empty, keep your clean center message fallback
+              div(v-if="!draft.party || draft.party.length === 0" class="ion-padding ion-text-center" style="color: var(--ion-color-step-400);")
+                | No characters added to this party yet.
+
+              //- Responsive Tablet Grid Container
+              ion-grid.ion-no-padding
+                ion-row
+                  //- Column auto-calculates sizes based on tablet viewport widths
+                  ion-col(v-for="pc in draft.party" :key="pc.id" size="12" size-md="6" size-lg="4" style="margin-bottom: 12px;")
+                    //- High-quality operational card style wrapper
+                    ion-card.ion-no-margin
+                      ion-card-content
+                        
+                        //- Top Section: Character Primary Identity and Actions Row
+                        div.top
+                          div
+                            h3 {{ pc.name }}
+                            p {{ pc.race || 'Unknown Race' }} • Level {{ pc.level || 1 }}
+                          
+                          //- Trash button nested cleanly in the top right corner
+                          ion-button(fill="clear" color="danger" size="small" @click="removeCharacter(pc.id)")
+                            ion-icon(slot="icon-only" :icon="trashOutline" style="font-size: 18px;")
+
+                        //- Middle Section: Secondary Metadata Metrics Row
+                        div.middle
+                          ion-badge.max-hit-points(color="danger")
+                            | {{ pc.maxHitPoints || 10 }} HP
+                          
+                          span(v-if="pc.armorClass" style="font-size: 12px; background: var(--ion-color-medium-tint, rgba(146, 148, 156, 0.1)); color: var(--ion-color-step-700); padding: 2px 6px; border-radius: 4px; font-weight: bold;")
+                            | AC {{ pc.armorClass }}
+
+                        //- Bottom Section: Character Class Chips
+                        div.bottom(v-if="pc.classes && pc.classes.length > 0")
+                          ion-badge.classes(
+                            v-for="cls in pc.classes" 
+                            :key="cls" 
+                            color="primary"
+                          ) {{ cls }}
 
           //- Standard layout button opening our local overlay shell to add a new player character
           ion-item(lines="none")
@@ -78,6 +94,7 @@
   ion-textarea {
     padding-bottom: 12px;
   }
+
   .list-header-inner {
     font-size: 16px;
     font-weight: 600;
@@ -87,13 +104,76 @@
     gap: 4px;
     align-items: baseline;
     justify-content: space-between;
-    .annotation {
-      font-weight: normal; 
-      font-size: 14px;
-      color: var(--ion-color-step-400);
-      font-weight: 400;
+  }
+
+  .inline-annotation {
+    font-weight: normal;
+    font-size: 14px;
+    color: var(--ion-color-step-400);
+    font-weight: 400;
+  }
+
+  ion-card-content {
+    .top {
+      display: flex;
+      flex-direction: row;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 8px;
+
+      >div {
+        h3 {
+          font-size: 16px;
+          font-weight: bold;
+          color: var(--ion-color-dark);
+        }
+
+        p {
+          font-size: 12px;
+          color: var(--ion-color-step-500);
+          margin: 0;
+        }
+      }
+
+      >ion-button {
+        //align-self: flex-start;
+        //position: relative;
+        margin-top: -4px;
+        margin-right: -4px;
+        // --padding-start: 0;
+        // --padding-end: 0;
+        // --padding-top: 0;
+        // --padding-bottom: 0;
+        min-width: 24px;
+        min-height: 24px;
+      }
+    }
+
+    .middle {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      margin-bottom: 10px;
+
+      .max-hit-points {
+        font-size: 11px;
+        padding: 4px 6px;
+        font-weight: bold;
+        border-radius: 6px;
+      }
+    }
+
+    .bottom {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 4px;
+
+      .classes {
+        --color: --ion-color-light;
+      }
     }
   }
+
 </style>
 
 <script setup lang="ts">
@@ -104,7 +184,7 @@
   import {
     IonButton, IonButtons, IonContent, IonHeader, IonInput, IonItem, IonList, IonPage,
     IonTextarea, IonToolbar, IonText, IonNote, IonBadge, IonRange, IonIcon, IonModal,
-    IonListHeader, IonLabel
+    IonListHeader, IonLabel, IonGrid, IonRow, IonCol, IonCard, IonCardContent
   } from '@ionic/vue';
   import { useDmScreenStore } from '../stores/dataStore';
   import { addIcons } from 'ionicons';
