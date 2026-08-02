@@ -27,16 +27,32 @@
             ion-textarea(v-model="draft.description" label="Description" label-placement="stacked" 
               placeholder="Campaign Description")
 
-          ion-item
+          ion-item.ion-no-padding
             ion-list
               ion-list-header
-                ion-label
-                  ion-text(color="dark") Player Characters
-                  ion-text(color="medium")  (Optional)
+                div.list-header-inner
+                  | Player Characters 
+                  span.annotation (Optional)
+
               ion-item(v-for="(pc, index) in draft.party" :key="pc.id")
+                //- 1. Left side: Character primary metadata info
                 ion-label
-                  h2 {{ pc.name }}
-                  p {{ pc.description || 'No description provided' }}
+                  h3(style="font-weight: 500; font-size: 16px; margin: 0 0 4px 0;") {{ pc.name }}
+                  //- Inline flex container tracking character stats summary
+                  div(style="display: flex; align-items: center; gap: 12px;")
+                    //- HP Badge Indicator
+                    ion-note(style="font-size: 13px; color: var(--ion-color-step-600); font-weight: 500;")
+                      | {{ pc.maxHitPoints || 10 }}&nbsp;HP                    
+                    //- Visual Class labels loop running horizontally
+                    div(style="display: flex; gap: 4px;" v-if="pc.classes && pc.classes.length > 0")
+                      span(
+                        v-for="cls in pc.classes" 
+                        :key="cls" 
+                        style="font-size: 11px; background: var(--ion-color-primary-tight, rgba(56, 128, 255, 0.1)); color: var(--ion-color-primary); padding: 2px 6px; border-radius: 4px; font-weight: 500;"
+                      ) {{ cls }}
+                //- ion-label
+                //-   h2 {{ pc.name }}
+                //-   p {{ pc.description || 'No description provided' }}
                 ion-button(slot="end" fill="clear" color="danger" @click="draft.party.splice(index, 1)")
                   ion-icon(name="trash-outline")
 
@@ -58,7 +74,27 @@
         )
 </template>
 
-<style lang="scss" scoped></style>
+<style lang="scss" scoped>
+  ion-textarea {
+    padding-bottom: 12px;
+  }
+  .list-header-inner {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--ion-color-step-600, #666666);
+    margin: 8px 0 10px 0;
+    display: flex;
+    gap: 4px;
+    align-items: baseline;
+    justify-content: space-between;
+    .annotation {
+      font-weight: normal; 
+      font-size: 14px;
+      color: var(--ion-color-step-400);
+      font-weight: 400;
+    }
+  }
+</style>
 
 <script setup lang="ts">
   import Ajv from 'ajv';

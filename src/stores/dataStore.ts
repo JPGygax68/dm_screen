@@ -14,7 +14,7 @@ export const useDmScreenStore = defineStore('dmscreen', {
         party: [
           {
             id: "pc-1",
-            name: "Growl Stormjaw",
+            name: "Growler Stormjaw",
             maxHitPoints: 45,
             classes: ["Fighter", "Barbarian"] // Tests your multi-chip rendering logic!
           },
