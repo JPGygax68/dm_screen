@@ -28,7 +28,6 @@
               placeholder="Campaign Description")
 
           ion-item
-            //- Use your custom FormRow wrapper or standard isolated layout container
             div(style="display: flex; flex-direction: column; width: 100%; padding: 10px 0;")
               div(style="font-size: 13px; font-weight: 500; color: var(--ion-color-step-600); margin-bottom: 8px;") 
                 | Party Members

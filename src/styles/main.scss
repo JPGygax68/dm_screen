@@ -1,5 +1,4 @@
 @use "tokens" as *;
-@use "theme/variables" as *;
 
 @include emit-component-css-vars(light, ":root");
 @include emit-component-css-vars(dark, ":root[data-theme='dark']");

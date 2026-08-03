@@ -28,3 +28,24 @@
   align-items: center;
   width: 100%;
 }
+
+/* NOT BEING USED RIGHT NOW, BUT MAYBE LATER. KEEPING FOR REFERENCE. */
+
+.party-inline-grid-group {
+  display: grid;
+  /* 
+    Automatically sizes cells horizontally based strictly on content length, 
+    letting text badges and buttons share the same line seamlessly.
+  */
+  grid-template-columns: repeat(auto-fill, minmax(min-content, max-content));
+  
+  /* Enforces a perfect, unstacked 8px spacing gap vertically and horizontally */
+  gap: 8px;
+  
+  /* 
+    CRITICAL FIX: Forces every single element on the line (badges and buttons) 
+    to share an absolute pixel-perfect vertical center alignment guideline.
+  */
+  align-items: center;
+  width: 100%;
+}

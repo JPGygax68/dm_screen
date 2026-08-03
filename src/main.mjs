@@ -16,7 +16,10 @@ import '@ionic/vue/css/display.css';
 
 import { createPinia } from 'pinia';
 
+import './styles/theme/variables.scss';
+import './styles/theme/rpg-components.scss';
 import './styles/main.scss';
+
 import App from './App.vue';
 import routes from './router';
 

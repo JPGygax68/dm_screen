@@ -2,7 +2,8 @@
 
   ion-page
     ion-header
-      ion-title.ion-padding Character Editor
+      ion-toolbar
+        ion-title.ion-padding Character Editor
     ion-content
       form(@submit.prevent="save")
         ion-list
