@@ -141,7 +141,7 @@
   import { addIcons } from 'ionicons';
   import { personAddOutline, trashOutline } from 'ionicons/icons';
   import Breadcrumbs from '../components/Breadcrumbs.vue';
-  import PlayerCharacterEditor from './PlayerCharacterEditor.vue';
+  import PlayerCharacterEditor from './PlayerCharacterEdit.vue';
   import fullSchema from '../generated/models/data.schema.json';
 
   addIcons({
