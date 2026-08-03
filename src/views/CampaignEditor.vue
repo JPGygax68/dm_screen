@@ -29,9 +29,8 @@
 
           ion-item
             ion-list(style="width: 100%;")
-              h4
-                | Player Characters 
-                span.inline-annotation (Optional)
+              h6 Player Characters 
+                span.inline-annotation
 
               //- If list is empty, keep your clean center message fallback
               div(v-if="!draft.party || draft.party.length === 0" class="ion-padding ion-text-center" style="color: var(--ion-color-step-400);")
@@ -39,23 +38,20 @@
 
               //- Responsive Tablet Grid Container
               ion-grid.ion-no-padding
-                ion-row
+                ion-row(ion-align-items-start)
                   //- Column auto-calculates sizes based on tablet viewport widths
-                  ion-col(v-for="pc in draft.party" :key="pc.id" size="12" size-md="6" size-lg="4" style="margin-bottom: 12px;")
+                  ion-col(v-for="pc in draft.party" :key="pc.id" )
                     //- High-quality operational card style wrapper
-                    ion-card.ion-no-margin
-                      ion-card-content
-                        
+                    ion-card
+                      ion-card-content                        
                         //- Top Section: Character Primary Identity and Actions Row
                         div.top
                           div
                             h3 {{ pc.name }}
-                            p {{ pc.race || 'Unknown Race' }} • Level {{ pc.level || 1 }}
-                          
+                            p {{ pc.race || 'Unknown Race' }} • Level {{ pc.level || 1 }}                
                           //- Trash button nested cleanly in the top right corner
                           ion-button(fill="clear" color="danger" size="small" @click="removeCharacter(pc.id)")
                             ion-icon(slot="icon-only" :icon="trashOutline" style="font-size: 18px;")
-
                         //- Middle Section: Secondary Metadata Metrics Row
                         div.middle
                           ion-badge.badge-stat-hp
@@ -63,7 +59,6 @@
 
                           ion-badge.badge-stat-ac(v-if="pc.armorClass")
                             | AC {{ pc.armorClass || 10 }}                          
-
                         //- Bottom Section: Character Class Chips
                         div.bottom
                           div.character-classes(v-if="pc.classes && pc.classes.length > 0")
@@ -71,9 +66,22 @@
                               | {{ cls }}
                             ion-badge.badge-character-class(v-for="(cls, key, index) in pc.classes.slice(1)")
                               | {{ cls }}
+
+                  ion-col(size="12" size-md="6" size-lg="4")
+                    ion-card
+                      ion-card-content
+                        div.middle
+                          ion-icon(name="person-add-outline" style="font-size: 48px; color: var(--ion-color-step-400);")
+                        div.bottom
+                          ion-button(expand="block" fill="outline" @click="isCharacterModalOpen = true")
+                            ion-icon(slot="start" :icon="personAddOutline")
+                            | Add Player Character
+                      //- ion-button(expand="center" fill="outline" @click="isCharacterModalOpen = true")
+                      //-   ion-icon(slot="start" :icon="personAddOutline")
+                      //-   | Add Player Character
                                 
           //- Standard layout button opening our local overlay shell to add a new player character
-          ion-item(lines="none")
+          //- ion-item(lines="none")
             ion-button(expand="block" class="ion-no-margin" @click="isCharacterModalOpen = true")
               ion-icon(slot="start" name="person-add-outline")
               | Add Player Character
@@ -113,41 +121,51 @@
     font-weight: 400;
   }
 
-  ion-card-content {
-    .top {
-      display: flex;
-      flex-direction: row;
-      justify-content: space-between;
-      align-items: flex-start;
-      margin-bottom: 8px;
+  ion-row {
 
-      >div {
-        h3 {
-          font-size: 16px;
-          font-weight: bold;
-          color: var(--ion-color-dark);
+    ion-card {
+
+      margin: 10px;
+
+      ion-card-content {
+        min-width: 300px;
+        min-height: 200px;
+
+        .top {
+          display: flex;
+          flex-direction: row;
+          justify-content: space-between;
+          align-items: flex-start;
+
+          >div {
+            h3 {
+              font-size: 16px;
+              font-weight: bold;
+              color: var(--ion-color-dark);
+            }
+
+            p {
+              font-size: 12px;
+              color: var(--ion-color-step-500);
+              margin: 0;
+            }
+          }
+
+          >ion-button {
+            margin-top: -4px;
+            margin-right: -4px;
+            min-width: 24px;
+            min-height: 24px;
+          }
         }
 
-        p {
-          font-size: 12px;
-          color: var(--ion-color-step-500);
-          margin: 0;
+        .middle {
+          display: flex;
+          gap: 12px;
+          align-items: center;
+          margin-bottom: 10px;
         }
       }
-
-      >ion-button {
-        margin-top: -4px;
-        margin-right: -4px;
-        min-width: 24px;
-        min-height: 24px;
-      }
-    }
-
-    .middle {
-      display: flex;
-      gap: 12px;
-      align-items: center;
-      margin-bottom: 10px;
     }
   }
 
@@ -166,6 +184,7 @@
       &.main-class {
         font-size: 14px;
       }
+
       padding: 4px 8px;
       font-weight: bold;
       border-radius: 6px;

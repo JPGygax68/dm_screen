@@ -15,16 +15,42 @@ export const useDmScreenStore = defineStore('dmscreen', {
           {
             id: "pc-1",
             name: "Growler Stormjaw",
+            level: 4,
             maxHitPoints: 45,
             race: "Half-Orc",
-            classes: ["Fighter", "Barbarian"] // Tests your multi-chip rendering logic!
+            classes: ["Fighter", "Barbarian"]
           },
           {
             id: "pc-2",
             name: "Elrond Half-Elven",
+            level: 3,
             race: "Half-Elf",
             maxHitPoints: 32,
-            classes: ["Paladin", "Cleric"] // Tests your multi-chip rendering logic!
+            classes: ["Paladin", "Cleric"]
+          },
+          {
+            id: "pc-3",
+            name: "Sam Brightspark",
+            race: "Halfling",
+            maxHitPoints: 12,
+            level: 2,
+            classes: ["Rogue"]
+          },
+          {
+            id: "pc-4",
+            name: "Thalindra Moonshadow",
+            race: "Elf",
+            level: 5,
+            maxHitPoints: 28,
+            classes: ["Cleric"]
+          },
+          {
+            id: "pc-5",
+            name: "Borin Stonefist",
+            race: "Dwarf",
+            level: 4,
+            maxHitPoints: 38,
+            classes: ["Fighter"]
           }
         ]
       },
