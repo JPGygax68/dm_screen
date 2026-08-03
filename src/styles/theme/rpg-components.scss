@@ -20,15 +20,6 @@
   --background: rgba(var(--ion-color-primary-rgb), 0.16);
 }
 
-/* Inline flex container managing your layout wrapping rows */
-.party-inline-flex-group {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  align-items: center;
-  width: 100%;
-}
-
 /* NOT BEING USED RIGHT NOW, BUT MAYBE LATER. KEEPING FOR REFERENCE. */
 
 .party-inline-grid-group {

@@ -45,7 +45,7 @@
 
                 //- Clean inline execution button matching the height of your text badges
                 ion-button(
-                  fill="clear" 
+                  fill="solid" 
                   size="small" 
                   @click="openCharacterCreator"
                   style="margin: 0; --padding-start: 8px; --padding-end: 8px; font-size: 13px;"
@@ -70,6 +70,16 @@
   ion-textarea {
     padding-bottom: 12px;
   }
+
+  /* Inline flex container managing your layout wrapping rows */
+  .party-inline-flex-group {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    align-items: baseline;
+    width: 100%;
+  }
+
 
   .list-header-inner {
     font-size: 16px;
