@@ -1,0 +1,30 @@
+/* src/theme/rpg-components.css */
+
+/* Interactive, clickable character badges */
+.badge-interactive-pc {
+  --background: rgba(var(--ion-color-primary-rgb), 0.08);
+  color: var(--ion-color-primary);
+  font-weight: 500;
+  font-size: 13px;
+  padding: 6px 12px;
+  border-radius: 6px;
+  margin: 0;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  transition: background-color 0.2s ease;
+}
+
+/* Subtle visual indicator when tapping badges on tablets */
+.badge-interactive-pc:active {
+  --background: rgba(var(--ion-color-primary-rgb), 0.16);
+}
+
+/* Inline flex container managing your layout wrapping rows */
+.party-inline-flex-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+  width: 100%;
+}

@@ -28,63 +28,31 @@
               placeholder="Campaign Description")
 
           ion-item
-            ion-list(style="width: 100%;")
-              h6 Player Characters 
-                span.inline-annotation
+            //- Use your custom FormRow wrapper or standard isolated layout container
+            div(style="display: flex; flex-direction: column; width: 100%; padding: 10px 0;")
+              div(style="font-size: 13px; font-weight: 500; color: var(--ion-color-step-600); margin-bottom: 8px;") 
+                | Party Members
 
-              //- If list is empty, keep your clean center message fallback
-              div(v-if="!draft.party || draft.party.length === 0" class="ion-padding ion-text-center" style="color: var(--ion-color-step-400);")
-                | No characters added to this party yet.
+              //- Horizontal flexbox group automatically wraps elements gracefully onto new lines
+              div(class="party-inline-flex-group")
+                
+                //- Clickable Character Badges
+                ion-badge(
+                  v-for="pc in draft.party" 
+                  :key="pc.id" 
+                  class="badge-interactive-pc"
+                  @click="openCharacterEditor(pc)"
+                ) {{ pc.name }}
 
-              //- Responsive Tablet Grid Container
-              ion-grid.ion-no-padding
-                ion-row(ion-align-items-start)
-                  //- Column auto-calculates sizes based on tablet viewport widths
-                  ion-col(v-for="pc in draft.party" :key="pc.id" )
-                    //- High-quality operational card style wrapper
-                    ion-card
-                      ion-card-content                        
-                        //- Top Section: Character Primary Identity and Actions Row
-                        div.top
-                          div
-                            h3 {{ pc.name }}
-                            p {{ pc.race || 'Unknown Race' }} • Level {{ pc.level || 1 }}                
-                          //- Trash button nested cleanly in the top right corner
-                          ion-button(fill="clear" color="danger" size="small" @click="removeCharacter(pc.id)")
-                            ion-icon(slot="icon-only" :icon="trashOutline" style="font-size: 18px;")
-                        //- Middle Section: Secondary Metadata Metrics Row
-                        div.middle
-                          ion-badge.badge-stat-hp
-                            | {{ pc.maxHitPoints || 10 }} HP
-
-                          ion-badge.badge-stat-ac(v-if="pc.armorClass")
-                            | AC {{ pc.armorClass || 10 }}                          
-                        //- Bottom Section: Character Class Chips
-                        div.bottom
-                          div.character-classes(v-if="pc.classes && pc.classes.length > 0")
-                            ion-badge.badge-character-class.main-class(v-for="cls in [pc.classes[0]]")
-                              | {{ cls }}
-                            ion-badge.badge-character-class(v-for="(cls, key, index) in pc.classes.slice(1)")
-                              | {{ cls }}
-
-                  ion-col(size="12" size-md="6" size-lg="4")
-                    ion-card
-                      ion-card-content
-                        div.middle
-                          ion-icon(name="person-add-outline" style="font-size: 48px; color: var(--ion-color-step-400);")
-                        div.bottom
-                          ion-button(expand="block" fill="outline" @click="isCharacterModalOpen = true")
-                            ion-icon(slot="start" :icon="personAddOutline")
-                            | Add Player Character
-                      //- ion-button(expand="center" fill="outline" @click="isCharacterModalOpen = true")
-                      //-   ion-icon(slot="start" :icon="personAddOutline")
-                      //-   | Add Player Character
-                                
-          //- Standard layout button opening our local overlay shell to add a new player character
-          //- ion-item(lines="none")
-            ion-button(expand="block" class="ion-no-margin" @click="isCharacterModalOpen = true")
-              ion-icon(slot="start" name="person-add-outline")
-              | Add Player Character
+                //- Clean inline execution button matching the height of your text badges
+                ion-button(
+                  fill="clear" 
+                  size="small" 
+                  @click="openCharacterCreator"
+                  style="margin: 0; --padding-start: 8px; --padding-end: 8px; font-size: 13px;"
+                )
+                  ion-icon(slot="start" :icon="personAddOutline" style="font-size: 16px; margin-inline-end: 4px;")
+                  | Add Member
 
           ion-item
             ion-button(type="submit" :disabled="!isValid") Save Campaign
@@ -92,7 +60,8 @@
 
       //- Inline Ionic overlay handling local character input sandbox context
       ion-modal(:is-open="isCharacterModalOpen" @didDismiss="isCharacterModalOpen = false")
-        PlayerCharacterCreate(
+        PlayerCharacterEditor(
+          :characterData="selectedCharacterForEdit"
           @save="handleInlineCharacterSave" 
           @cancel="isCharacterModalOpen = false"
         )
@@ -121,52 +90,18 @@
     font-weight: 400;
   }
 
-  ion-row {
+  .character-css-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    padding: 16px;
+    gap: 16px;
+    width: 100%;
+  }
 
-    ion-card {
-
-      margin: 10px;
-
-      ion-card-content {
-        min-width: 300px;
-        min-height: 200px;
-
-        .top {
-          display: flex;
-          flex-direction: row;
-          justify-content: space-between;
-          align-items: flex-start;
-
-          >div {
-            h3 {
-              font-size: 16px;
-              font-weight: bold;
-              color: var(--ion-color-dark);
-            }
-
-            p {
-              font-size: 12px;
-              color: var(--ion-color-step-500);
-              margin: 0;
-            }
-          }
-
-          >ion-button {
-            margin-top: -4px;
-            margin-right: -4px;
-            min-width: 24px;
-            min-height: 24px;
-          }
-        }
-
-        .middle {
-          display: flex;
-          gap: 12px;
-          align-items: center;
-          margin-bottom: 10px;
-        }
-      }
-    }
+  ion-card-header ion-button.trashcan {
+    position: absolute;
+    right: 0;
+    top: 0;
   }
 
   .bottom {
@@ -207,7 +142,7 @@
   import { addIcons } from 'ionicons';
   import { personAddOutline, trashOutline } from 'ionicons/icons';
   import Breadcrumbs from '../components/Breadcrumbs.vue';
-  import PlayerCharacterCreate from './PlayerCharacterCreate.vue';
+  import PlayerCharacterEditor from './PlayerCharacterEditor.vue';
   import fullSchema from '../generated/models/data.schema.json';
 
   addIcons({
@@ -288,6 +223,52 @@
   const isValid = computed(() => validationResult.value.isValid);
   const errors = computed(() => validationResult.value.errors);
 
+  // Local tracker holding the active character configuration target data structure
+  const selectedCharacterForEdit = ref<any>(null);
+
+  function openCharacterCreator() {
+    selectedCharacterForEdit.value = null; // Tells the modal to act as a creation sandbox
+    isCharacterModalOpen.value = true;
+  }
+
+  function openCharacterEditor(character: any) {
+    // Pass a deep copy of the selected character row safely into the editor state
+    selectedCharacterForEdit.value = JSON.parse(JSON.stringify(character));
+    isCharacterModalOpen.value = true;
+  }
+
+  function handleInlineCharacterSave(characterData: any) {
+    if (!draft.value.party) draft.value.party = [];
+
+    const index = draft.value.party.findIndex((pc: any) => pc.id === characterData.id);
+
+    if (index !== -1) {
+      // Modify existing character details row inline
+      draft.value.party[index] = characterData;
+    } else {
+      // Append a brand new character record
+      draft.value.party.push(characterData);
+    }
+
+    isCharacterModalOpen.value = false;
+  }
+
+  function handleInlineCharacterDelete(characterId: string) {
+    draft.value.party = draft.value.party.filter((pc: any) => pc.id !== characterId);
+    isCharacterModalOpen.value = false;
+  }
+
+  function save() {
+    dataStore.addOrUpdateCampaign(draft.value);
+    router.push('/campaigns');
+  }
+
+  function cancel() {
+    router.push('/campaigns');
+  }
+
+  // Lifecycle hook to load existing campaign data into the draft when the view is entered
+
   onIonViewWillEnter(() => {
     console.log('CampaignEditor view will enter');
 
@@ -306,20 +287,5 @@
     }
   });
 
-  // Capture inline modal character emissions directly into the draft
-  function handleInlineCharacterSave(newCharacter: any) {
-    if (!draft.value.party) draft.value.party = [];
-    draft.value.party.push(newCharacter);
-    isCharacterModalOpen.value = false;
-  }
-
-  function save() {
-    dataStore.addOrUpdateCampaign(draft.value);
-    router.push('/campaigns');
-  }
-
-  function cancel() {
-    router.push('/campaigns');
-  }
 
 </script>

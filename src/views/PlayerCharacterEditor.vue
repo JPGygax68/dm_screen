@@ -2,7 +2,7 @@
 
   ion-page
     ion-header
-      breadcrumbs
+      ion-title.ion-padding Character Editor
     ion-content
       form(@submit.prevent="save")
         ion-list
@@ -71,6 +71,14 @@
                 
           ion-item
             ion-button(type="submit" :disabled="!isValid") Save
+            //- Delete option only renders if modifying an existing PC profile row
+            ion-button(
+              v-if="isEditing" 
+              type="button" 
+              color="danger" 
+              fill="outline" 
+              @click="emit('delete', draft.value.id)"
+            ) Delete Character
             ion-button(@click="cancel" color="medium") Cancel
 
 </template>
@@ -80,8 +88,10 @@
     display: flex;
     align-items: center;
     gap: 4px;
-    ion-button > ion-icon {
-      width: 40px; height: 40px;
+
+    ion-button>ion-icon {
+      width: 40px;
+      height: 40px;
     }
   }
 
@@ -98,10 +108,12 @@
   import { useRoute } from 'vue-router';
   import {
     IonPage, IonHeader, IonContent, IonList, IonItem, IonInput, IonTextarea, IonButton,
-    IonNote, IonIcon, IonText, IonLabel, IonChip, IonSelect, IonSelectOption, IonRange, IonBadge
+    IonNote, IonIcon, IonText, IonLabel, IonChip, IonSelect, IonSelectOption, IonRange, 
+    IonBadge, IonTitle
   } from '@ionic/vue';
   import { addIcons } from 'ionicons';
-  import { createOutline, removeOutline, addOutline, 
+  import {
+    createOutline, removeOutline, addOutline,
     chevronBackOutline, chevronForwardOutline,
     heartOutline, heartDislikeOutline
   } from 'ionicons/icons';
@@ -113,8 +125,8 @@
   import Ajv from 'ajv';
   import fullSchema from '../generated/models/data.schema.json';
   import ClassSelector from '../components/ClassSelector.vue';
-  import { unfocusActiveElement } from '../lib/domHelpers';
-  
+  import { unfocusActiveElement } from '../lib/domHelpers.ts';
+
   addIcons({
     createOutline,
     removeOutline,
@@ -126,22 +138,22 @@
   });
 
   const schema = { ...fullSchema.$defs.PlayerCharacter, $defs: fullSchema.$defs };
-  //console.log('Campaign schema:', campaignSchema);
-
-  // const dataStore = useDataStore();
-  // const ui = useUiStore();
-
-  // const router = useRouter();
-  // const route = useRoute(); // Access the current route to get parameters
-  // const campaignId = route.params.campaign_id as string;
-
-  // const draft = ref<any>({ classes: [] });
 
   const nameInput = ref<any>(null);
+
+  const props = defineProps<{
+    characterData?: {
+      id: string;
+      name: string;
+      maxHitPoints: number;
+      classes: any[];
+    };
+  }>();
 
   const emit = defineEmits<{
     (e: 'save', payload: any): void;
     (e: 'cancel'): void;
+    (e: 'delete', characterId: string): void;
   }>();
 
   const draft = ref<{
@@ -149,13 +161,14 @@
     name: string;
     maxHitPoints: number;
     classes: any[];
-  }>({
+  }>(props.characterData ? { ...props.characterData } : {
     id: crypto.randomUUID() as string,
     name: '',
     maxHitPoints: 10,
     classes: []
   });
 
+  const isEditing = computed(() => !!props.characterData);
 
   // Keep track of user interaction state per field
   const touchedFields = ref<Record<string, boolean>>({});
@@ -269,7 +282,7 @@
     console.assert(!!draft.value, 'No player character draft to save');
     emit('save', { ...draft.value });
     unfocusActiveElement();
-    touchedFields.value = {}; 
+    touchedFields.value = {};
   }
 
   function cancel() {

@@ -24,13 +24,18 @@
 }
 
 .badge-character-class {
-  /* A soft, neutral slate-blue tint */
-  --background: rgba(var(--ion-color-secondary-rgb), 0.15);
+  /* 
+    Instead of hardcoding a solid blue background color, we use 
+    the active parent text color variable at a soft 12% opacity.
+  */
+  --background: rgba(var(--ion-text-color-rgb, 0, 0, 0), 0.12);
 
-  /* A deep, highly legible indigo text color */
-  color: var(--ion-color-secondary);
+  /* 
+    Forces the text color to strictly inherit the active text color 
+    of whatever parent wrapper it is dropped inside.
+  */
+  color: inherit;
 
   font-weight: 600;
   border-radius: 4px;
-  box-shadow: none;
 }
