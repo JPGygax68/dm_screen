@@ -58,20 +58,20 @@
 
                         //- Middle Section: Secondary Metadata Metrics Row
                         div.middle
-                          ion-badge.max-hit-points(color="danger")
+                          ion-badge.badge-stat-hp
                             | {{ pc.maxHitPoints || 10 }} HP
-                          
-                          span(v-if="pc.armorClass" style="font-size: 12px; background: var(--ion-color-medium-tint, rgba(146, 148, 156, 0.1)); color: var(--ion-color-step-700); padding: 2px 6px; border-radius: 4px; font-weight: bold;")
-                            | AC {{ pc.armorClass }}
+
+                          ion-badge.badge-stat-ac(v-if="pc.armorClass")
+                            | AC {{ pc.armorClass || 10 }}                          
 
                         //- Bottom Section: Character Class Chips
-                        div.bottom(v-if="pc.classes && pc.classes.length > 0")
-                          ion-badge.classes(
-                            v-for="cls in pc.classes" 
-                            :key="cls" 
-                            color="primary"
-                          ) {{ cls }}
-
+                        div.bottom
+                          div.character-classes(v-if="pc.classes && pc.classes.length > 0")
+                            ion-badge.badge-character-class.main-class(v-for="cls in [pc.classes[0]]")
+                              | {{ cls }}
+                            ion-badge.badge-character-class(v-for="(cls, key, index) in pc.classes.slice(1)")
+                              | {{ cls }}
+                                
           //- Standard layout button opening our local overlay shell to add a new player character
           ion-item(lines="none")
             ion-button(expand="block" class="ion-no-margin" @click="isCharacterModalOpen = true")
@@ -136,14 +136,8 @@
       }
 
       >ion-button {
-        //align-self: flex-start;
-        //position: relative;
         margin-top: -4px;
         margin-right: -4px;
-        // --padding-start: 0;
-        // --padding-end: 0;
-        // --padding-top: 0;
-        // --padding-bottom: 0;
         min-width: 24px;
         min-height: 24px;
       }
@@ -154,23 +148,27 @@
       gap: 12px;
       align-items: center;
       margin-bottom: 10px;
-
-      .max-hit-points {
-        font-size: 11px;
-        padding: 4px 6px;
-        font-weight: bold;
-        border-radius: 6px;
-      }
     }
+  }
 
-    .bottom {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 4px;
+  .bottom {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
 
-      .classes {
-        --color: --ion-color-light;
+    .classes {
+      --color: --ion-color-light;
+    }
+  }
+
+  .character-classes {
+    ion-badge {
+      &.main-class {
+        font-size: 14px;
       }
+      padding: 4px 8px;
+      font-weight: bold;
+      border-radius: 6px;
     }
   }
 

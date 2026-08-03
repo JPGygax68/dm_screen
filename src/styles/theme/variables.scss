@@ -1,0 +1,36 @@
+.badge-stat-hp {
+  /* A soft, pastel red background that implies health but doesn't shout "Danger!" */
+  --background: rgba(var(--ion-color-danger-rgb), 0.15);
+  //--background: rgba(235, 68, 90, 0.12);
+
+  /* A deep, highly legible dark crimson text color for absolute readability */
+  color: var(--ion-color-danger);
+
+  font-weight: 600;
+  border-radius: 4px;
+  box-shadow: none;
+}
+
+.badge-stat-ac {
+  /* A soft, neutral slate gray background */
+  //--background: rgba(146, 148, 156, 0.12);
+
+  /* A dark slate text color */
+  color: #37393e;
+
+  font-weight: 600;
+  border-radius: 4px;
+  box-shadow: none;
+}
+
+.badge-character-class {
+  /* A soft, neutral slate-blue tint */
+  --background: rgba(var(--ion-color-secondary-rgb), 0.15);
+
+  /* A deep, highly legible indigo text color */
+  color: var(--ion-color-secondary);
+
+  font-weight: 600;
+  border-radius: 4px;
+  box-shadow: none;
+}
