@@ -52,7 +52,7 @@
                 ) {{ pc.name }}
 
                 //- Clean inline execution button matching the height of your text badges
-                ion-button(
+                IonButton(
                   fill="outline" 
                   size="small" 
                   @click="openCharacterCreator"
@@ -146,18 +146,18 @@
 <script setup lang="ts">
   import Ajv from 'ajv';
   import { onIonViewWillEnter } from '@ionic/vue';
-  import { ref, reactive, computed, onMounted } from 'vue';
+  import { ref, computed } from 'vue';
   import { useRoute, useRouter } from 'vue-router';
-  import {
-    IonButton, IonButtons, IonContent, IonHeader, IonInput, IonItem, IonList, IonPage,
-    IonTextarea, IonToolbar, IonText, IonNote, IonBadge, IonRange, IonIcon, IonModal,
-    IonListHeader, IonLabel, IonGrid, IonRow, IonCol, IonCard, IonCardContent
-  } from '@ionic/vue';
+  // import {
+  //   IonButton, IonButtons, IonContent, IonHeader, IonInput, IonItem, IonList, IonPage,
+  //   IonTextarea, IonToolbar, IonText, IonNote, IonBadge, IonRange, IonIcon, IonModal,
+  //   IonListHeader, IonLabel, IonGrid, IonRow, IonCol, IonCard, IonCardContent
+  // } from '@ionic/vue';
   import { useDmScreenStore } from '../stores/dataStore';
   import { addIcons } from 'ionicons';
   import { personAddOutline, trashOutline } from 'ionicons/icons';
-  import Breadcrumbs from '../components/Breadcrumbs.vue';
-  import PlayerCharacterEditor from './PlayerCharacterEdit.vue';
+  // import Breadcrumbs from '../components/Breadcrumbs.vue';
+  // import PlayerCharacterEditor from './PlayerCharacterEdit.vue';
   import fullSchema from '../generated/models/data.schema.json';
 
   addIcons({

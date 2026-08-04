@@ -1,5 +1,6 @@
 import { defineConfig } from 'vite';
 import vue from '@vitejs/plugin-vue';
+import Components from 'unplugin-vue-components/vite';
 import { execFileSync } from 'node:child_process';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -56,7 +57,22 @@ function regenerateModels() {
 
 export default defineConfig({
   root: 'src',
-  plugins: [vue(), regenerateModels()],
+  plugins: [
+    vue(),
+    regenerateModels(),
+    // Automates your component registry passes cleanly
+    Components({
+      resolvers: [
+        (componentName) => {
+          // If a template tag starts with "Ion", automatically resolve it from @ionic/vue
+          if (componentName.startsWith('Ion')) {
+            return { name: componentName, from: '@ionic/vue' };
+          }
+        }
+      ],
+      dts: true, // Automatically writes a perfect global TypeScript types mapping file
+    })
+  ],
   build: {
     outDir: '../dist',
     emptyOutDir: true
