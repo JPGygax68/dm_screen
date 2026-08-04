@@ -106,7 +106,7 @@
 </style>
 
 <script setup lang="ts">
-  import { computed, ref } from 'vue';
+  import { computed, ref, watch } from 'vue';
   import { useRoute } from 'vue-router';
   import {
     IonPage, IonHeader, IonContent, IonList, IonItem, IonInput, IonTextarea, IonButton,
@@ -158,17 +158,24 @@
     (e: 'delete', characterId: string): void;
   }>();
 
-  const draft = ref<{
-    id: string;
-    name: string;
-    maxHitPoints: number;
-    classes: any[];
-  }>(props.characterData ? { ...props.characterData } : {
-    id: crypto.randomUUID() as string,
-    name: '',
-    maxHitPoints: 10,
-    classes: []
-  });
+  const draft = ref(generateBlankOrClone(props.characterData));
+
+  function generateBlankOrClone(source: any | null) {
+    if (source) {
+      return { ...source }; // Return a clean copy of the character profile
+    }
+    return {
+      id: crypto.randomUUID(),
+      name: '',
+      classes: [] as string[],
+      maxHitPoints: 10
+    };
+  }
+
+  // CRITICAL FOR MODALS: Watch for property swaps when toggling between different data objects
+  watch(() => props.characterData, (newSource) => {
+    draft.value = generateBlankOrClone(newSource);
+  }, { deep: true });
 
   const isEditing = computed(() => !!props.characterData);
 

@@ -24,8 +24,14 @@
                 ion-text(color="primary")  *
 
           ion-item
-            ion-textarea(v-model="draft.description" label="Description" label-placement="stacked" 
-              placeholder="Campaign Description")
+            ion-textarea(
+              :key="draft.id"
+              v-model="draft.description" 
+              label="Description" label-placement="stacked" 
+              placeholder="Campaign Description"
+              :rows="3"
+              :auto-grow="true"
+            )
 
           ion-item
             div(style="display: flex; flex-direction: column; width: 100%; padding: 10px 0;")
@@ -70,11 +76,8 @@
 </template>
 
 <style lang="scss" scoped>
-  ion-textarea {
-    padding-bottom: 12px;
-  }
 
-  /* Inline flex container managing your layout wrapping rows */
+/* Inline flex container managing your layout wrapping rows */
   .party-inline-flex-group {
     display: flex;
     flex-wrap: wrap;
