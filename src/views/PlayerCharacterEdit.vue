@@ -107,12 +107,12 @@
 
 <script setup lang="ts">
   import { computed, ref, watch } from 'vue';
-  import { useRoute } from 'vue-router';
-  import {
-    IonPage, IonHeader, IonContent, IonList, IonItem, IonInput, IonTextarea, IonButton,
-    IonNote, IonIcon, IonText, IonLabel, IonChip, IonSelect, IonSelectOption, IonRange,
-    IonBadge, IonTitle, IonToolbar, IonModal, alertController
-  } from '@ionic/vue';
+  import { alertController } from '@ionic/vue';
+  // import {
+  //   IonPage, IonHeader, IonContent, IonList, IonItem, IonInput, IonTextarea, IonButton,
+  //   IonNote, IonIcon, IonText, IonLabel, IonChip, IonSelect, IonSelectOption, IonRange,
+  //   IonBadge, IonTitle, IonToolbar, IonModal
+  // } from '@ionic/vue';
   import { addIcons } from 'ionicons';
   import {
     createOutline, removeOutline, addOutline,
@@ -123,7 +123,7 @@
   import { useUiStore } from '../stores/uiStore.ts';
   import useDataStore from '../stores/dataStore.ts';
   import { useRouter } from 'vue-router';
-  import Breadcrumbs from '../components/Breadcrumbs.vue';
+  // import Breadcrumbs from '../components/Breadcrumbs.vue';
   import Ajv from 'ajv';
   import fullSchema from '../generated/models/data.schema.json';
   import ClassSelector from '../components/ClassSelector.vue';

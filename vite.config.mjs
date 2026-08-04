@@ -62,6 +62,10 @@ export default defineConfig({
     regenerateModels(),
     // Automates your component registry passes cleanly
     Components({
+      // Tell the plugin to scan your local project folder arrays automatically
+      dirs: ['./components', './views'],     
+      // Control extension parameters so it looks for regular Vue layouts
+      extensions: ['vue'],
       resolvers: [
         (componentName) => {
           // If a template tag starts with "Ion", automatically resolve it from @ionic/vue

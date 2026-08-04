@@ -67,7 +67,7 @@
 
       //- Inline Ionic overlay handling local character input sandbox context
       ion-modal(:is-open="isCharacterModalOpen" @didDismiss="isCharacterModalOpen = false")
-        PlayerCharacterEditor(
+        PlayerCharacterEdit(
           :characterData="selectedCharacterForEdit"
           @save="handleInlineCharacterSave" 
           @cancel="isCharacterModalOpen = false"
@@ -156,8 +156,8 @@
   import { useDmScreenStore } from '../stores/dataStore';
   import { addIcons } from 'ionicons';
   import { personAddOutline, trashOutline } from 'ionicons/icons';
-  // import Breadcrumbs from '../components/Breadcrumbs.vue';
-  // import PlayerCharacterEditor from './PlayerCharacterEdit.vue';
+  //import Breadcrumbs from '../components/Breadcrumbs.vue';
+  import PlayerCharacterEdit from './PlayerCharacterEdit.vue';
   import fullSchema from '../generated/models/data.schema.json';
 
   addIcons({

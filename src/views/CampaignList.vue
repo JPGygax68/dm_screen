@@ -10,7 +10,7 @@
         class="ion-margin-horizontal ion-margin-top"
       ) Add New Campaign
 
-      IonicAccordionArray(
+      AccordionArray(
         :items="store.campaigns"
         :path="'campaigns'"
         v-model:openValues="openAccordions"
@@ -69,8 +69,8 @@
   import { useRouter } from 'vue-router';
   import useDmScreenStore from '../stores/dataStore.ts';
   import type { Ref } from 'vue';
-  import IonicAccordionArray from '../components/IonicAccordionArray.vue';
-  import Breadcrumbs from '../components/Breadcrumbs.vue';
+  // import AccordionArray from '../components/AccordionArray.vue';
+  // import Breadcrumbs from '../components/Breadcrumbs.vue';
   import { useUiStore } from '../stores/uiStore.ts';
 
   addIcons({
