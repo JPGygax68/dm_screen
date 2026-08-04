@@ -29,8 +29,10 @@
 
           ion-item
             div(style="display: flex; flex-direction: column; width: 100%; padding: 10px 0;")
-              div(style="font-size: 13px; font-weight: 500; color: var(--ion-color-step-600); margin-bottom: 8px;") 
+              // ion-note(style="font-size: 13px; font-weight: normal; color: var(--ion-color-step-600); margin-bottom: 8px; letter-spacing: normal;")
                 | Party Members
+
+              ion-label(style="font-size: 13px") Party Members
 
               //- Horizontal flexbox group automatically wraps elements gracefully onto new lines
               div(class="party-inline-flex-group")
@@ -45,7 +47,7 @@
 
                 //- Clean inline execution button matching the height of your text badges
                 ion-button(
-                  fill="solid" 
+                  fill="outline" 
                   size="small" 
                   @click="openCharacterCreator"
                   style="margin: 0; --padding-start: 8px; --padding-end: 8px; font-size: 13px;"
@@ -63,6 +65,7 @@
           :characterData="selectedCharacterForEdit"
           @save="handleInlineCharacterSave" 
           @cancel="isCharacterModalOpen = false"
+          @delete="handleInlineCharacterDelete"
         )
 </template>
 

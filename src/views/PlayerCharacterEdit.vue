@@ -3,7 +3,7 @@
   ion-page
     ion-header
       ion-toolbar
-        ion-title.ion-padding Character Editor
+        ion-title.ion-padding Player Character
     ion-content
       form(@submit.prevent="save")
         ion-list
@@ -70,17 +70,18 @@
                 ion-icon(slot="start" size="small" name="heart-dislike-outline" color="medium")
                 ion-icon(slot="end" size="small" name="heart-outline" color="primary")
                 
-          ion-item
+          ion-item(style="display: flex; gap: 8px")
             ion-button(type="submit" :disabled="!isValid") Save
+            ion-button(@click="cancel" color="medium") Cancel
+            span(style="flex: 1")
             //- Delete option only renders if modifying an existing PC profile row
             ion-button(
               v-if="isEditing" 
               type="button" 
               color="danger" 
               fill="outline" 
-              @click="emit('delete', draft.value.id)"
+              @click="presentDeleteConfirmation"
             ) Delete Character
-            ion-button(@click="cancel" color="medium") Cancel
 
 </template>
 
@@ -109,8 +110,8 @@
   import { useRoute } from 'vue-router';
   import {
     IonPage, IonHeader, IonContent, IonList, IonItem, IonInput, IonTextarea, IonButton,
-    IonNote, IonIcon, IonText, IonLabel, IonChip, IonSelect, IonSelectOption, IonRange, 
-    IonBadge, IonTitle
+    IonNote, IonIcon, IonText, IonLabel, IonChip, IonSelect, IonSelectOption, IonRange,
+    IonBadge, IonTitle, IonToolbar, IonModal, alertController
   } from '@ionic/vue';
   import { addIcons } from 'ionicons';
   import {
@@ -179,6 +180,34 @@
     // console.log(`Marking field ${field} as touched`);
     touchedFields.value[field] = true;
   }
+
+  async function presentDeleteConfirmation() {
+    // Build and display the native confirmation overlay programmatically
+    const alert = await alertController.create({
+      header: 'Delete Character?',
+      message: `Are you sure you want to permanently remove ${draft.value.name || 'this character'} \
+        from the campaign party? This action cannot be undone.`,
+      buttons: [
+        {
+          text: 'Cancel',
+          role: 'cancel',
+          cssClass: 'alert-button-role-cancel' // Keeps cancel styled softly
+        },
+        {
+          text: 'Delete',
+          role: 'destructive', // Signals a data-erasing step to the engine
+          handler: () => {
+            console.log('User confirmed deletion track. Bubbling payload up...');
+            emit('delete', draft.value.id);
+          }
+        }
+      ]
+    });
+
+    await alert.present();
+  }
+
+  // Lifecycle hooks to manage focus and reset touched fields when entering/leaving the view
 
   onIonViewWillEnter(() => {
     touchedFields.value = {};
