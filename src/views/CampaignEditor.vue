@@ -17,6 +17,7 @@
               :error-text="visibleErrors.name"
               required="true"
               enterkeyhint="next"
+              @ionInput="isDirty = true"
               @ionBlur="markAsTouched('name')"
             )
               div(slot="label")
@@ -62,7 +63,7 @@
                   | Add Member
 
           ion-item
-            ion-button(type="submit" :disabled="!isValid") Save Campaign
+            ion-button(type="submit" :disabled="!canSave") Save Campaign
             ion-button(type="button" color="medium" @click="cancel") Cancel
 
       //- Inline Ionic overlay handling local character input sandbox context
@@ -77,7 +78,7 @@
 
 <style lang="scss" scoped>
 
-/* Inline flex container managing your layout wrapping rows */
+  /* Inline flex container managing your layout wrapping rows */
   .party-inline-flex-group {
     display: flex;
     flex-wrap: wrap;
@@ -148,16 +149,9 @@
   import { onIonViewWillEnter } from '@ionic/vue';
   import { ref, computed } from 'vue';
   import { useRoute, useRouter } from 'vue-router';
-  // import {
-  //   IonButton, IonButtons, IonContent, IonHeader, IonInput, IonItem, IonList, IonPage,
-  //   IonTextarea, IonToolbar, IonText, IonNote, IonBadge, IonRange, IonIcon, IonModal,
-  //   IonListHeader, IonLabel, IonGrid, IonRow, IonCol, IonCard, IonCardContent
-  // } from '@ionic/vue';
   import { useDmScreenStore } from '../stores/dataStore';
   import { addIcons } from 'ionicons';
   import { personAddOutline, trashOutline } from 'ionicons/icons';
-  //import Breadcrumbs from '../components/Breadcrumbs.vue';
-  import PlayerCharacterEdit from './PlayerCharacterEdit.vue';
   import fullSchema from '../generated/models/data.schema.json';
 
   addIcons({
@@ -185,6 +179,8 @@
     party: [],
   });
 
+  const isDirty = ref(false);
+
   // Keep track of user interaction state per field
   const touchedFields = ref<Record<string, boolean>>({});
 
@@ -196,14 +192,14 @@
 
   // Initialize AJV validator
   const schema = { ...fullSchema.$defs.Campaign, $defs: fullSchema.$defs };
-  console.log('Campaign schema:', schema);
+  // console.log('Campaign schema:', schema);
   const ajv = new Ajv({ allErrors: true });
   const validate = ajv.compile(schema);
 
   // Compute errors reactively based on JSON Schema
   const validationResult = computed(() => {
     const valid = validate(draft.value);
-    console.log('Validation result for draft:', valid);
+    // console.log('Validation result for draft:', valid);
     const errorsMap: Record<string, string> = {};
 
     if (!valid && validate.errors) {
@@ -238,6 +234,10 @@
   const isValid = computed(() => validationResult.value.isValid);
   const errors = computed(() => validationResult.value.errors);
 
+  const canSave = computed(() => {
+    return isValid.value && isDirty.value;
+  });
+
   // Local tracker holding the active character configuration target data structure
   const selectedCharacterForEdit = ref<any>(null);
 
@@ -265,6 +265,7 @@
       draft.value.party.push(characterData);
     }
 
+    isDirty.value = true;
     isCharacterModalOpen.value = false;
   }
 
@@ -291,6 +292,7 @@
     if (existingCampaign) {
       draft.value = JSON.parse(JSON.stringify(existingCampaign)); // Clone the existing campaign data
       console.log('Loaded existing campaign into draft:', draft.value);
+      isDirty.value = false; // Reset dirty state since we just loaded existing data
     } else {
       console.warn(`No existing campaign found with ID: ${campaignId}, initializing new campaign draft`);
       draft.value = {

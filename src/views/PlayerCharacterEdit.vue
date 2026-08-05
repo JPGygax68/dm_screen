@@ -18,6 +18,7 @@
               :error-text="visibleErrors.name"
               required="true"
               enterkeyhint="next"
+              @ionInput="isDirty = true"
               @ionBlur="markAsTouched('name')"
             )
               div(slot="label")
@@ -25,8 +26,13 @@
                 ion-text(color="primary")  *
 
           ion-item
-            ion-textarea(v-model="draft.description" label="Description" label-placement="stacked" 
-              placeholder="Character Description")
+            ion-textarea(
+              v-model="draft.description" label="Description" label-placement="stacked" 
+              placeholder="Character Description"
+              @ionInput="isDirty = true"
+              :rows="2"
+              :auto-grow="true"
+            )
 
           ion-item            
             ClassSelector(
@@ -71,7 +77,7 @@
                 ion-icon(slot="end" size="small" name="heart-outline" color="primary")
                 
           ion-item(style="display: flex; gap: 8px")
-            ion-button(type="submit" :disabled="!isValid") Save
+            ion-button(type="submit" :disabled="!canSave") Save
             ion-button(@click="cancel" color="medium") Cancel
             span(style="flex: 1")
             //- Delete option only renders if modifying an existing PC profile row
@@ -108,11 +114,6 @@
 <script setup lang="ts">
   import { computed, ref, watch } from 'vue';
   import { alertController } from '@ionic/vue';
-  // import {
-  //   IonPage, IonHeader, IonContent, IonList, IonItem, IonInput, IonTextarea, IonButton,
-  //   IonNote, IonIcon, IonText, IonLabel, IonChip, IonSelect, IonSelectOption, IonRange,
-  //   IonBadge, IonTitle, IonToolbar, IonModal
-  // } from '@ionic/vue';
   import { addIcons } from 'ionicons';
   import {
     createOutline, removeOutline, addOutline,
@@ -120,10 +121,6 @@
     heartOutline, heartDislikeOutline
   } from 'ionicons/icons';
   import { onIonViewWillEnter, onIonViewWillLeave, onIonViewDidEnter } from '@ionic/vue';
-  import { useUiStore } from '../stores/uiStore.ts';
-  import useDataStore from '../stores/dataStore.ts';
-  import { useRouter } from 'vue-router';
-  // import Breadcrumbs from '../components/Breadcrumbs.vue';
   import Ajv from 'ajv';
   import fullSchema from '../generated/models/data.schema.json';
   import ClassSelector from '../components/ClassSelector.vue';
@@ -159,6 +156,8 @@
   }>();
 
   const draft = ref(generateBlankOrClone(props.characterData));
+
+  const isDirty = ref(false);
 
   function generateBlankOrClone(source: any | null) {
     if (source) {
@@ -218,6 +217,7 @@
 
   onIonViewWillEnter(() => {
     touchedFields.value = {};
+    isDirty.value = false;
   });
 
   onIonViewDidEnter(async () => {
@@ -276,6 +276,10 @@
   // Helpers for structural clarity in template
   const isValid = computed(() => validationResult.value.isValid);
   // const errors = computed(() => validationResult.value.errors);
+
+  const canSave = computed(() => {
+    return isValid.value && isDirty.value;
+  });
 
   function toggleClass(className: string) {
     const index = draft.value.classes.indexOf(className);

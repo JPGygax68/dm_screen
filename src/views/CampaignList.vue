@@ -62,17 +62,11 @@
 <script setup lang="ts">
   import { ref } from 'vue';
   import type { Ref } from 'vue';
-  // import {
-  //   IonPage, IonHeader, IonContent, IonFooter, IonList, IonItem, IonTextarea,
-  //   IonButton, IonIcon
-  // } from '@ionic/vue';
   import { addIcons } from 'ionicons';
   import { openOutline } from 'ionicons/icons';
   import { useRouter } from 'vue-router';
   import useDmScreenStore from '../stores/dataStore.ts';
   import type { AccordionArrayChangeEvent } from '../components/AccordionArray.vue';
-  // import AccordionArray from '../components/AccordionArray.vue';
-  // import Breadcrumbs from '../components/Breadcrumbs.vue';
   import { useUiStore } from '../stores/uiStore.ts';
 
   addIcons({
@@ -95,7 +89,7 @@
   };
 
   function handleAccordionChange(event: AccordionArrayChangeEvent) {
-    console.log('Accordion change event received with:', event);
+    //console.log('Accordion change event received with:', event);
     const { path, value } = event;
     store.updateByPath(path, value);
   }
