@@ -60,15 +60,17 @@
 </style>
 
 <script setup lang="ts">
-  import {
-    IonPage, IonHeader, IonContent, IonFooter, IonList, IonItem, IonTextarea,
-    IonButton, IonIcon
-  } from '@ionic/vue';
+  import { ref } from 'vue';
+  import type { Ref } from 'vue';
+  // import {
+  //   IonPage, IonHeader, IonContent, IonFooter, IonList, IonItem, IonTextarea,
+  //   IonButton, IonIcon
+  // } from '@ionic/vue';
   import { addIcons } from 'ionicons';
   import { openOutline } from 'ionicons/icons';
   import { useRouter } from 'vue-router';
   import useDmScreenStore from '../stores/dataStore.ts';
-  import type { Ref } from 'vue';
+  import type { AccordionArrayChangeEvent } from '../components/AccordionArray.vue';
   // import AccordionArray from '../components/AccordionArray.vue';
   // import Breadcrumbs from '../components/Breadcrumbs.vue';
   import { useUiStore } from '../stores/uiStore.ts';
@@ -81,7 +83,7 @@
   const store = useDmScreenStore();
   const ui = useUiStore();
 
-  const { openCampaignAccordions: openAccordions } = ui;
+  const openAccordions: Ref<string[] | null> = ref([]);
 
   const addNewCampaign = () => {
     // return () => {
@@ -92,8 +94,9 @@
     router.push('/campaigns/new');
   };
 
-  function handleAccordionChange(newValue: string[]) {
-    console.log('Accordion change event received with value:', newValue);
-    ui.setOpenCampaignAccordions(newValue);
+  function handleAccordionChange(event: AccordionArrayChangeEvent) {
+    console.log('Accordion change event received with:', event);
+    const { path, value } = event;
+    store.updateByPath(path, value);
   }
 </script>
