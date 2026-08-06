@@ -51,6 +51,7 @@ type: object
     properties:
       id: { "$ref": "#/$defs/PlayerId" }
       name: { type: string, description: "Character name", minLength: 1 }
+      portrait: { type: string, description: "Character portrait image data URL (optional)" }
       race: { type: string, description: "Character race (recommended)" }
       classes:
         type: array
@@ -463,6 +464,36 @@ type: object
     title: Encounter
     description: A combat encounter containing combatants and rounds
     properties:
+      tagline:
+        type: string
+        description: Short description of the encounter (optional)
+      description:
+        type: string
+        description: Longer description of the encounter (optional)
+      location:
+        type: string
+        description: Location of the encounter (optional)
+      startTime:
+        type: string
+        format: date-time
+        description: Start time of the encounter (optional)
+      endTime:
+        type: string
+        format: date-time
+        description: End time of the encounter (optional)
+      status:
+        type: string
+        enum:
+        - planned
+        - active
+        - completed
+        description: Status of the encounter
+      source:
+        type: string
+        description: Source of the encounter (e.g., module name, homebrew, etc.)
+      sourceId:
+        type: string
+        description: ID of the source of the encounter (e.g., module ID, homebrew ID, etc.)
       combatants:
         type: object
         description: Map of combatants by CombatantRef (Combatant type + ID)

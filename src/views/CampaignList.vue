@@ -13,8 +13,9 @@
       AccordionArray(
         :items="store.campaigns"
         :path="'campaigns'"
-        v-model:openValues="openAccordions"
+        :openValues="[selectedCampaignId]"
         @change="handleAccordionChange"
+        @update:openValues="selectedCampaignId = $event[0]" 
       )
         template(v-slot:header="{ item, index }")
           ion-button(
@@ -60,7 +61,7 @@
 </style>
 
 <script setup lang="ts">
-  import { ref } from 'vue';
+  import { ref, onMounted } from 'vue';
   import type { Ref } from 'vue';
   import { addIcons } from 'ionicons';
   import { openOutline } from 'ionicons/icons';
@@ -75,16 +76,16 @@
 
   const router = useRouter();
   const store = useDmScreenStore();
-  const ui = useUiStore();
 
-  const openAccordions: Ref<string[] | null> = ref([]);
+  const selectedCampaignId: Ref<string | null> = ref(null);
+
+  onMounted(() => {
+    if (store.campaigns.length > 0) {
+      selectedCampaignId.value = store.campaigns[0].id;
+    }
+  });
 
   const addNewCampaign = () => {
-    // return () => {
-    //   const newCampaign = { name: '(New Campaign)' };
-    //   const newCampaigns = [newCampaign, ...store.campaigns];
-    //   store.updateByPath('campaigns', newCampaigns);
-    // };
     router.push('/campaigns/new');
   };
 

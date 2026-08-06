@@ -8,22 +8,31 @@
       form(@submit.prevent="save")
         ion-list
           ion-item(:class="{ 'ion-invalid': visibleErrors.name, 'ion-touched': touchedFields.name }")
-            ion-input(
-              ref="nameInput"
-              v-model="draft.name" 
-              label-placement="stacked" 
-              placeholder="Character Name"
-              autocapitalize="words"
-              :class="{ 'ion-invalid': visibleErrors.name, 'ion-touched': touchedFields.name }"
-              :error-text="visibleErrors.name"
-              required="true"
-              enterkeyhint="next"
-              @ionInput="isDirty = true"
-              @ionBlur="markAsTouched('name')"
-            )
-              div(slot="label")
-                ion-text(color="dark") Name
-                ion-text(color="primary")  *
+            div(style="display: flex; align-items: flex-start; gap: 16px; width: 100%;")
+              ImagePicker(
+                ref="imageUploaderRef"
+                :imageDataUrl="draft.portrait || ''"
+                @change="onPortraitChanged($event)"
+              )
+
+              ion-input(
+                ion-no-padding
+                style="flex-grow: 1"
+                ref="nameInput"
+                v-model="draft.name" 
+                label-placement="stacked" 
+                placeholder="Character Name"
+                autocapitalize="words"
+                :class="{ 'ion-invalid': visibleErrors.name, 'ion-touched': touchedFields.name }"
+                :error-text="visibleErrors.name"
+                required="true"
+                enterkeyhint="next"
+                @ionInput="isDirty = true"
+                @ionBlur="markAsTouched('name')"
+              )
+                div(slot="label")
+                  ion-text(color="dark") Name
+                  ion-text(color="primary")  *
 
           ion-item
             ion-textarea(
@@ -92,23 +101,7 @@
 </template>
 
 <style scoped lang="scss">
-  .badge {
-    display: flex;
-    align-items: center;
-    gap: 4px;
 
-    ion-button>ion-icon {
-      width: 40px;
-      height: 40px;
-    }
-  }
-
-  .loose-label {
-    font-size: 13px;
-    margin-bottom: 8px;
-    font-weight: normal;
-    color: var(--ion-color-dark);
-  }
 </style>
 
 <script setup lang="ts">
@@ -118,12 +111,11 @@
   import {
     createOutline, removeOutline, addOutline,
     chevronBackOutline, chevronForwardOutline,
-    heartOutline, heartDislikeOutline
+    heartOutline, heartDislikeOutline, personOutline
   } from 'ionicons/icons';
   import { onIonViewWillEnter, onIonViewWillLeave, onIonViewDidEnter } from '@ionic/vue';
   import Ajv from 'ajv';
   import fullSchema from '../generated/models/data.schema.json';
-  import ClassSelector from '../components/ClassSelector.vue';
   import { unfocusActiveElement } from '../lib/domHelpers.ts';
 
   addIcons({
@@ -203,7 +195,7 @@
           text: 'Delete',
           role: 'destructive', // Signals a data-erasing step to the engine
           handler: () => {
-            console.log('User confirmed deletion track. Bubbling payload up...');
+            //console.log('User confirmed deletion track. Bubbling payload up...');
             emit('delete', draft.value.id);
           }
         }
@@ -211,6 +203,12 @@
     });
 
     await alert.present();
+  }
+
+  function onPortraitChanged(newImageDataUrl: string) {
+    //console.log('Portrait image updated. New data URL length:', newImageDataUrl.length);
+    draft.value.portrait = newImageDataUrl;
+    isDirty.value = true;
   }
 
   // Lifecycle hooks to manage focus and reset touched fields when entering/leaving the view

@@ -146,6 +146,7 @@
 
 <script setup lang="ts">
   import Ajv from 'ajv';
+  import addFormats from 'ajv-formats';
   import { onIonViewWillEnter } from '@ionic/vue';
   import { ref, computed } from 'vue';
   import { useRoute, useRouter } from 'vue-router';
@@ -194,6 +195,7 @@
   const schema = { ...fullSchema.$defs.Campaign, $defs: fullSchema.$defs };
   // console.log('Campaign schema:', schema);
   const ajv = new Ajv({ allErrors: true });
+  addFormats(ajv);
   const validate = ajv.compile(schema);
 
   // Compute errors reactively based on JSON Schema

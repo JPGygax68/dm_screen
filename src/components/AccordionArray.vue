@@ -8,6 +8,7 @@
       v-for="(item, index) in items"
       :value="item[props.idField] || console.assert(false, `Item at index ${index} is missing the id field '${props.idField}'`)"
       :disabled="disabled"
+      @focusin="emit('update:openValues', [item[props.idField]])"
     )
       IonItem(slot="header")
         IonLabel(slot="start")
