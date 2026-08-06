@@ -13,8 +13,9 @@
       ArrayAccordion(
         :items="encounters"
         :openValues="[selectedEncounterId]"
-        @change="handleAccordionChange"
-        @update:openValues="selectedEncounterId = $event[0]" 
+        @update:openValues="selectedEncounterId = $event?.[0] ?? null"
+        @update:reorder="onAccordionReorder"
+        @update:deleteItem="onDeleteAccordionItem"
       )
         template(v-slot:header="{ item, index }")
           ion-button(
@@ -102,8 +103,19 @@
     selectedEncounterId.value = newEncounter.id;
   }
 
-  function handleAccordionChange(event: any[]) {
+  function onAccordionReorder(event: any[]) {
     console.log('Encounter List Accordion change event received with:', event);
     dataStore.getCampaignById(campaignId)!.encounters = [...event];
+  }
+
+  function onDeleteAccordionItem(event: { index: number; id: string }) {
+    console.log('Encounter List Accordion delete event received with:', event);
+    const campaign = dataStore.getCampaignById(campaignId);
+    if (campaign) {
+      campaign.encounters.splice(event.index, 1);
+      if (selectedEncounterId.value === event.id) {
+        selectedEncounterId.value = campaign.encounters.length > 0 ? campaign.encounters[0].id : null;
+      }
+    }
   }
 </script>

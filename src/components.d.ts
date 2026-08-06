@@ -40,6 +40,8 @@ declare module 'vue' {
     IonNote: typeof import('@ionic/vue')['IonNote']
     IonPage: typeof import('@ionic/vue')['IonPage']
     IonRange: typeof import('@ionic/vue')['IonRange']
+    IonReorder: typeof import('@ionic/vue')['IonReorder']
+    IonReorderGroup: typeof import('@ionic/vue')['IonReorderGroup']
     IonRouterOutlet: typeof import('@ionic/vue')['IonRouterOutlet']
     IonText: typeof import('@ionic/vue')['IonText']
     IonTextarea: typeof import('@ionic/vue')['IonTextarea']

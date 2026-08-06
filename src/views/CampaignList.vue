@@ -14,7 +14,8 @@
         :items="store.campaigns"
         :path="'campaigns'"
         :openValues="[selectedCampaignId]"
-        @change="handleAccordionChange"
+        @update:reorder="handleAccordionReorder"
+        @update:deleteItem="handleAccordionDelete"
         @update:openValues="selectedCampaignId = $event?.[0] ?? null" 
       )
         template(v-slot:header="{ item, index }")
@@ -104,8 +105,13 @@
     router.push('/campaigns/new');
   };
 
-  function handleAccordionChange(event: AccordionArrayChangeEvent) {
-    console.log('Accordion change event received with:', event);
+  function handleAccordionReorder(event: AccordionArrayChangeEvent) {
+    console.log('Accordion reorder event received with:', event);
     store.campaigns = [...event];
+  }
+
+  function handleAccordionDelete(event: { index: number; id: string }) {
+    console.log('Accordion delete event received with:', event);
+    store.campaigns.splice(event.index, 1);
   }
 </script>

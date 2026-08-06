@@ -1,30 +1,24 @@
 <template lang="pug">
 
-  IonAccordionGroup.group(
-    :multiple="false"
-    :value="props.openValues[0]"
-    @ionChange="onAccordionChange($event)"
-  )
-    IonAccordion(
-      v-for="(item, index) in items"
-      :value="item[props.idField] || console.assert(false, `Item at index ${index} is missing the id field '${props.idField}'`)"
-      :key="item[props.idField]"
-      :disabled="disabled"
-      @focusin="emit('update:openValues', [item[props.idField]])"
+    IonAccordionGroup(
+      :multiple="false"
+      :value="props.openValues[0]"
+      @ionChange="onAccordionChange($event)"
     )
-      IonItem(slot="header")
-        IonLabel(slot="start")
-          | {{ item.name }} 
-        div.header-buttons(slot="end" class="array-item-actions" @click.stop)
-          slot(name="header" :item="item" :index="index")
-          IonButton(@click="removeItem(index)" fill="clear" color="danger")
-            IonIcon(slot="icon-only" name="trash")
-          IonButton(@click="moveUp(index)" :disabled="index === 0" fill="clear" color="medium")
-            IonIcon(slot="icon-only" name="up")
-          IonButton(@click="moveDown(index)" :disabled="index === items.length - 1" fill="clear" color="medium")
-            IonIcon(slot="icon-only" name="down")
-      IonItem(slot="content")
-        slot(name="content" :item="item" :index="index")
+      IonReorderGroup(@ionReorderEnd="onReorderEnd" :disabled="disabled")
+        IonAccordion(
+          v-for="(item, index) in items"
+          :value="item[props.idField] || console.assert(false, `Item at index ${index} is missing the id field '${props.idField}'`)"
+          :key="item[props.idField]"
+          :disabled="disabled"
+          @focusin="emit('update:openValues', [item[props.idField]])"
+        )
+          IonItem(slot="header")
+            IonReorder(slot="start")
+            IonLabel()
+              | {{ item.name }} 
+          IonItem(slot="content")
+            slot(name="content" :item="item" :index="index")
 
 </template>
 
@@ -39,7 +33,8 @@
 <script setup lang="ts">
   import { alertController } from '@ionic/vue';
   import { addIcons } from 'ionicons';
-  import { trashOutline, arrowUpOutline, arrowDownOutline, addOutline } from 'ionicons/icons';
+  import { trashOutline, arrowUpOutline, arrowDownOutline, addOutline, reorderTwoOutline } from 'ionicons/icons';
+  import type { ReorderEndCustomEvent } from '@ionic/core/components';
 
   export type AccordionArrayChangeEvent = any[]; // newly ordered array of items after a change (e.g., item moved or removed)
 
@@ -54,10 +49,10 @@
   });
 
   const emit = defineEmits<{
-    // Emitted when the items array is changed (e.g., item moved or removed)
-    (e: 'change', payload: any[]): void,
     // Emitted when an accordion is opened or closed; array of ID's
-    (e: 'update:openValues', value: string[] | null): void
+    (e: 'update:openValues', value: string[] | null): void,
+    // Emitted when the items array is changed (e.g., item moved or removed)
+    (e: 'update:reorder', payload: any[]): void,
   }>();
 
   function onAccordionChange(event: CustomEvent) {
@@ -68,46 +63,16 @@
     emit('update:openValues', currentOpenValues);
   }
 
-  const moveUp = (index: number) => {
-    const newItems = [...props.items];
-    const temp = newItems[index - 1];
-    newItems[index - 1] = newItems[index];
-    newItems[index] = temp;
-    emit('change', newItems);
-  };
+  function onReorderEnd(event: ReorderEndCustomEvent) {
+    // The `from` and `to` properties contain the index of the item
+    // when the drag started and ended, respectively
+    console.log('Dragged from index', event.detail.from, 'to', event.detail.to);
 
-  const moveDown = (index: number) => {
-    const newItems = [...props.items];
-    const temp = newItems[index + 1];
-    newItems[index + 1] = newItems[index];
-    newItems[index] = temp;
-    emit('change', newItems);
-  };
-
-  const removeItem = async (index: number) => {
-    // TODO: confirmation should be delegated back to the parent component
-    const alert = await alertController.create({
-      header: 'Delete Item?',
-      message: 'Are you sure?',
-      buttons: [
-        {
-          text: 'Cancel',
-          role: 'cancel'
-        },
-        {
-          text: 'Delete',
-          role: 'confirm',
-          handler: () => {
-            const newItems = [...props.items];
-            newItems.splice(index, 1);
-            emit('change', newItems);
-          }
-        }
-      ]
-    });
-
-    await alert.present();
-  };
+    // Finish the reorder and position the item in the DOM based on
+    // where the gesture ended. This method can also be called directly
+    // by the reorder group.
+    event.detail.complete();
+  }
 
   // Load all required icons for the buttons
   addIcons({
