@@ -20,19 +20,33 @@
         template(v-slot:header="{ item, index }")
           ion-button(
             @click="router.push(`/campaigns/${item.id}/edit`)"
+            fill="clear" color="medium"
           )
-            ion-icon(name="open")
+            ion-icon(slot="icon-only" name="open")
 
         template(v-slot:content="{ item, index }")
-          ion-list.main-fields
+          ion-list(lines="none").main-fields
             ion-item
               ion-textarea(
-              :value="item.description" 
-              label-placement="stacked" 
-              placeholder="Description"
-              rows="5"
-              readOnly
-            )
+                :key="item.id"
+                :value="item.description" 
+                label-placement="stacked" 
+                placeholder="Description"
+                rows="3"
+                auto-grow
+                readOnly
+              )
+            //ion-item.ion-no-padding
+            div.ion-margin(style="display: flex; flex-direction: row; width: 100%; gap: 8px")
+              ion-button(
+                @click="router.push(`/campaigns/${item.id}/edit`)"
+                expand="block"
+              ) Encounters
+                ion-icon(slot="start" :icon="listOutline")
+              ion-button(
+                @click="router.push(`/campaigns/${item.id}/encounters`)"
+                expand="block"
+              ) Edit Campaign
 
     ion-footer
       ion-button(
@@ -64,14 +78,15 @@
   import { ref, onMounted } from 'vue';
   import type { Ref } from 'vue';
   import { addIcons } from 'ionicons';
-  import { openOutline } from 'ionicons/icons';
+  import { openOutline, listOutline } from 'ionicons/icons';
   import { useRouter } from 'vue-router';
   import useDmScreenStore from '../stores/dataStore.ts';
   import type { AccordionArrayChangeEvent } from '../components/AccordionArray.vue';
   import { useUiStore } from '../stores/uiStore.ts';
 
   addIcons({
-    'open': openOutline
+    'open': openOutline,
+    'list': listOutline
   });
 
   const router = useRouter();

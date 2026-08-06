@@ -13,30 +13,28 @@
       IonItem(slot="header")
         IonLabel(slot="start")
           | {{ item.name }} 
-        div(slot="end" class="array-item-actions" @click.stop)
+        div.header-buttons(slot="end" class="array-item-actions" @click.stop)
           slot(name="header" :item="item" :index="index")
-          IonButton(@click="removeItem(index)")
-            IonIcon(name="trash")
-          IonButton(@click="moveUp(index)" :disabled="index === 0")
-            IonIcon(name="up")
-          IonButton(@click="moveDown(index)" :disabled="index === items.length - 1")
-            IonIcon(name="down")
+          IonButton(@click="removeItem(index)" fill="clear" color="danger")
+            IonIcon(slot="icon-only" name="trash")
+          IonButton(@click="moveUp(index)" :disabled="index === 0" fill="clear" color="medium")
+            IonIcon(slot="icon-only" name="up")
+          IonButton(@click="moveDown(index)" :disabled="index === items.length - 1" fill="clear" color="medium")
+            IonIcon(slot="icon-only" name="down")
       IonItem(slot="content")
         slot(name="content" :item="item" :index="index")
 
 </template>
 
 <style scoped lang="scss">
-  ion-accordion-group {
-    overflow-y: auto;
-    flex: 1;
+  .header-buttons {
+    display: flex;
+    gap: 4px;
+    margin-right: 16px;
   }
 </style>
 
 <script setup lang="ts">
-  import { watch } from 'vue';
-  import { computed, ref } from 'vue';
-  //import { IonAccordionGroup, IonAccordion, IonItem, IonLabel, IonIcon, IonButton } from '@ionic/vue';
   import { alertController } from '@ionic/vue';
   import { addIcons } from 'ionicons';
   import { trashOutline, arrowUpOutline, arrowDownOutline, addOutline } from 'ionicons/icons';
