@@ -16,6 +16,7 @@ declare module 'vue' {
     CampaignEditor: typeof import('./views/CampaignEditor.vue')['default']
     CampaignList: typeof import('./views/CampaignList.vue')['default']
     ClassSelector: typeof import('./components/ClassSelector.vue')['default']
+    EncounterList: typeof import('./views/EncounterList.vue')['default']
     FormSpecNode: typeof import('./components/FormSpecNode.vue')['default']
     ImagePicker: typeof import('./components/ImagePicker.vue')['default']
     ImageUploader: typeof import('./components/ImageUploader.vue')['default']

@@ -1,6 +1,6 @@
 import CampaignListView from '../views/CampaignList.vue';
 import CampaignEditor from '../views/CampaignEditor.vue';
-import PlayerCharacterCreate from '../views/PlayerCharacterCreate.vue';
+import EncounterList from '../views/EncounterList.vue';
 import type { RouteRecordRaw } from 'vue-router';
 
 const routes: RouteRecordRaw[] = [
@@ -23,6 +23,11 @@ const routes: RouteRecordRaw[] = [
     name: 'campaign-edit',
     component: CampaignEditor
   },
+  {
+    path: '/campaigns/:campaignId/encounters',
+    name: 'campaign-encounters',
+    component: EncounterList
+  }
 ];
 
 export default routes;

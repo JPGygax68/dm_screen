@@ -1,12 +1,14 @@
 <template lang="pug">
 
   IonAccordionGroup.group(
+    :multiple="false"
     :value="props.openValues[0]"
     @ionChange="onAccordionChange($event)"
   )
     IonAccordion(
       v-for="(item, index) in items"
       :value="item[props.idField] || console.assert(false, `Item at index ${index} is missing the id field '${props.idField}'`)"
+      :key="item[props.idField]"
       :disabled="disabled"
       @focusin="emit('update:openValues', [item[props.idField]])"
     )
@@ -39,12 +41,11 @@
   import { addIcons } from 'ionicons';
   import { trashOutline, arrowUpOutline, arrowDownOutline, addOutline } from 'ionicons/icons';
 
-  export type AccordionArrayChangeEvent = { path: string, value: any[] };
+  export type AccordionArrayChangeEvent = any[]; // newly ordered array of items after a change (e.g., item moved or removed)
 
   const props = withDefaults(defineProps<{
     idField?: string,
     items: any[],
-    path: string,
     disabled?: boolean,
     openValues?: string[] | null
   }>(), {
@@ -54,7 +55,7 @@
 
   const emit = defineEmits<{
     // Emitted when the items array is changed (e.g., item moved or removed)
-    (e: 'change', payload: { path: string, value: any[] }): void,
+    (e: 'change', payload: any[]): void,
     // Emitted when an accordion is opened or closed; array of ID's
     (e: 'update:openValues', value: string[] | null): void
   }>();
@@ -63,7 +64,7 @@
     const currentOpenValues = Array.isArray(event.detail.value)
       ? event.detail.value
       : [event.detail.value].filter(Boolean);
-
+    console.log('IonAccordionGroup change event received with:', currentOpenValues);
     emit('update:openValues', currentOpenValues);
   }
 
@@ -72,7 +73,7 @@
     const temp = newItems[index - 1];
     newItems[index - 1] = newItems[index];
     newItems[index] = temp;
-    emit('change', { path: props.path, value: newItems });
+    emit('change', newItems);
   };
 
   const moveDown = (index: number) => {
@@ -80,13 +81,13 @@
     const temp = newItems[index + 1];
     newItems[index + 1] = newItems[index];
     newItems[index] = temp;
-    emit('change', { path: props.path, value: newItems });
+    emit('change', newItems);
   };
 
   const removeItem = async (index: number) => {
     // TODO: confirmation should be delegated back to the parent component
     const alert = await alertController.create({
-      header: 'Delete Campaign?',
+      header: 'Delete Item?',
       message: 'Are you sure?',
       buttons: [
         {
@@ -99,8 +100,7 @@
           handler: () => {
             const newItems = [...props.items];
             newItems.splice(index, 1);
-            // TODO: Inform the parent that the item has been removed (by id)
-            emit('change', { path: props.path, value: newItems });
+            emit('change', newItems);
           }
         }
       ]

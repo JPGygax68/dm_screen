@@ -52,6 +52,32 @@ and require careful handling in the UI.`,
             maxHitPoints: 38,
             classes: ["Fighter"]
           }
+        ],
+        encounters: [
+          {
+            id: "enc-1",
+            name: "Goblin Ambush",
+            location: "Triboar Trail",
+            status: "ready", // ready, completed, active
+            difficulty: "Medium",
+            monstersSummary: "4x Goblin, 2x Wolf"
+          },
+          {
+            id: "enc-2",
+            name: "The Bugbear Chief's Den",
+            location: "Cragmaw Hideout",
+            status: "ready",
+            difficulty: "Deadly",
+            monstersSummary: "1x Bugbear Chief, 3x Goblin"
+          },
+          {
+            id: "enc-3",
+            name: "Redbrand Tavern Brawl",
+            location: "Phandalin",
+            status: "active",
+            difficulty: "Easy",
+            monstersSummary: "4x Redbrand Ruffian"
+          }
         ]
       },
       // Mock Campaign 2: An empty dataset to explicitly test your "Empty State" UI screens
@@ -65,21 +91,13 @@ and require careful handling in the UI.`,
   }),
   actions: {
 
-    updateByPath(path: string, value: any) {
-      console.log('Updating path:', path, 'with value:', value);
-      this.$patch(state => {
-        const { parent, key } = resolvePath(state, path);
-        parent[key] = value;
-        //console.log(parent[key], 'updated to', value);
-      });
-    },
-
     addOrUpdateCampaign(campaign: any) {
       console.log('Adding or updating campaign:', campaign);
       this.$patch(state => {
-        const index = state.campaigns.findIndex(c => c.id === campaign.id);
-        if (index !== -1) {
+        const existingCampaign = this.getCampaignById(campaign.id);
+        if (existingCampaign) {
           // Update existing campaign
+          const index = state.campaigns.findIndex(c => c.id === campaign.id);
           state.campaigns[index] = campaign;
           console.log('Updated campaign, new list:', this.$state.campaigns);
         } else {
@@ -95,25 +113,38 @@ and require careful handling in the UI.`,
         state.campaigns = state.campaigns.filter(c => c.id !== campaignId);
       });
       console.log('Removed campaign, new list:', this.$state.campaigns);
+    },
+
+    // REST Equivalent: GET /campaigns/:id
+    getCampaignById(campaignId: string) {
+      return this.campaigns.find(c => c.id === campaignId) || null;
+    },
+
+    // REST Equivalent: GET /campaigns/:campaignId/encounters/:encounterId
+    getEncounterById(campaignId: string, encounterId: string) {
+      const campaign = this.getCampaignById(campaignId);
+      if (!campaign || !campaign.encounters) return null;
+
+      return campaign.encounters.find((e: any) => e.id === encounterId) || null;
+    },
+
+    // REST Equivalent: PUT /campaigns/:campaignId/encounters/:encounterId
+    saveEncounter(campaignId: string, finalizedEncounter: any) {
+      const campaign = this.getCampaignById(campaignId);
+      if (!campaign) throw new Error(`Parent Campaign ${campaignId} not found.`);
+      if (!campaign.encounters) campaign.encounters = [];
+
+      const index = campaign.encounters.findIndex((e: any) => e.id === finalizedEncounter.id);
+
+      if (index !== -1) {
+        // Update existing item
+        campaign.encounters[index] = finalizedEncounter;
+      } else {
+        // Create brand new resource
+        campaign.encounters.push(finalizedEncounter);
+      }
     }
   }
 });
 
 export default useDmScreenStore;
-
-//-----------------------
-
-function resolvePath(root: any, path: string) {
-  //console.log('Resolving path:', path, 'on root:', root);
-  const segments = path.split('/');
-  let obj: any = root; // TODO: use a type obtained from the schema to type this properly
-
-  for (let i = 0; i < segments.length - 1; i++) {
-    obj = obj[segments[i]];
-    if (obj === undefined) {
-      throw new Error(`Invalid path: ${path}`);
-    }
-  }
-
-  return { parent: obj, key: segments[segments.length - 1] };
-}

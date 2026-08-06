@@ -67,6 +67,21 @@
       ];
     }
 
+    // /campaigns/:campaignId/encounters
+    if (path.match(/\/campaigns\/[^/]+\/encounters$/)) {
+      const campaignId = route.params.campaignId;
+      const campaign = store.campaigns.find(c => c.id === campaignId);
+      if (!campaign) {
+        console.error(`No campaign found with ID: ${campaignId}`);
+        return [];
+      }
+      return [
+        { label: 'Campaigns', to: '/campaigns' },
+        { label: `"${campaign.name}"`, to: `/campaigns/${campaignId}` },
+        { label: 'Encounters', to: `/campaigns/${campaignId}/encounters` }
+      ];
+    }
+
     return [];
   });
 

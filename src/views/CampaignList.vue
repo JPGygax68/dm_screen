@@ -15,7 +15,7 @@
         :path="'campaigns'"
         :openValues="[selectedCampaignId]"
         @change="handleAccordionChange"
-        @update:openValues="selectedCampaignId = $event[0]" 
+        @update:openValues="selectedCampaignId = $event?.[0] ?? null" 
       )
         template(v-slot:header="{ item, index }")
           ion-button(
@@ -39,12 +39,12 @@
             //ion-item.ion-no-padding
             div.ion-margin(style="display: flex; flex-direction: row; width: 100%; gap: 8px")
               ion-button(
-                @click="router.push(`/campaigns/${item.id}/edit`)"
+                @click="router.push(`/campaigns/${item.id}/encounters`)"
                 expand="block"
               ) Encounters
                 ion-icon(slot="start" :icon="listOutline")
               ion-button(
-                @click="router.push(`/campaigns/${item.id}/encounters`)"
+                @click="router.push(`/campaigns/${item.id}/edit`)"
                 expand="block"
               ) Edit Campaign
 
@@ -105,8 +105,7 @@
   };
 
   function handleAccordionChange(event: AccordionArrayChangeEvent) {
-    //console.log('Accordion change event received with:', event);
-    const { path, value } = event;
-    store.updateByPath(path, value);
+    console.log('Accordion change event received with:', event);
+    store.campaigns = [...event];
   }
 </script>
