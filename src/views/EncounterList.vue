@@ -10,7 +10,7 @@
         class="ion-margin-horizontal ion-margin-top"
       ) Add New Encounter
 
-      AccordionArray(
+      ArrayAccordion(
         :items="encounters"
         :openValues="[selectedEncounterId]"
         @change="handleAccordionChange"
@@ -61,7 +61,7 @@
   }
 </style>
 
-<script lang="ts" setup>
+<script setup lang="ts">
   import { ref, onMounted, computed } from 'vue';
   import { useRouter, useRoute } from 'vue-router';
   import useDmScreenStore from '../stores/dataStore';
