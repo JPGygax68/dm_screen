@@ -1,0 +1,40 @@
+# database/bestiary.yaml
+- id: "creature-goblin-scout"
+  name: "Goblin Scout"
+  cr: "1/4"
+  xp: 50
+  family: "Goblinoids"
+  tier: "Minion"
+  imagePrompt: |
+    Character design of a fantasy Goblin Scout. Clear clean lines, 
+    European comic book style, ligne claire, ink outline, flat colors 
+    with limited muted palette and minimal cell shading, Hergé and Moebius 
+    style influence. The goblin is wearing leather armor, holding a small 
+    scimitar, and scouting from behind a forest bush. Clean solid background. 
+    No gradients, no messy crosshatching. Aspect ratio 2:3.  
+  hitPoints: 7
+  speed: "30 ft."
+  stats: { str: 8, dex: 14, con: 10, int: 10, wis: 8, cha: 8 }
+  actions:
+    - name: "Scimitar"
+      desc: "Melee Weapon Attack: +4 to hit, reach 5 ft., one target. Hit: 5 (1d6 + 2) slashing damage."
+  subordinates: []
+  variants: ["creature-goblin-archer"]
+
+- id: "creature-goblin-captain"
+  name: "Goblin Captain"
+  cr: "3"
+  xp: 700
+  family: "Goblinoids"
+  tier: "Boss"
+  armorClass: 15
+  hitPoints: 36
+  speed: "30 ft."
+  stats: { str: 12, dex: 15, con: 14, int: 10, wis: 11, cha: 12 }
+  actions:
+    - name: "Multiattack"
+      desc: "The captain makes two attacks with his greatsword."
+    - name: "Greatsword"
+      desc: "Melee Weapon Attack: +4 to hit, reach 5 ft., one target. Hit: 9 (2d6 + 2) slashing damage."
+  subordinates: ["creature-goblin-scout", "creature-goblin-archer"]
+  variants: ["creature-goblin-shaman"]
