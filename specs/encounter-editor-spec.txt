@@ -1,0 +1,16 @@
+The Encounter Editor View
+-------------------------
+
+(Preliminary and explorative specification)
+
+This view allows the user to define an encounter that will later (or immediately after its creation) be tracked through the Encounter Tracker.
+
+It's main purpose is allows the DM to quickly assemble a group of adversaries for the players (or their characters, i.e. the PCs).
+
+The Encounter Editor (EE) has access to a database consisting of one or more "bestiary" yaml files plus associated folders with descriptive text and illustrative images. That database will be accessed via https and be served from the same https server that serves the application itself.
+
+The first iteration of the EE will deliberately be kept as simple as possible. Basically, it shall split the screen (landscape format) into two halves, with the left half containing already selected adversary creatures and their respective count, while the right half shall contain a view on the database for the DM to select creatures from. Double-tapping a creature on that list adds it to the list of adversaries on the left.
+
+On the left, each adversary will be displayed with a spin-edit count field and a "Remove" button.
+
+The bottom of the screen shall feature the two standard form buttons "Save" and "Discard" (the latter will ask for confirmation).
