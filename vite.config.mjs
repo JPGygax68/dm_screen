@@ -57,6 +57,7 @@ function regenerateModels() {
 
 export default defineConfig({
   root: 'src',
+  publicDir: '../public',
   plugins: [
     vue(),
     regenerateModels(),

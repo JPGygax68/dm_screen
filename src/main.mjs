@@ -1,7 +1,7 @@
 import { createApp } from 'vue';
 import { IonicVue } from '@ionic/vue';
 
-import { createRouter, createWebHistory } from '@ionic/vue-router';
+import { createRouter, createWebHashHistory } from '@ionic/vue-router';
 
 import '@ionic/vue/css/core.css';
 import '@ionic/vue/css/normalize.css';
@@ -30,7 +30,7 @@ const initialTheme = VALID_THEMES.has(storedTheme) ? storedTheme : 'auto';
 document.documentElement.dataset.theme = initialTheme;
 
 const router = createRouter({
-  history: createWebHistory(),
+  history: createWebHashHistory(),
   routes: routes
 });
 

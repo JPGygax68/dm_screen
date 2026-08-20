@@ -1,6 +1,6 @@
 {
   "name": "dm_screen",
-  "version": "1.0.0",
+  "version": "0.0.1",
   "description": "",
   "type": "module",
   "imports": {
@@ -10,7 +10,7 @@
     "generate:models": "node scripts/generate-model-json.mjs",
     "predev": "npm run generate:models",
     "prebuild": "npm run generate:models",
-    "dev": "vite",
+    "dev": "vite --host 0.0.0.0",
     "build": "vite build",
     "preview": "vite preview",
     "test": "echo \"Error: no test specified\" && exit 1",

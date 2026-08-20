@@ -1,5 +1,5 @@
 The Encounter Editor View
--------------------------
+=========================
 
 (Preliminary and explorative specification)
 
@@ -7,10 +7,49 @@ This view allows the user to define an encounter that will later (or immediately
 
 It's main purpose is allows the DM to quickly assemble a group of adversaries for the players (or their characters, i.e. the PCs).
 
-The Encounter Editor (EE) has access to a database consisting of one or more "bestiary" yaml files plus associated folders with descriptive text and illustrative images. That database will be accessed via https and be served from the same https server that serves the application itself.
+The Encounter Editor (EE) has access to a database consisting of one or more "bestiary" yaml files plus associated folders with descriptive text and illustrative images. That database will be accessed via https and be served from the same https server that serves the application itself (e.g. https://localhost:5173/assets/)
 
 The first iteration of the EE will deliberately be kept as simple as possible. Basically, it shall split the screen (landscape format) into two halves, with the left half containing already selected adversary creatures and their respective count, while the right half shall contain a view on the database for the DM to select creatures from. Double-tapping a creature on that list adds it to the list of adversaries on the left.
 
 On the left, each adversary will be displayed with a spin-edit count field and a "Remove" button.
 
 The bottom of the screen shall feature the two standard form buttons "Save" and "Discard" (the latter will ask for confirmation).
+
+Database format
+---------------
+
+The bestiary "database" is actually a filesystem structure that is organized like this:
+
+  bestiary.yaml                 machine-readable information about the creatures in the bestiary
+  images/                       containing illustrations for each creature in PNG format
+  
+Each creature defined in bestiary.yaml has an id field that matches the base filename of the PNG file containing its illustration.
+There is no formal schema (yet?) for the bestiary.yaml file, but here is an example that may serve as a reference for now:
+
+- id: "creature-goblin-sergeant"
+  name: "Goblin-Feldwebel"
+  alignment: "neutral böse"
+  cr: "1/2"
+  xp: 100
+  race: "Goblin"
+  family: "Goblinoide"
+  armorClass: 15
+  armorDetails: "Kettenhemd + kleiner Schild"
+  hitPoints: 18
+  speed: "9 Meter"
+  stats: { str: 10, dex: 14, con: 12, int: 10, wis: 10, cha: 12 }
+  actions:
+    - name: "Speer (Nahkampf)"
+      desc: "Nahkampfangriff mit Waffe: +4 auf Treffer, Reichweite 1,5 Meter, ein Ziel. Einhändig: 5 (1W6 + 2) Stichschaden. Zweihandig: 6 (1W8 + 2) Stichschaden."
+    - name: "Speer (Fernkampf)"
+      desc: "Fernkampfangriff mit Waffe: +4 auf Treffer, Reichweite 6/18 Meter, ein Ziel. Treffer: 5 (1W6 + 2) Stichschaden."
+    - name: "Kurzbogen"
+      desc: "Fernkampfangriff mit Waffe: +4 auf Treffer, Reichweite 9/36 Meter, ein Ziel. Treffer: 5 (1W6 + 2) Stichschaden."
+    - name: "Befehl zum Vorrücken (1/Tag)"
+      desc: "Der Feldwebel bläst in ein Horn. Bis zu drei verbündete Goblins innerhalb von 9 Metern, die ihn hören können, dürfen sofort ihre Reaktion einsetzen, um sich bis zur Hälfte ihrer Bewegungsrate zu bewegen, ohne Gelegenheitsangriffe zu provozieren."
+  subordinates: []
+  variants: []
+
+(The data format is not multilingual yet, but that may become necessary at some point in the future.)
+
+
