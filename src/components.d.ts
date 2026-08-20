@@ -11,16 +11,15 @@ export {}
 /* prettier-ignore */
 declare module 'vue' {
   export interface GlobalComponents {
-    AccordionArray: typeof import('./components/AccordionArray.vue')['default']
     ArrayAccordion: typeof import('./components/ArrayAccordion.vue')['default']
     Breadcrumbs: typeof import('./components/Breadcrumbs.vue')['default']
     CampaignEditor: typeof import('./views/CampaignEditor.vue')['default']
     CampaignList: typeof import('./views/CampaignList.vue')['default']
     ClassSelector: typeof import('./components/ClassSelector.vue')['default']
+    EncounterEditor: typeof import('./views/EncounterEditor.vue')['default']
     EncounterList: typeof import('./views/EncounterList.vue')['default']
     FormSpecNode: typeof import('./components/FormSpecNode.vue')['default']
     ImagePicker: typeof import('./components/ImagePicker.vue')['default']
-    ImageUploader: typeof import('./components/ImageUploader.vue')['default']
     IonAccordion: typeof import('@ionic/vue')['IonAccordion']
     IonAccordionGroup: typeof import('@ionic/vue')['IonAccordionGroup']
     IonApp: typeof import('@ionic/vue')['IonApp']
@@ -30,7 +29,6 @@ declare module 'vue' {
     IonContent: typeof import('@ionic/vue')['IonContent']
     IonFooter: typeof import('@ionic/vue')['IonFooter']
     IonHeader: typeof import('@ionic/vue')['IonHeader']
-    IonicAccordionArray: typeof import('./components/IonicAccordionArray.vue')['default']
     IonIcon: typeof import('@ionic/vue')['IonIcon']
     IonInput: typeof import('@ionic/vue')['IonInput']
     IonItem: typeof import('@ionic/vue')['IonItem']
@@ -43,6 +41,7 @@ declare module 'vue' {
     IonReorder: typeof import('@ionic/vue')['IonReorder']
     IonReorderGroup: typeof import('@ionic/vue')['IonReorderGroup']
     IonRouterOutlet: typeof import('@ionic/vue')['IonRouterOutlet']
+    IonSearchbar: typeof import('@ionic/vue')['IonSearchbar']
     IonText: typeof import('@ionic/vue')['IonText']
     IonTextarea: typeof import('@ionic/vue')['IonTextarea']
     IonTitle: typeof import('@ionic/vue')['IonTitle']

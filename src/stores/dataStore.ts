@@ -1,7 +1,11 @@
 import { defineStore } from 'pinia';
+import { parse } from 'yaml';
 
 export const useDmScreenStore = defineStore('dmscreen', {
   state: () => ({
+    bestiary: [] as any[],
+    bestiaryLoaded: false,
+    bestiaryError: null as string | null,
     campaigns: [
       // Mock Campaign 1: A rich dataset to test layouts, text truncation, and deep looping
       {
@@ -142,6 +146,30 @@ and require careful handling in the UI.`,
       } else {
         // Create brand new resource
         campaign.encounters.push(finalizedEncounter);
+      }
+    },
+
+    async loadBestiary() {
+      if (this.bestiaryLoaded) return this.bestiary;
+
+      try {
+        const response = await fetch('/assets/bestiary/bestiary.yaml');
+        if (!response.ok) {
+          throw new Error(`Failed to fetch bestiary: ${response.status}`);
+        }
+
+        const text = await response.text();
+        const parsed = parse(text);
+        this.bestiary = Array.isArray(parsed) ? parsed : [];
+        this.bestiaryLoaded = true;
+        this.bestiaryError = null;
+        return this.bestiary;
+      } catch (error) {
+        this.bestiary = [];
+        this.bestiaryLoaded = true;
+        this.bestiaryError = error instanceof Error ? error.message : 'Unknown bestiary error';
+        console.error('Unable to load the bestiary:', error);
+        return this.bestiary;
       }
     }
   }
