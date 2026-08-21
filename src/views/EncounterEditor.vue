@@ -31,7 +31,7 @@
               ion-button(
                 fill="clear"
                 color="danger"
-                @click="removeCreature(entry.creatureId)"
+                @click="removeCreature(entry.id)"
               ) Remove
 
         section.panel.bestiary-panel
@@ -53,10 +53,9 @@
 
     ion-footer
       ion-toolbar
-        ion-buttons(slot="start")
-          ion-button(color="medium" @click="discard") Discard
         ion-buttons(slot="end")
-          ion-button(color="primary" @click="saveEncounter") Save
+          ion-button(color="medium" @click="discard") Discard
+          ion-button(color="primary" @click="saveEncounter") Save 
 </template>
 
 <style scoped lang="scss">
