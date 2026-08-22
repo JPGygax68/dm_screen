@@ -1,5 +1,6 @@
 import { defineConfig } from 'vite';
 import vue from '@vitejs/plugin-vue';
+import tailwindcss from '@tailwindcss/vite';
 import Components from 'unplugin-vue-components/vite';
 import { execFileSync } from 'node:child_process';
 import path from 'node:path';
@@ -60,22 +61,15 @@ export default defineConfig({
   publicDir: '../public',
   plugins: [
     vue(),
+    tailwindcss(),
     regenerateModels(),
     // Automates your component registry passes cleanly
     Components({
       // Tell the plugin to scan your local project folder arrays automatically
-      dirs: ['./components', './views'],     
+      dirs: ['./components', './views'],
       // Control extension parameters so it looks for regular Vue layouts
       extensions: ['vue'],
-      resolvers: [
-        (componentName) => {
-          // If a template tag starts with "Ion", automatically resolve it from @ionic/vue
-          if (componentName.startsWith('Ion')) {
-            return { name: componentName, from: '@ionic/vue' };
-          }
-        }
-      ],
-      dts: true, // Automatically writes a perfect global TypeScript types mapping file
+      dts: true,
     })
   ],
   build: {

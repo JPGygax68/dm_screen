@@ -1,22 +1,17 @@
 <script setup lang="ts">
   import { useRoute, useRouter } from 'vue-router';
   import { computed } from 'vue';
-  import { IonToolbar, IonButtons, IonButton } from '@ionic/vue';
   import { useDmScreenStore } from '../stores/dataStore';
 
   const route = useRoute();
   const router = useRouter();
-
   const store = useDmScreenStore();
 
-  // Map routes to breadcrumb labels
   const crumbs = computed(() => {
     const path = route.path;
 
     if (path === '/campaigns') {
-      return [
-        { label: 'Campaigns', to: '/campaigns' }
-      ];
+      return [{ label: 'Campaigns', to: '/campaigns' }];
     }
 
     if (path === '/campaigns/new') {
@@ -26,39 +21,17 @@
       ];
     }
 
-    // /campaigns/:id/player-characters/new
-    if (path.match(/\/campaigns\/[^/]+\/player-characters\/new/)) {
-      // console.log('Generating breadcrumbs for path:', path);
-      const campaign_id = route.params.campaign_id;
-      const campaign = store.campaigns.find(c => c.id === campaign_id);
-      if (!campaign) {
-        console.error(`No campaign found with ID: ${campaign_id}`);
-        return [];
-      }
-      return [
-        { label: 'Player Characters', to: `/campaigns/${campaign_id}/player-characters` },
-        { label: `"${campaign.name }"`, to: `/campaigns/${campaign_id}` },
-        { label: 'New Player Character', to: `/campaigns/${campaign_id}/player-characters/new` }
-      ];
-    }
-
-    // /campaigns/:id/edit
     if (path.match(/\/campaigns\/[^/]+\/edit/)) {
-      console.log('Generating breadcrumbs for Campaign edit path:', path);
       const id = route.params.id;
       const campaign = store.campaigns.find(c => c.id === id);
-      if (!campaign) {
-        console.error(`No campaign found with ID: ${id}`);
-        return [];
-      }
+      if (!campaign) return [];
       return [
         { label: 'Campaigns', to: '/campaigns' },
-        { label: `"${campaign.name }"`, to: `/campaigns/${id}` },
+        { label: `"${campaign.name}"`, to: `/campaigns/${id}` },
         { label: 'Edit Campaign', to: `/campaigns/${id}/edit` }
       ];
     }
 
-    // /campaigns/:id
     if (path.match(/\/campaigns\/[^/]+$/)) {
       const id = route.params.id;
       return [
@@ -67,14 +40,10 @@
       ];
     }
 
-    // /campaigns/:campaignId/encounters
     if (path.match(/\/campaigns\/[^/]+\/encounters$/)) {
       const campaignId = route.params.campaignId;
       const campaign = store.campaigns.find(c => c.id === campaignId);
-      if (!campaign) {
-        console.error(`No campaign found with ID: ${campaignId}`);
-        return [];
-      }
+      if (!campaign) return [];
       return [
         { label: 'Campaigns', to: '/campaigns' },
         { label: `"${campaign.name}"`, to: `/campaigns/${campaignId}` },
@@ -90,11 +59,43 @@
   }
 </script>
 
-<template lang="pug">
-
-  IonToolbar(color="light")
-    IonButtons(slot="start")
-      IonButton(v-for="(c, i) in crumbs" :key="i" @click="go(c.to)" :disabled="!c.to")
-        | {{ c.label }}
-
+<template>
+  <nav class="breadcrumbs" aria-label="Breadcrumb">
+    <button
+      v-for="(c, i) in crumbs"
+      :key="i"
+      type="button"
+      class="crumb"
+      :disabled="!c.to"
+      @click="go(c.to)"
+    >
+      {{ c.label }}
+    </button>
+  </nav>
 </template>
+
+<style scoped lang="scss">
+  .breadcrumbs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    padding: 0.75rem 1rem;
+    background: rgba(15, 23, 42, 0.8);
+    border-bottom: 1px solid rgba(148, 163, 184, 0.2);
+  }
+
+  .crumb {
+    appearance: none;
+    border: 0;
+    background: transparent;
+    color: #cbd5e1;
+    cursor: pointer;
+    padding: 0.25rem 0.5rem;
+    border-radius: 999px;
+
+    &:disabled {
+      cursor: default;
+      opacity: 0.7;
+    }
+  }
+</style>

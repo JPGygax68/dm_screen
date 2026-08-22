@@ -52,13 +52,7 @@
 
 <script setup lang="ts">
   import { ref } from 'vue';
-  import { onIonViewWillEnter } from '@ionic/vue';
-  import { IonPage, IonHeader, IonContent, IonItem, IonLabel, IonButton, IonIcon, IonList, IonItemSliding, 
-    IonItemOptions, IonItemOption, IonAvatar } from '@ionic/vue';
-  import { addIcons } from 'ionicons';
-  import { personAddOutline, trashOutline } from 'ionicons/icons';
   import { useRouter, useRoute } from 'vue-router';
-  import Breadcrumbs from '../components/Breadcrumbs.vue';
   import useDmScreenStore from '../stores/dataStore.ts';
   import useUiStore from '../stores/uiStore.ts';
 
@@ -67,25 +61,14 @@
   const router = useRouter();
   const route = useRoute();
 
-  addIcons({
-    'person-add': personAddOutline,
-    'trash': trashOutline
-  });
-
-  // Grab the campaign id from the URL parameter
   const campaignId = route.params.id as string;
-
   const party = ref(ui.campaignDraft?.party ?? []);
 
-
-  onIonViewWillEnter(() => {
-    // Look up the existing campaign record inside your permanent data store
-    const existingCampaign = store.campaigns.find(c => c.id === campaignId);
-    console.assert(!!existingCampaign, `No campaign found with ID: ${campaignId}`);
-    // Load a deep reactive copy into your UI store draft block to edit safely
+  const existingCampaign = store.campaigns.find(c => c.id === campaignId);
+  if (existingCampaign) {
     ui.loadCampaignIntoDraft(existingCampaign);
-  });
-
+    party.value = ui.campaignDraft?.party ?? [];
+  }
 
   function addCharacter() {
     router.push(`/campaigns/${campaignId}/player-characters/new`);
@@ -93,8 +76,6 @@
 
   function removeCharacter(characterId: string) {
     ui.removeCharacterFromParty(characterId);
-    party.value = ui.campaignDraft?.party ?? []; // Update the local party reference
+    party.value = ui.campaignDraft?.party ?? [];
   }
-
-
 </script>

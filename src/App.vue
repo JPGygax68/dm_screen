@@ -1,11 +1,17 @@
 <script setup lang="ts">
 </script>
 
-<template lang="pug">
-
-IonApp   
-  IonRouterOutlet
-
+<template>
+  <div class="app-shell">
+    <router-view />
+  </div>
 </template>
 
-<style scoped lang="scss"></style>
+<style scoped lang="scss">
+  .app-shell {
+    min-height: 100vh;
+    width: 100%;
+    background: #f8fafc;
+    color: #0f172a;
+  }
+</style>

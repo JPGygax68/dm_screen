@@ -1,25 +1,19 @@
-<template lang="pug">
+<template>
+  <div style="padding-top: 16px; padding-bottom: 8px;">
+    <div class="upload-container" @click="triggerFilePicker">
+      <img v-if="imageDataUrl" :src="imageDataUrl" class="image-preview" alt="Portrait preview" />
+      <div v-else class="placeholder-icon" aria-hidden="true">👤</div>
+      <div class="edit-overlay">{{ imageDataUrl ? 'EDIT' : 'ADD' }}</div>
+    </div>
 
-  div(style="padding-top: 16px; padding-bottom: 8px;")     
-    //- Clickable Avatar Container triggering a hidden native file element picker
-    div(class="upload-container" @click="triggerFilePicker")
-      img(v-if="imageDataUrl" 
-        :src="imageDataUrl" 
-        class="image-preview" 
-        alt="Portrait preview")
-      div(v-else class="ion-text-center")
-        ion-icon(:icon="personOutline" class="placeholder-icon")
-      div(class="edit-overlay") {{ imageDataUrl ? 'EDIT' : 'ADD' }}
-    
-    //- Hidden native browser file system input block
-    input(
+    <input
       ref="fileInputRef"
       type="file"
       accept="image/*"
       style="display: none;"
       @change="onImageSelected"
-    )
-
+    />
+  </div>
 </template>
 
 <style scoped lang="scss">
@@ -65,7 +59,6 @@
 
 <script setup lang="ts">
   import { ref } from 'vue';
-  import { personOutline } from 'ionicons/icons';
 
   const props = defineProps<{
     imageDataUrl: string;

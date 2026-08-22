@@ -1,247 +1,104 @@
-<template lang="pug">
-  ion-page
-    ion-header
-      Breadcrumbs
+<template>
+  <div class="min-h-screen bg-app-body text-app-text">
+    <div class="mx-auto max-w-7xl px-4 py-4">
+      <Breadcrumbs />
 
-    ion-content
-      div.editor-shell
-        section.panel.selection-panel
-          div.panel-header
-            h2 Selected Adversaries
-          div.empty-state(v-if="selectedCreatures.length === 0")
-            p No creatures selected yet.
+      <div class="mt-4 grid gap-4 lg:grid-cols-[minmax(320px,0.95fr)_minmax(340px,1.35fr)]">
+        <section class="flex min-h-0 flex-col overflow-hidden rounded-xl border border-border-subtle bg-surface">
+          <div class="border-b border-border-subtle px-4 py-3">
+            <h2 class="text-lg font-semibold">Selected Adversaries</h2>
+          </div>
 
-          div.selection-list(v-else)
-            div.selection-item(v-for="entry in selectedCreatures" :key="entry.creatureId")
-              img(:src="getCreatureImageUrl(entry)" :alt="entry.name")
+          <div v-if="selectedCreatures.length === 0" class="flex min-h-48 items-center justify-center p-4 text-center text-sm text-app-muted">
+            No creatures selected yet.
+          </div>
 
-              div.selection-meta
-                h3 {{ entry.name }}
-                p {{ entry.race }} • CR {{ entry.cr }} • AC {{ entry.armorClass }}
+          <div v-else class="flex flex-col gap-3 overflow-y-auto p-3">
+            <div
+              v-for="entry in selectedCreatures"
+              :key="entry.id"
+              class="grid grid-cols-[64px_minmax(0,1fr)_90px_auto] items-center gap-3 rounded-lg border border-border-subtle bg-surface-subtle px-2 py-2"
+            >
+              <img :src="getCreatureImageUrl(entry)" :alt="entry.name" class="h-16 w-16 rounded-md object-cover" />
 
-              div.selection-controls
-                label Count
-                ion-input(
+              <div class="min-w-0">
+                <h3 class="truncate text-base font-semibold">{{ entry.name }}</h3>
+                <p class="truncate text-xs text-app-muted">{{ entry.race }} • CR {{ entry.cr }} • AC {{ entry.armorClass }}</p>
+              </div>
+
+              <div class="flex flex-col items-center gap-1">
+                <label class="text-[11px] uppercase tracking-widest text-app-muted">Count</label>
+                <input
                   :value="entry.count"
                   type="number"
                   min="1"
-                  @ionInput="updateCreatureCount(entry, $event)"
-                )
+                  class="w-20 rounded-md border border-border-default bg-surface px-2 py-1 text-center text-sm outline-none focus:border-action"
+                  @input="updateCreatureCount(entry, $event)"
+                />
+              </div>
 
-              ion-button(
-                fill="clear"
-                color="danger"
+              <button
+                type="button"
+                class="rounded border border-border-default bg-surface px-3 py-1.5 text-sm font-medium hover:bg-surface-subtle"
                 @click="removeCreature(entry.id)"
-              ) Remove
+              >
+                Remove
+              </button>
+            </div>
+          </div>
+        </section>
 
-        section.panel.bestiary-panel
-          div.panel-header
-            h2 Bestiary
-          ion-searchbar(v-model="searchTerm" placeholder="Search creatures")
+        <section class="flex min-h-0 flex-col overflow-hidden rounded-xl border border-border-subtle bg-surface">
+          <div class="border-b border-border-subtle px-4 py-3">
+            <h2 class="text-lg font-semibold">Bestiary</h2>
+          </div>
 
-          div.bestiary-list
-            button.creature-card(
+          <div class="px-3 pt-3">
+            <input
+              v-model="searchTerm"
+              type="search"
+              placeholder="Search creatures"
+              class="w-full rounded-md border border-border-default bg-surface px-3 py-2 text-sm outline-none placeholder:text-app-muted focus:border-action"
+            />
+          </div>
+
+          <div class="flex flex-col gap-3 overflow-y-auto p-3">
+            <button
               v-for="creature in filteredBestiary"
               :key="creature.id"
               type="button"
+              class="flex w-full items-center gap-3 rounded-lg border border-border-subtle bg-surface-subtle px-3 py-2 text-left transition hover:border-border-default hover:bg-surface-strong"
               @click="addCreature(creature)"
-            )
-              img(:src="getCreatureImageUrl(creature)" :alt="creature.name")
-              div.creature-card-body
-                h3 {{ creature.name }}
-                p {{ creature.race }} • CR {{ creature.cr }} • AC {{ creature.armorClass }}
+            >
+              <img :src="getCreatureImageUrl(creature)" :alt="creature.name" class="h-14 w-14 shrink-0 rounded-md object-cover" />
+              <div class="min-w-0">
+                <h3 class="truncate text-base font-semibold">{{ creature.name }}</h3>
+                <p class="truncate text-xs text-app-muted">{{ creature.race }} • CR {{ creature.cr }} • AC {{ creature.armorClass }}</p>
+              </div>
+            </button>
+          </div>
+        </section>
+      </div>
 
-    ion-footer
-      ion-toolbar
-        ion-buttons(slot="end")
-          ion-button(color="medium" @click="discard") Discard
-          ion-button(color="primary" @click="saveEncounter") Save 
+      <div class="mt-4 flex justify-end gap-2 border-t border-border-subtle pt-4">
+        <button
+          type="button"
+          class="rounded border border-border-default bg-surface px-4 py-2 text-sm font-medium hover:bg-surface-subtle"
+          @click="discard"
+        >
+          Discard
+        </button>
+        <button
+          type="button"
+          class="rounded border border-action bg-action px-4 py-2 text-sm font-medium text-action-foreground hover:opacity-95"
+          @click="saveEncounter"
+        >
+          Save
+        </button>
+      </div>
+    </div>
+  </div>
 </template>
-
-<style scoped lang="scss">
-  ion-page {
-    display: flex;
-    flex-direction: column;
-    height: 100%;
-  }
-
-  ion-content {
-    --padding-top: 12px;
-  }
-
-  .editor-shell {
-    display: grid;
-    grid-template-columns: minmax(320px, 0.95fr) minmax(340px, 1.35fr);
-    gap: 16px;
-    height: 100%;
-    padding: 0 16px 16px;
-    box-sizing: border-box;
-  }
-
-  .panel {
-    display: flex;
-    flex-direction: column;
-    min-height: 0;
-    background: rgba(255, 255, 255, 0.03);
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    border-radius: 16px;
-    overflow: hidden;
-  }
-
-  .panel-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 12px 16px;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-
-    h2 {
-      margin: 0;
-      font-size: 1.1rem;
-    }
-  }
-
-  .empty-state {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    min-height: 180px;
-    padding: 16px;
-    color: var(--ion-color-medium);
-    text-align: center;
-  }
-
-  .selection-list,
-  .bestiary-list {
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-    padding: 12px;
-    overflow-y: auto;
-  }
-
-  .selection-item {
-    display: grid;
-    grid-template-columns: 64px minmax(0, 1fr) 90px auto;
-    align-items: center;
-    gap: 12px;
-    padding: 8px 10px;
-    border-radius: 12px;
-    background: rgba(255, 255, 255, 0.02);
-    border: 1px solid rgba(255, 255, 255, 0.06);
-
-    img {
-      width: 64px;
-      height: 64px;
-      object-fit: cover;
-      border-radius: 10px;
-      background: rgba(0, 0, 0, 0.2);
-    }
-  }
-
-  .selection-meta {
-    min-width: 0;
-
-    h3,
-    p {
-      margin: 0;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-
-    h3 {
-      font-size: 1rem;
-      margin-bottom: 4px;
-    }
-
-    p {
-      color: var(--ion-color-medium);
-      font-size: 0.8rem;
-    }
-  }
-
-  .selection-controls {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 4px;
-
-    label {
-      color: var(--ion-color-medium);
-      font-size: 0.7rem;
-      text-transform: uppercase;
-      letter-spacing: 0.08rem;
-    }
-
-    ion-input {
-      --padding-start: 8px;
-      --padding-end: 8px;
-      width: 76px;
-      min-height: 40px;
-      text-align: center;
-      border-radius: 8px;
-      border: 1px solid rgba(255, 255, 255, 0.08);
-      background: rgba(0, 0, 0, 0.1);
-    }
-  }
-
-  .creature-card {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    width: 100%;
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    border-radius: 12px;
-    padding: 10px 12px;
-    background: rgba(255, 255, 255, 0.02);
-    color: inherit;
-    text-align: left;
-    cursor: pointer;
-
-    &:hover {
-      border-color: rgba(var(--ion-color-primary-rgb), 0.6);
-      background: rgba(var(--ion-color-primary-rgb), 0.05);
-    }
-
-    img {
-      width: 56px;
-      height: 56px;
-      object-fit: cover;
-      border-radius: 10px;
-      flex-shrink: 0;
-    }
-  }
-
-  .creature-card-body {
-    min-width: 0;
-
-    h3,
-    p {
-      margin: 0;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-
-    h3 {
-      margin-bottom: 4px;
-      font-size: 1rem;
-    }
-
-    p {
-      color: var(--ion-color-medium);
-      font-size: 0.8rem;
-    }
-  }
-
-  @media (max-width: 760px) {
-    .editor-shell {
-      grid-template-columns: 1fr;
-      padding-bottom: 24px;
-    }
-  }
-</style>
 
 <script setup lang="ts">
   import { computed, onMounted, ref } from 'vue';
@@ -355,7 +212,9 @@
   }
 
   function saveEncounter() {
-    if (!encounter.value) return;
+    if (!encounter.value) {
+      throw new Error('Encounter state was not initialized before save.');
+    }
 
     const finalizedEncounter = {
       ...encounter.value,

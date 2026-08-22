@@ -1,98 +1,161 @@
 <template lang="pug">
-  ion-page
-    ion-header
-      Breadcrumbs
-    
-    ion-content
-      ion-button(
-        @click="addNewCampaign()" 
-        expand="block" 
-        class="ion-margin-horizontal ion-margin-top"
-      ) Add New Campaign
+  div.page-shell
+    Breadcrumbs
 
-      ArrayAccordion(
-        :items="store.campaigns"
-        :path="'campaigns'"
-        :openValues="[selectedCampaignId]"
-        @update:reorder="handleAccordionReorder"
-        @update:deleteItem="handleAccordionDelete"
-        @update:openValues="selectedCampaignId = $event?.[0] ?? null" 
-      )
-        template(v-slot:header="{ item, index }")
-          ion-button(
-            @click="router.push(`/campaigns/${item.id}/edit`)"
-            fill="clear" color="medium"
-          )
-            ion-icon(slot="icon-only" name="open")
+    main.content-panel
+      div.page-header
+        h1 Campaigns
+        button.primary-button(type="button", @click="addNewCampaign") Add New Campaign
 
-        template(v-slot:content="{ item, index }")
-          ion-list(lines="none").main-fields
-            ion-item
-              ion-textarea(
-                :key="item.id"
-                :value="item.description" 
-                label-placement="stacked" 
-                placeholder="Description"
-                rows="3"
-                auto-grow
-                readOnly
-              )
-            //ion-item.ion-no-padding
-            div.ion-margin(style="display: flex; flex-direction: row; width: 100%; gap: 8px")
-              ion-button(
-                @click="router.push(`/campaigns/${item.id}/encounters`)"
-                expand="block"
-              ) Encounters
-                ion-icon(slot="start" :icon="listOutline")
-              ion-button(
-                @click="router.push(`/campaigns/${item.id}/edit`)"
-                expand="block"
-              ) Edit Campaign
+      ul.campaign-list
+        li.campaign-item(v-for="campaign in store.campaigns" :key="campaign.id")
+          div.campaign-row
+            div.campaign-copy
+              button.campaign-title-button(type="button", @click="openCampaign(campaign.id)") {{ campaign.name }}
+              p.description(v-if="campaign.description") {{ campaign.description }}
 
-    ion-footer
-      ion-button(
-        @click="router.push('/')" 
-        class="ion-margin-horizontal ion-margin-bottom"
-      ) Back to Home
+            div.actions
+              button.ghost-button(type="button", @click="openCampaign(campaign.id)") Open
+              button.danger-button(type="button", @click="removeCampaign(campaign.id)") Remove
 
+      button.secondary-button(type="button", @click="router.push('/')") Back to Home
 </template>
 
 <style scoped lang="scss">
-  ion-page {
-    display: flex;
-    flex-direction: column;
-    height: 100%;
-    overflow-y: auto;
-
-    // ionic-accordion-array {
-    //   flex: 1;
-    // }
-
+  .page-shell {
+    min-height: 100vh;
+    background: #f8fafc;
+    color: #0f172a;
   }
 
-  .main-fields {
-    width: 100%;
+  .content-panel {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 1rem;
+  }
+
+  .page-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-bottom: 1rem;
+  }
+
+  h1 {
+    margin: 0;
+    font-size: clamp(1.5rem, 2vw, 2rem);
+    color: #0f172a;
+  }
+
+  .campaign-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  .campaign-item {
+    border: 1px solid rgba(148, 163, 184, 0.35);
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.85);
+    box-shadow: 0 1px 2px rgba(15, 23, 42, 0.06);
+  }
+
+  .campaign-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 1rem 1.25rem;
+  }
+
+  .campaign-copy {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    min-width: 0;
+    gap: 0.4rem;
+  }
+
+  .campaign-title-button {
+    appearance: none;
+    border: 0;
+    background: transparent;
+    padding: 0;
+    font: inherit;
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #0f172a;
+    text-align: left;
+    cursor: pointer;
+  }
+
+  .description {
+    margin: 0;
+    color: #475569;
+    white-space: pre-wrap;
+    line-height: 1.5;
+    font-size: 0.93rem;
+  }
+
+  .actions {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex-shrink: 0;
+  }
+
+  button {
+    appearance: none;
+    border: 1px solid rgba(148, 163, 184, 0.35);
+    border-radius: 10px;
+    background: #fff;
+    color: #0f172a;
+    padding: 0.6rem 0.9rem;
+    font: inherit;
+    cursor: pointer;
+    transition: filter 0.15s ease, transform 0.15s ease;
+
+    &:hover {
+      filter: brightness(0.98);
+    }
+  }
+
+  .primary-button {
+    background: #2563eb;
+    color: white;
+    border-color: #2563eb;
+  }
+
+  .ghost-button {
+    background: #eef2ff;
+    border-color: #c7d2fe;
+    color: #1d4ed8;
+  }
+
+  .danger-button {
+    background: #fff1f2;
+    border-color: #fecdd3;
+    color: #be123c;
+  }
+
+  .secondary-button {
+    margin-top: 1rem;
+    background: #f8fafc;
   }
 </style>
 
 <script setup lang="ts">
   import { ref, onMounted } from 'vue';
   import type { Ref } from 'vue';
-  import { addIcons } from 'ionicons';
-  import { openOutline, listOutline } from 'ionicons/icons';
   import { useRouter } from 'vue-router';
   import useDmScreenStore from '../stores/dataStore.ts';
-  import type { AccordionArrayChangeEvent } from '../components/ArrayAccordion.vue';
-  import { useUiStore } from '../stores/uiStore.ts';
-
-  addIcons({
-    'open': openOutline,
-    'list': listOutline
-  });
 
   const router = useRouter();
   const store = useDmScreenStore();
-
   const selectedCampaignId: Ref<string | null> = ref(null);
 
   onMounted(() => {
@@ -101,17 +164,18 @@
     }
   });
 
-  const addNewCampaign = () => {
+  function addNewCampaign() {
     router.push('/campaigns/new');
-  };
-
-  function handleAccordionReorder(event: AccordionArrayChangeEvent) {
-    console.log('Accordion reorder event received with:', event);
-    store.campaigns = [...event];
   }
 
-  function handleAccordionDelete(event: { index: number; id: string }) {
-    console.log('Accordion delete event received with:', event);
-    store.campaigns.splice(event.index, 1);
+  function openCampaign(campaignId: string) {
+    router.push(`/campaigns/${campaignId}/encounters`);
+  }
+
+  function removeCampaign(campaignId: string) {
+    store.removeCampaign(campaignId);
+    if (selectedCampaignId.value === campaignId) {
+      selectedCampaignId.value = store.campaigns[0]?.id ?? null;
+    }
   }
 </script>

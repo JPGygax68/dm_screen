@@ -1,0 +1,27 @@
+@import "tailwindcss";
+
+@custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
+
+@theme {
+  --font-sans: Inter, system-ui, sans-serif;
+
+  --color-app-bg: var(--dm-app-bg);
+  --color-app-body: var(--dm-app-body-bg);
+  --color-app-text: var(--dm-app-text);
+  --color-app-muted: var(--dm-app-muted-text);
+
+  --color-surface: var(--dm-surface-raised);
+  --color-surface-subtle: var(--dm-surface-subtle);
+  --color-surface-strong: var(--dm-surface-strong);
+
+  --color-border-default: var(--dm-border-default);
+  --color-border-subtle: var(--dm-border-subtle);
+
+  --color-action: var(--dm-button-filled-bg);
+  --color-action-foreground: var(--dm-button-filled-text);
+  --color-action-secondary: var(--dm-button-filled-bg-secondary);
+  --color-action-secondary-foreground: var(--dm-button-filled-text-secondary);
+
+  --color-alert-error-bg: var(--dm-alert-error-bg);
+  --color-alert-error-text: var(--dm-alert-error-text);
+}

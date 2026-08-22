@@ -1,65 +1,52 @@
-<template lang="pug">
-
-template(v-if="node.kind === 'layout'")
-  ion-card.form-spec-group(v-if="node.uiType === 'Group'")
-    ion-card-header(v-if="node.label")
-      ion-card-title {{ node.label }}
-    ion-card-content
-      FormSpecNode(
+<template>
+  <div v-if="node.kind === 'layout'" class="form-spec-layout">
+    <div v-if="node.uiType === 'Group'" class="group-card">
+      <h4 v-if="node.label">{{ node.label }}</h4>
+      <FormSpecNode
         v-for="(child, index) in node.elements || []"
         :key="child.path || `${child.uiType || 'node'}-${index}`"
         :node="child"
         :data="data"
         :error-by-path="errorByPath"
         @update-field="onChildUpdate"
-      )
-  div.form-spec-layout(v-else)
-    FormSpecNode(
-      v-for="(child, index) in node.elements || []"
-      :key="child.path || `${child.uiType || 'node'}-${index}`"
-      :node="child"
-      :data="data"
-      :error-by-path="errorByPath"
-      @update-field="onChildUpdate"
-    )
+      />
+    </div>
 
-template(v-else-if="node.kind === 'field'")
-  ion-item.form-spec-field(lines="none")
-    ion-label(position="stacked") {{ node.label || node.path }}
-    ion-textarea(
+    <template v-else>
+      <FormSpecNode
+        v-for="(child, index) in node.elements || []"
+        :key="child.path || `${child.uiType || 'node'}-${index}`"
+        :node="child"
+        :data="data"
+        :error-by-path="errorByPath"
+        @update-field="onChildUpdate"
+      />
+    </template>
+  </div>
+
+  <div v-else-if="node.kind === 'field'" class="field-block">
+    <label>{{ node.label || node.path }}</label>
+    <textarea
       v-if="isMultiline"
       :value="fieldValue"
       :placeholder="placeholderText"
       :rows="Number(node.options?.rows || 3)"
-      @ionInput="onInput"
-    )
-    ion-input(
+      @input="onInput($event)"
+    />
+    <input
       v-else
       :value="fieldValue"
       :placeholder="placeholderText"
-      @ionInput="onInput"
-    )
-    
-  ion-note.form-spec-error(v-if="fieldError" color="danger") {{ fieldError }}
+      @input="onInput($event)"
+    />
+    <small v-if="fieldError" class="error">{{ fieldError }}</small>
+  </div>
 
-template(v-else)
-  ion-note(color="warning") Unsupported form node: {{ node.uiType || 'unknown' }}
-
+  <small v-else class="warning">Unsupported form node: {{ node.uiType || 'unknown' }}</small>
 </template>
 
 <script setup>
 import { computed } from 'vue';
-import {
-  IonCard,
-  IonCardContent,
-  IonCardHeader,
-  IonCardTitle,
-  IonInput,
-  IonItem,
-  IonLabel,
-  IonNote,
-  IonTextarea
-} from '@ionic/vue';
 
 const props = defineProps({
   node: {
@@ -92,7 +79,7 @@ const fieldError = computed(() => {
 function onInput(event) {
   emit('update-field', {
     path: props.node.path,
-    value: event?.detail?.value ?? ''
+    value: event?.target?.value ?? ''
   });
 }
 
@@ -101,17 +88,12 @@ function onChildUpdate(payload) {
 }
 
 function getValueAtPath(target, dataPath) {
-  if (!dataPath || typeof dataPath !== 'string') {
-    return undefined;
-  }
-
+  if (!dataPath || typeof dataPath !== 'string') return undefined;
   const segments = dataPath.split('.').filter(Boolean);
   let current = target;
 
   for (const segment of segments) {
-    if (current == null || typeof current !== 'object') {
-      return undefined;
-    }
+    if (current == null || typeof current !== 'object') return undefined;
     current = current[segment];
   }
 

@@ -1,106 +1,114 @@
-<template lang="pug">
+<template>
+  <div class="class-selector">
+    <label class="label">Character Classes</label>
 
-  div(style="display: flex; flex-direction: column; width: 100%; padding: 10px 0;")
+    <div class="selected-list">
+      <span v-if="!classes || classes.length === 0" class="empty">No classes selected yet.</span>
+      <button
+        v-for="selectedClass in classes"
+        :key="selectedClass"
+        type="button"
+        class="selected-pill"
+        @click="removeClass(selectedClass)"
+      >
+        {{ selectedClass }} ×
+      </button>
+    </div>
 
-    ion-label.loose-label Character Classes
-
-    //- Header Row with an action trigger button
-    div(style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;")
-      div(style="display: flex; flex-wrap: wrap; gap: 8px;")
-        //- Fallback text if array is empty
-        ion-text(color="medium" style="font-size: 14px;" v-if="!classes || classes.length === 0")
-          | No classes selected yet.                 
-        //- Render chips for selected targets with a click-to-remove function
-        ion-chip(
-          v-for="selectedClass in classes" 
-          :key="selectedClass"
-          color="primary"
-        )
-          ion-label {{ selectedClass }}
-          ion-icon(name="close-circle" @click="removeClass(selectedClass)")
-
-      ion-button(fill="clear" size="small" @click="openClassSelector")
-        ion-icon(slot="start" name="options-outline")
-          | Manage Classes
-
-    //- 1. Hidden Ionic Select control that handles the data state
-    ion-select(
-      ref="classSelectRef"
-      :value="classes"
-      @ionChange="handleSelectChange"
-      :interface-options="selectorOptions"
-      multiple="true"
-      interface="alert"
-      ok-text="Apply"
-      cancel-text="Dismiss"
-      style="display: none; visibility: hidden; position: absolute;"
-    )
-      ion-select-option(v-for="dndClass in availableClasses" :key="dndClass" :value="dndClass")
-        | {{ dndClass }}
+    <div class="choice-list">
+      <label v-for="dndClass in availableClasses" :key="dndClass" class="choice-item">
+        <input
+          type="checkbox"
+          :checked="classes.includes(dndClass)"
+          @change="toggleClass(dndClass, $event)"
+        />
+        <span>{{ dndClass }}</span>
+      </label>
+    </div>
+  </div>
 </template>
 
 <style scoped lang="scss">
-  .loose-label {
-    font-size: 13px;
-    margin-bottom: 8px;
-    font-weight: normal;
-    color: var(--ion-color-dark);
+  .class-selector {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    width: 100%;
+  }
+
+  .label {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: #cbd5e1;
+  }
+
+  .selected-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    min-height: 2.25rem;
+  }
+
+  .empty {
+    color: #94a3b8;
+    font-size: 0.85rem;
+  }
+
+  .selected-pill {
+    appearance: none;
+    border: 1px solid rgba(96, 165, 250, 0.4);
+    background: rgba(59, 130, 246, 0.12);
+    color: #dbeafe;
+    border-radius: 999px;
+    padding: 0.3rem 0.6rem;
+    cursor: pointer;
+  }
+
+  .choice-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: 0.5rem;
+  }
+
+  .choice-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    border: 1px solid rgba(148, 163, 184, 0.2);
+    border-radius: 8px;
+    padding: 0.5rem 0.6rem;
+    background: rgba(15, 23, 42, 0.4);
   }
 </style>
 
 <script setup lang="ts">
-  import { ref } from 'vue';
-  import { addIcons } from 'ionicons';
-  import {
-    IonLabel, IonText, IonChip, IonIcon, IonSelect, IonSelectOption,
-    IonButton
-  } from '@ionic/vue';
-  import { optionsOutline, closeCircle } from 'ionicons/icons';
-
-  import type { Ref } from 'vue';
-
-  // The static source of truth for standard SRD D&D 5e classes
   const availableClasses = [
     'Barbarian', 'Bard', 'Cleric', 'Druid', 'Fighter', 'Monk',
     'Paladin', 'Ranger', 'Rogue', 'Sorcerer', 'Warlock', 'Wizard'
   ];
 
-  addIcons({
-    'options-outline': optionsOutline,
-    'close-circle': closeCircle
-  });
+  const props = defineProps<{ classes: string[] }>();
+  const emit = defineEmits<{ (e: 'update:classes', values: string[]): void }>();
 
-  const selectorOptions = {
-    header: 'Select Character Classes',
-    subHeader: 'Choose one or more classes for your character'
-  };
-  
-  const props = defineProps<{
-    classes: string[];
-    // TODO: additional classes?
-  }>();
-
-  const emit = defineEmits<{
-    (e: 'update:classes', values: string[]): void
-  }>();
-
-  function handleSelectChange(event: CustomEvent) {
-    const updatedValues = Array.isArray(event.detail.value) ? event.detail.value : [];
-    emit('update:classes', updatedValues);
+  function syncClasses(next: string[]) {
+    emit('update:classes', next);
   }
 
-  const classSelectRef: Ref<any> = ref(null);
+  function toggleClass(selectedClass: string, event: Event) {
+    const checked = (event.target as HTMLInputElement).checked;
+    const next = [...(props.classes ?? [])];
 
-  function openClassSelector() {
-    if (classSelectRef.value) {
-      classSelectRef.value.$el.open();
+    if (checked && !next.includes(selectedClass)) next.push(selectedClass);
+    if (!checked) {
+      const index = next.indexOf(selectedClass);
+      if (index >= 0) next.splice(index, 1);
     }
+
+    syncClasses(next);
   }
 
   function removeClass(selectedClass: string) {
-    const index = props.classes.indexOf(selectedClass);
-    if (index > -1) {
-      props.classes.splice(index, 1);
-    }
+    const next = (props.classes ?? []).filter(c => c !== selectedClass);
+    syncClasses(next);
   }
 </script>

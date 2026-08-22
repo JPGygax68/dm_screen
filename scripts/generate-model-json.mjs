@@ -62,18 +62,6 @@ function generateVueComponent(formName, formSpec) {
   <template lang="pug">${templateLines.join('\n')}
   </template>
   <script setup>
-  import {
-    IonCard,
-    IonCardContent,
-    IonCardHeader,
-    IonCardTitle,
-    IonInput,
-    IonItem,
-    IonLabel,
-    IonNote,
-    IonTextarea
-  } from '@ionic/vue';
-  
   const props = defineProps({
     data: {
       type: Object,

@@ -1,42 +1,90 @@
-<template lang="pug">
+<template>
+  <div class="accordion-array">
+    <div v-for="(item, index) in items" :key="item[props.idField] || index" class="accordion-item">
+      <div class="accordion-header">
+        <button type="button" class="accordion-toggle" @click="toggleItem(item)">
+          {{ item.name || `Item ${index + 1}` }}
+        </button>
 
-    IonAccordionGroup(
-      :multiple="false"
-      :value="props.openValues[0]"
-      @ionChange="onAccordionChange($event)"
-    )
-      IonReorderGroup(@ionReorderEnd="onReorderEnd" :disabled="disabled")
-        IonAccordion(
-          v-for="(item, index) in items"
-          :value="item[props.idField] || console.assert(false, `Item at index ${index} is missing the id field '${props.idField}'`)"
-          :key="item[props.idField]"
-          :disabled="disabled"
-          @focusin="emit('update:openValues', [item[props.idField]])"
-        )
-          IonItem(slot="header")
-            IonReorder(slot="start")
-            IonLabel()
-              | {{ item.name }} 
-          IonItem(slot="content")
-            slot(name="content" :item="item" :index="index")
+        <div class="header-actions">
+          <button type="button" @click="moveItem(index, -1)" :disabled="index === 0">↑</button>
+          <button type="button" @click="moveItem(index, 1)" :disabled="index === items.length - 1">↓</button>
+          <button type="button" class="danger" @click="deleteItem(index, item)">Remove</button>
+        </div>
+      </div>
 
+      <div v-if="isOpen(item)" class="accordion-content">
+        <slot name="content" :item="item" :index="index" />
+      </div>
+    </div>
+  </div>
 </template>
 
 <style scoped lang="scss">
-  .header-buttons {
+  .accordion-array {
     display: flex;
-    gap: 4px;
-    margin-right: 16px;
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  .accordion-item {
+    border: 1px solid rgba(148, 163, 184, 0.2);
+    border-radius: 12px;
+    overflow: hidden;
+    background: rgba(15, 23, 42, 0.35);
+  }
+
+  .accordion-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.75rem 1rem;
+  }
+
+  .accordion-toggle {
+    flex: 1;
+    background: transparent;
+    border: 0;
+    color: inherit;
+    text-align: left;
+    font: inherit;
+    cursor: pointer;
+  }
+
+  .header-actions {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+
+    button {
+      appearance: none;
+      border: 1px solid rgba(148, 163, 184, 0.2);
+      background: rgba(15, 23, 42, 0.7);
+      color: inherit;
+      border-radius: 8px;
+      padding: 0.35rem 0.5rem;
+      cursor: pointer;
+
+      &:disabled {
+        opacity: 0.45;
+        cursor: not-allowed;
+      }
+
+      &.danger {
+        color: #fca5a5;
+      }
+    }
+  }
+
+  .accordion-content {
+    border-top: 1px solid rgba(148, 163, 184, 0.15);
+    padding: 0.75rem 1rem 1rem;
   }
 </style>
 
 <script setup lang="ts">
-  import { alertController } from '@ionic/vue';
-  import { addIcons } from 'ionicons';
-  import { trashOutline, arrowUpOutline, arrowDownOutline, addOutline, reorderTwoOutline } from 'ionicons/icons';
-  import type { ReorderEndCustomEvent } from '@ionic/core/components';
-
-  export type AccordionArrayChangeEvent = any[]; // newly ordered array of items after a change (e.g., item moved or removed)
+  export type AccordionArrayChangeEvent = any[];
 
   const props = withDefaults(defineProps<{
     idField?: string,
@@ -49,37 +97,40 @@
   });
 
   const emit = defineEmits<{
-    // Emitted when an accordion is opened or closed; array of ID's
     (e: 'update:openValues', value: string[] | null): void,
-    // Emitted when the items array is changed (e.g., item moved or removed)
     (e: 'update:reorder', payload: any[]): void,
+    (e: 'update:deleteItem', payload: { index: number; id: string }): void,
   }>();
 
-  function onAccordionChange(event: CustomEvent) {
-    const currentOpenValues = Array.isArray(event.detail.value)
-      ? event.detail.value
-      : [event.detail.value].filter(Boolean);
-    console.log('IonAccordionGroup change event received with:', currentOpenValues);
-    emit('update:openValues', currentOpenValues);
+  function getItemId(item: any, index: number) {
+    if (item && item[props.idField] != null) return String(item[props.idField]);
+    return `item-${index}`;
   }
 
-  function onReorderEnd(event: ReorderEndCustomEvent) {
-    // The `from` and `to` properties contain the index of the item
-    // when the drag started and ended, respectively
-    console.log('Dragged from index', event.detail.from, 'to', event.detail.to);
-
-    // Finish the reorder and position the item in the DOM based on
-    // where the gesture ended. This method can also be called directly
-    // by the reorder group.
-    event.detail.complete();
+  function isOpen(item: any) {
+    const itemId = getItemId(item, 0);
+    return (props.openValues ?? []).includes(itemId);
   }
 
-  // Load all required icons for the buttons
-  addIcons({
-    'trash': trashOutline,
-    'up': arrowUpOutline,
-    'down': arrowDownOutline,
-    'add': addOutline
-  });
+  function toggleItem(item: any) {
+    const currentIds = props.openValues ?? [];
+    const itemId = getItemId(item, currentIds.length);
+    const next = currentIds.includes(itemId) ? [] : [itemId];
+    emit('update:openValues', next);
+  }
 
+  function moveItem(index: number, direction: -1 | 1) {
+    const target = index + direction;
+    if (target < 0 || target >= props.items.length) return;
+
+    const copy = [...props.items];
+    const [moved] = copy.splice(index, 1);
+    copy.splice(target, 0, moved);
+    emit('update:reorder', copy);
+  }
+
+  function deleteItem(index: number, item: any) {
+    const itemId = getItemId(item, index);
+    emit('update:deleteItem', { index, id: itemId });
+  }
 </script>
