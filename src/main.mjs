@@ -6,13 +6,11 @@ import 'primeicons/primeicons.css';
 import { createPinia } from 'pinia';
 
 import './styles/tailwind.css';
-import './styles/theme/variables.scss';
-import './styles/theme/rpg-components.scss';
-import './styles/main.scss';
 
 import App from './App.vue';
 import routes from './router';
 
+// Select / set the initial theme
 const THEME_STORAGE_KEY = 'dm-screen-theme';
 const VALID_THEMES = new Set(['light', 'dark', 'auto']);
 const storedTheme = localStorage.getItem(THEME_STORAGE_KEY);
