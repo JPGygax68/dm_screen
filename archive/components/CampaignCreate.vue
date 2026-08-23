@@ -36,23 +36,12 @@
 
 <script setup lang="ts">
   import { computed, ref } from 'vue';
-  import {
-    IonPage, IonHeader, IonContent, IonList, IonItem, IonInput, IonTextarea, IonButton,
-    IonNote, IonIcon, IonText
-  } from '@ionic/vue';
-  import { addIcons } from 'ionicons';
-  import { createOutline } from 'ionicons/icons';
-  import { onIonViewWillEnter, onIonViewWillLeave, onIonViewDidEnter } from '@ionic/vue';
   import { useUiStore } from '../stores/uiStore.ts';
   import useDataStore from '../stores/dataStore.ts';
   import { useRouter } from 'vue-router';
   import Breadcrumbs from '../components/Breadcrumbs.vue';
   import Ajv from 'ajv';
   import schema from '../generated/models/data.schema.json';
-
-  addIcons({
-    'create': createOutline
-  });
 
   const campaignSchema = { ...schema.$defs.Campaign, $defs: schema.$defs };
   //console.log('Campaign schema:', campaignSchema);

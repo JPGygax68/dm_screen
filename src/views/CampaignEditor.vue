@@ -1,5 +1,7 @@
 <template>
-  <div class="min-h-screen bg-stone-100 text-slate-800">
+  <div class="min-h-screen bg-app-body text-app-text">
+    <Breadcrumbs />
+
     <div class="mx-auto max-w-4xl px-4 py-6">
       <header class="mb-6 flex items-center justify-between gap-4 border-b border-slate-200 pb-4">
         <div>

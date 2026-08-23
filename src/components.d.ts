@@ -13,6 +13,7 @@ declare module 'vue' {
   export interface GlobalComponents {
     ArrayAccordion: typeof import('./components/ArrayAccordion.vue')['default']
     Breadcrumbs: typeof import('./components/Breadcrumbs.vue')['default']
+    CampaignCreate: typeof import('./components/CampaignCreate.vue')['default']
     CampaignEditor: typeof import('./views/CampaignEditor.vue')['default']
     CampaignList: typeof import('./views/CampaignList.vue')['default']
     ClassSelector: typeof import('./components/ClassSelector.vue')['default']

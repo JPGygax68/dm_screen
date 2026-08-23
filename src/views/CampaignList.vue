@@ -1,7 +1,8 @@
 <template>
   <div class="min-h-screen bg-app-body text-app-text">
+    <Breadcrumbs />
+    
     <div class="mx-auto max-w-6xl px-4 py-4">
-      <Breadcrumbs />
 
       <main class="mt-4">
         <div class="mb-4 flex items-center justify-between gap-4">
@@ -88,7 +89,7 @@
   }
 
   function openCampaign(campaignId: string) {
-    router.push(`/campaigns/${campaignId}/encounters`);
+    router.push(`/campaigns/${campaignId}/edit`);
   }
 
   function removeCampaign(campaignId: string) {
