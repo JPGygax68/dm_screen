@@ -1,7 +1,5 @@
 @import "tailwindcss";
 
-@custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
-
 :root {
   color-scheme: light;
 
@@ -72,31 +70,8 @@
   --component-list-item-strong-bg: var(--design-surface-strong);
 }
 
-:root[data-theme="dark"] {
-  color-scheme: dark;
-
-  --design-page-bg: var(--base-neutral-10);
-  --design-page-text: var(--base-neutral-90);
-  --design-page-muted: var(--base-neutral-80);
-  --design-surface: var(--base-neutral-10);
-  --design-surface-subtle: var(--base-neutral-20);
-  --design-surface-strong: var(--base-neutral-30);
-  --design-border-default: var(--base-neutral-80);
-  --design-border-subtle: var(--base-neutral-40);
-  --design-accent: var(--base-primary-80);
-  --design-accent-foreground: var(--base-primary-20);
-  --design-accent-secondary: var(--base-secondary-80);
-  --design-accent-secondary-foreground: var(--base-secondary-20);
-  --design-danger: var(--base-error-80);
-  --design-danger-foreground: var(--base-error-40);
-}
-
-:root[data-theme="auto"] {
-  color-scheme: light;
-}
-
 @media (prefers-color-scheme: dark) {
-  :root[data-theme="auto"] {
+  :root {
     color-scheme: dark;
 
     --design-page-bg: var(--base-neutral-10);
@@ -116,9 +91,12 @@
   }
 }
 
+/* Theme tokens for Tailwind CSS */
+
 @theme {
   --font-sans: Inter, system-ui, sans-serif;
 
+  /* Base / primitive tokens */
   --color-base-primary-0: var(--base-primary-0);
   --color-base-primary-10: var(--base-primary-10);
   --color-base-primary-20: var(--base-primary-20);
@@ -151,6 +129,7 @@
   --color-base-error-90: var(--base-error-90);
   --color-base-error-100: var(--base-error-100);
 
+  /* Design / semantic tokens */
   --color-design-page-bg: var(--design-page-bg);
   --color-design-page-text: var(--design-page-text);
   --color-design-page-muted: var(--design-page-muted);
@@ -166,6 +145,7 @@
   --color-design-danger: var(--design-danger);
   --color-design-danger-foreground: var(--design-danger-foreground);
 
+  /* Component tokens */
   --color-component-button-bg: var(--component-button-bg);
   --color-component-button-foreground: var(--component-button-foreground);
   --color-component-button-secondary-bg: var(--component-button-secondary-bg);
