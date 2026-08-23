@@ -1,12 +1,12 @@
 <template>
-  <div class="min-h-screen bg-app-body text-app-text">
-    <div class="border-b border-border-default bg-surface-strong text-app-text">
+  <div class="min-h-screen bg-design-page-bg text-design-page-text">
+    <div class="border-b border-design-border-default bg-component-list-item-strong-bg text-design-page-text">
       <div class="mx-auto max-w-6xl px-4 py-3 text-sm font-medium">
         <div class="flex items-center gap-2">
           <span>Campaigns</span>
-          <span class="text-app-muted">/</span>
+          <span class="text-design-page-muted">/</span>
           <span>{{ currentCampaign?.name || 'Campaign' }}</span>
-          <span class="text-app-muted">/</span>
+          <span class="text-design-page-muted">/</span>
           <span class="font-semibold">Encounters</span>
         </div>
       </div>
@@ -18,23 +18,23 @@
       </div>
 
       <div class="max-w-[440px]">
-        <button type="button" class="mb-4 rounded border border-border-default bg-surface px-3 py-2 text-left text-[15px] font-medium hover:bg-surface-subtle" @click="addNewEncounter">Add New Encounter</button>
+        <button type="button" class="mb-4 rounded border border-design-border-default bg-component-panel-bg px-3 py-2 text-left text-[15px] font-medium hover:bg-component-list-item-subtle-bg" @click="addNewEncounter">Add New Encounter</button>
 
-        <div v-if="encounters.length === 0" class="rounded border border-dashed border-border-subtle bg-surface-subtle p-6 text-sm text-app-muted">
+        <div v-if="encounters.length === 0" class="rounded border border-dashed border-design-border-subtle bg-component-list-item-subtle-bg p-6 text-sm text-design-page-muted">
           No encounters created yet.
         </div>
 
         <div v-else class="space-y-3">
-          <div v-for="item in encounters" :key="item.id" class="border-b border-border-subtle pb-3 last:border-b-0 last:pb-0">
+          <div v-for="item in encounters" :key="item.id" class="border-b border-design-border-subtle pb-3 last:border-b-0 last:pb-0">
             <div class="flex items-start gap-3">
               <div class="flex-1 min-w-0">
-                <div class="cursor-pointer text-[15px] font-medium hover:text-app-muted" @click="toggleEncounter(item.id)">
+                <div class="cursor-pointer text-[15px] font-medium text-design-page-text hover:text-design-page-muted" @click="toggleEncounter(item.id)">
                   {{ item.name || 'Untitled Encounter' }}
                 </div>
               </div>
               <div class="flex shrink-0 items-center gap-2">
-                <button type="button" class="rounded border border-border-default bg-surface px-2 py-1 text-[12px] font-medium hover:bg-surface-subtle" @click="router.push(`/campaigns/${campaignId}/encounters/${item.id}/edit`)">Open</button>
-                <button type="button" class="rounded border border-border-default bg-surface px-2 py-1 text-[12px] font-medium hover:bg-surface-subtle" @click="removeEncounter(item.id)">Delete</button>
+                <button type="button" class="rounded border border-design-border-default bg-component-button-secondary-bg px-2 py-1 text-[12px] font-medium text-component-button-secondary-foreground hover:bg-component-list-item-strong-bg" @click="router.push(`/campaigns/${campaignId}/encounters/${item.id}/edit`)">Open</button>
+                <button type="button" class="rounded border border-design-border-default bg-component-button-secondary-bg px-2 py-1 text-[12px] font-medium text-component-button-secondary-foreground hover:bg-component-list-item-strong-bg" @click="removeEncounter(item.id)">Delete</button>
               </div>
             </div>
 
@@ -44,16 +44,16 @@
                 :value="item.description || ''"
                 rows="4"
                 readonly
-                class="w-full rounded border border-border-subtle bg-surface px-2 py-2 text-sm"
+                class="w-full rounded border border-design-border-subtle bg-component-panel-bg px-2 py-2 text-sm"
               />
               <div class="mt-3">
-                <button type="button" class="rounded border border-border-default bg-surface-subtle px-3 py-2 text-[15px] font-medium hover:bg-surface-strong" @click="router.push(`/campaigns/${campaignId}/encounters/${item.id}/edit`)">Edit Encounter</button>
+                <button type="button" class="rounded border border-design-border-default bg-component-list-item-subtle-bg px-3 py-2 text-[15px] font-medium hover:bg-component-list-item-strong-bg" @click="router.push(`/campaigns/${campaignId}/encounters/${item.id}/edit`)">Edit Encounter</button>
               </div>
             </div>
           </div>
         </div>
 
-        <button type="button" class="mt-4 rounded border border-border-default bg-surface px-3 py-2 text-[15px] font-medium hover:bg-surface-subtle" @click="router.push('/')">Back to Home</button>
+        <button type="button" class="mt-4 rounded border border-design-border-default bg-component-panel-bg px-3 py-2 text-[15px] font-medium hover:bg-component-list-item-subtle-bg" @click="router.push('/')">Back to Home</button>
       </div>
     </div>
   </div>

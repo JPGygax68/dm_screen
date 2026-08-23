@@ -1,5 +1,5 @@
 <template>
-  <div class="min-h-screen bg-app-body text-app-text">
+  <div class="min-h-screen bg-design-page-bg text-design-page-text">
     <Breadcrumbs />
     
     <div class="mx-auto max-w-6xl px-4 py-4">
@@ -9,7 +9,7 @@
           <h1 class="text-[clamp(1.5rem,2vw,2rem)] font-bold">Campaigns</h1>
           <button
             type="button"
-            class="rounded-lg border border-action bg-action px-4 py-2 text-sm font-medium text-action-foreground hover:opacity-95"
+            class="rounded-lg border border-component-button-bg bg-component-button-bg px-4 py-2 text-sm font-medium text-component-button-foreground hover:opacity-95"
             @click="addNewCampaign"
           >
             Add New Campaign
@@ -20,18 +20,18 @@
           <li
             v-for="campaign in store.campaigns"
             :key="campaign.id"
-            class="rounded-xl border border-border-subtle bg-surface shadow-sm"
+            class="rounded-xl border border-design-border-subtle bg-component-panel-bg shadow-sm"
           >
             <div class="flex items-center justify-between gap-4 px-5 py-4">
               <div class="flex min-w-0 flex-1 flex-col gap-1.5">
                 <button
                   type="button"
-                  class="cursor-pointer border-0 bg-transparent p-0 text-left text-lg font-semibold"
+                  class="cursor-pointer border-0 bg-transparent p-0 text-left text-lg font-semibold text-design-page-text"
                   @click="openCampaign(campaign.id)"
                 >
                   {{ campaign.name }}
                 </button>
-                <p v-if="campaign.description" class="m-0 whitespace-pre-wrap text-sm leading-6 text-app-muted">
+                <p v-if="campaign.description" class="m-0 whitespace-pre-wrap text-sm leading-6 text-design-page-muted">
                   {{ campaign.description }}
                 </p>
               </div>
@@ -39,14 +39,14 @@
               <div class="flex shrink-0 items-center gap-2">
                 <button
                   type="button"
-                  class="rounded-lg border border-border-default bg-surface-subtle px-3 py-2 text-sm font-medium hover:bg-surface-strong"
+                  class="rounded-lg border border-design-border-default bg-component-button-secondary-bg px-3 py-2 text-sm font-medium text-component-button-secondary-foreground hover:bg-component-list-item-strong-bg"
                   @click="openCampaign(campaign.id)"
                 >
                   Open
                 </button>
                 <button
                   type="button"
-                  class="rounded-lg border border-alert-error-bg bg-alert-error-bg px-3 py-2 text-sm font-medium text-alert-error-text hover:opacity-90"
+                  class="rounded-lg border border-component-button-danger-bg bg-component-button-danger-bg px-3 py-2 text-sm font-medium text-component-button-danger-foreground hover:opacity-90"
                   @click="removeCampaign(campaign.id)"
                 >
                   Remove
@@ -58,7 +58,7 @@
 
         <button
           type="button"
-          class="mt-4 rounded-lg border border-border-default bg-surface px-4 py-2 text-sm font-medium hover:bg-surface-subtle"
+          class="mt-4 rounded-lg border border-design-border-default bg-component-panel-bg px-4 py-2 text-sm font-medium hover:bg-component-list-item-subtle-bg"
           @click="router.push('/')"
         >
           Back to Home

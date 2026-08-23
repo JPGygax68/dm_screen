@@ -11,17 +11,13 @@ export {}
 /* prettier-ignore */
 declare module 'vue' {
   export interface GlobalComponents {
-    ArrayAccordion: typeof import('./components/ArrayAccordion.vue')['default']
     Breadcrumbs: typeof import('./components/Breadcrumbs.vue')['default']
-    CampaignCreate: typeof import('./components/CampaignCreate.vue')['default']
     CampaignEditor: typeof import('./views/CampaignEditor.vue')['default']
     CampaignList: typeof import('./views/CampaignList.vue')['default']
     ClassSelector: typeof import('./components/ClassSelector.vue')['default']
     EncounterEditor: typeof import('./views/EncounterEditor.vue')['default']
     EncounterList: typeof import('./views/EncounterList.vue')['default']
-    FormSpecNode: typeof import('./components/FormSpecNode.vue')['default']
     ImagePicker: typeof import('./components/ImagePicker.vue')['default']
-    PartyEditor: typeof import('./views/PartyEditor.vue')['default']
     PlayerCharacterEdit: typeof import('./views/PlayerCharacterEdit.vue')['default']
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']

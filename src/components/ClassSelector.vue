@@ -1,22 +1,22 @@
 <template>
-  <div class="class-selector">
-    <label class="label">Character Classes</label>
+  <div class="flex w-full flex-col gap-3">
+    <label class="text-sm font-semibold text-design-page-text">Character Classes</label>
 
-    <div class="selected-list">
-      <span v-if="!classes || classes.length === 0" class="empty">No classes selected yet.</span>
+    <div class="flex min-h-9 flex-wrap gap-2">
+      <span v-if="!classes || classes.length === 0" class="text-sm text-design-page-muted">No classes selected yet.</span>
       <button
         v-for="selectedClass in classes"
         :key="selectedClass"
         type="button"
-        class="selected-pill"
+        class="rounded-full border border-design-border-default bg-component-list-item-subtle-bg px-3 py-1 text-sm text-design-page-text transition hover:bg-component-list-item-strong-bg"
         @click="removeClass(selectedClass)"
       >
         {{ selectedClass }} ×
       </button>
     </div>
 
-    <div class="choice-list">
-      <label v-for="dndClass in availableClasses" :key="dndClass" class="choice-item">
+    <div class="grid grid-cols-[repeat(auto-fit,minmax(120px,1fr))] gap-2">
+      <label v-for="dndClass in availableClasses" :key="dndClass" class="flex items-center gap-2 rounded-lg border border-design-border-subtle bg-component-panel-bg px-3 py-2 text-sm text-design-page-text">
         <input
           type="checkbox"
           :checked="classes.includes(dndClass)"
@@ -27,59 +27,6 @@
     </div>
   </div>
 </template>
-
-<style scoped lang="scss">
-  .class-selector {
-    display: flex;
-    flex-direction: column;
-    gap: 0.75rem;
-    width: 100%;
-  }
-
-  .label {
-    font-size: 0.8rem;
-    font-weight: 600;
-    color: #cbd5e1;
-  }
-
-  .selected-list {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.5rem;
-    min-height: 2.25rem;
-  }
-
-  .empty {
-    color: #94a3b8;
-    font-size: 0.85rem;
-  }
-
-  .selected-pill {
-    appearance: none;
-    border: 1px solid rgba(96, 165, 250, 0.4);
-    background: rgba(59, 130, 246, 0.12);
-    color: #dbeafe;
-    border-radius: 999px;
-    padding: 0.3rem 0.6rem;
-    cursor: pointer;
-  }
-
-  .choice-list {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-    gap: 0.5rem;
-  }
-
-  .choice-item {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    border: 1px solid rgba(148, 163, 184, 0.2);
-    border-radius: 8px;
-    padding: 0.5rem 0.6rem;
-    background: rgba(15, 23, 42, 0.4);
-  }
-</style>
 
 <script setup lang="ts">
   const availableClasses = [

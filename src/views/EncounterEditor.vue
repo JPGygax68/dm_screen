@@ -1,15 +1,15 @@
 <template>
-  <div class="min-h-screen bg-app-body text-app-text">
+  <div class="min-h-screen bg-design-page-bg text-design-page-text">
     <div class="mx-auto max-w-7xl px-4 py-4">
       <Breadcrumbs />
 
       <div class="mt-4 grid gap-4 lg:grid-cols-[minmax(320px,0.95fr)_minmax(340px,1.35fr)]">
-        <section class="flex min-h-0 flex-col overflow-hidden rounded-xl border border-border-subtle bg-surface">
-          <div class="border-b border-border-subtle px-4 py-3">
+        <section class="flex min-h-0 flex-col overflow-hidden rounded-xl border border-design-border-subtle bg-component-panel-bg">
+          <div class="border-b border-design-border-subtle px-4 py-3">
             <h2 class="text-lg font-semibold">Selected Adversaries</h2>
           </div>
 
-          <div v-if="selectedCreatures.length === 0" class="flex min-h-48 items-center justify-center p-4 text-center text-sm text-app-muted">
+          <div v-if="selectedCreatures.length === 0" class="flex min-h-48 items-center justify-center p-4 text-center text-sm text-design-page-muted">
             No creatures selected yet.
           </div>
 
@@ -17,29 +17,29 @@
             <div
               v-for="entry in selectedCreatures"
               :key="entry.id"
-              class="grid grid-cols-[64px_minmax(0,1fr)_90px_auto] items-center gap-3 rounded-lg border border-border-subtle bg-surface-subtle px-2 py-2"
+              class="grid grid-cols-[64px_minmax(0,1fr)_90px_auto] items-center gap-3 rounded-lg border border-design-border-subtle bg-component-list-item-subtle-bg px-2 py-2"
             >
               <img :src="getCreatureImageUrl(entry)" :alt="entry.name" class="h-16 w-16 rounded-md object-cover" />
 
               <div class="min-w-0">
                 <h3 class="truncate text-base font-semibold">{{ entry.name }}</h3>
-                <p class="truncate text-xs text-app-muted">{{ entry.race }} • CR {{ entry.cr }} • AC {{ entry.armorClass }}</p>
+                <p class="truncate text-xs text-design-page-muted">{{ entry.race }} • CR {{ entry.cr }} • AC {{ entry.armorClass }}</p>
               </div>
 
               <div class="flex flex-col items-center gap-1">
-                <label class="text-[11px] uppercase tracking-widest text-app-muted">Count</label>
+                <label class="text-[11px] uppercase tracking-widest text-design-page-muted">Count</label>
                 <input
                   :value="entry.count"
                   type="number"
                   min="1"
-                  class="w-20 rounded-md border border-border-default bg-surface px-2 py-1 text-center text-sm outline-none focus:border-action"
+                  class="w-20 rounded-md border border-component-input-border bg-component-input-bg px-2 py-1 text-center text-sm text-component-input-text outline-none focus:border-component-button-bg"
                   @input="updateCreatureCount(entry, $event)"
                 />
               </div>
 
               <button
                 type="button"
-                class="rounded border border-border-default bg-surface px-3 py-1.5 text-sm font-medium hover:bg-surface-subtle"
+                class="rounded border border-design-border-default bg-component-list-item-bg px-3 py-1.5 text-sm font-medium hover:bg-component-list-item-subtle-bg"
                 @click="removeCreature(entry.id)"
               >
                 Remove
@@ -48,8 +48,8 @@
           </div>
         </section>
 
-        <section class="flex min-h-0 flex-col overflow-hidden rounded-xl border border-border-subtle bg-surface">
-          <div class="border-b border-border-subtle px-4 py-3">
+        <section class="flex min-h-0 flex-col overflow-hidden rounded-xl border border-design-border-subtle bg-component-panel-bg">
+          <div class="border-b border-design-border-subtle px-4 py-3">
             <h2 class="text-lg font-semibold">Bestiary</h2>
           </div>
 
@@ -58,7 +58,7 @@
               v-model="searchTerm"
               type="search"
               placeholder="Search creatures"
-              class="w-full rounded-md border border-border-default bg-surface px-3 py-2 text-sm outline-none placeholder:text-app-muted focus:border-action"
+              class="w-full rounded-md border border-component-input-border bg-component-input-bg px-3 py-2 text-sm text-component-input-text outline-none placeholder:text-design-page-muted focus:border-component-button-bg"
             />
           </div>
 
@@ -67,30 +67,30 @@
               v-for="creature in filteredBestiary"
               :key="creature.id"
               type="button"
-              class="flex w-full items-center gap-3 rounded-lg border border-border-subtle bg-surface-subtle px-3 py-2 text-left transition hover:border-border-default hover:bg-surface-strong"
+              class="flex w-full items-center gap-3 rounded-lg border border-design-border-subtle bg-component-list-item-subtle-bg px-3 py-2 text-left transition hover:border-design-border-default hover:bg-component-list-item-strong-bg"
               @click="addCreature(creature)"
             >
               <img :src="getCreatureImageUrl(creature)" :alt="creature.name" class="h-14 w-14 shrink-0 rounded-md object-cover" />
               <div class="min-w-0">
                 <h3 class="truncate text-base font-semibold">{{ creature.name }}</h3>
-                <p class="truncate text-xs text-app-muted">{{ creature.race }} • CR {{ creature.cr }} • AC {{ creature.armorClass }}</p>
+                <p class="truncate text-xs text-design-page-muted">{{ creature.race }} • CR {{ creature.cr }} • AC {{ creature.armorClass }}</p>
               </div>
             </button>
           </div>
         </section>
       </div>
 
-      <div class="mt-4 flex justify-end gap-2 border-t border-border-subtle pt-4">
+      <div class="mt-4 flex justify-end gap-2 border-t border-design-border-subtle pt-4">
         <button
           type="button"
-          class="rounded border border-border-default bg-surface px-4 py-2 text-sm font-medium hover:bg-surface-subtle"
+          class="rounded border border-design-border-default bg-component-list-item-bg px-4 py-2 text-sm font-medium hover:bg-component-list-item-subtle-bg"
           @click="discard"
         >
           Discard
         </button>
         <button
           type="button"
-          class="rounded border border-action bg-action px-4 py-2 text-sm font-medium text-action-foreground hover:opacity-95"
+          class="rounded border border-component-button-bg bg-component-button-bg px-4 py-2 text-sm font-medium text-component-button-foreground hover:opacity-95"
           @click="saveEncounter"
         >
           Save

@@ -1,33 +1,33 @@
 <template>
-  <div class="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+  <div class="rounded-2xl border border-design-border-subtle bg-component-panel-bg p-4 shadow-sm">
     <form @submit.prevent="save" class="space-y-5">
       <div class="flex flex-col gap-4 sm:flex-row">
         <ImagePicker :imageDataUrl="draft.portrait || ''" @change="onPortraitChanged" />
 
         <div class="flex-1">
-          <label for="character-name" class="mb-2 block text-sm font-semibold text-slate-700">Name <span class="text-amber-600">*</span></label>
+          <label for="character-name" class="mb-2 block text-sm font-semibold text-design-page-text">Name <span class="text-design-page-muted">*</span></label>
           <input
             id="character-name"
             ref="nameInput"
             v-model="draft.name"
             type="text"
-            class="w-full rounded-lg border border-slate-300 bg-slate-50 px-3 py-2 text-base text-slate-900 outline-none transition focus:border-slate-500 focus:bg-white"
+            class="w-full rounded-lg border border-component-input-border bg-component-input-bg px-3 py-2 text-base text-component-input-text outline-none transition placeholder:text-design-page-muted focus:border-component-button-bg"
             placeholder="Character Name"
             required
             @input="isDirty = true"
             @blur="markAsTouched('name')"
           />
-          <p v-if="touchedFields.name && visibleErrors.name" class="mt-2 text-sm text-red-600">{{ visibleErrors.name }}</p>
+          <p v-if="touchedFields.name && visibleErrors.name" class="mt-2 text-sm text-design-page-muted">{{ visibleErrors.name }}</p>
         </div>
       </div>
 
       <div>
-        <label for="character-description" class="mb-2 block text-sm font-semibold text-slate-700">Description</label>
+        <label for="character-description" class="mb-2 block text-sm font-semibold text-design-page-text">Description</label>
         <textarea
           id="character-description"
           v-model="draft.description"
           rows="3"
-          class="w-full rounded-lg border border-slate-300 bg-slate-50 px-3 py-2 text-base text-slate-900 outline-none transition focus:border-slate-500 focus:bg-white"
+          class="w-full rounded-lg border border-component-input-border bg-component-input-bg px-3 py-2 text-base text-component-input-text outline-none transition placeholder:text-design-page-muted focus:border-component-button-bg"
           placeholder="Character Description"
           @input="isDirty = true"
         />
@@ -37,13 +37,13 @@
         <ClassSelector :classes="draft.classes || []" @update:classes="draft.classes = $event" />
       </div>
 
-      <div class="rounded-xl border border-slate-200 bg-slate-50 p-3">
+      <div class="rounded-xl border border-design-border-subtle bg-component-list-item-subtle-bg p-3">
         <div class="mb-3 flex items-center justify-between gap-4">
-          <label class="text-sm font-semibold text-slate-700">Max Hit Points</label>
+          <label class="text-sm font-semibold text-design-page-text">Max Hit Points</label>
           <div class="flex items-center gap-2">
-            <button type="button" class="h-8 w-8 rounded-md border border-slate-300 bg-white text-lg text-slate-700 hover:bg-slate-100" @click="adjustHp(-1)">-</button>
-            <span class="min-w-16 text-center text-sm font-semibold text-slate-900">{{ draft.maxHitPoints || 10 }} HP</span>
-            <button type="button" class="h-8 w-8 rounded-md border border-slate-300 bg-white text-lg text-slate-700 hover:bg-slate-100" @click="adjustHp(1)">+</button>
+            <button type="button" class="h-8 w-8 rounded-md border border-design-border-default bg-component-panel-bg text-lg text-design-page-text hover:bg-component-list-item-strong-bg" @click="adjustHp(-1)">-</button>
+            <span class="min-w-16 text-center text-sm font-semibold">{{ draft.maxHitPoints || 10 }} HP</span>
+            <button type="button" class="h-8 w-8 rounded-md border border-design-border-default bg-component-panel-bg text-lg text-design-page-text hover:bg-component-list-item-strong-bg" @click="adjustHp(1)">+</button>
           </div>
         </div>
 
@@ -53,18 +53,18 @@
           :min="schema.properties.maxHitPoints.minimum"
           :max="schema.properties.maxHitPoints.maximum"
           step="1"
-          class="w-full accent-slate-900"
+          class="w-full accent-component-button-bg"
         />
       </div>
 
       <div class="flex flex-wrap items-center gap-3 pt-2">
-        <button type="submit" class="rounded-lg bg-slate-900 px-4 py-2 text-sm font-medium text-white transition hover:bg-slate-700 disabled:cursor-not-allowed disabled:bg-slate-300" :disabled="!canSave">Save</button>
-        <button type="button" class="rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50" @click="cancel">Cancel</button>
+        <button type="submit" class="rounded-lg border border-component-button-bg bg-component-button-bg px-4 py-2 text-sm font-medium text-component-button-foreground transition hover:opacity-95 disabled:cursor-not-allowed disabled:bg-component-list-item-strong-bg disabled:text-design-page-muted" :disabled="!canSave">Save</button>
+        <button type="button" class="rounded-lg border border-design-border-default bg-component-button-secondary-bg px-4 py-2 text-sm font-medium text-component-button-secondary-foreground transition hover:bg-component-list-item-strong-bg" @click="cancel">Cancel</button>
         <div class="flex-1" />
         <button
           v-if="isEditing"
           type="button"
-          class="rounded-lg border border-red-200 bg-red-50 px-4 py-2 text-sm font-medium text-red-700 transition hover:bg-red-100"
+          class="rounded-lg border border-component-button-danger-bg bg-component-button-danger-bg px-4 py-2 text-sm font-medium text-component-button-danger-foreground transition hover:opacity-90"
           @click="presentDeleteConfirmation"
         >
           Delete Character

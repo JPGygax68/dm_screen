@@ -1,9 +1,11 @@
 <template>
-  <div style="padding-top: 16px; padding-bottom: 8px;">
-    <div class="upload-container" @click="triggerFilePicker">
-      <img v-if="imageDataUrl" :src="imageDataUrl" class="image-preview" alt="Portrait preview" />
-      <div v-else class="placeholder-icon" aria-hidden="true">👤</div>
-      <div class="edit-overlay">{{ imageDataUrl ? 'EDIT' : 'ADD' }}</div>
+  <div class="pt-4 pb-2">
+    <div class="relative flex h-18 w-18 cursor-pointer items-center justify-center overflow-hidden rounded-lg border-2 border-dashed border-design-border-default bg-component-list-item-subtle-bg" @click="triggerFilePicker">
+      <img v-if="imageDataUrl" :src="imageDataUrl" class="h-full w-full object-cover" alt="Portrait preview" />
+      <div v-else class="text-3xl text-design-page-muted" aria-hidden="true">👤</div>
+      <div class="absolute inset-x-0 bottom-0 bg-black/60 py-0.5 text-center text-[9px] font-medium text-white">
+        {{ imageDataUrl ? 'EDIT' : 'ADD' }}
+      </div>
     </div>
 
     <input
@@ -15,47 +17,6 @@
     />
   </div>
 </template>
-
-<style scoped lang="scss">
-
-  .upload-container {
-    position: relative;
-    width: 72px;
-    height: 72px;
-    border-radius: 8px;
-    border: 2px dashed var(--ion-color-step-300);
-    background: var(--ion-color-step-50);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    overflow: hidden;
-    cursor: pointer;
-  }
-
-  .image-preview {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-  }
-
-  .placeholder-icon {
-    font-size: 28px;
-    color: var(--ion-color-step-400);
-  }
-
-  /* Tiny overlay badge indicating the frame is clickable */
-  .edit-overlay {
-    position: absolute;
-    bottom: 0;
-    width: 100%;
-    background: rgba(0, 0, 0, 0.6);
-    color: #ffffff;
-    font-size: 9px;
-    text-align: center;
-    padding: 2px 0;
-    font-weight: 500;
-  }
-</style>
 
 <script setup lang="ts">
   import { ref } from 'vue';

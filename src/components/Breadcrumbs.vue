@@ -1,6 +1,6 @@
 <script setup lang="ts">
-  import { useRoute, useRouter } from 'vue-router';
   import { computed } from 'vue';
+  import { useRoute, useRouter } from 'vue-router';
   import { useDmScreenStore } from '../stores/dataStore';
 
   const route = useRoute();
@@ -27,8 +27,7 @@
       if (!campaign) return [];
       return [
         { label: 'Campaigns', to: '/campaigns' },
-        { label: `"${campaign.name}"`, to: `/campaigns/${id}` },
-        // { label: 'Edit Campaign', to: `/campaigns/${id}/edit` }
+        { label: `"${campaign.name}"`, to: `/campaigns/${id}` }
       ];
     }
 
@@ -59,41 +58,17 @@
   }
 </script>
 
-<template lang="pug">
-
-  nav.breadcrumbs(aria-label="Breadcrumb")
-    button.crumb(
+<template>
+  <nav aria-label="Breadcrumb" class="flex flex-wrap gap-2 border-b border-design-border-subtle bg-component-list-item-strong-bg px-4 py-3">
+    <button
       v-for="(c, i) in crumbs"
       :key="i"
       type="button"
       :disabled="!c.to"
+      class="rounded-full px-2 py-1 text-sm text-design-page-muted transition enabled:cursor-pointer enabled:hover:text-design-page-text disabled:cursor-default disabled:opacity-70"
       @click="go(c.to)"
-    ) {{ c.label }}
-
+    >
+      {{ c.label }}
+    </button>
+  </nav>
 </template>
-
-<style scoped lang="scss">
-  .breadcrumbs {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.5rem;
-    padding: 0.75rem 1rem;
-    background: rgba(15, 23, 42, 0.8);
-    border-bottom: 1px solid rgba(148, 163, 184, 0.2);
-  }
-
-  .crumb {
-    appearance: none;
-    border: 0;
-    background: transparent;
-    color: #cbd5e1;
-    cursor: pointer;
-    padding: 0.25rem 0.5rem;
-    border-radius: 999px;
-
-    &:disabled {
-      cursor: default;
-      opacity: 0.7;
-    }
-  }
-</style>
