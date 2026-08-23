@@ -21,14 +21,14 @@
       ];
     }
 
-    if (path.match(/\/campaigns\/[^/]+\/edit/)) {
+    if (path.match(/\/campaigns\/[^/]+/)) {
       const id = route.params.id;
       const campaign = store.campaigns.find(c => c.id === id);
       if (!campaign) return [];
       return [
         { label: 'Campaigns', to: '/campaigns' },
         { label: `"${campaign.name}"`, to: `/campaigns/${id}` },
-        { label: 'Edit Campaign', to: `/campaigns/${id}/edit` }
+        // { label: 'Edit Campaign', to: `/campaigns/${id}/edit` }
       ];
     }
 
@@ -59,19 +59,17 @@
   }
 </script>
 
-<template>
-  <nav class="breadcrumbs" aria-label="Breadcrumb">
-    <button
+<template lang="pug">
+
+  nav.breadcrumbs(aria-label="Breadcrumb")
+    button.crumb(
       v-for="(c, i) in crumbs"
       :key="i"
       type="button"
-      class="crumb"
       :disabled="!c.to"
       @click="go(c.to)"
-    >
-      {{ c.label }}
-    </button>
-  </nav>
+    ) {{ c.label }}
+
 </template>
 
 <style scoped lang="scss">

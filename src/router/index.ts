@@ -20,7 +20,7 @@ const routes: RouteRecordRaw[] = [
     component: CampaignEditor
   },
   {
-    path: '/campaigns/:id/edit',
+    path: '/campaigns/:id',
     name: 'campaign-edit',
     component: CampaignEditor
   },

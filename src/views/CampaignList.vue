@@ -89,7 +89,7 @@
   }
 
   function openCampaign(campaignId: string) {
-    router.push(`/campaigns/${campaignId}/edit`);
+    router.push(`/campaigns/${campaignId}`);
   }
 
   function removeCampaign(campaignId: string) {
