@@ -15,5 +15,30 @@
     "diagnostics": {
       "componentUses": true
     }
-  }
+  },
+  "tailwindCSS.includeLanguages": {
+    "vue": "html",
+    "pug": "html",
+    "html": "html",
+    "javascript": "javascript",
+    "typescript": "typescript"
+  },
+  "tailwindCSS.classAttributes": [
+    "class",
+    "className",
+    "ngClass",
+    "v-bind:class",
+    ":class",
+    "class:list"
+  ],
+  "tailwindCSS.experimental.classRegex": [
+    [
+      "class\\s*=\\s*\"([^\"]*)\"",
+      1
+    ],
+    [
+      "class\\s*=\\s*'([^']*)'",
+      1
+    ]
+  ]
 }

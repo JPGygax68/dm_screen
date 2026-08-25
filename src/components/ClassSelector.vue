@@ -1,8 +1,8 @@
 <template>
   <div class="flex w-full flex-col gap-3">
-    <label class="text-sm font-semibold text-design-page-text">Character Classes</label>
+    <label class="text-sm font-semibold text-design-page-text">Character Class(es)</label>
 
-    <div class="flex min-h-9 flex-wrap gap-2">
+    <div class="flex min-h-9 flex-wrap items-center gap-2">
       <span v-if="!classes || classes.length === 0" class="text-sm text-design-page-muted">No classes selected yet.</span>
       <button
         v-for="selectedClass in classes"
@@ -13,22 +13,24 @@
       >
         {{ selectedClass }} ×
       </button>
-    </div>
 
-    <div class="grid grid-cols-[repeat(auto-fit,minmax(120px,1fr))] gap-2">
-      <label v-for="dndClass in availableClasses" :key="dndClass" class="flex items-center gap-2 rounded-lg border border-design-border-subtle bg-component-panel-bg px-3 py-2 text-sm text-design-page-text">
-        <input
-          type="checkbox"
-          :checked="classes.includes(dndClass)"
-          @change="toggleClass(dndClass, $event)"
-        />
-        <span>{{ dndClass }}</span>
-      </label>
+      <select
+        v-model="pendingClass"
+        class="h-9 min-w-40 rounded-lg border border-design-border-subtle bg-component-panel-bg px-3 text-sm text-design-page-text"
+        @change="addSelectedClass"
+      >
+        <option value="">Multiclass</option>
+        <option v-for="dndClass in unselectedClasses" :key="dndClass" :value="dndClass">
+          {{ dndClass }}
+        </option>
+      </select>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
+  import { computed, ref } from 'vue';
+
   const availableClasses = [
     'Barbarian', 'Bard', 'Cleric', 'Druid', 'Fighter', 'Monk',
     'Paladin', 'Ranger', 'Rogue', 'Sorcerer', 'Warlock', 'Wizard'
@@ -36,22 +38,26 @@
 
   const props = defineProps<{ classes: string[] }>();
   const emit = defineEmits<{ (e: 'update:classes', values: string[]): void }>();
+  const pendingClass = ref('');
+
+  const unselectedClasses = computed(() => {
+    const selected = new Set(props.classes ?? []);
+    return availableClasses.filter(dndClass => !selected.has(dndClass));
+  });
 
   function syncClasses(next: string[]) {
     emit('update:classes', next);
   }
 
-  function toggleClass(selectedClass: string, event: Event) {
-    const checked = (event.target as HTMLInputElement).checked;
+  function addSelectedClass() {
+    const selectedClass = pendingClass.value;
+    if (!selectedClass) return;
+
     const next = [...(props.classes ?? [])];
-
-    if (checked && !next.includes(selectedClass)) next.push(selectedClass);
-    if (!checked) {
-      const index = next.indexOf(selectedClass);
-      if (index >= 0) next.splice(index, 1);
-    }
-
+    if (!next.includes(selectedClass)) next.push(selectedClass);
     syncClasses(next);
+
+    pendingClass.value = '';
   }
 
   function removeClass(selectedClass: string) {
