@@ -177,4 +177,20 @@
       outline-none transition placeholder:text-design-page-muted 
       focus:border-component-button-bg;
   }
+
+  select {
+    @apply rounded-lg border border-component-input-border 
+      bg-component-input-bg px-3 py-2 text-base text-component-input-text 
+      outline-none transition placeholder:text-design-page-muted 
+      focus:border-component-button-bg;
+  }
+}
+
+@layer components {
+
+  /* Component styles EXPERIMENTAL */
+
+  .badge {
+    @apply rounded-full border border-design-border-default bg-component-list-item-subtle-bg px-3 py-1 text-sm text-design-page-text transition hover:bg-component-list-item-strong-bg
+  }
 }

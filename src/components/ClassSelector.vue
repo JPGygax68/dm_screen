@@ -8,7 +8,7 @@
         v-for="selectedClass in classes"
         :key="selectedClass"
         type="button"
-        class="rounded-full border border-design-border-default bg-component-list-item-subtle-bg px-3 py-1 text-sm text-design-page-text transition hover:bg-component-list-item-strong-bg"
+        class="badge"
         @click="removeClass(selectedClass)"
       >
         {{ selectedClass }} ×
@@ -16,7 +16,6 @@
 
       <select
         v-model="pendingClass"
-        class="h-9 min-w-40 rounded-lg border border-design-border-subtle bg-component-panel-bg px-3 text-sm text-design-page-text"
         @change="addSelectedClass"
       >
         <option value="">Multiclass</option>
