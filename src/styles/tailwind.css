@@ -53,21 +53,31 @@
   --design-danger-foreground: var(--base-error-100);
 
   /* Component tokens */
+
   --component-button-bg: var(--design-accent);
+  --component-button-border: var(--component-button-bg);
   --component-button-foreground: var(--design-accent-foreground);
   --component-button-secondary-bg: var(--design-surface-subtle);
   --component-button-secondary-foreground: var(--design-page-text);
   --component-button-danger-bg: var(--design-danger);
   --component-button-danger-foreground: var(--design-danger-foreground);
+
   --component-input-bg: var(--design-surface);
   --component-input-border: var(--design-border-default);
   --component-input-text: var(--design-page-text);
   --component-input-placeholder: var(--design-page-muted);
+
   --component-panel-bg: var(--design-surface);
   --component-panel-border: var(--design-border-subtle);
+
   --component-list-item-bg: var(--design-surface);
   --component-list-item-subtle-bg: var(--design-surface-subtle);
   --component-list-item-strong-bg: var(--design-surface-strong);
+
+  --component-icon-button-bg: var(--component-panel-bg);
+  --component-icon-button-border: var(--design-border-default);
+  --component-icon-button-foreground: var(--design-page-text);
+  --component-icon-button-hover-bg: var(--component-list-item-strong-bg);
 }
 
 @media (prefers-color-scheme: dark) {
@@ -147,11 +157,16 @@
 
   /* Component tokens */
   --color-component-button-bg: var(--component-button-bg);
+  --color-component-button-border: var(--component-button-border);
   --color-component-button-foreground: var(--component-button-foreground);
   --color-component-button-secondary-bg: var(--component-button-secondary-bg);
   --color-component-button-secondary-foreground: var(--component-button-secondary-foreground);
   --color-component-button-danger-bg: var(--component-button-danger-bg);
   --color-component-button-danger-foreground: var(--component-button-danger-foreground);
+  --color-component-icon-button-bg: var(--component-icon-button-bg);
+  --color-component-icon-button-border: var(--component-icon-button-border);
+  --color-component-icon-button-foreground: var(--component-icon-button-foreground);
+  --color-component-icon-button-hover-bg: var(--component-icon-button-hover-bg);
   --color-component-input-bg: var(--component-input-bg);
   --color-component-input-border: var(--component-input-border);
   --color-component-input-text: var(--component-input-text);
@@ -168,7 +183,7 @@
   /* Base styles EXPERIMENTAL */
 
   button {
-    @apply rounded-lg border border-component-button-bg bg-component-button-bg px-4 py-2 text-sm font-medium text-component-button-foreground transition hover:opacity-95 disabled:cursor-not-allowed disabled:border-component-list-item-strong-bg disabled:bg-component-list-item-strong-bg disabled:text-design-page-muted;
+    @apply rounded-lg border border-component-button-border bg-component-button-bg px-4 py-2 text-sm font-medium text-component-button-foreground transition hover:opacity-95 disabled:cursor-not-allowed disabled:border-component-list-item-strong-bg disabled:bg-component-list-item-strong-bg disabled:text-design-page-muted;
   }
 
   label {
@@ -206,7 +221,20 @@
     @apply rounded-full border border-design-border-default bg-component-list-item-subtle-bg px-3 py-1 text-sm text-design-page-text transition hover:bg-component-list-item-strong-bg
   }
 
-  .icon-button {
-    @apply bg-component-panel-bg text-design-page-text text-center w-8 h-8 p-0 text-lg;
+  .glyph-button {
+    @apply w-8 h-8 border-component-icon-button-border bg-component-icon-button-bg p-0 text-center text-lg text-component-icon-button-foreground hover:bg-component-icon-button-hover-bg hover:opacity-100;
+  }
+
+  .surface-subtle {
+    @apply rounded-xl border border-design-border-subtle bg-component-list-item-subtle-bg p-3;
+
+    /* Surfaces can remap component variables so nested controls adapt automatically. */
+    --component-button-bg: var(--component-button-secondary-bg);
+    --component-button-border: var(--design-border-default);
+    --component-button-foreground: var(--component-button-secondary-foreground);
+    --component-icon-button-bg: var(--component-panel-bg);
+    --component-icon-button-border: var(--design-border-default);
+    --component-icon-button-foreground: var(--design-page-text);
+    --component-icon-button-hover-bg: var(--component-list-item-strong-bg);
   }
 }

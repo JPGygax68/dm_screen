@@ -22,13 +22,13 @@ div(class="rounded-2xl border border-design-border-subtle bg-component-panel-bg 
         div
             ClassSelector(:classes="draft.classes || []" @update:classes="draft.classes = $event")
 
-        div(class="rounded-xl border border-design-border-subtle bg-component-list-item-subtle-bg p-3")
+        div(class="surface-subtle")
             div(class="mb-3 flex items-center justify-between gap-4")
                 label(class="text-sm font-semibold text-design-page-text") Max Hit Points
                 div(class="flex items-center gap-1")
-                    button(class="icon-button" type="button" @click="adjustHp(-1)") -
+                    button(class="glyph-button" type="button" @click="adjustHp(-1)") -
                     span(class="min-w-16 text-center text-sm font-semibold") {{ draft.maxHitPoints || 10 }} HP
-                    button(class="icon-button" type="button" @click="adjustHp(1)") +
+                    button(class="glyph-button" type="button" @click="adjustHp(1)") +
 
             input(v-model.number="draft.maxHitPoints" type="range" :min="schema.properties.maxHitPoints.minimum" :max="schema.properties.maxHitPoints.maximum" step="1" class="w-full accent-component-button-bg")
 
