@@ -1,5 +1,5 @@
 <template>
-  <div class="flex w-full flex-col gap-3">
+  <div class="flex w-full flex-col">
     <label class="text-sm font-semibold text-design-page-text">Character Class(es)</label>
 
     <div class="flex min-h-9 flex-wrap items-center gap-2">
@@ -15,6 +15,7 @@
       </button>
 
       <select
+        v-if="!isMaxClassesReached"
         v-model="pendingClass"
         @change="addSelectedClass"
       >
@@ -23,6 +24,9 @@
           {{ dndClass }}
         </option>
       </select>
+      <span v-else class="text-sm text-design-page-muted">
+        Maximum of {{ maxClasses }} classes reached.
+      </span>
     </div>
   </div>
 </template>
@@ -63,4 +67,10 @@
     const next = (props.classes ?? []).filter(c => c !== selectedClass);
     syncClasses(next);
   }
+
+  // Ruleset specific logic
+  // TODO: for now it's DnD 2024, but this should be configurable and moved to a ruleset-specific component
+  const maxClasses = 3;
+  const isMaxClassesReached = computed(() => (props.classes ?? []).length >= maxClasses);
+
 </script>

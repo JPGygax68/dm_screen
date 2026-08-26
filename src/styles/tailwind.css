@@ -167,6 +167,10 @@
 
   /* Base styles EXPERIMENTAL */
 
+  button {
+    @apply rounded-lg border border-component-button-bg bg-component-button-bg px-4 py-2 text-sm font-medium text-component-button-foreground transition hover:opacity-95 disabled:cursor-not-allowed disabled:border-component-list-item-strong-bg disabled:bg-component-list-item-strong-bg disabled:text-design-page-muted;
+  }
+
   label {
     @apply mb-2 block text-sm font-semibold text-design-page-text;
   }
@@ -190,7 +194,24 @@
 
   /* Component styles EXPERIMENTAL */
 
+  .secondary {
+    @apply border-design-border-default bg-component-button-secondary-bg text-component-button-secondary-foreground hover:bg-component-list-item-strong-bg hover:opacity-100;
+  }
+
+  .danger {
+    @apply border-component-button-danger-bg bg-component-button-danger-bg text-component-button-danger-foreground hover:opacity-90;
+  }
+
   .badge {
     @apply rounded-full border border-design-border-default bg-component-list-item-subtle-bg px-3 py-1 text-sm text-design-page-text transition hover:bg-component-list-item-strong-bg
+  }
+
+  .icon-button {
+    @apply text-center w-8 h-8 p-0 text-lg;
+  }
+
+  /* Colors for a button inside a list item with subtle background. */
+  .bg-component-list-item-subtle-bg button {
+    @apply bg-component-panel-bg text-design-page-text ;
   }
 }

@@ -26,17 +26,17 @@ div(class="rounded-2xl border border-design-border-subtle bg-component-panel-bg 
             div(class="mb-3 flex items-center justify-between gap-4")
                 label(class="text-sm font-semibold text-design-page-text") Max Hit Points
                 div(class="flex items-center gap-2")
-                    button(class="h-8 w-8 rounded-md border border-design-border-default bg-component-panel-bg text-lg text-design-page-text hover:bg-component-list-item-strong-bg" type="button" @click="adjustHp(-1)") -
+                    button(class="icon-button" type="button" @click="adjustHp(-1)") -
                     span(class="min-w-16 text-center text-sm font-semibold") {{ draft.maxHitPoints || 10 }} HP
-                    button(class="h-8 w-8 rounded-md border border-design-border-default bg-component-panel-bg text-lg text-design-page-text hover:bg-component-list-item-strong-bg" type="button" @click="adjustHp(1)") +
+                    button(class="button-plain h-8 w-8 rounded-md border border-design-border-default bg-component-panel-bg px-0 py-0 text-lg text-design-page-text transition hover:bg-component-list-item-strong-bg" type="button" @click="adjustHp(1)") +
 
             input(v-model.number="draft.maxHitPoints" type="range" :min="schema.properties.maxHitPoints.minimum" :max="schema.properties.maxHitPoints.maximum" step="1" class="w-full accent-component-button-bg")
 
         div(class="flex flex-wrap items-center gap-3 pt-2")
-            button(class="rounded-lg border border-component-button-bg bg-component-button-bg px-4 py-2 text-sm font-medium text-component-button-foreground transition hover:opacity-95 disabled:cursor-not-allowed disabled:bg-component-list-item-strong-bg disabled:text-design-page-muted" type="submit" :disabled="!canSave") Save
-            button(class="rounded-lg border border-design-border-default bg-component-button-secondary-bg px-4 py-2 text-sm font-medium text-component-button-secondary-foreground transition hover:bg-component-list-item-strong-bg" type="button" @click="cancel") Cancel
+            button(type="submit" :disabled="!canSave") Save
+            button(class="secondary" type="button" @click="cancel") Cancel
             div(class="flex-1")
-            button(class="rounded-lg border border-component-button-danger-bg bg-component-button-danger-bg px-4 py-2 text-sm font-medium text-component-button-danger-foreground transition hover:opacity-90" v-if="isEditing" type="button" @click="presentDeleteConfirmation")
+            button(class="danger" v-if="isEditing" type="button" @click="presentDeleteConfirmation")
                 | Delete Character
 </template>
 
