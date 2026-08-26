@@ -25,10 +25,10 @@ div(class="rounded-2xl border border-design-border-subtle bg-component-panel-bg 
         div(class="rounded-xl border border-design-border-subtle bg-component-list-item-subtle-bg p-3")
             div(class="mb-3 flex items-center justify-between gap-4")
                 label(class="text-sm font-semibold text-design-page-text") Max Hit Points
-                div(class="flex items-center gap-2")
+                div(class="flex items-center gap-1")
                     button(class="icon-button" type="button" @click="adjustHp(-1)") -
                     span(class="min-w-16 text-center text-sm font-semibold") {{ draft.maxHitPoints || 10 }} HP
-                    button(class="button-plain h-8 w-8 rounded-md border border-design-border-default bg-component-panel-bg px-0 py-0 text-lg text-design-page-text transition hover:bg-component-list-item-strong-bg" type="button" @click="adjustHp(1)") +
+                    button(class="icon-button" type="button" @click="adjustHp(1)") +
 
             input(v-model.number="draft.maxHitPoints" type="range" :min="schema.properties.maxHitPoints.minimum" :max="schema.properties.maxHitPoints.maximum" step="1" class="w-full accent-component-button-bg")
 

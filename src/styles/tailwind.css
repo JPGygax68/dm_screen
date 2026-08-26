@@ -207,11 +207,6 @@
   }
 
   .icon-button {
-    @apply text-center w-8 h-8 p-0 text-lg;
-  }
-
-  /* Colors for a button inside a list item with subtle background. */
-  .bg-component-list-item-subtle-bg button {
-    @apply bg-component-panel-bg text-design-page-text ;
+    @apply bg-component-panel-bg text-design-page-text text-center w-8 h-8 p-0 text-lg;
   }
 }
