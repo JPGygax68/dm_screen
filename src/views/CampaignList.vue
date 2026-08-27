@@ -58,7 +58,7 @@
 
         <button
           type="button"
-          class="mt-4 rounded-lg border border-design-border-default bg-component-panel-bg px-4 py-2 text-sm font-medium hover:bg-component-list-item-subtle-bg"
+          class="mt-4 px-4 py-2 text-sm font-medium hover:bg-component-list-item-subtle-bg"
           @click="router.push('/')"
         >
           Back to Home
