@@ -39,14 +39,14 @@
               <div class="flex shrink-0 items-center gap-2">
                 <button
                   type="button"
-                  class="rounded-lg border border-design-border-default bg-component-button-secondary-bg px-3 py-2 text-sm font-medium text-component-button-secondary-foreground hover:bg-component-list-item-strong-bg"
+                  class="secondary"
                   @click="openCampaign(campaign.id)"
                 >
                   Open
                 </button>
                 <button
                   type="button"
-                  class="rounded-lg border border-component-button-danger-bg bg-component-button-danger-bg px-3 py-2 text-sm font-medium text-component-button-danger-foreground hover:opacity-90"
+                  class="danger"
                   @click="removeCampaign(campaign.id)"
                 >
                   Remove
@@ -58,7 +58,7 @@
 
         <button
           type="button"
-          class="mt-4 px-4 py-2 text-sm font-medium hover:bg-component-list-item-subtle-bg"
+          class="secondary mt-4 px-4 py-2 text-sm font-medium"
           @click="router.push('/')"
         >
           Back to Home

@@ -24,11 +24,11 @@ div(class="rounded-2xl border border-design-border-subtle bg-component-panel-bg 
 
         div(class="surface-subtle")
             div(class="mb-3 flex items-center justify-between gap-4")
-                label(class="text-sm font-semibold text-design-page-text") Max Hit Points
+                label(class="text-sm font-semibold text-design-page-text") Max Hit Points (without bonuses or maluses)
                 div(class="flex items-center gap-1")
-                    button(class="glyph-button" type="button" @click="adjustHp(-1)") -
-                    span(class="min-w-16 text-center text-sm font-semibold") {{ draft.maxHitPoints || 10 }} HP
-                    button(class="glyph-button" type="button" @click="adjustHp(1)") +
+                    button(class="glyph-button no-f" type="button" tabindex="-1" @click="adjustHp(-1)") -
+                    input(class="max-w-12 text-center text-sm font-semibold [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none" type="number" v-model.number="draft.maxHitPoints" min="1" length="3" @input="isDirty = true" @blur="markAsTouched('maxHitPoints')")
+                    button(class="glyph-button" type="button" tabindex="-1" @click="adjustHp(1)") +
 
             input(v-model.number="draft.maxHitPoints" type="range" :min="schema.properties.maxHitPoints.minimum" :max="schema.properties.maxHitPoints.maximum" step="1" class="w-full accent-component-button-bg")
 
@@ -44,6 +44,7 @@ div(class="rounded-2xl border border-design-border-subtle bg-component-panel-bg 
 import { computed, ref, watch, onMounted } from 'vue';
 import Ajv from 'ajv';
 import fullSchema from '../generated/models/data.schema.json';
+import { pcClasses } from '../rulesets/dnd2024/classes';
 
 const schema = { ...fullSchema.$defs.PlayerCharacter, $defs: fullSchema.$defs };
 const nameInput = ref<HTMLInputElement | null>(null);
@@ -177,5 +178,11 @@ function cancel() {
     emit('cancel');
     unfocusActiveElement();
     touchedFields.value = {};
+}
+
+// DnD specific functionality, may be moved to a composable in the future
+
+function maxNaturalHitPointsAtTotalLevel(level: number): number {
+    return level * 12; // Assuming a maximum of 12 hit points per level for DnD 2024
 }
 </script>

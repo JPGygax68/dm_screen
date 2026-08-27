@@ -33,11 +33,11 @@
 
 <script setup lang="ts">
   import { computed, ref } from 'vue';
+  import { pcClasses } from '../rulesets/dnd2024/classes';
 
-  const availableClasses = [
-    'Barbarian', 'Bard', 'Cleric', 'Druid', 'Fighter', 'Monk',
-    'Paladin', 'Ranger', 'Rogue', 'Sorcerer', 'Warlock', 'Wizard'
-  ];
+  const availableClassNames = computed(() => [
+    ...Object.keys(pcClasses)
+  ]);
 
   const props = defineProps<{ classes: string[] }>();
   const emit = defineEmits<{ (e: 'update:classes', values: string[]): void }>();
@@ -45,7 +45,7 @@
 
   const unselectedClasses = computed(() => {
     const selected = new Set(props.classes ?? []);
-    return availableClasses.filter(dndClass => !selected.has(dndClass));
+    return availableClassNames.value.filter(dndClass => !selected.has(dndClass));
   });
 
   function syncClasses(next: string[]) {
