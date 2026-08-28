@@ -1,0 +1,33 @@
+Character sheet spreadsheet reference
+
+Source: pasted spreadsheet screenshot attached in session (viewed as reference image).
+
+Key observations:
+- The sheet is highly data-dense and optimized for a single-page, fillable character record.
+- It mixes identity header fields, derived combat stats, ability scores, saving throws, skills, equipment, notes, and spell slots in one tightly packed layout.
+- It is very spreadsheet-first: strong for data entry, less strong for readable, guided editing in a web app.
+- It exposes a useful domain inventory: character name, class, race, background, level, XP, proficiency bonus, HP, AC, speed, initiative, weapon stats, spells, skills, etc.
+
+Design implications for the app:
+- Keep the sheet modular: break it into clear sections instead of one huge grid.
+- Use a card or panel layout with distinct groups for identity, combat, abilities, skills, equipment, and spellcasting.
+- Favor a readable editorial hierarchy over raw table density.
+- Use a compact but structured form design: row-based sections, not giant two-column spreadsheet grids.
+- Some rows are mostly data entry, but the UI should still guide the user, not just dump raw values.
+
+Good traits to borrow:
+- Complete coverage of essential D&D 2024 essentials.
+- Strong domain coverage across combat, ability, equipment, and spellcasting.
+- Compact summary values that users will want visible at a glance.
+
+Traits to avoid or refine:
+- Overly dense spreadsheet layout with weak visual grouping.
+- Long columns of repeated values, which make it harder to scan in a browser UI.
+- Too much data packed into a single page without section hierarchy.
+
+Implementation direction:
+- Build the new sheet as a structured, sectioned character dashboard rather than a spreadsheet clone.
+- Use the reference sheet for required field coverage, not for exact visual replication.
+- Distinguish editable inputs from derived values with obvious visual semantics and support popover info explanations for both.
+- Favor anchored, non-jittering popovers or info panels over inline expansion so the layout stays stable under responsive resizing and touch input.
+- Default to a landscape-oriented sheet that scales down gracefully instead of forcing a narrow portrait form.
