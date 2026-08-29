@@ -59,7 +59,7 @@
 </script>
 
 <template>
-  <nav aria-label="Breadcrumb" class="flex flex-wrap gap-2 border-b border-design-border-subtle bg-component-list-item-strong-bg px-4 py-3">
+  <nav aria-label="Breadcrumbs" class="flex flex-wrap gap-2 border-b border-design-border-subtle bg-component-list-item-strong-bg px-4 py-3">
     <a
       v-for="(c, i) in crumbs"
       :key="i"
