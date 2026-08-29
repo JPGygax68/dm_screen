@@ -69,7 +69,7 @@ function go(to: string | null) {
 
 <template>
     <nav aria-label="Breadcrumbs"
-        class="flex flex-wrap gap-2 border-b border-design-border-subtle bg-component-list-item-strong-bg px-4 py-3">
+        class="flex flex-wrap gap-2 border-b border-design-border-subtle bg-component-list-item-strong-bg px-2 py-2">
         <a v-for="(c, i) in crumbs" :key="i" :href="c.to || '#'"
             class="rounded-full px-2 py-1 text-sm text-design-page-muted transition cursor-pointer hover:text-design-page-text disabled:cursor-default disabled:opacity-70"
             @click.prevent="go(c.to)">
