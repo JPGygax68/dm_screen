@@ -79,7 +79,7 @@
   const router = useRouter();
   const dataStore = useDmScreenStore();
 
-  const campaignId = route.params.id as string;
+  const campaignId = route.params.campaignId as string;
   const draft = ref<{
     id: string;
     name: string;
@@ -151,7 +151,7 @@
     router.push({
       name: 'campaign-character-edit',
       params: {
-        id: targetCampaignId,
+        campaignId: targetCampaignId,
         characterId: character.id
       },
       query: { returnTo: `/campaigns/${targetCampaignId}` }

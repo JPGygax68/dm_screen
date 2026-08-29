@@ -1,73 +1,79 @@
 <script setup lang="ts">
-  import { computed } from 'vue';
-  import { useRoute, useRouter } from 'vue-router';
-  import { useDmScreenStore } from '../stores/dataStore';
+import { computed } from 'vue';
+import { useRoute, useRouter } from 'vue-router';
+import { useDmScreenStore } from '../stores/dataStore';
 
-  const route = useRoute();
-  const router = useRouter();
-  const store = useDmScreenStore();
+const route = useRoute();
+const router = useRouter();
+const store = useDmScreenStore();
 
-  const crumbs = computed(() => {
-    const path = route.path;
+const crumbs = computed(() => {
+    const segments = route.path.split('/').filter(Boolean);
 
-    if (path === '/campaigns') {
-      return [{ label: 'Campaigns', to: '/campaigns' }];
+    if (!segments.length || segments[0] !== 'campaigns') {
+        return [];
     }
 
-    if (path === '/campaigns/new') {
-      return [
-        { label: 'Campaigns', to: '/campaigns' },
-        { label: 'New Campaign', to: null }
-      ];
+    const campaignId = route.params.campaignId as string | undefined;
+    const characterId = route.params.characterId as string | undefined;
+    const encounterId = route.params.encounterId as string | undefined;
+    const campaign = campaignId ? store.campaigns.find(c => c.id === campaignId) : null;
+
+    const base = [{ label: 'Campaigns', to: '/campaigns' }];
+
+    if (segments.length === 1) {
+        return base;
     }
 
-    if (path.match(/\/campaigns\/[^/]+/)) {
-      const id = route.params.id;
-      const campaign = store.campaigns.find(c => c.id === id);
-      if (!campaign) return [];
-      return [
-        { label: 'Campaigns', to: '/campaigns' },
-        { label: `"${campaign.name}"`, to: `/campaigns/${id}` }
-      ];
+    if (segments[1] === 'new') {
+        return [...base, { label: 'New Campaign', to: null }];
     }
 
-    if (path.match(/\/campaigns\/[^/]+$/)) {
-      const id = route.params.id;
-      return [
-        { label: 'Campaigns', to: '/campaigns' },
-        { label: `"${store.campaigns.find(c => c.id === id)?.name}"`, to: `/campaigns/${id}` }
-      ];
+    if (campaign) {
+        base.push({ label: `"${campaign.name}"`, to: `/campaigns/${campaignId}` });
     }
 
-    if (path.match(/\/campaigns\/[^/]+\/encounters$/)) {
-      const campaignId = route.params.campaignId;
-      const campaign = store.campaigns.find(c => c.id === campaignId);
-      if (!campaign) return [];
-      return [
-        { label: 'Campaigns', to: '/campaigns' },
-        { label: `"${campaign.name}"`, to: `/campaigns/${campaignId}` },
-        { label: 'Encounters', to: `/campaigns/${campaignId}/encounters` }
-      ];
+    if (segments.length === 2) {
+        return base;
     }
 
-    return [];
-  });
+    if (segments[2] === 'characters' && characterId) {
+        const character = campaign?.party.find(ch => ch.id === characterId);
+        return [
+            ...base,
+            { label: character ? `"${character.name}"` : 'Character', to: null }
+        ];
+    }
 
-  function go(to: string | null) {
+    if (segments[2] === 'encounters') {
+        const encountersPath = `/campaigns/${campaignId}/encounters`;
+        if (segments.length === 3) {
+            return [...base, { label: 'Encounters', to: null }];
+        }
+
+        const encounter = campaign?.encounters?.find((entry: any) => entry.id === encounterId);
+        return [
+            ...base,
+            { label: 'Encounters', to: encountersPath },
+            { label: encounter ? `"${encounter.name}"` : 'Encounter', to: null }
+        ];
+    }
+
+    return base;
+});
+
+function go(to: string | null) {
     if (to) router.push(to);
-  }
+}
 </script>
 
 <template>
-  <nav aria-label="Breadcrumbs" class="flex flex-wrap gap-2 border-b border-design-border-subtle bg-component-list-item-strong-bg px-4 py-3">
-    <a
-      v-for="(c, i) in crumbs"
-      :key="i"
-      :href="c.to || '#'"
-      class="rounded-full px-2 py-1 text-sm text-design-page-muted transition cursor-pointer hover:text-design-page-text disabled:cursor-default disabled:opacity-70"
-      @click.prevent="go(c.to)"
-    >
-      {{ c.label }}
-    </a>
-  </nav>
+    <nav aria-label="Breadcrumbs"
+        class="flex flex-wrap gap-2 border-b border-design-border-subtle bg-component-list-item-strong-bg px-4 py-3">
+        <a v-for="(c, i) in crumbs" :key="i" :href="c.to || '#'"
+            class="rounded-full px-2 py-1 text-sm text-design-page-muted transition cursor-pointer hover:text-design-page-text disabled:cursor-default disabled:opacity-70"
+            @click.prevent="go(c.to)">
+            {{ c.label }}
+        </a>
+    </nav>
 </template>

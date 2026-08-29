@@ -333,7 +333,7 @@ type PlayerCharacterDraft = Record<string, unknown> & {
   };
 };
 
-const campaignId = computed(() => String(route.params.id ?? ''));
+const campaignId = computed(() => String(route.params.campaignId ?? ''));
 const characterId = computed(() => (typeof route.params.characterId === 'string' ? route.params.characterId : null));
 const returnToPath = computed(() =>
   typeof route.query.returnTo === 'string' ? route.query.returnTo : `/campaigns/${campaignId.value}`
