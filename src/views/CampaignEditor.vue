@@ -64,21 +64,6 @@
         </div>
       </form>
     </div>
-
-    <div v-if="isCharacterModalOpen" class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4" @click.self="isCharacterModalOpen = false">
-      <div class="max-h-[90vh] w-full max-w-3xl overflow-auto rounded-2xl border border-design-border-subtle bg-component-panel-bg p-4 shadow-2xl">
-        <div class="mb-4 flex items-center justify-between">
-          <h2 class="text-xl font-semibold">{{ selectedCharacterForEdit ? 'Edit Party Member' : 'Add Party Member' }}</h2>
-          <button type="button" class="rounded-lg border border-design-border-default bg-component-button-secondary-bg px-3 py-1.5 text-sm font-medium text-component-button-secondary-foreground hover:bg-component-list-item-strong-bg" @click="isCharacterModalOpen = false">Close</button>
-        </div>
-        <PlayerCharacterEdit
-          :characterData="selectedCharacterForEdit"
-          @save="handleInlineCharacterSave"
-          @cancel="isCharacterModalOpen = false"
-          @delete="handleInlineCharacterDelete"
-        />
-      </div>
-    </div>
   </div>
 </template>
 
@@ -95,7 +80,6 @@
   const dataStore = useDmScreenStore();
 
   const campaignId = route.params.id as string;
-  const isCharacterModalOpen = ref(false);
   const draft = ref<{
     id: string;
     name: string;
@@ -153,36 +137,33 @@
   const isValid = computed(() => validationResult.value.isValid);
   const canSave = computed(() => isValid.value && isDirty.value);
 
-  const selectedCharacterForEdit = ref<any>(null);
-
   function openCharacterCreator() {
-    selectedCharacterForEdit.value = null;
-    isCharacterModalOpen.value = true;
+    const targetCampaignId = persistDraftAndGetId();
+    router.push({
+      name: 'campaign-character-new',
+      params: { id: targetCampaignId },
+      query: { returnTo: `/campaigns/${targetCampaignId}` }
+    });
   }
 
-  function openCharacterEditor(character: any) {
-    selectedCharacterForEdit.value = JSON.parse(JSON.stringify(character));
-    isCharacterModalOpen.value = true;
+  function openCharacterEditor(character: { id: string }) {
+    const targetCampaignId = persistDraftAndGetId();
+    router.push({
+      name: 'campaign-character-edit',
+      params: {
+        id: targetCampaignId,
+        characterId: character.id
+      },
+      query: { returnTo: `/campaigns/${targetCampaignId}` }
+    });
   }
 
-  function handleInlineCharacterSave(characterData: any) {
-    if (!draft.value.party) draft.value.party = [];
-
-    const index = draft.value.party.findIndex((pc: any) => pc.id === characterData.id);
-
-    if (index !== -1) {
-      draft.value.party[index] = characterData;
-    } else {
-      draft.value.party.push(characterData);
-    }
-
-    isDirty.value = true;
-    isCharacterModalOpen.value = false;
-  }
-
-  function handleInlineCharacterDelete(characterId: string) {
-    draft.value.party = draft.value.party.filter((pc: any) => pc.id !== characterId);
-    isCharacterModalOpen.value = false;
+  function persistDraftAndGetId() {
+    const targetCampaignId = draft.value.id || crypto.randomUUID();
+    draft.value.id = targetCampaignId;
+    dataStore.addOrUpdateCampaign(JSON.parse(JSON.stringify(draft.value)));
+    isDirty.value = false;
+    return targetCampaignId;
   }
 
   function save() {

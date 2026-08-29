@@ -14,11 +14,11 @@ declare module 'vue' {
     Breadcrumbs: typeof import('./components/Breadcrumbs.vue')['default']
     CampaignEditor: typeof import('./views/CampaignEditor.vue')['default']
     CampaignList: typeof import('./views/CampaignList.vue')['default']
+    CharacterSheetView: typeof import('./views/CharacterSheetView.vue')['default']
     ClassSelector: typeof import('./components/ClassSelector.vue')['default']
     EncounterEditor: typeof import('./views/EncounterEditor.vue')['default']
     EncounterList: typeof import('./views/EncounterList.vue')['default']
     ImagePicker: typeof import('./components/ImagePicker.vue')['default']
-    PlayerCharacterEdit: typeof import('./views/PlayerCharacterEdit.vue')['default']
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']
   }

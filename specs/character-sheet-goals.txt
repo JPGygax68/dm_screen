@@ -1,6 +1,6 @@
 # Character Sheet Replacement Goals
 
-Goal: replace the current PlayerCharacterEdit view with a full D&D 2024 character sheet while preserving the app's existing routed, client-side data model.
+Goal: replace the current character editor view with a full D&D 2024 character sheet while preserving the app's existing routed, client-side data model.
 
 Scope for this phase:
 - Keep the existing app flow and data model; do not introduce a backend or external persistence layer.

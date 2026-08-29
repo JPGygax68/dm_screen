@@ -1,7 +1,19 @@
 <template>
-  <div class="rounded-2xl border border-design-border-subtle bg-component-panel-bg p-4 shadow-sm">
-    <form class="space-y-5" @submit.prevent="save">
-      <div class="sticky top-0 z-20 -mx-4 mb-2 border-b border-design-border-subtle bg-component-panel-bg px-4 py-3">
+  <div class="min-h-screen bg-design-page-bg text-design-page-text">
+    <Breadcrumbs />
+    <div class="mx-auto w-full max-w-6xl px-3 py-3">
+      <div class="border border-design-border-subtle bg-component-panel-bg px-3 py-2">
+    <div v-if="!currentCampaign" class="border border-red-300 bg-red-50 p-3 text-red-900">
+      <p class="font-semibold">Campaign not found.</p>
+      <button type="button" class="secondary small mt-2" @click="router.push('/campaigns')">Back to campaigns</button>
+    </div>
+    <form v-else class="space-y-3" @submit.prevent="save">
+      <div class="mb-1 flex flex-wrap items-center justify-between gap-2">
+        <button type="button" class="secondary small" @click="cancel">Back</button>
+        <h2 class="text-base font-semibold text-design-page-text">{{ isEditing ? 'Edit Character Sheet' : 'New Character Sheet' }}</h2>
+        <p class="text-xs text-design-page-muted">{{ currentCampaign.name }}</p>
+      </div>
+      <div class="sticky top-0 z-20 -mx-3 mb-1 border-b border-design-border-subtle bg-component-panel-bg px-3 py-1.5">
         <div class="flex flex-wrap items-center gap-2">
           <button type="button" class="secondary small" @click="scrollToSection('identity')">Identity</button>
           <button type="button" class="secondary small" @click="scrollToSection('core')">Core Stats</button>
@@ -15,10 +27,10 @@
           <span>Identity</span>
           <span>{{ sectionOpen.identity ? '−' : '+' }}</span>
         </button>
-        <div v-if="sectionOpen.identity" class="mt-4 space-y-4">
-          <div class="flex flex-col gap-4 sm:flex-row">
+        <div v-if="sectionOpen.identity" class="mt-2 space-y-2">
+          <div class="flex flex-col gap-2 sm:flex-row">
             <ImagePicker :imageDataUrl="draft.portrait || ''" @change="onPortraitChanged" />
-            <div class="flex-1 space-y-4">
+            <div class="flex-1 space-y-2">
               <div>
                 <label class="field-label" for="character-name">
                   Name <span class="text-design-page-muted">*</span>
@@ -37,7 +49,7 @@
                 <p v-if="touchedFields.name && visibleErrors.name" class="field-error">{{ visibleErrors.name }}</p>
               </div>
 
-              <div class="grid gap-3 sm:grid-cols-2">
+              <div class="grid gap-2 sm:grid-cols-2">
                 <div>
                   <label class="field-label" for="character-level">
                     Level
@@ -87,13 +99,13 @@
           <span>Core Stats</span>
           <span>{{ sectionOpen.core ? '−' : '+' }}</span>
         </button>
-        <div v-if="sectionOpen.core" class="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-          <div v-for="ability in abilityRows" :key="ability.key" class="rounded-lg border border-design-border-subtle bg-component-list-item-subtle-bg p-3">
+        <div v-if="sectionOpen.core" class="mt-2 grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
+          <div v-for="ability in abilityRows" :key="ability.key" class="border border-design-border-subtle bg-component-list-item-subtle-bg px-2 py-1.5">
             <label class="field-label" :for="`ability-${ability.key}`">
               {{ ability.label }}
               <button type="button" class="info-btn" @click="openInfo(`ability-${ability.key}`, $event)">?</button>
             </label>
-            <div class="mt-2 flex items-center gap-3">
+            <div class="mt-1.5 flex items-center gap-2">
               <input
                 :id="`ability-${ability.key}`"
                 v-model.number="draft.abilityScores[ability.key]"
@@ -115,7 +127,7 @@
           <span>Combat Summary</span>
           <span>{{ sectionOpen.combat ? '−' : '+' }}</span>
         </button>
-        <div v-if="sectionOpen.combat" class="mt-4 space-y-3">
+        <div v-if="sectionOpen.combat" class="mt-2 space-y-2">
           <div class="combat-row">
             <div class="combat-label">
               Proficiency Bonus
@@ -184,7 +196,7 @@
             </p>
           </div>
 
-          <div v-if="missingAttackPrerequisites.length" class="rounded-lg border border-red-300 bg-red-50 p-3 text-sm text-red-900">
+          <div v-if="missingAttackPrerequisites.length" class="border border-red-300 bg-red-50 p-2 text-sm text-red-900">
             <p class="font-semibold">Missing data for attack bonus:</p>
             <ul class="mt-2 space-y-1">
               <li v-for="item in missingAttackPrerequisites" :key="item.field" class="flex items-center justify-between gap-2">
@@ -203,8 +215,8 @@
           <span>Equipment / Prerequisites</span>
           <span>{{ sectionOpen.equipment ? '−' : '+' }}</span>
         </button>
-        <div v-if="sectionOpen.equipment" class="mt-4 space-y-3">
-          <div v-if="returnTarget === 'combat'" class="rounded-lg border border-design-border-subtle bg-component-list-item-strong-bg p-3">
+        <div v-if="sectionOpen.equipment" class="mt-2 space-y-2">
+          <div v-if="returnTarget === 'combat'" class="border border-design-border-subtle bg-component-list-item-strong-bg p-2">
             <p class="text-sm text-design-page-text">Fill the missing fields below, then return to the combat calculation.</p>
             <button type="button" class="secondary small mt-2" @click="returnToTarget">Return to Combat Summary</button>
           </div>
@@ -225,7 +237,7 @@
             />
           </div>
 
-          <div class="grid gap-3 sm:grid-cols-2">
+          <div class="grid gap-2 sm:grid-cols-2">
             <div>
               <label class="field-label" for="weapon-ability">
                 Weapon Ability
@@ -260,13 +272,15 @@
         </div>
       </section>
 
-      <div class="flex flex-wrap items-center gap-3 pt-2">
+      <div class="flex flex-wrap items-center gap-2 pt-1">
         <button type="submit" :disabled="!canSave">Save</button>
         <button class="secondary" type="button" @click="cancel">Cancel</button>
         <div class="flex-1" />
         <button class="danger" v-if="isEditing" type="button" @click="presentDeleteConfirmation">Delete Character</button>
       </div>
     </form>
+      </div>
+    </div>
 
     <div
       v-if="activeInfo"
@@ -288,14 +302,19 @@
 import { computed, nextTick, onBeforeUnmount, onMounted, reactive, ref, watch } from 'vue';
 import Ajv from 'ajv';
 import fullSchema from '../generated/models/data.schema.json';
+import { useRoute, useRouter } from 'vue-router';
+import { useDmScreenStore } from '../stores/dataStore';
 
 const schema = { ...fullSchema.$defs.PlayerCharacter, $defs: fullSchema.$defs };
 const nameInput = ref<HTMLInputElement | null>(null);
+const route = useRoute();
+const router = useRouter();
+const dataStore = useDmScreenStore();
 
 type AbilityKey = 'strength' | 'dexterity' | 'constitution' | 'intelligence' | 'wisdom' | 'charisma';
 type SectionKey = 'identity' | 'core' | 'combat' | 'equipment';
 
-type PlayerCharacterDraft = {
+type PlayerCharacterDraft = Record<string, unknown> & {
   id: string;
   name: string;
   portrait?: string;
@@ -321,21 +340,17 @@ type PlayerCharacterDraft = {
   };
 };
 
-const props = defineProps<{
-  characterData?: {
-    id: string;
-    name: string;
-    maxHitPoints: number;
-    classes: string[];
-    [key: string]: unknown;
-  };
-}>();
-
-const emit = defineEmits<{
-  (e: 'save', payload: PlayerCharacterDraft): void;
-  (e: 'cancel'): void;
-  (e: 'delete', characterId: string): void;
-}>();
+const campaignId = computed(() => String(route.params.id ?? ''));
+const characterId = computed(() => (typeof route.params.characterId === 'string' ? route.params.characterId : null));
+const returnToPath = computed(() =>
+  typeof route.query.returnTo === 'string' ? route.query.returnTo : `/campaigns/${campaignId.value}`
+);
+const currentCampaign = computed(() => dataStore.getCampaignById(campaignId.value));
+const selectedCharacter = computed(() => {
+  const campaign = currentCampaign.value;
+  if (!campaign || !characterId.value || !Array.isArray(campaign.party)) return null;
+  return campaign.party.find((pc: { id: string }) => pc.id === characterId.value) ?? null;
+});
 
 function createBlankDraft(): PlayerCharacterDraft {
   return {
@@ -372,7 +387,7 @@ function createBlankDraft(): PlayerCharacterDraft {
   };
 }
 
-function generateBlankOrClone(source?: Record<string, unknown>): PlayerCharacterDraft {
+function generateBlankOrClone(source?: Record<string, unknown> | null): PlayerCharacterDraft {
   const base = createBlankDraft();
   if (!source) return base;
   return {
@@ -390,7 +405,7 @@ function generateBlankOrClone(source?: Record<string, unknown>): PlayerCharacter
   };
 }
 
-const draft = ref<PlayerCharacterDraft>(generateBlankOrClone(props.characterData as Record<string, unknown> | undefined));
+const draft = ref<PlayerCharacterDraft>(createBlankDraft());
 const isDirty = ref(false);
 const isHydrating = ref(true);
 const touchedFields = ref<Record<string, boolean>>({});
@@ -419,14 +434,26 @@ const abilityRows: Array<{ key: AbilityKey; label: string }> = [
   { key: 'charisma', label: 'Charisma' }
 ];
 
-watch(() => props.characterData, async (newSource) => {
+async function hydrateDraftFromRoute() {
   isHydrating.value = true;
-  draft.value = generateBlankOrClone(newSource as Record<string, unknown> | undefined);
+  const source = selectedCharacter.value as Record<string, unknown> | null;
+  draft.value = source ? generateBlankOrClone(source) : createBlankDraft();
+  if (!draft.value.id) {
+    draft.value.id = crypto.randomUUID();
+  }
   touchedFields.value = {};
   isDirty.value = false;
   await nextTick();
   isHydrating.value = false;
-}, { deep: true });
+}
+
+watch(
+  [campaignId, characterId, currentCampaign],
+  () => {
+    void hydrateDraftFromRoute();
+  },
+  { immediate: true }
+);
 
 watch(draft, () => {
   if (!isHydrating.value) {
@@ -434,7 +461,7 @@ watch(draft, () => {
   }
 }, { deep: true });
 
-const isEditing = computed(() => !!props.characterData);
+const isEditing = computed(() => !!characterId.value && !!selectedCharacter.value);
 
 function markAsTouched(field: string) {
   touchedFields.value[field] = true;
@@ -549,11 +576,12 @@ function returnToTarget() {
 }
 
 function presentDeleteConfirmation() {
+  if (!selectedCharacter.value) return;
   const confirmed = window.confirm(
     `Are you sure you want to permanently remove ${draft.value.name || 'this character'} from the campaign party? This action cannot be undone.`
   );
   if (confirmed) {
-    emit('delete', draft.value.id);
+    deleteCharacter();
   }
 }
 
@@ -588,7 +616,7 @@ const visibleErrors = computed(() => {
   return errorsMap;
 });
 
-const canSave = computed(() => validationResult.value.isValid && isDirty.value);
+const canSave = computed(() => Boolean(currentCampaign.value) && validationResult.value.isValid && isDirty.value);
 
 function unfocusActiveElement() {
   const activeElement = document.activeElement as HTMLElement | null;
@@ -596,15 +624,52 @@ function unfocusActiveElement() {
 }
 
 function save() {
-  emit('save', { ...draft.value });
+  const campaign = currentCampaign.value;
+  if (!campaign) {
+    throw new Error(`Campaign ${campaignId.value} not found while saving character.`);
+  }
+
+  const existingParty = Array.isArray(campaign.party) ? [...campaign.party] : [];
+  const index = existingParty.findIndex((pc: { id: string }) => pc.id === draft.value.id);
+  const payload = JSON.parse(JSON.stringify(draft.value));
+
+  if (index >= 0) {
+    existingParty[index] = payload;
+  } else {
+    existingParty.push(payload);
+  }
+
+  dataStore.addOrUpdateCampaign({
+    ...campaign,
+    party: existingParty
+  });
+
+  router.push(returnToPath.value);
   unfocusActiveElement();
   touchedFields.value = {};
 }
 
 function cancel() {
-  emit('cancel');
+  router.push(returnToPath.value);
   unfocusActiveElement();
   touchedFields.value = {};
+}
+
+function deleteCharacter() {
+  const campaign = currentCampaign.value;
+  if (!campaign) {
+    throw new Error(`Campaign ${campaignId.value} not found while deleting character.`);
+  }
+
+  const existingParty = Array.isArray(campaign.party) ? campaign.party : [];
+  const nextParty = existingParty.filter((pc: { id: string }) => pc.id !== draft.value.id);
+
+  dataStore.addOrUpdateCampaign({
+    ...campaign,
+    party: nextParty
+  });
+
+  router.push(returnToPath.value);
 }
 
 const INFO_CONTENT: Record<string, { title: string; meaning: string; formula?: string }> = {
@@ -731,10 +796,7 @@ function handleWindowClick(event: MouseEvent) {
 }
 
 onMounted(async () => {
-  touchedFields.value = {};
-  isDirty.value = false;
   await nextTick();
-  isHydrating.value = false;
   nameInput.value?.focus();
   window.addEventListener('keydown', handleWindowKeydown);
   window.addEventListener('click', handleWindowClick);
@@ -748,10 +810,8 @@ onBeforeUnmount(() => {
 
 <style scoped>
 .surface-subtle {
-  border-radius: 1rem;
-  border: 1px solid var(--design-border-subtle);
-  background: var(--component-list-item-subtle-bg);
-  padding: 1rem;
+  border-top: 1px solid var(--design-border-subtle);
+  padding: 0.55rem 0 0.25rem;
 }
 
 .section-toggle {
@@ -762,27 +822,30 @@ onBeforeUnmount(() => {
   border: 0;
   background: transparent;
   font-weight: 700;
+  font-size: 0.9rem;
   color: var(--design-page-text);
+  padding: 0.1rem 0;
 }
 
 .field-label {
-  margin-bottom: 0.5rem;
+  margin-bottom: 0.35rem;
   display: flex;
   align-items: center;
-  gap: 0.5rem;
-  font-size: 0.875rem;
+  gap: 0.35rem;
+  font-size: 0.8rem;
   font-weight: 600;
   color: var(--design-page-text);
 }
 
 .field-input {
   width: 100%;
-  border-radius: 0.5rem;
+  border-radius: 0.35rem;
   border: 1px solid var(--component-input-border);
   background: var(--component-input-bg);
-  padding: 0.45rem 0.65rem;
+  padding: 0.35rem 0.5rem;
   color: var(--component-input-text);
   outline: none;
+  font-size: 0.9rem;
 }
 
 .field-input:focus {
@@ -790,21 +853,21 @@ onBeforeUnmount(() => {
 }
 
 .field-error {
-  margin-top: 0.45rem;
+  margin-top: 0.25rem;
   font-size: 0.8rem;
   color: #b91c1c;
 }
 
 .info-btn {
   display: inline-flex;
-  height: 1.25rem;
-  width: 1.25rem;
+  height: 1.1rem;
+  width: 1.1rem;
   align-items: center;
   justify-content: center;
   border-radius: 9999px;
   border: 1px solid var(--design-border-default);
   background: var(--component-panel-bg);
-  font-size: 0.75rem;
+  font-size: 0.7rem;
   font-weight: 700;
   line-height: 1;
   color: var(--design-page-muted);
@@ -812,19 +875,19 @@ onBeforeUnmount(() => {
 
 .derived-pill {
   white-space: nowrap;
-  border-radius: 9999px;
+  border-radius: 0.35rem;
   border: 1px solid var(--design-border-subtle);
   background: var(--component-list-item-strong-bg);
-  padding: 0.25rem 0.6rem;
-  font-size: 0.8rem;
+  padding: 0.2rem 0.45rem;
+  font-size: 0.75rem;
   font-weight: 600;
 }
 
 .combat-row {
-  border-radius: 0.75rem;
+  border-radius: 0.35rem;
   border: 1px solid var(--design-border-subtle);
   background: var(--component-panel-bg);
-  padding: 0.75rem;
+  padding: 0.45rem 0.55rem;
 }
 
 .combat-label {
@@ -835,21 +898,21 @@ onBeforeUnmount(() => {
 }
 
 .combat-value {
-  margin-top: 0.4rem;
+  margin-top: 0.25rem;
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 0.5rem;
+  gap: 0.35rem;
 }
 
 .formula {
-  margin-top: 0.4rem;
-  font-size: 0.8rem;
+  margin-top: 0.25rem;
+  font-size: 0.75rem;
   color: var(--design-page-muted);
 }
 
 .secondary.small {
-  font-size: 0.75rem;
-  padding: 0.2rem 0.55rem;
+  font-size: 0.72rem;
+  padding: 0.15rem 0.45rem;
 }
 </style>

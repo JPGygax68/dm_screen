@@ -8,6 +8,11 @@ The goal of this project is to create a digital "Dungeon Master" screen for Dung
 - The main, or ideally all, parts of the user interface should be made available as printable sheets for game masters to use when no computer is available
 - Both the digital ui and printed sheets should support non-standard usage by allowing overrides and annotations at every step
 
+## UI layout principles
+
+- Prioritize density: reduce decorative chrome (large rounded frames/padding) in favor of compact, high-information layouts.
+- If a section is not collapsible, separate it with a simple divider line and tight spacing instead of a framed panel.
+
 ## Target platforms
 
 The application should run on:
@@ -16,4 +21,3 @@ The application should run on:
 - Tablets (if feasible without sacrificing features or ease of use)
 
 Smartphones are *not* an intended target platform, being too limited in display surface and ease of input.
-
