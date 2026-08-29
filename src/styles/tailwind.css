@@ -237,4 +237,8 @@
     --component-icon-button-foreground: var(--design-page-text);
     --component-icon-button-hover-bg: var(--component-list-item-strong-bg);
   }
+
+  section.sheet-section {
+    @apply rounded-xl border border-design-border-subtle bg-component-list-item-subtle-bg p-2;
+  }
 }

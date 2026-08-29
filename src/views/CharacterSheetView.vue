@@ -3,30 +3,29 @@
     <Breadcrumbs class="shrink-0" />
     <div class="flex-1 overflow-y-auto">
       <div class="mx-auto w-full max-w-6xl px-3 py-3">
-        <div class="border border-design-border-subtle bg-component-panel-bg px-3 py-2">
         <div v-if="!currentCampaign" class="border border-red-300 bg-red-50 p-3 text-red-900">
           <p class="font-semibold">Campaign not found.</p>
-          <button type="button" class="secondary small mt-2" @click="router.push('/campaigns')">Back to
+          <button type="button" class="secondary mt-2 px-2 py-1 text-[0.72rem]" @click="router.push('/campaigns')">Back to
             campaigns</button>
         </div>
         <form v-else class="space-y-3" @submit.prevent="save">
           <div class="mb-1 flex flex-wrap items-center justify-between gap-2">
-            <button type="button" class="secondary small" @click="cancel">Back</button>
+            <button type="button" class="secondary px-2 py-1 text-[0.72rem]" @click="cancel">Back</button>
             <h2 class="text-base font-semibold text-design-page-text">{{ isEditing ? 'Edit Character Sheet' : 'New Character Sheet' }}</h2>
             <p class="text-xs text-design-page-muted">{{ currentCampaign.name }}</p>
           </div>
           <div
             class="sticky top-0 z-20 -mx-3 mb-1 border-b border-design-border-subtle bg-component-panel-bg px-3 py-1.5">
             <div class="flex flex-wrap items-center gap-2">
-              <button type="button" class="secondary small" @click="scrollToSection('identity')">Identity</button>
-              <button type="button" class="secondary small" @click="scrollToSection('core')">Core Stats</button>
-              <button type="button" class="secondary small" @click="scrollToSection('combat')">Combat</button>
-              <button type="button" class="secondary small" @click="scrollToSection('equipment')">Equipment</button>
+              <button type="button" class="secondary px-2 py-1 text-[0.72rem]" @click="scrollToSection('identity')">Identity</button>
+              <button type="button" class="secondary px-2 py-1 text-[0.72rem]" @click="scrollToSection('core')">Core Stats</button>
+              <button type="button" class="secondary px-2 py-1 text-[0.72rem]" @click="scrollToSection('combat')">Combat</button>
+              <button type="button" class="secondary px-2 py-1 text-[0.72rem]" @click="scrollToSection('equipment')">Equipment</button>
             </div>
           </div>
 
-          <section ref="identitySection" class="surface-subtle">
-            <button type="button" class="section-toggle" @click="toggleSection('identity')">
+          <section ref="identitySection" class="sheet-section">
+            <button type="button" class="flex w-full items-center justify-between border-0 bg-transparent p-[0.1rem_0] text-[0.9rem] font-bold text-design-page-text" @click="toggleSection('identity')">
               <span>Identity</span>
               <span>{{ sectionOpen.identity ? '−' : '+' }}</span>
             </button>
@@ -35,49 +34,52 @@
                 <ImagePicker :imageDataUrl="draft.portrait || ''" @change="onPortraitChanged" />
                 <div class="flex-1 space-y-2">
                   <div>
-                    <label class="field-label" for="character-name">
+                    <label class="mb-[0.35rem] flex items-center gap-[0.35rem] text-[0.8rem] font-semibold text-design-page-text" for="character-name">
                       Name <span class="text-design-page-muted">*</span>
-                      <button type="button" class="info-btn" @click="openInfo('name', $event)">?</button>
+                      <button type="button" class="inline-flex h-[1.1rem] w-[1.1rem] items-center justify-center rounded-full border border-design-border-default bg-component-panel-bg text-[0.7rem] font-bold leading-none text-design-page-muted" @click="openInfo('name', $event)">?</button>
                     </label>
-                    <input id="character-name" ref="nameInput" v-model="draft.name" type="text" class="field-input"
+                    <input id="character-name" ref="nameInput" v-model="draft.name" type="text"
+                      class="w-full rounded-[0.35rem] border border-component-input-border bg-component-input-bg px-2.5 py-[0.35rem] text-[0.9rem] text-component-input-text outline-none transition placeholder:text-design-page-muted focus:border-component-button-bg"
                       placeholder="Character Name" required @blur="markAsTouched('name')" />
-                    <p v-if="touchedFields.name && visibleErrors.name" class="field-error">{{ visibleErrors.name }}</p>
+                    <p v-if="touchedFields.name && visibleErrors.name" class="mt-1 text-[0.8rem] text-red-700">{{ visibleErrors.name }}</p>
                   </div>
 
                   <div class="grid gap-2 sm:grid-cols-2">
                     <div>
-                      <label class="field-label" for="character-level">
+                      <label class="mb-[0.35rem] flex items-center gap-[0.35rem] text-[0.8rem] font-semibold text-design-page-text" for="character-level">
                         Level
-                        <button type="button" class="info-btn" @click="openInfo('level', $event)">?</button>
+                        <button type="button" class="inline-flex h-[1.1rem] w-[1.1rem] items-center justify-center rounded-full border border-design-border-default bg-component-panel-bg text-[0.7rem] font-bold leading-none text-design-page-muted" @click="openInfo('level', $event)">?</button>
                       </label>
                       <input id="character-level" v-model.number="draft.level" type="number" min="1" max="20"
-                        class="field-input" />
+                        class="w-full rounded-[0.35rem] border border-component-input-border bg-component-input-bg px-2.5 py-[0.35rem] text-[0.9rem] text-component-input-text outline-none transition placeholder:text-design-page-muted focus:border-component-button-bg" />
                     </div>
                     <div>
-                      <label class="field-label" for="character-race">
+                      <label class="mb-[0.35rem] flex items-center gap-[0.35rem] text-[0.8rem] font-semibold text-design-page-text" for="character-race">
                         Race
-                        <button type="button" class="info-btn" @click="openInfo('race', $event)">?</button>
+                        <button type="button" class="inline-flex h-[1.1rem] w-[1.1rem] items-center justify-center rounded-full border border-design-border-default bg-component-panel-bg text-[0.7rem] font-bold leading-none text-design-page-muted" @click="openInfo('race', $event)">?</button>
                       </label>
-                      <input id="character-race" v-model="draft.race" type="text" class="field-input"
+                      <input id="character-race" v-model="draft.race" type="text"
+                        class="w-full rounded-[0.35rem] border border-component-input-border bg-component-input-bg px-2.5 py-[0.35rem] text-[0.9rem] text-component-input-text outline-none transition placeholder:text-design-page-muted focus:border-component-button-bg"
                         placeholder="e.g. Red Dragonborn" />
                     </div>
                     <div>
-                      <label class="field-label" for="character-background">
+                      <label class="mb-[0.35rem] flex items-center gap-[0.35rem] text-[0.8rem] font-semibold text-design-page-text" for="character-background">
                         Background
-                        <button type="button" class="info-btn" @click="openInfo('background', $event)">?</button>
+                        <button type="button" class="inline-flex h-[1.1rem] w-[1.1rem] items-center justify-center rounded-full border border-design-border-default bg-component-panel-bg text-[0.7rem] font-bold leading-none text-design-page-muted" @click="openInfo('background', $event)">?</button>
                       </label>
-                      <input id="character-background" v-model="draft.background" type="text" class="field-input"
+                      <input id="character-background" v-model="draft.background" type="text"
+                        class="w-full rounded-[0.35rem] border border-component-input-border bg-component-input-bg px-2.5 py-[0.35rem] text-[0.9rem] text-component-input-text outline-none transition placeholder:text-design-page-muted focus:border-component-button-bg"
                         placeholder="e.g. Hunter" />
                     </div>
                     <div>
-                      <label class="field-label" for="character-max-hp">
+                      <label class="mb-[0.35rem] flex items-center gap-[0.35rem] text-[0.8rem] font-semibold text-design-page-text" for="character-max-hp">
                         Max HP
-                        <button type="button" class="info-btn" @click="openInfo('maxHitPoints', $event)">?</button>
+                        <button type="button" class="inline-flex h-[1.1rem] w-[1.1rem] items-center justify-center rounded-full border border-design-border-default bg-component-panel-bg text-[0.7rem] font-bold leading-none text-design-page-muted" @click="openInfo('maxHitPoints', $event)">?</button>
                       </label>
                       <input id="character-max-hp" v-model.number="draft.maxHitPoints" type="number"
                         :min="schema.properties.maxHitPoints.minimum" :max="schema.properties.maxHitPoints.maximum"
-                        class="field-input" @blur="markAsTouched('maxHitPoints')" />
-                      <p v-if="touchedFields.maxHitPoints && visibleErrors.maxHitPoints" class="field-error">{{
+                        class="w-full rounded-[0.35rem] border border-component-input-border bg-component-input-bg px-2.5 py-[0.35rem] text-[0.9rem] text-component-input-text outline-none transition placeholder:text-design-page-muted focus:border-component-button-bg" @blur="markAsTouched('maxHitPoints')" />
+                      <p v-if="touchedFields.maxHitPoints && visibleErrors.maxHitPoints" class="mt-1 text-[0.8rem] text-red-700">{{
                         visibleErrors.maxHitPoints }}</p>
                     </div>
                   </div>
@@ -87,22 +89,23 @@
             </div>
           </section>
 
-          <section ref="coreSection" class="surface-subtle">
-            <button type="button" class="section-toggle" @click="toggleSection('core')">
+          <section ref="coreSection" class="sheet-section">
+            <button type="button" class="flex w-full items-center justify-between border-0 bg-transparent p-[0.1rem_0] text-[0.9rem] font-bold text-design-page-text" @click="toggleSection('core')">
               <span>Core Stats</span>
               <span>{{ sectionOpen.core ? '−' : '+' }}</span>
             </button>
             <div v-if="sectionOpen.core" class="mt-2 grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
               <div v-for="ability in abilityRows" :key="ability.key"
                 class="border border-design-border-subtle bg-component-list-item-subtle-bg px-2 py-1.5">
-                <label class="field-label" :for="`ability-${ability.key}`">
+                <label class="mb-[0.35rem] flex items-center gap-[0.35rem] text-[0.8rem] font-semibold text-design-page-text" :for="`ability-${ability.key}`">
                   {{ ability.label }}
-                  <button type="button" class="info-btn" @click="openInfo(`ability-${ability.key}`, $event)">?</button>
+                  <button type="button" class="inline-flex h-[1.1rem] w-[1.1rem] items-center justify-center rounded-full border border-design-border-default bg-component-panel-bg text-[0.7rem] font-bold leading-none text-design-page-muted" @click="openInfo(`ability-${ability.key}`, $event)">?</button>
                 </label>
                 <div class="mt-1.5 flex items-center gap-2">
                   <input :id="`ability-${ability.key}`" v-model.number="draft.abilityScores[ability.key]" type="number"
-                    min="1" max="30" class="field-input" />
-                  <div class="derived-pill">
+                    min="1" max="30"
+                    class="w-full rounded-[0.35rem] border border-component-input-border bg-component-input-bg px-2.5 py-[0.35rem] text-[0.9rem] text-component-input-text outline-none transition placeholder:text-design-page-muted focus:border-component-button-bg" />
+                  <div class="whitespace-nowrap rounded-[0.35rem] border border-design-border-subtle bg-component-list-item-strong-bg px-[0.45rem] py-[0.2rem] text-[0.75rem] font-semibold">
                     Mod {{ formatModifier(abilityModifier(draft.abilityScores[ability.key])) }}
                   </div>
                 </div>
@@ -110,18 +113,18 @@
             </div>
           </section>
 
-          <section ref="combatSection" class="surface-subtle">
-            <button type="button" class="section-toggle" @click="toggleSection('combat')">
+          <section ref="combatSection" class="sheet-section">
+            <button type="button" class="flex w-full items-center justify-between border-0 bg-transparent p-[0.1rem_0] text-[0.9rem] font-bold text-design-page-text" @click="toggleSection('combat')">
               <span>Combat Summary</span>
               <span>{{ sectionOpen.combat ? '−' : '+' }}</span>
             </button>
             <div v-if="sectionOpen.combat" class="mt-2 space-y-2">
-              <div class="combat-row">
-                <div class="combat-label">
+              <div class="rounded-[0.35rem] border border-design-border-subtle bg-component-panel-bg p-[0.45rem_0.55rem]">
+                <div class="flex items-center gap-2 font-bold">
                   Proficiency Bonus
-                  <button type="button" class="info-btn" @click="openInfo('proficiencyBonus', $event)">?</button>
+                  <button type="button" class="inline-flex h-[1.1rem] w-[1.1rem] items-center justify-center rounded-full border border-design-border-default bg-component-panel-bg text-[0.7rem] font-bold leading-none text-design-page-muted" @click="openInfo('proficiencyBonus', $event)">?</button>
                 </div>
-                <div class="combat-value">
+                <div class="mt-1 flex flex-wrap items-center gap-[0.35rem]">
                   <span>{{ formatModifier(effectiveProficiencyBonus) }}</span>
                   <label class="inline-flex items-center gap-2 text-xs text-design-page-muted">
                     <input v-model="draft.overrides.proficiencyBonus.enabled" type="checkbox" />
@@ -129,53 +132,53 @@
                   </label>
                   <input v-if="draft.overrides.proficiencyBonus.enabled"
                     v-model.number="draft.overrides.proficiencyBonus.value" type="number"
-                    class="field-input max-w-20" />
+                    class="w-full max-w-20 rounded-[0.35rem] border border-component-input-border bg-component-input-bg px-2.5 py-[0.35rem] text-[0.9rem] text-component-input-text outline-none transition focus:border-component-button-bg" />
                 </div>
-                <p class="formula">Derived from level: {{ formatModifier(derivedProficiencyBonus) }}</p>
+                <p class="mt-1 text-[0.75rem] text-design-page-muted">Derived from level: {{ formatModifier(derivedProficiencyBonus) }}</p>
               </div>
 
-              <div class="combat-row">
-                <div class="combat-label">
+              <div class="rounded-[0.35rem] border border-design-border-subtle bg-component-panel-bg p-[0.45rem_0.55rem]">
+                <div class="flex items-center gap-2 font-bold">
                   Initiative
-                  <button type="button" class="info-btn" @click="openInfo('initiative', $event)">?</button>
+                  <button type="button" class="inline-flex h-[1.1rem] w-[1.1rem] items-center justify-center rounded-full border border-design-border-default bg-component-panel-bg text-[0.7rem] font-bold leading-none text-design-page-muted" @click="openInfo('initiative', $event)">?</button>
                 </div>
-                <div class="combat-value">
+                <div class="mt-1 flex flex-wrap items-center gap-[0.35rem]">
                   <span>{{ formatModifier(effectiveInitiative) }}</span>
                   <label class="inline-flex items-center gap-2 text-xs text-design-page-muted">
                     <input v-model="draft.overrides.initiative.enabled" type="checkbox" />
                     Override
                   </label>
                   <input v-if="draft.overrides.initiative.enabled" v-model.number="draft.overrides.initiative.value"
-                    type="number" class="field-input max-w-20" />
+                    type="number" class="w-full max-w-20 rounded-[0.35rem] border border-component-input-border bg-component-input-bg px-2.5 py-[0.35rem] text-[0.9rem] text-component-input-text outline-none transition focus:border-component-button-bg" />
                 </div>
-                <p class="formula">Dex mod {{ formatModifier(dexModifier) }} + bonus {{
+                <p class="mt-1 text-[0.75rem] text-design-page-muted">Dex mod {{ formatModifier(dexModifier) }} + bonus {{
                   formatModifier(draft.initiativeBonus) }}</p>
               </div>
 
-              <div class="combat-row">
-                <div class="combat-label">
+              <div class="rounded-[0.35rem] border border-design-border-subtle bg-component-panel-bg p-[0.45rem_0.55rem]">
+                <div class="flex items-center gap-2 font-bold">
                   Armor Class
-                  <button type="button" class="info-btn" @click="openInfo('armorClass', $event)">?</button>
+                  <button type="button" class="inline-flex h-[1.1rem] w-[1.1rem] items-center justify-center rounded-full border border-design-border-default bg-component-panel-bg text-[0.7rem] font-bold leading-none text-design-page-muted" @click="openInfo('armorClass', $event)">?</button>
                 </div>
-                <div class="combat-value">
+                <div class="mt-1 flex flex-wrap items-center gap-[0.35rem]">
                   <span>{{ effectiveArmorClass }}</span>
                   <label class="inline-flex items-center gap-2 text-xs text-design-page-muted">
                     <input v-model="draft.overrides.armorClass.enabled" type="checkbox" />
                     Override
                   </label>
                   <input v-if="draft.overrides.armorClass.enabled" v-model.number="draft.overrides.armorClass.value"
-                    type="number" class="field-input max-w-20" />
+                    type="number" class="w-full max-w-20 rounded-[0.35rem] border border-component-input-border bg-component-input-bg px-2.5 py-[0.35rem] text-[0.9rem] text-component-input-text outline-none transition focus:border-component-button-bg" />
                 </div>
-                <p class="formula">Base {{ draft.armorClassBase }} + Dex mod {{ formatModifier(dexModifier) }} + armor
+                <p class="mt-1 text-[0.75rem] text-design-page-muted">Base {{ draft.armorClassBase }} + Dex mod {{ formatModifier(dexModifier) }} + armor
                   bonus {{ formatModifier(draft.armorClassBonus) }}</p>
               </div>
 
-              <div class="combat-row">
-                <div class="combat-label">
+              <div class="rounded-[0.35rem] border border-design-border-subtle bg-component-panel-bg p-[0.45rem_0.55rem]">
+                <div class="flex items-center gap-2 font-bold">
                   Attack Bonus (equipped weapon)
-                  <button type="button" class="info-btn" @click="openInfo('attackBonus', $event)">?</button>
+                  <button type="button" class="inline-flex h-[1.1rem] w-[1.1rem] items-center justify-center rounded-full border border-design-border-default bg-component-panel-bg text-[0.7rem] font-bold leading-none text-design-page-muted" @click="openInfo('attackBonus', $event)">?</button>
                 </div>
-                <div class="combat-value">
+                <div class="mt-1 flex flex-wrap items-center gap-[0.35rem]">
                   <span v-if="canComputeAttackBonus">{{ formatModifier(effectiveAttackBonus) }}</span>
                   <span v-else class="text-design-page-muted">Missing prerequisites</span>
                   <label class="inline-flex items-center gap-2 text-xs text-design-page-muted">
@@ -183,9 +186,9 @@
                     Override
                   </label>
                   <input v-if="draft.overrides.attackBonus.enabled" v-model.number="draft.overrides.attackBonus.value"
-                    type="number" class="field-input max-w-20" />
+                    type="number" class="w-full max-w-20 rounded-[0.35rem] border border-component-input-border bg-component-input-bg px-2.5 py-[0.35rem] text-[0.9rem] text-component-input-text outline-none transition focus:border-component-button-bg" />
                 </div>
-                <p v-if="canComputeAttackBonus" class="formula">
+                <p v-if="canComputeAttackBonus" class="mt-1 text-[0.75rem] text-design-page-muted">
                   {{ weaponAbilityLabel }} mod {{ formatModifier(weaponAbilityModifier) }}
                   <span v-if="draft.proficientWithWeapon"> + prof {{ formatModifier(effectiveProficiencyBonus) }}</span>
                 </p>
@@ -198,7 +201,7 @@
                   <li v-for="item in missingAttackPrerequisites" :key="item.field"
                     class="flex items-center justify-between gap-2">
                     <span>{{ item.message }}</span>
-                    <button type="button" class="secondary small"
+                    <button type="button" class="secondary px-2 py-1 text-[0.72rem]"
                       @click="resolveMissingPrerequisite(item.field, item.section)">
                       Go to {{ item.sectionLabel }}
                     </button>
@@ -208,8 +211,8 @@
             </div>
           </section>
 
-          <section ref="equipmentSection" class="surface-subtle">
-            <button type="button" class="section-toggle" @click="toggleSection('equipment')">
+          <section ref="equipmentSection" class="sheet-section">
+            <button type="button" class="flex w-full items-center justify-between border-0 bg-transparent p-[0.1rem_0] text-[0.9rem] font-bold text-design-page-text" @click="toggleSection('equipment')">
               <span>Equipment / Prerequisites</span>
               <span>{{ sectionOpen.equipment ? '−' : '+' }}</span>
             </button>
@@ -218,28 +221,30 @@
                 class="border border-design-border-subtle bg-component-list-item-strong-bg p-2">
                 <p class="text-sm text-design-page-text">Fill the missing fields below, then return to the combat
                   calculation.</p>
-                <button type="button" class="secondary small mt-2" @click="returnToTarget">Return to Combat
+                <button type="button" class="secondary mt-2 px-2 py-1 text-[0.72rem]" @click="returnToTarget">Return to Combat
                   Summary</button>
               </div>
 
               <div>
-                <label class="field-label" for="equipped-weapon">
+                <label class="mb-[0.35rem] flex items-center gap-[0.35rem] text-[0.8rem] font-semibold text-design-page-text" for="equipped-weapon">
                   Equipped Weapon
-                  <button type="button" class="info-btn" @click="openInfo('equippedWeapon', $event)">?</button>
+                  <button type="button" class="inline-flex h-[1.1rem] w-[1.1rem] items-center justify-center rounded-full border border-design-border-default bg-component-panel-bg text-[0.7rem] font-bold leading-none text-design-page-muted" @click="openInfo('equippedWeapon', $event)">?</button>
                 </label>
                 <input id="equipped-weapon" :ref="(el) => setFieldRef('equippedWeaponName', el)"
-                  v-model="draft.equippedWeaponName" type="text" class="field-input"
+                  v-model="draft.equippedWeaponName" type="text"
+                  class="w-full rounded-[0.35rem] border border-component-input-border bg-component-input-bg px-2.5 py-[0.35rem] text-[0.9rem] text-component-input-text outline-none transition placeholder:text-design-page-muted focus:border-component-button-bg"
                   :class="{ 'ring-2 ring-red-400': highlightedFields.has('equippedWeaponName') }"
                   placeholder="e.g. Shortsword" />
               </div>
 
               <div class="grid gap-2 sm:grid-cols-2">
                 <div>
-                  <label class="field-label" for="weapon-ability">
+                  <label class="mb-[0.35rem] flex items-center gap-[0.35rem] text-[0.8rem] font-semibold text-design-page-text" for="weapon-ability">
                     Weapon Ability
-                    <button type="button" class="info-btn" @click="openInfo('weaponAbility', $event)">?</button>
+                    <button type="button" class="inline-flex h-[1.1rem] w-[1.1rem] items-center justify-center rounded-full border border-design-border-default bg-component-panel-bg text-[0.7rem] font-bold leading-none text-design-page-muted" @click="openInfo('weaponAbility', $event)">?</button>
                   </label>
-                  <select id="weapon-ability" v-model="draft.equippedWeaponAbility" class="field-input">
+                  <select id="weapon-ability" v-model="draft.equippedWeaponAbility"
+                    class="w-full rounded-[0.35rem] border border-component-input-border bg-component-input-bg px-2.5 py-[0.35rem] text-[0.9rem] text-component-input-text outline-none transition focus:border-component-button-bg">
                     <option value="strength">Strength</option>
                     <option value="dexterity">Dexterity</option>
                   </select>
@@ -251,12 +256,13 @@
               </div>
 
               <div>
-                <label class="field-label" for="inventory-items">
+                <label class="mb-[0.35rem] flex items-center gap-[0.35rem] text-[0.8rem] font-semibold text-design-page-text" for="inventory-items">
                   Inventory Items (one per line)
-                  <button type="button" class="info-btn" @click="openInfo('inventory', $event)">?</button>
+                  <button type="button" class="inline-flex h-[1.1rem] w-[1.1rem] items-center justify-center rounded-full border border-design-border-default bg-component-panel-bg text-[0.7rem] font-bold leading-none text-design-page-muted" @click="openInfo('inventory', $event)">?</button>
                 </label>
                 <textarea id="inventory-items" :ref="(el) => setFieldRef('inventoryItemsText', el)"
-                  v-model="draft.inventoryItemsText" rows="4" class="field-input"
+                  v-model="draft.inventoryItemsText" rows="4"
+                  class="w-full rounded-[0.35rem] border border-component-input-border bg-component-input-bg px-2.5 py-[0.35rem] text-[0.9rem] text-component-input-text outline-none transition placeholder:text-design-page-muted focus:border-component-button-bg"
                   :class="{ 'ring-2 ring-red-400': highlightedFields.has('inventoryItemsText') }"
                   placeholder="Shortsword&#10;Leather Armor&#10;Explorer's Pack" />
               </div>
@@ -271,7 +277,6 @@
               Character</button>
           </div>
         </form>
-        </div>
       </div>
     </div>
 
@@ -281,7 +286,7 @@
       <div class="mb-1 text-sm font-semibold text-design-page-text">{{ activeInfo.title }}</div>
       <p class="text-sm text-design-page-text">{{ activeInfo.meaning }}</p>
       <p v-if="activeInfo.formula" class="mt-2 text-xs text-design-page-muted">{{ activeInfo.formula }}</p>
-      <button type="button" class="secondary small mt-3" @click="closeInfo">Close</button>
+      <button type="button" class="secondary mt-3 px-2 py-1 text-[0.72rem]" @click="closeInfo">Close</button>
     </div>
   </div>
 </template>
@@ -796,111 +801,4 @@ onBeforeUnmount(() => {
 });
 </script>
 
-<style scoped>
-.surface-subtle {
-  border-top: 1px solid var(--design-border-subtle);
-  padding: 0.55rem 0 0.25rem;
-}
 
-.section-toggle {
-  width: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  border: 0;
-  background: transparent;
-  font-weight: 700;
-  font-size: 0.9rem;
-  color: var(--design-page-text);
-  padding: 0.1rem 0;
-}
-
-.field-label {
-  margin-bottom: 0.35rem;
-  display: flex;
-  align-items: center;
-  gap: 0.35rem;
-  font-size: 0.8rem;
-  font-weight: 600;
-  color: var(--design-page-text);
-}
-
-.field-input {
-  width: 100%;
-  border-radius: 0.35rem;
-  border: 1px solid var(--component-input-border);
-  background: var(--component-input-bg);
-  padding: 0.35rem 0.5rem;
-  color: var(--component-input-text);
-  outline: none;
-  font-size: 0.9rem;
-}
-
-.field-input:focus {
-  border-color: var(--component-button-bg);
-}
-
-.field-error {
-  margin-top: 0.25rem;
-  font-size: 0.8rem;
-  color: #b91c1c;
-}
-
-.info-btn {
-  display: inline-flex;
-  height: 1.1rem;
-  width: 1.1rem;
-  align-items: center;
-  justify-content: center;
-  border-radius: 9999px;
-  border: 1px solid var(--design-border-default);
-  background: var(--component-panel-bg);
-  font-size: 0.7rem;
-  font-weight: 700;
-  line-height: 1;
-  color: var(--design-page-muted);
-}
-
-.derived-pill {
-  white-space: nowrap;
-  border-radius: 0.35rem;
-  border: 1px solid var(--design-border-subtle);
-  background: var(--component-list-item-strong-bg);
-  padding: 0.2rem 0.45rem;
-  font-size: 0.75rem;
-  font-weight: 600;
-}
-
-.combat-row {
-  border-radius: 0.35rem;
-  border: 1px solid var(--design-border-subtle);
-  background: var(--component-panel-bg);
-  padding: 0.45rem 0.55rem;
-}
-
-.combat-label {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  font-weight: 700;
-}
-
-.combat-value {
-  margin-top: 0.25rem;
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 0.35rem;
-}
-
-.formula {
-  margin-top: 0.25rem;
-  font-size: 0.75rem;
-  color: var(--design-page-muted);
-}
-
-.secondary.small {
-  font-size: 0.72rem;
-  padding: 0.15rem 0.45rem;
-}
-</style>
