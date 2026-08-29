@@ -9,13 +9,6 @@
           campaigns</button>
       </div>
       <form v-else class="flex h-full flex-col gap-1" @submit.prevent="save">
-        <!--
-        <div class="shrink-0 flex flex-wrap items-center justify-between gap-2">
-          <button type="button" class="secondary px-2 py-1 text-[0.72rem]" @click="cancel">Back</button>
-          <h2 class="text-base font-semibold text-design-page-text">{{ isEditing ? 'Edit Character Sheet' : "New Character Sheet" }}</h2>
-          <p class="text-xs text-design-page-muted">{{ currentCampaign.name }}</p>
-        </div>
-        // -->
         <div
           class="sticky top-0 z-20 -mx-3 mb-1 shrink-0 border-b border-design-border-subtle bg-component-panel-bg px-3 py-1.5">
           <div class="flex flex-wrap items-center gap-2">
@@ -32,14 +25,11 @@
         </div>
 
         <div class="min-h-0 flex-1 overflow-y-auto">
-          <div class="flex flex-col gap-2">
+          <div class="grid gap-2 grid-cols-1 sm:grid-cols-2 __flex __flex-col __gap-2">
             <section ref="identitySection" class="sheet-section">
-              <button type="button"
-                class="flex w-full items-center justify-between border-0 bg-transparent p-[0.1rem_0] text-[0.9rem] font-bold text-design-page-text"
-                @click="toggleSection('identity')">
-                <span>Identity</span>
-                <span>{{ sectionOpen.identity ? '−' : '+' }}</span>
-              </button>
+              <label class="p-[0.1rem_0] text-[0.9rem] font-bold text-design-page-text">
+                Identity
+              </label>
               <div v-if="sectionOpen.identity" class="mt-2 space-y-2">
                 <div class="flex flex-col gap-2 sm:flex-row">
                   <ImagePicker :imageDataUrl="draft.portrait || ''" @change="onPortraitChanged" />
@@ -124,13 +114,10 @@
             </section>
 
             <section ref="coreSection" class="sheet-section">
-              <button type="button"
-                class="flex w-full items-center justify-between border-0 bg-transparent p-[0.1rem_0] text-[0.9rem] font-bold text-design-page-text"
-                @click="toggleSection('core')">
-                <span>Core Stats</span>
-                <span>{{ sectionOpen.core ? '−' : '+' }}</span>
-              </button>
-              <div v-if="sectionOpen.core" class="mt-2 grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
+              <label class="p-[0.1rem_0] text-[0.9rem] font-bold text-design-page-text">
+                Core Stats
+              </label>
+              <div v-if="sectionOpen.core" class="mt-2 grid gap-2 grid-cols-2 lg:grid-cols-3">
                 <div v-for="ability in abilityRows" :key="ability.key"
                   class="border border-design-border-subtle bg-component-list-item-subtle-bg px-2 py-1.5">
                   <label
@@ -143,8 +130,8 @@
                   </label>
                   <div class="mt-1.5 flex items-center gap-2">
                     <input :id="`ability-${ability.key}`" v-model.number="draft.abilityScores[ability.key]"
-                      type="number" min="1" max="30"
-                      class="w-full rounded-[0.35rem] border border-component-input-border bg-component-input-bg px-2.5 py-[0.35rem] text-[0.9rem] text-component-input-text outline-none transition placeholder:text-design-page-muted focus:border-component-button-bg" />
+                      type="number" min="1" max="30" width="2"
+                      class="w-14 text-center rounded-[0.35rem] border border-component-input-border bg-component-input-bg px-2.5 py-[0.35rem] text-[0.9rem] text-component-input-text outline-none transition placeholder:text-design-page-muted focus:border-component-button-bg" />
                     <div
                       class="whitespace-nowrap rounded-[0.35rem] border border-design-border-subtle bg-component-list-item-strong-bg px-[0.45rem] py-[0.2rem] text-[0.75rem] font-semibold">
                       Mod {{ formatModifier(abilityModifier(draft.abilityScores[ability.key])) }}
@@ -252,7 +239,7 @@
                   <p v-if="canComputeAttackBonus" class="mt-1 text-[0.75rem] text-design-page-muted">
                     {{ weaponAbilityLabel }} mod {{ formatModifier(weaponAbilityModifier) }}
                     <span v-if="draft.proficientWithWeapon"> + prof {{ formatModifier(effectiveProficiencyBonus)
-                      }}</span>
+                    }}</span>
                   </p>
                 </div>
 
