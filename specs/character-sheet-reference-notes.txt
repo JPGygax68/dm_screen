@@ -31,3 +31,8 @@ Implementation direction:
 - Distinguish editable inputs from derived values with obvious visual semantics and support popover info explanations for both.
 - Favor anchored, non-jittering popovers or info panels over inline expansion so the layout stays stable under responsive resizing and touch input.
 - Default to a landscape-oriented sheet that scales down gracefully instead of forcing a narrow portrait form.
+- Do not use tabs as the primary structure inside the sheet; keep all major character sections on one vertical page.
+- Use collapsible panels plus a sticky in-sheet section navigator to reduce clutter while preserving scanability.
+- Add prerequisite-aware flows: when a computed action cannot be resolved, identify missing inputs, deep-link to the right sheet sections, and visibly mark required fields.
+- Preserve return context: after entering missing data, provide a reliable "return to where I was" path back to the originating encounter/calculation task.
+- Treat manual override as a first-class capability, not an exception path.

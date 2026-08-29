@@ -5,6 +5,7 @@ Goal: replace the current PlayerCharacterEdit view with a full D&D 2024 characte
 Scope for this phase:
 - Keep the existing app flow and data model; do not introduce a backend or external persistence layer.
 - Replace the current compact editor with a sheet-style layout that reads like a proper D&D 2024 character sheet.
+- Preserve DM autonomy: the app must never block progress because setup is incomplete.
 
 Planned sections:
 - Header / identity: name, class, level, race, background, alignment, player name, XP, proficiency bonus, inspiration.
@@ -23,6 +24,11 @@ Design goals:
 - Explicitly distinguish authored inputs from calculated values, with visual cues and explanatory affordances.
 - Provide consistent info/help affordances for important fields so beginners and occasional DMs can understand the value's meaning without cluttering the layout.
 - Favor a landscape-first, centered sheet layout for desktop/tablet use; stack sections vertically only when necessary for narrow screens.
+- Use route-level navigation for page changes, not tabs for core sheet sections.
+- Prefer a vertical single-page sheet with collapsible section panels and a sticky section navigator for quick jumps.
+- Allow on-the-fly data entry during active play: when a calculation lacks required data, guide the DM to the missing fields and support quick return to the in-progress task.
+- Mark missing prerequisite fields clearly across sheets/views, including cross-sheet dependencies (e.g., attack roll -> equipped weapon -> inventory).
+- Keep overrides easy: DMs must be able to manually edit or override app-provided values when needed.
 
 Non-goals for this pass:
 - no new backend data model
@@ -36,3 +42,5 @@ Acceptance bar for implementation:
 - core D&D 2024 character information is visible and editable
 - existing PC data remains compatible with the current app structure
 - the sheet integrates cleanly with the current route and store structure without requiring new infrastructure
+- calculations fail gracefully: missing prerequisites surface actionable guidance instead of hard failure
+- navigation context is preserved so the DM can return to the originating encounter/calculation flow after filling missing data
