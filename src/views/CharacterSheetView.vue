@@ -136,8 +136,8 @@
                       class="whitespace-nowrap rounded-[0.35rem] border border-design-border-subtle bg-component-list-item-strong-bg px-[0.45rem] py-[0.2rem] font-semibold">
                       {{ formatModifier(abilityModifier(draft.abilityScores[ability.key])) }}
                     </div>
-                    <div class="whitespace-nowrap rounded-[0.35rem] border border-design-border-subtle bg-component-list-item-strong-bg px-[0.45rem] py-[0.2rem] font-semibold"
-                      :class="isSavingThrowProficient(ability.key) ? 'bg-green-100 border-green-300' : 'text-current/30 bg-component-list-item-strong-bg border-design-border-subtle'">
+                    <div class="ml-auto whitespace-nowrap rounded-[0.35rem] border border-design-border-subtle bg-component-list-item-strong-bg px-[0.45rem] py-[0.2rem] font-semibold"
+                      :class="isSavingThrowProficient(ability.key) ? 'bg-lime-400 border-lime-500' : 'text-current/10 bg-component-list-item-strong-bg border-design-border-subtle'">
                       &#x1F6E1;
                     </div>
                   </div>
