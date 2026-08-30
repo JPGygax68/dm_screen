@@ -1,47 +1,84 @@
 // DnD classes for the 2024 ruleset. These are used to generate the class selection UI and to provide class-specific information.
-export type PCClass = {
-    maxHitPointsPerLevel: number
+
+export type ClassName = 'Fighter' | 'Wizard' | 'Barbarian' | 'Rogue' | 
+    'Cleric' | 'Ranger' | 'Paladin' | 'Bard' | 
+    'Druid' | 'Monk' | 'Sorcerer' | 'Warlock' | 
+    'Artificer';
+
+export type AbilityKey = 'STR' | 'DEX' | 'CON' | 'INT' | 'WIS' | 'CHA';
+
+export type ClassDef = {
+    maxHitPointsPerLevel: number,
+    savingThrows?: AbilityKey[],
 };
 
-export const pcClasses: Record<string, PCClass> = {
+export const pcClasses: Record<ClassName, ClassDef> = {
 
-    fighter: {
+    Fighter: {
         maxHitPointsPerLevel: 10,
+        savingThrows: ['STR', 'CON'],
     },
-    wizard: {
+    Wizard: {
         maxHitPointsPerLevel: 6,
+        savingThrows: ['INT', 'WIS']
     },
-    barbarian: {
+    Barbarian: {
         maxHitPointsPerLevel: 12,
+        savingThrows: ['STR', 'CON'],
     },
-    rogue: {
+    Rogue: {
         maxHitPointsPerLevel: 8,
+        savingThrows: ['DEX', 'INT'],
     },
-    cleric: {
+    Cleric: {
         maxHitPointsPerLevel: 8,
+        savingThrows: ['WIS', 'CHA']
     },
-    ranger: {
+    Ranger: {
         maxHitPointsPerLevel: 10,
+        savingThrows: ['STR', 'DEX'],
     },
-    paladin: {
+    Paladin: {
         maxHitPointsPerLevel: 10,
+        savingThrows: ['WIS', 'CHA'],
     },
-    bard: {
+    Bard: {
         maxHitPointsPerLevel: 8,
+        savingThrows: ['DEX', 'CHA'],
     },
-    druid: {
+    Druid: {
         maxHitPointsPerLevel: 8,
+        savingThrows: ['WIS', 'INT'],
     },
-    monk: {
+    Monk: {
         maxHitPointsPerLevel: 8,
+        savingThrows: ['STR', 'DEX'],
     },
-    sorcerer: {
+    Sorcerer: {
         maxHitPointsPerLevel: 6,
+        savingThrows: ['CON', 'CHA'],
     },
-    warlock: {
+    Warlock: {
         maxHitPointsPerLevel: 8,
+        savingThrows: ['CHA', 'CON'],
     },
-    artificer: {
+    Artificer: {
         maxHitPointsPerLevel: 8,
+        savingThrows: ['INT', 'CON'],
     },
 };
+
+export function savingThrowProficienciesFromClasses(classes: ClassName[]): AbilityKey[] {
+    //console.log('Calculating saving throw proficiencies for classes:', classes);
+    const proficiencies = new Set<AbilityKey>();
+    for (const classKey of classes) {
+        const classDef = pcClasses[classKey];
+        if (classDef.savingThrows) {
+            for (const ability of classDef.savingThrows) {
+                proficiencies.add(ability);
+            }
+        }
+    }
+    //console.log('Calculated saving throw proficiencies:', Array.from(proficiencies));
+    return Array.from(proficiencies);
+}

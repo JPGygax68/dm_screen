@@ -133,8 +133,12 @@
                       type="number" min="1" max="30" width="2"
                       class="w-14 text-center rounded-[0.35rem] border border-component-input-border bg-component-input-bg px-2.5 py-[0.35rem] text-[0.9rem] text-component-input-text outline-none transition placeholder:text-design-page-muted focus:border-component-button-bg" />
                     <div
-                      class="whitespace-nowrap rounded-[0.35rem] border border-design-border-subtle bg-component-list-item-strong-bg px-[0.45rem] py-[0.2rem] text-[0.75rem] font-semibold">
-                      Mod {{ formatModifier(abilityModifier(draft.abilityScores[ability.key])) }}
+                      class="whitespace-nowrap rounded-[0.35rem] border border-design-border-subtle bg-component-list-item-strong-bg px-[0.45rem] py-[0.2rem] font-semibold">
+                      {{ formatModifier(abilityModifier(draft.abilityScores[ability.key])) }}
+                    </div>
+                    <div class="whitespace-nowrap rounded-[0.35rem] border border-design-border-subtle bg-component-list-item-strong-bg px-[0.45rem] py-[0.2rem] font-semibold"
+                      :class="isSavingThrowProficient(ability.key) ? 'bg-green-100 border-green-300' : 'text-current/30 bg-component-list-item-strong-bg border-design-border-subtle'">
+                      &#x1F6E1;
                     </div>
                   </div>
                 </div>
@@ -362,6 +366,7 @@ import Ajv from 'ajv';
 import fullSchema from '../generated/models/data.schema.json';
 import { useRoute, useRouter } from 'vue-router';
 import { useDmScreenStore } from '../stores/dataStore';
+import { AbilityKey, ClassName, savingThrowProficienciesFromClasses } from '../rulesets/dnd2024/classes';
 
 const schema = { ...fullSchema.$defs.PlayerCharacter, $defs: fullSchema.$defs };
 const nameInput = ref<HTMLInputElement | null>(null);
@@ -369,7 +374,6 @@ const route = useRoute();
 const router = useRouter();
 const dataStore = useDmScreenStore();
 
-type AbilityKey = 'strength' | 'dexterity' | 'constitution' | 'intelligence' | 'wisdom' | 'charisma';
 type SectionKey = 'identity' | 'core' | 'combat' | 'equipment';
 
 type PlayerCharacterDraft = Record<string, unknown> & {
@@ -379,7 +383,7 @@ type PlayerCharacterDraft = Record<string, unknown> & {
   description?: string;
   race?: string;
   background?: string;
-  classes: string[];
+  classes: ClassName[];
   level: number;
   maxHitPoints: number;
   abilityScores: Record<AbilityKey, number>;
@@ -387,7 +391,7 @@ type PlayerCharacterDraft = Record<string, unknown> & {
   armorClassBase: number;
   armorClassBonus: number;
   equippedWeaponName: string;
-  equippedWeaponAbility: 'strength' | 'dexterity';
+  equippedWeaponAbility: 'STR' | 'DEX';
   proficientWithWeapon: boolean;
   inventoryItemsText: string;
   overrides: {
@@ -422,18 +426,18 @@ function createBlankDraft(): PlayerCharacterDraft {
     race: '',
     background: '',
     abilityScores: {
-      strength: 10,
-      dexterity: 10,
-      constitution: 10,
-      intelligence: 10,
-      wisdom: 10,
-      charisma: 10
+      STR: 10,
+      DEX: 10,
+      CON: 10,
+      INT: 10,
+      WIS: 10,
+      CHA: 10
     },
     initiativeBonus: 0,
     armorClassBase: 10,
     armorClassBonus: 0,
     equippedWeaponName: '',
-    equippedWeaponAbility: 'strength',
+    equippedWeaponAbility: 'STR',
     proficientWithWeapon: true,
     inventoryItemsText: '',
     overrides: {
@@ -451,7 +455,7 @@ function generateBlankOrClone(source?: Record<string, unknown> | null): PlayerCh
   return {
     ...base,
     ...source,
-    classes: Array.isArray(source.classes) ? (source.classes as string[]) : [],
+    classes: Array.isArray(source.classes) ? (source.classes as ClassName[]) : [],
     abilityScores: {
       ...base.abilityScores,
       ...(typeof source.abilityScores === 'object' && source.abilityScores ? source.abilityScores as Record<AbilityKey, number> : {})
@@ -484,12 +488,12 @@ const highlightedFields = ref<Set<string>>(new Set());
 const returnTarget = ref<'combat' | null>(null);
 
 const abilityRows: Array<{ key: AbilityKey; label: string }> = [
-  { key: 'strength', label: 'Strength' },
-  { key: 'dexterity', label: 'Dexterity' },
-  { key: 'constitution', label: 'Constitution' },
-  { key: 'intelligence', label: 'Intelligence' },
-  { key: 'wisdom', label: 'Wisdom' },
-  { key: 'charisma', label: 'Charisma' }
+  { key: 'STR', label: 'Strength' },
+  { key: 'DEX', label: 'Dexterity' },
+  { key: 'CON', label: 'Constitution' },
+  { key: 'INT', label: 'Intelligence' },
+  { key: 'WIS', label: 'Wisdom' },
+  { key: 'CHA', label: 'Charisma' }
 ];
 
 async function hydrateDraftFromRoute() {
@@ -581,11 +585,11 @@ const missingAttackPrerequisites = computed(() => {
 
 const canComputeAttackBonus = computed(() => missingAttackPrerequisites.value.length === 0);
 const weaponAbilityModifier = computed(() =>
-  draft.value.equippedWeaponAbility === 'dexterity'
-    ? abilityModifier(draft.value.abilityScores.dexterity)
-    : abilityModifier(draft.value.abilityScores.strength)
+  draft.value.equippedWeaponAbility === 'DEX'
+    ? abilityModifier(draft.value.abilityScores.DEX)
+    : abilityModifier(draft.value.abilityScores.STR)
 );
-const weaponAbilityLabel = computed(() => (draft.value.equippedWeaponAbility === 'dexterity' ? 'Dex' : 'Str'));
+const weaponAbilityLabel = computed(() => (draft.value.equippedWeaponAbility === 'DEX' ? 'Dex' : 'Str'));
 const derivedAttackBonus = computed(() => {
   if (!canComputeAttackBonus.value) return 0;
   const prof = draft.value.proficientWithWeapon ? effectiveProficiencyBonus.value : 0;
@@ -864,4 +868,13 @@ onBeforeUnmount(() => {
   window.removeEventListener('keydown', handleWindowKeydown);
   window.removeEventListener('click', handleWindowClick);
 });
+
+const savingThrowProficiencies = computed(() => {
+  return savingThrowProficienciesFromClasses(draft.value.classes);
+});
+
+const isSavingThrowProficient = (abilityKey: AbilityKey) => {
+  return savingThrowProficiencies.value.includes(abilityKey);
+};
+
 </script>
