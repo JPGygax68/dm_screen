@@ -32,8 +32,8 @@
               </label>
               <div v-if="sectionOpen.identity" class="mt-2 space-y-2">
                 <div class="flex flex-col gap-2 sm:flex-row">
-                  <ImagePicker :imageDataUrl="draft.portrait || ''" @change="onPortraitChanged" />
-                  <div class="flex-1 space-y-2">
+                  <ImagePicker class="flex-1" :imageDataUrl="draft.portrait || ''" @change="onPortraitChanged" />
+                  <div class="flex-2 space-y-2">
                     <div>
                       <label
                         class="mb-[0.35rem] flex items-center gap-[0.35rem] text-[0.8rem] font-semibold text-design-page-text"

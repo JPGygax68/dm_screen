@@ -1,6 +1,6 @@
 <template>
-  <div class="pt-4 pb-2">
-    <div class="relative flex h-18 w-18 cursor-pointer items-center justify-center overflow-hidden rounded-lg border-2 border-dashed border-design-border-default bg-component-list-item-subtle-bg" @click="triggerFilePicker">
+  <div class="pt-4 pb-2 w-full">
+    <div class="relative flex w-full aspect-square cursor-pointer items-center justify-center overflow-hidden rounded-lg border-2 border-dashed border-design-border-default bg-component-list-item-subtle-bg" @click="triggerFilePicker">
       <img v-if="imageDataUrl" :src="imageDataUrl" class="h-full w-full object-cover" alt="Portrait preview" />
       <div v-else class="text-3xl text-design-page-muted" aria-hidden="true">👤</div>
       <div class="absolute inset-x-0 bottom-0 bg-black/60 py-0.5 text-center text-[9px] font-medium text-white">
