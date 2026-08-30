@@ -137,7 +137,7 @@
                       {{ formatModifier(abilityModifier(draft.abilityScores[ability.key])) }}
                     </div>
                     <div class="ml-auto whitespace-nowrap rounded-[0.35rem] border border-design-border-subtle bg-component-list-item-strong-bg px-[0.45rem] py-[0.2rem] font-semibold"
-                      :class="isSavingThrowProficient(ability.key) ? 'bg-lime-400 border-lime-500' : 'text-current/10 bg-component-list-item-strong-bg border-design-border-subtle'">
+                      :class="isSavingThrowProficient(ability.key) ? 'bg-indigo-400 border-indigo-600 text-indigo-900' : 'text-indigo-900/10 bg-component-list-item-strong-bg border-design-border-subtle'">
                       &#x1F6E1;
                     </div>
                   </div>
@@ -366,7 +366,7 @@ import Ajv from 'ajv';
 import fullSchema from '../generated/models/data.schema.json';
 import { useRoute, useRouter } from 'vue-router';
 import { useDmScreenStore } from '../stores/dataStore';
-import { AbilityKey, ClassName, savingThrowProficienciesFromClasses } from '../rulesets/dnd2024/classes';
+import { AbilityKey, ClassName, savingThrowProficienciesFromClass } from '../rulesets/dnd2024';
 
 const schema = { ...fullSchema.$defs.PlayerCharacter, $defs: fullSchema.$defs };
 const nameInput = ref<HTMLInputElement | null>(null);
@@ -537,7 +537,7 @@ function formatModifier(value: number) {
   return value >= 0 ? `+${value}` : `${value}`;
 }
 
-const dexModifier = computed(() => abilityModifier(draft.value.abilityScores.dexterity));
+const dexModifier = computed(() => abilityModifier(draft.value.abilityScores.DEX));
 const derivedProficiencyBonus = computed(() => Math.floor((Math.max(1, draft.value.level) - 1) / 4) + 2);
 const effectiveProficiencyBonus = computed(() =>
   draft.value.overrides.proficiencyBonus.enabled ? draft.value.overrides.proficiencyBonus.value : derivedProficiencyBonus.value
@@ -870,7 +870,7 @@ onBeforeUnmount(() => {
 });
 
 const savingThrowProficiencies = computed(() => {
-  return savingThrowProficienciesFromClasses(draft.value.classes);
+  return savingThrowProficienciesFromClass(draft.value.classes[0] || null);
 });
 
 const isSavingThrowProficient = (abilityKey: AbilityKey) => {

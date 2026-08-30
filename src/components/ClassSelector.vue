@@ -33,7 +33,7 @@
 
 <script setup lang="ts">
   import { computed, ref } from 'vue';
-  import { pcClasses } from '../rulesets/dnd2024/classes';
+  import { pcClasses } from '../rulesets/dnd2024';
 
   const availableClassNames = computed(() => [
     ...Object.keys(pcClasses)
