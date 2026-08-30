@@ -69,18 +69,5 @@ export const pcClasses: Record<ClassName, ClassDef> = {
 };
 
 export function savingThrowProficienciesFromClass(className: ClassName): AbilityKey[] {
-    //console.log('Calculating saving throw proficiencies for class:', className[0]);
-    const proficiencies = new Set<AbilityKey>();
-    const classDef = pcClasses[className];
-    if (!classDef) {
-        console.warn(`Class definition not found for class: ${className}`);
-        return [];
-    }
-    if (classDef.savingThrows) {
-        for (const ability of classDef.savingThrows) {
-            proficiencies.add(ability);
-        }
-    }
-    //console.log('Calculated saving throw proficiencies:', Array.from(proficiencies));
-    return Array.from(proficiencies);
+    return pcClasses[className].savingThrows || [];
 }

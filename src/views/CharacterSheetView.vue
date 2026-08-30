@@ -132,8 +132,7 @@
                     <input :id="`ability-${ability.key}`" v-model.number="draft.abilityScores[ability.key]"
                       type="number" min="1" max="30" width="2"
                       class="w-14 text-center rounded-[0.35rem] border border-component-input-border bg-component-input-bg px-2.5 py-[0.35rem] text-[0.9rem] text-component-input-text outline-none transition placeholder:text-design-page-muted focus:border-component-button-bg" />
-                    <div
-                      class="whitespace-nowrap rounded-[0.35rem] border border-design-border-subtle bg-component-list-item-strong-bg px-[0.45rem] py-[0.2rem] font-semibold">
+                    <div class="readonly-field">
                       {{ formatModifier(abilityModifier(draft.abilityScores[ability.key])) }}
                     </div>
                     <div class="ml-auto whitespace-nowrap rounded-[0.35rem] border border-design-border-subtle bg-component-list-item-strong-bg px-[0.45rem] py-[0.2rem] font-semibold"
@@ -152,7 +151,7 @@
                 <span>Combat Summary</span>
                 <span>{{ sectionOpen.combat ? '−' : '+' }}</span>
               </button>
-              <div v-if="sectionOpen.combat" class="mt-2 space-y-2">
+              <div v-if="sectionOpen.combat" class="mt-2 space-y-2 grid grid-cols-1 sm:grid-cols-2 gap-2">
                 <div
                   class="rounded-[0.35rem] border border-design-border-subtle bg-component-panel-bg p-[0.45rem_0.55rem]">
                   <div class="flex items-center gap-2 font-bold">
@@ -161,15 +160,16 @@
                       class="inline-flex h-[1.1rem] w-[1.1rem] items-center justify-center rounded-full border border-design-border-default bg-component-panel-bg text-[0.7rem] font-bold leading-none text-design-page-muted"
                       @click="openInfo('proficiencyBonus', $event)">?</button>
                   </div>
-                  <div class="mt-1 flex flex-wrap items-center gap-[0.35rem]">
-                    <span>{{ formatModifier(effectiveProficiencyBonus) }}</span>
-                    <label class="inline-flex items-center gap-2 text-xs text-design-page-muted">
+                  <div class="mt-1 flex flex-wrap items-bottom gap-[0.75rem]">
+                    <span class="readonly-field">{{ formatModifier(effectiveProficiencyBonus) }}</span>
+                    <label class="inline-flex items-center gap-1 text-xs text-design-page-muted">
                       <input v-model="draft.overrides.proficiencyBonus.enabled" type="checkbox" />
                       Override
                     </label>
                     <input v-if="draft.overrides.proficiencyBonus.enabled"
+                      length="2"
                       v-model.number="draft.overrides.proficiencyBonus.value" type="number"
-                      class="w-full max-w-20 rounded-[0.35rem] border border-component-input-border bg-component-input-bg px-2.5 py-[0.35rem] text-[0.9rem] text-component-input-text outline-none transition focus:border-component-button-bg" />
+                      class="w-12 max-w-20" />
                   </div>
                   <p class="mt-1 text-[0.75rem] text-design-page-muted">Derived from level: {{
                     formatModifier(derivedProficiencyBonus) }}</p>
