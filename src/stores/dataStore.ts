@@ -1,6 +1,23 @@
 import { defineStore } from 'pinia';
 import { parse } from 'yaml';
 
+export type EncounterStatus = "Draft" | "Ready" | "Ongoing" | "Completed";
+
+export function getEncounterStatusInEnglish(status: EncounterStatus) {
+  switch (status) {
+    case "Draft":
+      return "Draft";
+    case "Ready":
+      return "Ready";
+    case "Ongoing":
+      return "Ongoing";
+    case "Completed":
+      return "Completed";
+    default:
+      return "Unknown";
+  }
+}
+
 export const useDmScreenStore = defineStore('dmscreen', {
   state: () => ({
     bestiary: [] as any[],
@@ -63,8 +80,8 @@ and require careful handling in the UI.`,
             title: "Goblin Ambush",
             summary: "Unrest in the Forest",
             location: "Triboar Trail",
-            status: "ready", // ready, completed, active
-            difficulty: "Medium",
+            status: "Ongoing", // ready, completed, active
+            difficulty: "Medium", // TODO: replace with XP or CR
             monstersSummary: "4x Goblin, 2x Wolf"
           },
           {
@@ -72,7 +89,7 @@ and require careful handling in the UI.`,
             title: "The Bugbear Chief's Den",
             summary: "The not-so-brave hiding in the cave",
             location: "Cragmaw Hideout",
-            status: "ready",
+            status: "Ready",
             difficulty: "Deadly",
             monstersSummary: "1x Bugbear Chief, 3x Goblin"
           },
@@ -80,7 +97,7 @@ and require careful handling in the UI.`,
             id: "enc-3",
             title: "Redbrand Tavern Brawl",
             location: "Phandalin",
-            status: "active",
+            status: "Draft",
             difficulty: "Easy",
             monstersSummary: "4x Redbrand Ruffian"
           }

@@ -15,25 +15,27 @@
         <div v-else id="encounter-list" class="">
 
           <div v-for="item in encounters" :key="item.id" class="encounter-item border-t">
-            <div class="encounter-header" @click="toggleEncounter(item.id)">
+            <div class="encounter-header"">
               <span class="accordion-header flex items-start gap-3 my-2">
-                <span class="flex-1 min-w-0">
+                <span class="flex-1 min-w-0" @click="toggleEncounter(item.id)">
                   <span class="">
                     {{ item.title || 'Untitled Encounter' }}
                   </span>
                 </span>
+                <span class="encounter-status">{{ getEncounterStatusInEnglish(item.status) }}</span>
                 <span class="flex shrink-0 items-center gap-2">
-                  <button type="button" class="secondary small"
+                  <button type="button" class="secondary small-box"
                     @click="router.push(`/campaigns/${campaignId}/encounters/${item.id}/edit`)">Open</button>
-                  <button type="button" class="danger small" @click="removeEncounter(item.id)">Delete</button>
+                  <button type="button" class="danger small-box" @click="removeEncounter(item.id)">Delete</button>
                 </span>
               </span>
             </div>
-            <div class="encounter-content text-sm flex flex-col gap-y-2" v-show="selectedEncounterId === item.id">
-              <div v-if="item.summary" class="w-[60%]">
+            <div class="encounter-content text-sm grid grid-cols-1 sm:grid-cols-2 gap-2"
+              v-show="selectedEncounterId === item.id">
+              <div v-if="item.summary" class="col-span-full">
                 "{{ item.summary }}"
               </div>
-              <div>Location: {{ item.location || 'Unknown' }}</div>
+              <span><span class="text-xs">Location: </span> {{ item.location || 'Unknown' }}</span>
             </div>
 
             <!--
@@ -54,10 +56,17 @@
   </div>
 </template>
 
+<style scoped>
+  @reference "#styles/tailwind.css";
+  .encounter-status {
+    @apply badge-like small-box w-16 text-center;
+  }
+</style>
+
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
-import useDmScreenStore from '../stores/dataStore';
+import useDmScreenStore, { getEncounterStatusInEnglish } from '../stores/dataStore';
 
 const route = useRoute();
 const router = useRouter();

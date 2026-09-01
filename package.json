@@ -4,7 +4,8 @@
   "description": "",
   "type": "module",
   "imports": {
-    "#lib/*": "./lib/*"
+    "#lib/*": "./lib/*",
+    "#styles/*": "./src/styles/*"
   },
   "scripts": {
     "generate:models": "node scripts/generate-model-json.mjs",
