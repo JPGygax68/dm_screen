@@ -15,21 +15,20 @@
         <div v-else id="encounter-list" class="">
 
           <div v-for="item in encounters" :key="item.id" class="encounter-item border-t">
-            <div class="encounter-header"">
-              <span class="accordion-header flex items-start gap-3 my-2">
-                <span class="flex-1 min-w-0" @click="toggleEncounter(item.id)">
-                  <span class="">
-                    {{ item.title || 'Untitled Encounter' }}
-                  </span>
-                </span>
-                <span class="encounter-status">{{ getEncounterStatusInEnglish(item.status) }}</span>
-                <span class="flex shrink-0 items-center gap-2">
-                  <button type="button" class="secondary small-box"
-                    @click="router.push(`/campaigns/${campaignId}/encounters/${item.id}/edit`)">Open</button>
-                  <button type="button" class="danger small-box" @click="removeEncounter(item.id)">Delete</button>
-                </span>
+            <span class="accordion-header flex items-start gap-3 my-2">
+              <span class="w-[50%] grow" @click="toggleEncounter(item.id)">
+                {{ item.title || 'Untitled Encounter' }}
               </span>
-            </div>
+              <span class="info grow-0 mr-2">
+                <span class="encounter-status">{{ getEncounterStatusInEnglish(item.status) }}</span>
+              </span>
+              <span class="flex shrink-0 items-center gap-2">
+                <button type="button" class="secondary small-box"
+                  @click="router.push(`/campaigns/${campaignId}/encounters/${item.id}/edit`)">Open</button>
+                <button type="button" class="danger small-box" @click="removeEncounter(item.id)">Delete</button>
+              </span>
+            </span>
+
             <div class="encounter-content text-sm grid grid-cols-1 sm:grid-cols-2 gap-2"
               v-show="selectedEncounterId === item.id">
               <div v-if="item.summary" class="col-span-full">
@@ -57,10 +56,11 @@
 </template>
 
 <style scoped>
-  @reference "#styles/tailwind.css";
-  .encounter-status {
-    @apply badge-like small-box w-16 text-center;
-  }
+@reference "#styles/tailwind.css";
+
+.encounter-status {
+  @apply badge-like small-box inline-block w-16 text-center;
+}
 </style>
 
 <script setup lang="ts">
