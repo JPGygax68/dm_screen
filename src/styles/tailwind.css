@@ -213,11 +213,11 @@
 
   /* Component styles EXPERIMENTAL */
 
-  .secondary {
+  button.secondary {
     @apply border-design-border-default bg-component-button-secondary-bg text-component-button-secondary-foreground hover:bg-component-list-item-strong-bg hover:opacity-100;
   }
 
-  .danger {
+  button.danger {
     @apply border-component-button-danger-bg bg-component-button-danger-bg text-component-button-danger-foreground hover:opacity-90;
   }
 
@@ -225,8 +225,17 @@
     @apply rounded-full border border-design-border-default bg-component-list-item-subtle-bg px-3 py-1 text-sm text-design-page-text transition hover:bg-component-list-item-strong-bg
   }
 
+  button.small {
+    @apply rounded border px-2 py-1 text-[12px] font-medium;
+  }
+
   .glyph-button {
     @apply w-8 h-8 border-component-icon-button-border bg-component-icon-button-bg p-0 text-center text-lg text-component-icon-button-foreground hover:bg-component-icon-button-hover-bg hover:opacity-100;
+  }
+
+  .accordion-header {
+    @apply text-[15px] font-medium text-design-page-text hover:text-design-page-muted
+      cursor-pointer;
   }
 
   .surface-subtle {
@@ -253,5 +262,15 @@
       text-component-input-placeholder
       h-8
       px-[0.45rem] py-[0.2rem];
+  }
+
+  .readonly-bonus-malus {
+    @apply whitespace-nowrap rounded-[0.35rem] 
+      border border-design-border-subtle 
+      bg-component-list-item-strong-bg 
+      text-component-input-placeholder
+      h-8
+      px-[0.45rem] py-[0.2rem]
+      text-center;
   }
 }

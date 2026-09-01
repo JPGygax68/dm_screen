@@ -1,0 +1,3 @@
+## TO-DOS
+
+- Display at-a-glance overview of encounter (CR, XP, special events e.g. PC death)

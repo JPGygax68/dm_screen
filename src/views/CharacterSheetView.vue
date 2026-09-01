@@ -160,8 +160,8 @@
                       class="inline-flex h-[1.1rem] w-[1.1rem] items-center justify-center rounded-full border border-design-border-default bg-component-panel-bg text-[0.7rem] font-bold leading-none text-design-page-muted"
                       @click="openInfo('proficiencyBonus', $event)">?</button>
                   </div>
-                  <div class="mt-1 flex flex-wrap items-bottom gap-[0.75rem]">
-                    <span class="readonly-field">{{ formatModifier(effectiveProficiencyBonus) }}</span>
+                  <div class="mt-1 flex flex-wrap items-bottom gap-2">
+                    <span class="readonly-bonus-malus mr-2">{{ formatModifier(effectiveProficiencyBonus) }}</span>
                     <label class="inline-flex items-center gap-1 text-xs text-design-page-muted">
                       <input v-model="draft.overrides.proficiencyBonus.enabled" type="checkbox" />
                       Override
@@ -171,8 +171,7 @@
                       v-model.number="draft.overrides.proficiencyBonus.value" type="number"
                       class="w-12 max-w-20" />
                   </div>
-                  <p class="mt-1 text-[0.75rem] text-design-page-muted">Derived from level: {{
-                    formatModifier(derivedProficiencyBonus) }}</p>
+                  <p class="mt-1 text-[0.75rem] text-design-page-muted">Derived from level {{ draft.level }}</p>
                 </div>
 
                 <div
@@ -183,15 +182,15 @@
                       class="inline-flex h-[1.1rem] w-[1.1rem] items-center justify-center rounded-full border border-design-border-default bg-component-panel-bg text-[0.7rem] font-bold leading-none text-design-page-muted"
                       @click="openInfo('initiative', $event)">?</button>
                   </div>
-                  <div class="mt-1 flex flex-wrap items-center gap-[0.35rem]">
-                    <span>{{ formatModifier(effectiveInitiative) }}</span>
-                    <label class="inline-flex items-center gap-2 text-xs text-design-page-muted">
+                  <div class="mt-1 flex flex-wrap items-bottom gap-[0.35rem]">
+                    <span class="readonly-bonus-malus mr-2">{{ formatModifier(effectiveInitiative) }}</span>
+                    <label class="inline-flex items-center gap-1 text-xs text-design-page-muted">
                       <input v-model="draft.overrides.initiative.enabled" type="checkbox" />
                       Override
                     </label>
                     <input v-if="draft.overrides.initiative.enabled" v-model.number="draft.overrides.initiative.value"
                       type="number"
-                      class="w-full max-w-20 rounded-[0.35rem] border border-component-input-border bg-component-input-bg px-2.5 py-[0.35rem] text-[0.9rem] text-component-input-text outline-none transition focus:border-component-button-bg" />
+                      class="w-12 max-w-20" />
                   </div>
                   <p class="mt-1 text-[0.75rem] text-design-page-muted">Dex mod {{ formatModifier(dexModifier) }} +
                     bonus {{
@@ -207,7 +206,7 @@
                       @click="openInfo('armorClass', $event)">?</button>
                   </div>
                   <div class="mt-1 flex flex-wrap items-center gap-[0.35rem]">
-                    <span>{{ effectiveArmorClass }}</span>
+                    <span class="readonly-field w-12 text-center">{{ effectiveArmorClass }}</span>
                     <label class="inline-flex items-center gap-2 text-xs text-design-page-muted">
                       <input v-model="draft.overrides.armorClass.enabled" type="checkbox" />
                       Override

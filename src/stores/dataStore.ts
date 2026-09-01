@@ -60,7 +60,8 @@ and require careful handling in the UI.`,
         encounters: [
           {
             id: "enc-1",
-            name: "Goblin Ambush",
+            title: "Goblin Ambush",
+            summary: "Unrest in the Forest",
             location: "Triboar Trail",
             status: "ready", // ready, completed, active
             difficulty: "Medium",
@@ -68,7 +69,8 @@ and require careful handling in the UI.`,
           },
           {
             id: "enc-2",
-            name: "The Bugbear Chief's Den",
+            title: "The Bugbear Chief's Den",
+            summary: "The not-so-brave hiding in the cave",
             location: "Cragmaw Hideout",
             status: "ready",
             difficulty: "Deadly",
@@ -76,7 +78,7 @@ and require careful handling in the UI.`,
           },
           {
             id: "enc-3",
-            name: "Redbrand Tavern Brawl",
+            title: "Redbrand Tavern Brawl",
             location: "Phandalin",
             status: "active",
             difficulty: "Easy",

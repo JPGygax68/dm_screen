@@ -9,6 +9,7 @@
           <h1 class="text-3xl font-bold">{{ draft.name || 'Untitled Campaign' }}</h1>
         </div>
         <div class="flex items-center gap-2">
+          <button type="button" class="rounded-lg border border-design-border-default bg-component-button-secondary-bg px-4 py-2 text-sm font-medium text-component-button-secondary-foreground transition hover:bg-component-list-item-strong-bg" @click="openEncounterList">Encounter List</button>
           <button type="button" class="rounded-lg border border-design-border-default bg-component-button-secondary-bg px-4 py-2 text-sm font-medium text-component-button-secondary-foreground transition hover:bg-component-list-item-strong-bg" @click="cancel">Cancel</button>
           <button type="submit" form="campaign-form" class="rounded-lg border border-component-button-bg bg-component-button-bg px-4 py-2 text-sm font-medium text-component-button-foreground transition hover:opacity-95 disabled:cursor-not-allowed disabled:bg-component-list-item-strong-bg disabled:text-design-page-muted" :disabled="!canSave">Save Campaign</button>
         </div>
@@ -155,6 +156,14 @@
         characterId: character.id
       },
       query: { returnTo: `/campaigns/${targetCampaignId}` }
+    });
+  }
+
+  function openEncounterList() {
+    const targetCampaignId = persistDraftAndGetId();
+    router.push({
+      name: 'campaign-encounters',
+      params: { campaignId: targetCampaignId }
     });
   }
 
