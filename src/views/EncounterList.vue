@@ -20,7 +20,9 @@
                 {{ item.title || 'Untitled Encounter' }}
               </span>
               <span class="info grow mx-2 justify-self-start">
-                <span class="encounter-status">{{ getEncounterStatusInEnglish(item.status) }}</span>
+                <span class="encounter-status"
+                  :class="encounterStatusColorClass(item.status)"
+                >{{ getEncounterStatusInEnglish(item.status) }}</span>
               </span>
               <span class="flex shrink-0 items-center gap-2">
                 <button type="button" class="secondary small-box"
@@ -118,4 +120,16 @@ function removeEncounter(encounterId: string) {
     selectedEncounterId.value = campaign.encounters.length > 0 ? campaign.encounters[0].id : null;
   }
 }
+
+function encounterStatusColorClass(status: string) {
+  switch (status) {
+    case 'Ready':
+      return 'green';
+    case 'Running':
+      return 'primary';
+    default:
+      return '';
+  }
+}
+
 </script>

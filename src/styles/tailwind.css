@@ -264,6 +264,13 @@
   &.clickable {
     @apply cursor-pointer hover:bg-component-list-item-strong-bg hover:opacity-100;
   }
+
+  &.primary {
+    @apply bg-component-button-bg border-component-button-border text-component-button-foreground;
+  }
+  &.green {
+    @apply border-lime-500 bg-lime-300 text-design-page-text;
+  }
 }
 
 @utility title-label {

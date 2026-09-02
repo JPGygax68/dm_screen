@@ -2,7 +2,7 @@ import { defineStore } from 'pinia';
 import { I } from 'vue-router/dist/router-CWoNjPRp.mjs';
 import { parse } from 'yaml';
 
-export type EncounterStatus = "Draft" | "Ready" | "Ongoing" | "Completed";
+export type EncounterStatus = "Draft" | "Ready" | "Running" | "Completed";
 
 export function getEncounterStatusInEnglish(status: EncounterStatus) {
   switch (status) {
@@ -10,8 +10,8 @@ export function getEncounterStatusInEnglish(status: EncounterStatus) {
       return "Draft";
     case "Ready":
       return "Ready";
-    case "Ongoing":
-      return "Ongoing";
+    case "Running":
+      return "Running";
     case "Completed":
       return "Completed";
     default:
@@ -81,7 +81,7 @@ and require careful handling in the UI.`,
             title: "Goblin Ambush",
             summary: "Unrest in the Forest",
             location: "Triboar Trail",
-            status: "Ongoing", // ready, completed, active
+            status: "Running", // ready, active, completed
             difficulty: "Medium", // TODO: replace with XP or CR
             enemies: [{
               id: 'creature-goblin-sergeant-1',
