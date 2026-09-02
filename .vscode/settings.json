@@ -5,7 +5,11 @@
   // 1. Force the Vue layout block context to use raw indentation math
   "[vue]": {
     "editor.foldingStrategy": "indentation",
-    "editor.showFoldingControls": "always"
+    "editor.showFoldingControls": "always",
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "[html]": {
+    "editor.defaultFormatter": "vscode.html-language-features"
   },
   "[pug]": {
     "editor.foldingStrategy": "indentation",

@@ -1,3 +1,4 @@
 ## TO-DOS
 
 - Display at-a-glance overview of encounter (CR, XP, special events e.g. PC death)
+- Encounter(s) that are Ongoing should have big buttons allowing to continue them (in rare cases, more than one encounter could be Ongoing at the same time - when the party has split)
