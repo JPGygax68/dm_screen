@@ -220,7 +220,7 @@
   }
 
   .accordion-header {
-    @apply text-[15px] font-medium text-design-page-text hover:text-design-page-muted cursor-pointer;
+    @apply text-[15px] font-medium text-design-page-text hover:text-design-page-muted;
   }
 
   .surface-subtle {
@@ -260,6 +260,14 @@
 
 @utility badge-like {
   @apply rounded-full border border-design-border-default bg-component-button-secondary-bg px-3 py-1 text-sm text-design-page-text;
+
+  &.clickable {
+    @apply cursor-pointer hover:bg-component-list-item-strong-bg hover:opacity-100;
+  }
+}
+
+@utility title-label {
+  @apply border border-design-border-default bg-component-button-secondary-bg px-2 py-1 text-sm text-design-page-text;
 
   &.clickable {
     @apply cursor-pointer hover:bg-component-list-item-strong-bg hover:opacity-100;

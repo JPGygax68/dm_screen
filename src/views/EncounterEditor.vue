@@ -101,13 +101,7 @@ function saveEncounter() {
 
   const finalizedEncounter = {
     ...encounter.value,
-    enemyList: encounter.value.enemyList.map((entry) => ({
-      ...entry,
-      count: Math.max(1, Number(entry.count || 1)),
-    })),
-    monstersSummary: encounter.value.enemyList.length
-      ? encounter.value.enemyList.map((entry) => `${entry.count}x ${entry.id}`).join(", ")
-      : "No creatures selected",
+    enemies: encounter.value.enemies.map((enemy: any) => ({ ...enemy })),
   };
 
   dataStore.saveEncounter(campaignId, finalizedEncounter);
