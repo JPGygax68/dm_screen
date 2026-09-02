@@ -1,4 +1,31 @@
 {
+  "editor.tokenColorCustomizations": {
+    "textMateRules": [
+      {
+        "scope": [
+          "meta.attribute.class.html string.quoted.double.html",
+          "meta.attribute.class.html string.quoted.single.html",
+          "meta.attribute.class.html entity.other.attribute-name"
+        ],
+        "settings": {
+          "foreground": "#505560"
+        }
+      },
+      {
+        "scope": [
+          // Style 1: Standard Pug class attributes -> div(class="my-class")
+          "meta.tag.other.unique.pug string.quoted.double.pug",
+          "meta.tag.other.unique.pug string.quoted.single.pug",
+          "meta.tag.other.unique.pug entity.other.attribute-name.tag.pug",
+          // Style 2: Pug shorthand class literals -> div.my-class
+          "entity.other.attribute-name.class.pug"
+        ],
+        "settings": {
+          "foreground": "#505560" // Matches your dim gray color
+        }
+      }
+    ]
+  },
   "editor.semanticHighlighting.enabled": true,
   "editor.foldingStrategy": "auto",
   "editor.defaultFoldingRangeProvider": "Vue.volar",
