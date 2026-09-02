@@ -18,25 +18,19 @@
 
       <section id="enemies" class="sheet-section">
         <label for="enemy-list">Enemy List</label>
-        <span id="enemy-list" class="flex flex-wrap gap-2">
-          <span
-            v-for="enemy in encounter.enemies"
-            :key="enemy.id"
-            @click="editEnemy(enemy)"
-            class="badge-like clickable"
-          >
+        <span id="enemy-list" class="flex flex-wrap gap-2 items-center">
+          <span v-for="enemy in encounter.enemies" :key="enemy.id" class="badge-like clickable">
             {{ enemy.name }}
           </span>
+          <button type="button" @click="addRemoveEnemies()" class="ml-auto secondary">
+            Add / Remove
+          </button>
         </span>
       </section>
 
       <div id="actions" class="mt-2 flex gap-2">
-        <button type="button" @click="discard" class="secondary">
-          Discard
-        </button>
-        <button type="button" @click="saveEncounter" class="primary">
-          Save
-        </button>
+        <button type="button" @click="discard" class="secondary">Discard</button>
+        <button type="button" @click="saveEncounter" class="primary">Save</button>
       </div>
     </form>
   </div>
@@ -62,7 +56,6 @@ h3 {
 import { computed, onMounted, ref } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import useDmScreenStore from "../stores/dataStore";
-import { CreatureRef } from "../components/CreatureSelector.vue";
 
 const route = useRoute();
 const router = useRouter();
@@ -70,9 +63,7 @@ const dataStore = useDmScreenStore();
 
 const campaignId = route.params.campaignId as string;
 const encounterId = route.params.encounterId as string;
-//const searchTerm = ref("");
 const encounter = ref<any>({});
-//const selectedCreatures = ref<SelectedCreature[]>([]);
 
 onMounted(async () => {
   // await dataStore.loadBestiary();
@@ -86,29 +77,21 @@ function loadEncounter() {
     return;
   }
 
-  const existingEncounter = campaign.encounters?.find(
-    (entry: any) => entry.id === encounterId,
-  ) || {
+  const existingEncounter = campaign.encounters?.find((entry: any) => entry.id === encounterId) || {
     id: encounterId,
     name: "New Encounter",
     description: "",
-    enemyList: [],
+    enemies: [],
   };
 
   encounter.value = {
     ...existingEncounter,
-    enemyList: Array.isArray(existingEncounter.enemyList)
-      ? existingEncounter.enemyList.map((item: CreatureRef) => ({
-          id: item.id,
-          count: item.count ?? 1,
-        }))
-      : [],
   };
 }
 
-function editEnemy(enemy: CreatureRef) {
-  // Implement the logic to edit the enemy here
-  console.log("TODO: edit enemy:", enemy);
+function addRemoveEnemies() {
+  // Navigate to the enemy management screen or open a modal
+  router.push(`/campaigns/${campaignId}/encounters/${encounterId}/manage-enemies`);
 }
 
 function saveEncounter() {
@@ -123,9 +106,7 @@ function saveEncounter() {
       count: Math.max(1, Number(entry.count || 1)),
     })),
     monstersSummary: encounter.value.enemyList.length
-      ? encounter.value.enemyList
-          .map((entry) => `${entry.count}x ${entry.id}`)
-          .join(", ")
+      ? encounter.value.enemyList.map((entry) => `${entry.count}x ${entry.id}`).join(", ")
       : "No creatures selected",
   };
 

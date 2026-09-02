@@ -84,11 +84,17 @@ and require careful handling in the UI.`,
             status: "Ongoing", // ready, completed, active
             difficulty: "Medium", // TODO: replace with XP or CR
             enemies: [{
-              id: 'creature-goblin-scout-1',
-              name: 'Goblin Scout #1'
-            }, {
               id: 'creature-goblin-sergeant-1',
-              name: 'Goblin Sergeant'
+              imageId: 'creature-goblin-sergeant',
+              name: 'Goblin Sergeant',
+              cr: '1/2',
+              armorClass: 15,
+            }, {
+              id: 'creature-goblin-scout-1',
+              imageId: 'creature-goblin-scout',
+              name: 'Goblin Scout #1',
+              cr: '1/4',
+              armorClass: 13,
             }]
           },
           {

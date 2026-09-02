@@ -250,6 +250,10 @@
   }
 }
 
+@utility clickable {
+  @apply cursor-pointer hover:opacity-95;
+}
+
 @utility button-like {
   @apply rounded-lg border border-component-button-border bg-component-button-bg px-4 py-2 text-sm font-medium text-component-button-foreground transition hover:opacity-95 disabled:cursor-not-allowed disabled:border-component-list-item-strong-bg disabled:bg-component-list-item-strong-bg disabled:text-design-page-muted;
 }

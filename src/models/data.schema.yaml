@@ -128,8 +128,10 @@ type: object
       type: { "$ref": "#/$defs/CombatantType" }
       id: 
         oneOf: [ { "$ref": "#/$defs/PlayerId" }, { "$ref": "#/$defs/NpcId" }, { "$ref": "#/$defs/CreatureId" } ]
-        description: 'Unique identifier for the combatant (must match a PC, NPC, or creature
-          in the campaign)'
+        description: 'Unique identifier for the combatant (must match a PC, NPC, or creature)'
+      imageId:
+        oneOf: [ { "$ref": "#/$defs/PlayerId" }, { "$ref": "#/$defs/NpcId" }, { "$ref": "#/$defs/CreatureId" } ]
+        description: 'Identifier for the combatant image (optional)'
       name:
         type: string
         description: Combatant name

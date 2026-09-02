@@ -44,6 +44,11 @@ const routes: RouteRecordRaw[] = [
     path: '/campaigns/:campaignId/encounters/:encounterId/edit',
     name: 'campaign-encounter-edit',
     component: EncounterEditor
+  },
+  {
+    path: '/campaigns/:campaignId/encounters/:encounterId/manage-enemies',
+    name: 'campaign-encounter-manage-enemies',
+    component: () => import('../views/ManageEnemies.vue')
   }
 ];
 
