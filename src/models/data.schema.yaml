@@ -44,6 +44,34 @@ type: object
     # - encounters
     additionalProperties: false
 
+  Encounter:
+    type: object
+    title: Encounter
+    description: An encounter within a campaign
+    properties:
+      id: { type: string, description: "Unique encounter identifier" }
+      title: { type: string, description: "Encounter title", minLength: 1 }
+      summary: { type: string, description: "Brief summary of the encounter (optional)" }
+      location: { type: string, description: "Location of the encounter (optional)" }
+      status: { "$ref": "#/$defs/EncounterStatus" }
+      difficulty: { type: string, description: "Encounter difficulty (optional)" }
+      enemies:
+        type: array
+        description: List of enemies in the encounter
+        items:
+          "$ref": "#/$defs/Combatant"
+        uniqueItems: true
+    required:
+    - id
+    - title
+    - status
+    additionalProperties: false
+
+  EncounterStatus:
+    type: string
+    description: "Status of an encounter"
+    enum: ["Draft", "Ready", "Ongoing", "Completed"]
+
   PlayerCharacter:
     type: object
     title: Player Character
@@ -102,6 +130,10 @@ type: object
         oneOf: [ { "$ref": "#/$defs/PlayerId" }, { "$ref": "#/$defs/NpcId" }, { "$ref": "#/$defs/CreatureId" } ]
         description: 'Unique identifier for the combatant (must match a PC, NPC, or creature
           in the campaign)'
+      name:
+        type: string
+        description: Combatant name
+        minLength: 1
       initiativeRoll:
         type: integer
         description: Initiative roll result
@@ -121,6 +153,8 @@ type: object
           type: string
     required:
     - type
+    - id
+    - name
     - initiativeRoll
     - hitPoints
     - conditions
@@ -457,80 +491,6 @@ type: object
       description:
         type: string
         description: Description of the event
-    additionalProperties: false
-
-  # TODO: split the Encounter into a static EncounterDefinition and a dynamic EncounterState, 
-  # so that the definition can be easily copied/reused across multiple encounters and the state can be persisted separately.
-  Encounter:
-    type: object
-    title: Encounter
-    description: A combat encounter containing combatants and rounds
-    properties:
-      id: { type: string, description: "Unique encounter identifier" }
-      tagline:
-        type: string
-        description: Short description of the encounter (optional)
-      description:
-        type: string
-        description: Longer description of the encounter (optional)
-      location:
-        type: string
-        description: Location of the encounter (optional)
-      difficulty:
-        type: string
-        description: Difficulty of the encounter (optional)
-      source:
-        type: string
-        description: Source of the encounter (e.g., module name, homebrew, etc.)
-      sourceId:
-        type: string
-        description: ID of the source of the encounter (e.g., module ID, homebrew ID, etc.)
-      combatants:
-        type: object
-        description: Map of combatants by CombatantRef (Combatant type + ID)
-        minProperties: 1
-      startTime:
-        type: string
-        format: date-time
-        description: Start time of the encounter (optional)
-      endTime:
-        type: string
-        format: date-time
-        description: End time of the encounter (optional)
-      status:
-        type: string
-        enum:
-        - draft
-        - ready
-        - active
-        - completed
-        description: Status of the encounter
-      initiativeOrder:
-        type: array
-        description: List of combatant IDs in initiative order
-        items:
-          "$ref": "#/$defs/CombatantRef"
-        minItems: 1
-      currentRound:
-        type: integer
-        minimum: 1
-        description: Current round number
-      currentTurn:
-        type: integer
-        minimum: 0
-        description: Current turn index in the round
-      rounds:
-        type: array
-        description: List of combat rounds (can be implemented as indexed array or
-          dictionary)
-        items:
-          "$ref": "#/$defs/Round"
-    required:
-    - combatants
-    - initiativeOrder
-    - currentRound
-    - currentTurn
-    - rounds
     additionalProperties: false
 
 properties:

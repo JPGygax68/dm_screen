@@ -33,7 +33,7 @@
   "[vue]": {
     "editor.foldingStrategy": "indentation",
     "editor.showFoldingControls": "always",
-    "editor.defaultFormatter": "esbenp.prettier-vscode"
+    "editor.defaultFormatter": "Vue.volar"
   },
   "[html]": {
     "editor.defaultFormatter": "vscode.html-language-features"

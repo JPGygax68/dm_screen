@@ -1,4 +1,5 @@
 import { defineStore } from 'pinia';
+import { I } from 'vue-router/dist/router-CWoNjPRp.mjs';
 import { parse } from 'yaml';
 
 export type EncounterStatus = "Draft" | "Ready" | "Ongoing" | "Completed";
@@ -82,7 +83,13 @@ and require careful handling in the UI.`,
             location: "Triboar Trail",
             status: "Ongoing", // ready, completed, active
             difficulty: "Medium", // TODO: replace with XP or CR
-            monstersSummary: "4x Goblin, 2x Wolf"
+            enemies: [{
+              id: 'creature-goblin-scout-1',
+              name: 'Goblin Scout #1'
+            }, {
+              id: 'creature-goblin-sergeant-1',
+              name: 'Goblin Sergeant'
+            }]
           },
           {
             id: "enc-2",
@@ -90,16 +97,14 @@ and require careful handling in the UI.`,
             summary: "The not-so-brave hiding in the cave",
             location: "Cragmaw Hideout",
             status: "Ready",
-            difficulty: "Deadly",
-            monstersSummary: "1x Bugbear Chief, 3x Goblin"
+            difficulty: "Deadly"
           },
           {
             id: "enc-3",
             title: "Redbrand Tavern Brawl",
             location: "Phandalin",
             status: "Draft",
-            difficulty: "Easy",
-            monstersSummary: "4x Redbrand Ruffian"
+            difficulty: "Easy"
           }
         ]
       },

@@ -55,7 +55,7 @@ const crumbs = computed(() => {
         return [
             ...base,
             { label: 'Encounters', to: encountersPath },
-            { label: encounter ? `"${encounter.name}"` : 'Encounter', to: null }
+            { label: encounter ? `"${encounter.title}"` : '(New Encounter)', to: null }
         ];
     }
 
