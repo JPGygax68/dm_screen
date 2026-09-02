@@ -230,6 +230,7 @@
     --component-button-bg: var(--component-button-secondary-bg);
     --component-button-border: var(--design-border-default);
     --component-button-foreground: var(--component-button-secondary-foreground);
+    --component-button-secondary-bg: var(--design-page-bg);
     --component-icon-button-bg: var(--component-panel-bg);
     --component-icon-button-border: var(--design-border-default);
     --component-icon-button-foreground: var(--design-page-text);
@@ -254,7 +255,11 @@
 }
 
 @utility badge-like {
-  @apply rounded-full border border-design-border-default bg-component-list-item-subtle-bg px-3 py-1 text-sm text-design-page-text
+  @apply rounded-full border border-design-border-default bg-component-button-secondary-bg px-3 py-1 text-sm text-design-page-text;
+
+  &.clickable {
+    @apply cursor-pointer hover:bg-component-list-item-strong-bg hover:opacity-100;
+  }
 }
 
 @utility small-box {

@@ -2,16 +2,29 @@
   <div class="min-h-screen bg-design-page-bg text-design-page-text">
     <Breadcrumbs />
 
-    <div class="mx-auto max-w-7xl px-4 py-4 flex flex-col gap-2">
+    <form class="mx-auto max-w-7xl px-4 py-4 flex flex-col gap-2">
       <section id="general" class="sheet-section">
-        <label for="encounter-title">Encounter Title<span class="text-design-page-muted">*</span></label>
-        <input id="encounter-title" type="text" v-model="encounter.title" placeholder="New Encounter" />
+        <label for="encounter-title"
+          >Encounter Title<span class="text-design-page-muted">*</span></label
+        >
+        <input
+          id="encounter-title"
+          type="text"
+          v-model="encounter.title"
+          placeholder="New Encounter"
+          class="w-full"
+        />
       </section>
 
       <section id="enemies" class="sheet-section">
         <label for="enemy-list">Enemy List</label>
         <span id="enemy-list" class="flex flex-wrap gap-2">
-          <span v-for="enemy in encounter.enemies" :key="enemy.id" class="badge-like">
+          <span
+            v-for="enemy in encounter.enemies"
+            :key="enemy.id"
+            @click="editEnemy(enemy)"
+            class="badge-like clickable"
+          >
             {{ enemy.name }}
           </span>
         </span>
@@ -25,7 +38,7 @@
           Save
         </button>
       </div>
-    </div>
+    </form>
   </div>
 </template>
 
@@ -86,11 +99,16 @@ function loadEncounter() {
     ...existingEncounter,
     enemyList: Array.isArray(existingEncounter.enemyList)
       ? existingEncounter.enemyList.map((item: CreatureRef) => ({
-        id: item.id,
-        count: item.count ?? 1,
-      }))
+          id: item.id,
+          count: item.count ?? 1,
+        }))
       : [],
   };
+}
+
+function editEnemy(enemy: CreatureRef) {
+  // Implement the logic to edit the enemy here
+  console.log("TODO: edit enemy:", enemy);
 }
 
 function saveEncounter() {
@@ -106,8 +124,8 @@ function saveEncounter() {
     })),
     monstersSummary: encounter.value.enemyList.length
       ? encounter.value.enemyList
-        .map((entry) => `${entry.count}x ${entry.id}`)
-        .join(", ")
+          .map((entry) => `${entry.count}x ${entry.id}`)
+          .join(", ")
       : "No creatures selected",
   };
 
