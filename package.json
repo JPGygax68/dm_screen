@@ -30,8 +30,11 @@
   "homepage": "https://github.com/JPGygax68/dm_screen#readme",
   "dependencies": {
     "@primevue/themes": "^4.3.7",
+    "@types/lodash": "^4.17.25",
     "ajv": "^8.20.0",
     "ajv-formats": "^3.0.1",
+    "events": "^3.3.0",
+    "lodash": "^4.18.1",
     "pinia": "^4.0.2",
     "pouchdb": "^9.0.0",
     "primeicons": "^7.0.0",

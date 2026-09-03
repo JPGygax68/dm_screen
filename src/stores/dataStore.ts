@@ -1,8 +1,3 @@
-import { defineStore } from 'pinia';
-import { I } from 'vue-router/dist/router-CWoNjPRp.mjs';
-import { parse } from 'yaml';
-import testCampaigns from './test-campaigns';
-
 export type EncounterStatus = "Draft" | "Ready" | "Running" | "Completed";
 
 export function getEncounterStatusInEnglish(status: EncounterStatus) {
@@ -20,93 +15,196 @@ export function getEncounterStatusInEnglish(status: EncounterStatus) {
   }
 }
 
-export const useDmScreenStore = defineStore('dmscreen', {
-  state: () => ({
-    bestiary: [] as any[],
-    bestiaryLoaded: false,
-    bestiaryError: null as string | null,
-    campaigns: testCampaigns,
-  }),
-  actions: {
+import { defineStore } from 'pinia'
+import { ref, watch, toRaw } from 'vue'
+import { db, saveCampaignToDisk, getAllCampaignsFromDisk, destroyAndRecreateDatabase } from '@/db/dmScreenDb'
+import testCampaigns from './test-campaigns'
+import { parse } from 'yaml'
+import _ from 'lodash'
 
-    addOrUpdateCampaign(campaign: any) {
-      console.log('Adding or updating campaign:', campaign);
-      this.$patch(state => {
-        const existingCampaign = this.getCampaignById(campaign.id);
-        if (existingCampaign) {
-          // Update existing campaign
-          const index = state.campaigns.findIndex(c => c.id === campaign.id);
-          state.campaigns[index] = campaign;
-          console.log('Updated campaign, new list:', this.$state.campaigns);
-        } else {
-          // Add new campaign
-          state.campaigns = [campaign, ...state.campaigns];
-          console.log('Added new campaign, new list:', this.$state.campaigns);
-        }
-      });
-    },
+export const useDmScreenStore = defineStore('campaigns_master', () => {
+  // --- STATE LAYER ---
+  const allCampaigns = ref<any[]>([])       // DM Screen data: all available campaigns
+  const currentCampaign = ref<any>({})      // The active campaign document being explored
+  const currentEncounter = ref<any>({})     // The active encounter document being explored
 
-    removeCampaign(campaignId: string) {
-      this.$patch(state => {
-        state.campaigns = state.campaigns.filter(c => c.id !== campaignId);
-      });
-      console.log('Removed campaign, new list:', this.$state.campaigns);
-    },
+  const bestiary = ref<any[]>([]);
 
-    // REST Equivalent: GET /campaigns/:id
-    getCampaignById(campaignId: string) {
-      return this.campaigns.find(c => c.id === campaignId) || null;
-    },
+  // Single generic sandbox cache slot, pre-hydrated on F5 reload
+  const cachedDraft = localStorage.getItem('dnd_active_draft')
+  const activeDraft = ref(cachedDraft ? JSON.parse(cachedDraft) : null)
 
-    // REST Equivalent: GET /campaigns/:campaignId/encounters/:encounterId
-    getEncounterById(campaignId: string, encounterId: string) {
-      const campaign = this.getCampaignById(campaignId);
-      if (!campaign || !campaign.encounters) return null;
+  // --- AUTOMATED WATCHERS (PERFORMANCE SECURED) ---
 
-      return campaign.encounters.find((e: any) => e.id === encounterId) || null;
-    },
+  // 1. LocalStorage Draft Synchronizer
+  watch(activeDraft, (newDraft) => {
+    if (newDraft) {
+      localStorage.setItem('dnd_active_draft', JSON.stringify(newDraft))
+    } else {
+      localStorage.removeItem('dnd_active_draft')
+    }
+  }, { deep: true })
 
-    // REST Equivalent: PUT /campaigns/:campaignId/encounters/:encounterId
-    saveEncounter(campaignId: string, finalizedEncounter: any) {
-      const campaign = this.getCampaignById(campaignId);
-      if (!campaign) throw new Error(`Parent Campaign ${campaignId} not found.`);
-      if (!campaign.encounters) campaign.encounters = [];
+  // 2. Debounced PouchDB Disk Writer
+  // Clones and serializes data EXACTLY ONCE when the DM pauses typing for 300ms
+  const debouncedDiskSave = _.debounce(async () => {
+    if (!currentCampaign.value) return
+    const snapshot = structuredClone(toRaw(currentCampaign.value))
+    await saveCampaignToDisk(snapshot)
+    console.log(`💾 Disk committed snapshot for: ${snapshot.name}`)
+  }, 300)
 
-      const index = campaign.encounters.findIndex((e: any) => e.id === finalizedEncounter.id);
+  // watch(allCampaigns, (newData) => {
+  //   if (newData) {
+  //     debouncedDiskSave(newData)
+  //   }
+  // }, { deep: true })
 
-      if (index !== -1) {
-        // Update existing item
-        campaign.encounters[index] = finalizedEncounter;
-      } else {
-        // Create brand new resource
-        campaign.encounters.push(finalizedEncounter);
+  return {
+    allCampaigns,
+    currentCampaign,
+    currentEncounter,
+    bestiary,
+    cachedDraft,
+    activeDraft,
+    loadBestiary,
+    loadAllCampaigns,
+    selectCampaign,
+    removeCampaign,
+    startNewEntity,
+    loadExistingEntityIntoDraft,
+    commitDraft,
+    forceOverwriteDatabaseWithTestingData
+  }
+
+  // --- PRODUCTION ACTIONS ---
+
+  async function loadBestiary() {
+    if (bestiary.value?.length) return bestiary.value;
+
+    try {
+      const response = await fetch('/assets/bestiary/bestiary.yaml');
+      if (!response.ok) {
+        throw new Error(`Failed to fetch bestiary: ${response.status}`);
       }
-    },
 
-    async loadBestiary() {
-      if (this.bestiaryLoaded) return this.bestiary;
+      const text = await response.text();
+      const parsed = parse(text);
+      bestiary.value = Array.isArray(parsed) ? parsed : [];
+      return bestiary.value;
+    } catch (error) {
+      bestiary.value = [];
+    }
+  }
 
-      try {
-        const response = await fetch('/assets/bestiary/bestiary.yaml');
-        if (!response.ok) {
-          throw new Error(`Failed to fetch bestiary: ${response.status}`);
-        }
+  async function loadAllCampaigns() {
+    allCampaigns.value = await getAllCampaignsFromDisk()
+  }
 
-        const text = await response.text();
-        const parsed = parse(text);
-        this.bestiary = Array.isArray(parsed) ? parsed : [];
-        this.bestiaryLoaded = true;
-        this.bestiaryError = null;
-        return this.bestiary;
-      } catch (error) {
-        this.bestiary = [];
-        this.bestiaryLoaded = true;
-        this.bestiaryError = error instanceof Error ? error.message : 'Unknown bestiary error';
-        console.error('Unable to load the bestiary:', error);
-        return this.bestiary;
+  function selectCampaign(campaignId: string) {
+    const campaign = allCampaigns.value.find(c => c.id === campaignId) || null
+    currentCampaign.value = campaign
+  }
+
+  function removeCampaign(campaignId: string) {
+    const idx = allCampaigns.value.findIndex(c => c.id === campaignId)
+    if (idx > -1) allCampaigns.value.splice(idx, 1)
+    if (currentCampaign.value?.id === campaignId) currentCampaign.value = null
+  }
+
+  // Initialize a pristine document skeleton into the sandbox wrapper
+  function startNewEntity(type: string) {
+    activeDraft.value = {
+      id: crypto.randomUUID(),
+      type: type, // e.g. 'npc', 'location', 'encounter'
+      isNew: true,
+      name: ''
+    }
+    return activeDraft.value.id
+  }
+
+  // Deep clone an existing document into the sandbox wrapper
+  function loadExistingEntityIntoDraft(entityId: string, type: string) {
+    if (!currentCampaign.value) return
+
+    let existing = null
+    if (type === 'campaign') existing = allCampaigns.value.find(c => c.id === entityId);
+    if (type === 'encounter') existing = currentCampaign.value.encounters?.find((e: any) => e.id === entityId)
+    if (type === 'combatant') existing = currentEncounter.value.enemies?.find((e: any) => e.id === entityId)
+
+    if (existing) {
+      activeDraft.value = {
+        ...structuredClone(toRaw(existing)),
+        type: type,
+        isNew: false
       }
     }
   }
-});
+
+  // Cross the threshold gate into production records
+  function commitDraft() {
+    if (!activeDraft.value || !currentCampaign.value) return
+
+    const entity = { ...activeDraft.value }
+    const type = entity.type
+    delete entity.type
+    delete entity.isNew
+
+    if (activeDraft.value.isNew) {
+      // SCENARIO A: Push fresh creation
+      if (type === 'campaign') allCampaigns.value.push(entity)
+      if (type === 'encounter') {
+        currentCampaign.value.encounters = currentCampaign.value.encounters || [];
+        currentCampaign.value.encounters.push(entity);
+      }
+    } else {
+      // SCENARIO B: Replace old record values
+      if (type === 'campaign') {
+        const idx = allCampaigns.value.findIndex((c: any) => c.id === entity.id)
+        if (idx > -1) allCampaigns.value[idx] = entity
+      }
+      if (type === 'encounter') {
+        const idx = currentCampaign.value.encounters.findIndex((c: any) => c.id === entity.id)
+        if (idx > -1) currentCampaign.value.encounters[idx] = entity
+      }
+      if (type === 'combatant') {
+        const idx = currentEncounter.value.enemies.findIndex((e: any) => e.id === entity.id)
+        if (idx > -1) currentEncounter.value.enemies[idx] = entity
+      }
+    }
+
+    activeDraft.value = null // Wipes sandbox and triggers the PouchDB watch loop
+  }
+
+  function discardDraft() {
+    activeDraft.value = null
+  }
+
+  // --- TESTING HARNESS OVERWRITE UTILITY ---
+  async function forceOverwriteDatabaseWithTestingData() {
+    console.warn('⚠️ Purging local instance and resetting test data streams...')
+
+    // 1. Physically destroy the disk instance to clear out any bad indices
+    await destroyAndRecreateDatabase()
+
+    // 2. Insert your Mock JSON Array
+    const bulkInsertPayload = testCampaigns.map(campaign => ({
+      _id: campaign.id,
+      ...campaign
+    }))
+
+
+    // Write the pristine testing array down to the clean database
+    await db.bulkDocs(bulkInsertPayload)
+
+    // 3. Clear reactive states to isolate fields from old memory traces
+    activeDraft.value = null
+    currentCampaign.value = null
+
+    // 4. Rehydrate the UI array instantly
+    await loadAllCampaigns()
+    console.log('✅ Local store and database successfully re-seeded.')
+  }
+})
 
 export default useDmScreenStore;

@@ -16,7 +16,6 @@ declare module 'vue' {
     CampaignList: typeof import('./views/CampaignList.vue')['default']
     CharacterSheetView: typeof import('./views/CharacterSheetView.vue')['default']
     ClassSelector: typeof import('./components/ClassSelector.vue')['default']
-    CreatureSelector: typeof import('./components/CreatureSelector.vue')['default']
     EncounterEditor: typeof import('./views/EncounterEditor.vue')['default']
     EncounterList: typeof import('./views/EncounterList.vue')['default']
     ImagePicker: typeof import('./components/ImagePicker.vue')['default']

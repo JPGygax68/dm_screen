@@ -18,7 +18,7 @@
 
         <ul class="flex list-none flex-col gap-3 p-0">
           <li
-            v-for="campaign in store.campaigns"
+            v-for="campaign in store.allCampaigns"
             :key="campaign.id"
             class="rounded-xl border border-design-border-subtle bg-component-panel-bg shadow-sm"
           >
@@ -72,15 +72,15 @@
   import { ref, onMounted } from 'vue';
   import type { Ref } from 'vue';
   import { useRouter } from 'vue-router';
-  import useDmScreenStore from '../stores/dataStore.ts';
+  import useDmScreenStore from '@/stores/dataStore';
 
   const router = useRouter();
   const store = useDmScreenStore();
   const selectedCampaignId: Ref<string | null> = ref(null);
 
   onMounted(() => {
-    if (store.campaigns.length > 0) {
-      selectedCampaignId.value = store.campaigns[0].id;
+    if (store.allCampaigns.length > 0) {
+      selectedCampaignId.value = store.allCampaigns[0].id;
     }
   });
 
@@ -95,7 +95,7 @@
   function removeCampaign(campaignId: string) {
     store.removeCampaign(campaignId);
     if (selectedCampaignId.value === campaignId) {
-      selectedCampaignId.value = store.campaigns[0]?.id ?? null;
+      selectedCampaignId.value = store.allCampaigns[0]?.id ?? null;
     }
   }
 </script>

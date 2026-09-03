@@ -59,6 +59,12 @@ function regenerateModels() {
 export default defineConfig({
   root: 'src',
   publicDir: '../public',
+  resolve: {
+    alias: {
+      '@': path.join(repoRoot, 'src'),
+      events: 'events/events.js'
+    }
+  },
   plugins: [
     vue(),
     tailwindcss(),
