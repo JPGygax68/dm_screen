@@ -78,7 +78,7 @@
 
   const route = useRoute();
   const router = useRouter();
-  const dataStore = useDmScreenStore();
+  const store = useDmScreenStore();
 
   const campaignId = route.params.campaignId as string;
   const draft = ref<{
@@ -170,13 +170,13 @@
   function persistDraftAndGetId() {
     const targetCampaignId = draft.value.id || crypto.randomUUID();
     draft.value.id = targetCampaignId;
-    dataStore.addOrUpdateCampaign(JSON.parse(JSON.stringify(draft.value)));
+    store.addOrUpdateCampaign(JSON.parse(JSON.stringify(draft.value)));
     isDirty.value = false;
     return targetCampaignId;
   }
 
   function save() {
-    dataStore.addOrUpdateCampaign(draft.value);
+    store.addOrUpdateCampaign(draft.value);
     router.push('/campaigns');
   }
 
@@ -184,7 +184,7 @@
     router.push('/campaigns');
   }
 
-  const existingCampaign = dataStore.campaigns.find(c => c.id === campaignId);
+  const existingCampaign = store.campaigns.find(c => c.id === campaignId);
   if (existingCampaign) {
     draft.value = JSON.parse(JSON.stringify(existingCampaign));
     isDirty.value = false;

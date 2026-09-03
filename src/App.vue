@@ -3,6 +3,6 @@
 
 <template>
   <div class="h-screen w-full bg-design-page-bg text-design-page-text overscroll-y-none">
-    <router-view />
+    <router-view :key="$route.fullPath"/>
   </div>
 </template>
