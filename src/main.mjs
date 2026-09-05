@@ -1,6 +1,7 @@
 import { createApp } from 'vue';
 import { createPinia } from 'pinia';
 import { createRouter, createWebHistory } from 'vue-router';
+import '@/styles/tailwind.css';
 import App from './App.vue';
 
 // 1. Import your raw JSON Schema data footprint

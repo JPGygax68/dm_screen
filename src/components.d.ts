@@ -19,6 +19,8 @@ declare module 'vue' {
     ClassSelector: typeof import('./components/ClassSelector.vue')['default']
     EncounterEditor: typeof import('./views/EncounterEditor.vue')['default']
     EncounterList: typeof import('./views/EncounterList.vue')['default']
+    GenericDetailView: typeof import('./views/GenericDetailView.vue')['default']
+    GenericListView: typeof import('./views/GenericListView.vue')['default']
     ImagePicker: typeof import('./components/ImagePicker.vue')['default']
     ManageEnemies: typeof import('./views/ManageEnemies.vue')['default']
     RouterLink: typeof import('vue-router')['RouterLink']
