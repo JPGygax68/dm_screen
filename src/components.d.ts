@@ -11,6 +11,7 @@ export {}
 /* prettier-ignore */
 declare module 'vue' {
   export interface GlobalComponents {
+    __Breadcrumbs: typeof import('./components/__Breadcrumbs.vue')['default']
     Breadcrumbs: typeof import('./components/Breadcrumbs.vue')['default']
     CampaignEditor: typeof import('./views/CampaignEditor.vue')['default']
     CampaignList: typeof import('./views/CampaignList.vue')['default']

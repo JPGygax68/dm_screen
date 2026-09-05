@@ -1,89 +1,73 @@
 <script setup lang="ts">
-import { computed } from "vue";
-import { useRoute, useRouter } from "vue-router";
-import { useDmScreenStore } from "../stores/dataStore";
+import { computed } from 'vue';
+import { useRoute } from 'vue-router';
+import { getActivePinia } from 'pinia';
 
 const route = useRoute();
-const router = useRouter();
-const store = useDmScreenStore();
 
-const crumbs = computed(() => {
-  const segments = route.path.split("/").filter(Boolean);
-
-  if (!segments.length || segments[0] !== "campaigns") {
-    return [];
-  }
-
-  const campaignId = route.params.campaignId as string | undefined;
-  const characterId = route.params.characterId as string | undefined;
-  const encounterId = route.params.encounterId as string | undefined;
-  const campaign = campaignId ? store.allCampaigns.find((c) => c.id === campaignId) : null;
-
-  const base = [{ label: "Campaigns", to: "/campaigns" }];
-
-  if (segments.length === 1) {
-    return base;
-  }
-
-  if (segments[1] === "new") {
-    return [...base, { label: "New Campaign", to: null }];
-  }
-
-  if (campaign) {
-    base.push({ label: `"${campaign.name}"`, to: `/campaigns/${campaignId}` });
-  }
-
-  if (segments.length === 2) {
-    return base;
-  }
-
-  if (segments[2] === "characters" && characterId) {
-    const character = campaign?.party.find((ch: any) => ch.id === characterId);
-    return [...base, { label: character ? `"${character.name}"` : "Character", to: null }];
-  }
-
-  if (segments[2] === "encounters") {
-    const encountersPath = `/campaigns/${campaignId}/encounters`;
-    if (segments.length === 3) {
-      return [...base, { label: "Encounters", to: null }];
-    }
-
-    const encounter = campaign?.encounters?.find((entry: any) => entry.id === encounterId);
-    return [
-      ...base,
-      { label: "Encounters", to: encountersPath },
-      { label: encounter ? `"${encounter.title}"` : "(New Encounter)", to: null },
-    ];
-  }
-
-  return base;
+// Dynamically locate the instantiated store instance out of the running Pinia registry
+const store = computed(() => {
+  const pinia = getActivePinia();
+  // Look up the store by the title ID assigned in your schema factory
+  return (pinia as any)?._s.get('generic-dmscreen-store') || (pinia as any)?._s.get('DMScreen Data Schema');
 });
 
-function go(to: string | null) {
-  if (to) router.push(to);
+interface Crumb {
+  label: string;
+  path: string;
 }
-</script>
 
-<template>
-  <nav
-    aria-label="Breadcrumbs"
-    class="flex flex-wrap gap-2 border-b border-design-border-subtle bg-component-list-item-strong-bg px-2 py-2"
-  >
-    <a
-      v-for="(c, i) in crumbs"
-      :key="i"
-      :href="c.to || '#'"
-      class="rounded-full px-2 py-1 text-sm text-design-page-muted transition cursor-pointer hover:text-design-page-text disabled:cursor-default disabled:opacity-70"
-      @click.prevent="go(c.to)"
-    >
-      {{ c.label }}
-    </a>
-    <button
-      v-if="crumbs.length"
-      @click.prevent="store.forceOverwriteDatabaseWithTestingData()"
-      class="ml-auto button-like small"
-    >
-      Reload test data
-    </button>
-  </nav>
-</template>
+function findEntityDisplayLabel(entity: any): string {
+  if (!entity) return 'Loading...';
+  return entity.name || entity.title || entity.label || entity.id || 'Untitled Record';
+}
+
+const crumbs = computed<Crumb[]>(() => {
+  const trail: Crumb[] = [];
+  
+  // Guard access in case store isn't hydrated immediately
+  if (!store.value) return trail;
+  let searchContext: any = store.value;
+
+  route.matched.forEach((match) => {
+    if (match.path === '/' || match.path === '/:pathMatch(.*)*') return;
+
+    let runtimePath = match.path;
+    Object.keys(route.params).forEach((paramKey) => {
+      runtimePath = runtimePath.replace(`:${paramKey}`, String(route.params[paramKey]));
+    });
+
+    const segments = match.path.split('/');
+    const currentSegment = segments[segments.length - 1];
+
+    if (currentSegment.startsWith(':')) {
+      const idParamName = currentSegment.substring(1);
+      const currentId = route.params[idParamName];
+
+      if (currentId && Array.isArray(searchContext)) {
+        const activeEntity = searchContext.find((item: any) => item.id === currentId);
+        if (activeEntity) {
+          trail.push({
+            label: findEntityDisplayLabel(activeEntity),
+            path: runtimePath
+          });
+          searchContext = activeEntity;
+        }
+      }
+    } else if (currentSegment) {
+      const listLabel = currentSegment.charAt(0).toUpperCase() + currentSegment.slice(1);
+      
+      trail.push({
+        label: listLabel,
+        path: runtimePath
+      });
+
+      if (searchContext && searchContext[currentSegment]) {
+        searchContext = searchContext[currentSegment];
+      }
+    }
+  });
+
+  return trail;
+});
+</script>
