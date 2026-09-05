@@ -13,7 +13,7 @@ type: object
 
   Campaigns:
     type: array
-    description: Set of campaigns
+    description: Campaigns
     items:
       "$ref": "#/$defs/Campaign"
     uniqueItems: true

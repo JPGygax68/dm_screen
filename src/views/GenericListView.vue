@@ -141,7 +141,7 @@ import dataSchema from "@/generated/models/data.schema.json";
 import { resolveEffectiveSchema } from "@/utils/schema-utils";
 
 const props = defineProps<{
-  collectionKey: string;
+  collectionKey: string; // The key in the data schema representing the collection to display
 }>();
 
 const route = useRoute();
@@ -151,7 +151,8 @@ const formData = reactive<Record<string, any>>({});
 
 const store = computed(() => {
   const pinia = getActivePinia();
-  return (pinia as any)?._s.get("generic-dmscreen-store");
+  console.log("Active Pinia instance:", pinia);
+  return (pinia as any)?._s.get("generic-store");
 });
 
 const contextData = computed(() => {
@@ -286,6 +287,7 @@ function submitForm() {
     }
   });
 
+  console.log("Store before upsert:", store.value);
   store.value.upsertEntity(props.collectionKey, newRecord, contextData.value.parentContext);
   isModalOpen.value = false;
 }

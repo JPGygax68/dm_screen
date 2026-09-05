@@ -1,4 +1,5 @@
 import { resolveEffectiveSchema } from '@/utils/schema-utils';
+import { toRaw } from 'vue';
 
 /**
  * Generic Schema-Driven Database Persistence Adapter
@@ -11,7 +12,9 @@ export class GenericPersistenceAdapter {
 
     constructor(schema: any) {
         // Generate a unique database name based on the schema title
-        this.dbName = schema.title?.toLowerCase().replace(/\s+/g, '-') || 'generic-dmscreen-db';
+        // this.dbName = schema.title?.toLowerCase().replace(/\s+/g, '-') || 'generic-dmscreen-db';
+
+        this.dbName = 'generic-db';
 
         // Dynamically identify root collections by scanning schema properties for arrays
         if (schema.properties) {
@@ -83,16 +86,20 @@ export class GenericPersistenceAdapter {
         await this.initDB();
         if (!this.db) throw new Error('Database not initialized');
 
-        // If the data is a clean collection array, write records sequentially
         if (Array.isArray(data)) {
             const tx = this.db.transaction(collectionKey, 'readwrite');
             const store = tx.objectStore(collectionKey);
 
-            // Clear out obsolete storage objects first to maintain precise synchronization matching memory arrays
             store.clear();
 
-            data.forEach(item => {
-                if (item.id) store.put(item);
+            // FIX: Unpack the whole underlying array reference in one shot.
+            // The internal items within the unwrapped array are matching plain JS objects!
+            const cleanArray = toRaw(data);
+
+            cleanArray.forEach(item => {
+                if (item.id) {
+                    store.put(item);
+                }
             });
 
             return new Promise((resolve, reject) => {
@@ -100,19 +107,21 @@ export class GenericPersistenceAdapter {
                 tx.onerror = () => reject(tx.error);
             });
         } else if (data && data.id) {
-            // Single record upsert utility pathing shortcut
             return new Promise((resolve, reject) => {
                 if (!this.db) return reject('No DB context');
                 const tx = this.db.transaction(collectionKey, 'readwrite');
                 const store = tx.objectStore(collectionKey);
-                const request = store.put(data);
+
+                // FIX: Zero-overhead unwrapping for single entity operations
+                const cleanItem = toRaw(data);
+                const request = store.put(cleanItem);
 
                 request.onsuccess = () => resolve();
                 request.onerror = () => reject(request.error);
             });
         }
     }
-
+    
     /**
      * Private internal helper to read all objects from an IndexedDB store namespace
      */

@@ -82,7 +82,7 @@ const router = useRouter();
 // 1. Resolve store context from global running runtime registry
 const store = computed(() => {
   const pinia = getActivePinia();
-  return (pinia as any)?._s.get("generic-dmscreen-store");
+  return (pinia as any)?._s.get("generic-store");
 });
 
 /**

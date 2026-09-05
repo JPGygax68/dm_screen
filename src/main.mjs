@@ -2,16 +2,16 @@ import { createApp } from 'vue';
 import { createPinia } from 'pinia';
 import { createRouter, createWebHistory } from 'vue-router';
 import '@/styles/tailwind.css';
-import App from './App.vue';
+import App from '@/App.vue';
 
 // 1. Import your raw JSON Schema data footprint
 // (Ensure your bundler environment supports directly loading JSON files)
-import dataSchema from './generated/models/data.schema.json';
+import dataSchema from '@/generated/models/data.schema.json';
 
 // 2. Import your generic, schema-driven factories
-import { createGenericStore } from './stores/generic-store.js';
-import { buildRoutesFromSchema } from './router/generic-router.js';
-import { GenericPersistenceAdapter } from './db/persistence.js'; // Adjust path to your adapter
+import { createGenericStore } from '@/stores/generic-store.js';
+import { buildRoutesFromSchema } from '@/router/generic-router.js';
+import { GenericPersistenceAdapter } from '@/db/persistence.js'; // Adjust path to your adapter
 
 const app = createApp(App);
 
@@ -23,7 +23,7 @@ app.use(pinia);
 const dbAdapter = new GenericPersistenceAdapter(dataSchema);
 
 // 5. Build and instantiate your Pinia store dynamically
-// This registers 'generic-dmscreen-store' directly into Pinia's central internal map
+// This registers 'generic-store' directly into Pinia's central internal map
 const useGlobalStore = createGenericStore(dataSchema, dbAdapter);
 const globalStore = useGlobalStore();
 

@@ -5,7 +5,8 @@ import { resolveEffectiveSchema } from '@/utils/schema-utils';
  * Universal JSON Schema Runtime State Factory
  */
 export function createGenericStore(schema: any, persistenceAdapter: any) {
-  return defineStore(schema.title || 'generic-dmscreen-store', {
+  // TODO: make name overridable via schema metadata, or via parameter?
+  return defineStore('generic-store', {
     state: () => {
       const initialState: Record<string, any> = {};
 
