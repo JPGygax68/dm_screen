@@ -82,7 +82,7 @@
         >
           <h2 class="text-xl font-bold text-slate-900 mb-5">New {{ entityLabel }}</h2>
 
-          <form @submit.prevent="submitForm" class="space-y-4">
+          <form ref="formRef" @submit.prevent="submitForm" class="space-y-4">
             <div v-for="field in formFields" :key="field.key" class="flex flex-col gap-1.5">
               <label :for="field.key" class="text-sm font-semibold text-slate-700">
                 {{ field.label }}
@@ -97,6 +97,7 @@
                 type="text"
                 :required="field.required"
                 :placeholder="field.description"
+                @input="checkFormValidity"
                 class=""
               />
 
@@ -107,12 +108,13 @@
                 :required="field.required"
                 :placeholder="field.description"
                 rows="3"
+                @input="checkFormValidity"
               ></textarea>
             </div>
 
             <div class="flex justify-end gap-3 mt-6 pt-4 border-t border-slate-100">
               <button type="button" @click="isModalOpen = false" class="secondary">Cancel</button>
-              <button type="submit" class="primary">Create Record</button>
+              <button type="submit" :disabled="!isFormValid" class="primary">Create Record</button>
             </div>
           </form>
         </div>
@@ -126,7 +128,7 @@
 </style>
 
 <script setup lang="ts">
-import { ref, computed, watch, reactive } from "vue";
+import { ref, computed, watch, reactive, nextTick } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { getActivePinia } from "pinia";
 import dataSchema from "@/generated/models/data.schema.json";
@@ -238,29 +240,48 @@ const formFields = computed(() => {
     });
 });
 
-watch(isModalOpen, (isOpen) => {
+const formRef = ref<HTMLFormElement | null>(null);
+const isFormValid = ref(false);
+
+/**
+ * Checks the native HTML5 validity state of the entire form element context
+ */
+function checkFormValidity() {
+  if (formRef.value) {
+    isFormValid.value = formRef.value.checkValidity();
+  }
+}
+
+// Reset validity parameters whenever the dialog modal transitions open or shut
+watch(isModalOpen, async (isOpen) => {
   if (isOpen) {
     Object.keys(formData).forEach((k) => delete formData[k]);
     formFields.value.forEach((f) => {
       formData[f.key] = f.default !== undefined ? f.default : "";
     });
+    
+    // Wait for Vue's virtual DOM to mount the form elements before checking validation
+    await nextTick();
+    checkFormValidity();
+  } else {
+    isFormValid.value = false;
   }
 });
 
-function getStatusClasses(status: string) {
-  switch (status) {
-    case "Draft":
-      return "bg-slate-100 text-slate-700";
-    case "Ready":
-      return "bg-emerald-50 text-emerald-700 border border-emerald-200";
-    case "Ongoing":
-      return "bg-amber-50 text-amber-700 border border-amber-200";
-    case "Completed":
-      return "bg-blue-50 text-blue-700 border border-blue-200";
-    default:
-      return "bg-slate-100 text-slate-600";
-  }
-}
+// function getStatusClasses(status: string) {
+//   switch (status) {
+//     case "Draft":
+//       return "bg-slate-100 text-slate-700";
+//     case "Ready":
+//       return "bg-emerald-50 text-emerald-700 border border-emerald-200";
+//     case "Ongoing":
+//       return "bg-amber-50 text-amber-700 border border-amber-200";
+//     case "Completed":
+//       return "bg-blue-50 text-blue-700 border border-blue-200";
+//     default:
+//       return "bg-slate-100 text-slate-600";
+//   }
+// }
 
 function navigateToDetail(id: string) {
   const targetPath = route.path.endsWith("/") ? `${route.path}${id}` : `${route.path}/${id}`;
