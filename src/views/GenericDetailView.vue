@@ -1,69 +1,173 @@
 <template>
-  <div class="min-h-screen bg-design-page-bg text-design-page-text">
+  <div class="min-h-screen bg-slate-50/50 text-slate-900 font-sans">
     <Breadcrumbs />
 
-    <div class="mx-auto max-w-6xl px-4 py-4">
-      <!-- Back Navigation & Breadcrumbs -->
-      <header class="mb-6 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-        <button @click="goBack" class="secondary">
-          <span class="mr-2">←</span>
-          Back to List
+    <div class="mx-auto max-w-6xl px-4 py-6 space-y-6">
+      <!-- Back Navigation Bar -->
+      <header
+        class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-slate-200 pb-4"
+      >
+        <button
+          @click="goBack"
+          class="inline-flex items-center px-3 py-1.5 border border-slate-300 rounded-lg text-sm font-medium text-slate-700 bg-white hover:bg-slate-50 shadow-2xs transition-colors cursor-pointer group"
+        >
+          <span class="mr-2 transform group-hover:-translate-x-0.5 transition-transform">←</span>
+          Back
         </button>
+
+        <!-- Dynamic Action Switches -->
+        <div class="flex items-center gap-2">
+          <button
+            v-if="!isEditing"
+            @click="startEditing"
+            class="px-4 py-1.5 border border-slate-300 bg-white text-slate-700 hover:bg-slate-50 text-sm font-semibold rounded-lg shadow-2xs transition-colors cursor-pointer"
+          >
+            Edit Record
+          </button>
+          <template v-else>
+            <button
+              @click="cancelEditing"
+              class="px-4 py-1.5 border border-slate-300 bg-white text-slate-700 hover:bg-slate-50 text-sm font-semibold rounded-lg shadow-2xs transition-colors cursor-pointer"
+            >
+              Cancel
+            </button>
+            <button
+              @click="saveChanges"
+              :disabled="!isFormValid"
+              class="px-4 py-1.5 border border-transparent bg-blue-600 text-white hover:bg-blue-700 disabled:bg-slate-300 disabled:cursor-not-allowed text-sm font-semibold rounded-lg shadow-2xs transition-colors cursor-pointer"
+            >
+              Save Changes
+            </button>
+          </template>
+        </div>
       </header>
 
       <!-- Data Loading Placeholder State -->
-      <div v-if="!activeEntity" class="text-center py-20 text-slate-500">
-        <br />
+      <div
+        v-if="!activeEntity"
+        class="text-center py-20 text-slate-500 bg-white border border-slate-200 rounded-xl"
+      >
         <div class="animate-pulse flex flex-col items-center gap-3">
           <div class="h-8 w-48 bg-slate-200 rounded"></div>
           <div class="h-4 w-64 bg-slate-200 rounded"></div>
         </div>
       </div>
 
-      <!-- Reactive Dynamic Detail Dashboard -->
-      <div v-else class="space-y-8">
-        <!-- Title Area -->
-        <div class="border-b border-slate-200 pb-6">
-          <h1 class="text-3xl font-extrabold text-slate-900 tracking-tight">
-            {{ activeEntity.name || activeEntity.title || "Untitled Record" }}
-          </h1>
-          <p v-if="activeEntity.id" class="text-xs font-mono text-slate-400 mt-1">
-            ID: {{ activeEntity.id }}
-          </p>
+      <!-- Reactive Dashboard Layout Split -->
+      <div v-else class="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
+        <!-- MAIN CONTENT PANEL: Presentation Fields -->
+        <div class="lg:col-span-2 space-y-6">
+          <div class="bg-white border border-slate-200 shadow-2xs rounded-xl p-6 space-y-6">
+            <div>
+              <h1 class="text-2xl font-extrabold text-slate-900 tracking-tight">
+                {{ activeEntity.name || activeEntity.title || "Untitled Record" }}
+              </h1>
+              <p
+                v-if="activeEntity.id"
+                class="text-xs font-mono text-slate-400 mt-1 uppercase tracking-wider"
+              >
+                System Key: {{ activeEntity.id }}
+              </p>
+            </div>
+
+            <form
+              ref="formRef"
+              @submit.prevent
+              class="grid grid-cols-1 gap-5 border-t border-slate-100 pt-4"
+            >
+              <div v-for="field in entityFields" :key="field.key" class="flex flex-col gap-1">
+                <label
+                  :for="field.key"
+                  class="text-xs font-bold text-slate-400 uppercase tracking-wider"
+                >
+                  {{ field.label }}
+                </label>
+
+                <!-- EDIT MODE FIELDS -->
+                <template v-if="isEditing">
+                  <input
+                    v-if="!field.isTextarea"
+                    :id="field.key"
+                    v-model="editData[field.key]"
+                    type="text"
+                    @input="checkFormValidity"
+                    class="w-full px-3 py-2 border border-slate-300 rounded-lg shadow-2xs text-sm focus:outline-hidden focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-slate-50/50 focus:bg-white transition-all"
+                  />
+                  <textarea
+                    v-else
+                    :id="field.key"
+                    v-model="editData[field.key]"
+                    rows="4"
+                    @input="checkFormValidity"
+                    class="w-full px-3 py-2 border border-slate-300 rounded-lg shadow-2xs text-sm focus:outline-hidden focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-slate-50/50 focus:bg-white transition-all resize-none"
+                  ></textarea>
+                </template>
+
+                <!-- PRESENTATION VIEW MODE FIELDS -->
+                <template v-else>
+                  <span v-if="field.key === 'status'" class="mt-0.5">
+                    <span
+                      class="inline-flex items-center px-2.5 py-0.5 rounded-md text-xs font-semibold border"
+                      :class="getStatusClasses(activeEntity[field.key])"
+                    >
+                      {{ activeEntity[field.key] }}
+                    </span>
+                  </span>
+                  <p
+                    v-else-if="field.isTextarea"
+                    class="text-slate-700 text-sm mt-0.5 whitespace-pre-line leading-relaxed bg-slate-50/30 p-3 rounded-lg border border-slate-100"
+                  >
+                    {{ activeEntity[field.key] || "—" }}
+                  </p>
+                  <span v-else class="text-slate-800 text-sm font-semibold mt-0.5">
+                    {{
+                      activeEntity[field.key] !== undefined && activeEntity[field.key] !== null
+                        ? activeEntity[field.key]
+                        : "—"
+                    }}
+                  </span>
+                </template>
+              </div>
+            </form>
+          </div>
         </div>
 
-        <div class="grid grid-cols-1 gap-4">
-          <div v-for="field in entityFields" :key="field.key" class="grid grid-cols-1 gap-4">
-            <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider">
-              {{ field.label }}
-            </span>
+        <!-- SIDEBAR PANEL: Navigating Deeper Into Sub-Collections -->
+        <div class="space-y-6">
+          <div
+            v-if="subCollections.length > 0"
+            class="bg-slate-100/60 border border-slate-200 rounded-xl p-5 space-y-4"
+          >
+            <div>
+              <h2 class="text-xs font-bold text-slate-500 uppercase tracking-wider">
+                Sub-Collections
+              </h2>
+              <p class="text-xs text-slate-400 mt-0.5">
+                Select a category below to explore its records.
+              </p>
+            </div>
 
-            <!-- Specialized Rendering for Status Enums -->
-            <span v-if="field.key === 'status'" class="mt-1">
-              <span
-                class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium"
-                :class="getStatusClasses((activeEntity as any)[field.key])"
+            <div class="flex flex-col gap-2">
+              <button
+                v-for="sub in subCollections"
+                :key="sub.key"
+                @click="navigateToSubCollection(sub.key)"
+                class="w-full flex items-center justify-between px-4 py-3 bg-white border border-slate-200 hover:border-blue-400 hover:shadow-sm rounded-xl text-left text-sm font-bold text-slate-700 hover:text-blue-600 transition-all cursor-pointer group"
               >
-                {{ (activeEntity as any)[field.key] }}
-              </span>
-            </span>
-
-            <!-- Standard Presentation Split: Multiline text vs Standard Primitives -->
-            <p
-              v-else-if="field.isTextarea"
-              class="text-slate-700 text-sm mt-1 whitespace-pre-line leading-relaxed"
-            >
-              {{ (activeEntity as any)[field.key] || "—" }}
-            </p>
-
-            <span v-else class="text-slate-800 text-sm font-medium mt-1">
-              {{
-                (activeEntity as any)[field.key] !== undefined &&
-                (activeEntity as any)[field.key] !== null
-                  ? (activeEntity as any)[field.key]
-                  : "—"
-              }}
-            </span>
+                <span>{{ sub.label }}</span>
+                <span class="inline-flex items-center gap-2">
+                  <span
+                    class="bg-slate-100 text-slate-600 text-xs px-2 py-0.5 rounded-md group-hover:bg-blue-50 group-hover:text-blue-600 font-medium transition-colors"
+                  >
+                    {{ activeEntity[sub.key]?.length || 0 }}
+                  </span>
+                  <span
+                    class="text-slate-300 group-hover:text-blue-500 transform group-hover:translate-x-0.5 transition-all"
+                    >→</span
+                  >
+                </span>
+              </button>
+            </div>
           </div>
         </div>
       </div>
@@ -72,17 +176,29 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from "vue";
+import { ref, computed, reactive, nextTick } from "vue";
 import { useRoute, useRouter } from "vue-router";
-import { getActivePinia } from "pinia";
 import dataSchema from "@/generated/models/data.schema.json";
 import { resolveEffectiveSchema } from "@/utils/schema-utils";
 import { useDmScreenStore } from "@/stores/dmScreenStore";
 
 const route = useRoute();
 const router = useRouter();
-
 const store = computed(() => useDmScreenStore());
+
+// Inline Form Modification Hooks
+const isEditing = ref(false);
+const isFormValid = ref(true);
+const formRef = ref<HTMLFormElement | null>(null);
+const editData = reactive<Record<string, any>>({});
+
+/**
+ * Safely extracts primitive fields out of the active entity context
+ */
+function getFieldValue(key: string): any {
+  if (!activeEntity.value) return "";
+  return (activeEntity.value as Record<string, any>)[key];
+}
 
 /**
  * Deep Nested Entity Context Extractor
@@ -92,30 +208,20 @@ const activeEntity = computed(() => {
 
   const currentParams = route.params;
   const paramKeys = Object.keys(currentParams);
-
   if (paramKeys.length === 0) return null;
 
-  // Crucial: Pinia tracks collections in the internal `_collections` dictionary object
   let currentScope: any = store.value._collections || (store.value as any);
   let leafEntity: any = null;
 
   route.matched.forEach((match) => {
-    // Split the route definition path into individual matching tokens
     const segments = match.path.split("/").filter(Boolean);
 
     segments.forEach((segment) => {
       if (segment.startsWith(":")) {
-        // 1. Dynamic ID parameter resolution context
         const idParamName = segment.substring(1);
         const activeId = currentParams[idParamName];
 
         if (activeId && Array.isArray(currentScope)) {
-          console.log(
-            "Searching for entity with ID:",
-            activeId,
-            "within collection array scope:",
-            currentScope,
-          );
           const found = currentScope.find((item: any) => item.id === String(activeId));
           if (found) {
             currentScope = found;
@@ -123,13 +229,10 @@ const activeEntity = computed(() => {
           }
         }
       } else {
-        // 2. Static path parameter context navigation (e.g., 'campaigns' or 'encounters')
         if (currentScope && typeof currentScope === "object") {
           if (currentScope[segment]) {
-            // Steps down into a nested model sub-collection property
             currentScope = currentScope[segment];
           } else if (currentScope._collections && currentScope._collections[segment]) {
-            // Fallback for store root layer checks
             currentScope = currentScope._collections[segment];
           }
         }
@@ -137,13 +240,11 @@ const activeEntity = computed(() => {
     });
   });
 
-  console.log("Deep Entity Extraction complete. Resolved Target:", leafEntity);
   return leafEntity;
 });
 
 /**
  * Schema Analyzer
- * Matches active parameter namespaces back to explicit properties inside $defs
  */
 const currentDefinitionName = computed(() => {
   let matchedDefName = "";
@@ -152,7 +253,6 @@ const currentDefinitionName = computed(() => {
   for (const match of matchedRoutes) {
     const lastSegment = match.path.split("/").pop() || "";
     if (lastSegment.startsWith(":")) {
-      // e.g., transforms parameter mapping "campaignId" -> "campaign"
       matchedDefName = lastSegment.substring(1).replace("Id", "");
       break;
     }
@@ -162,19 +262,16 @@ const currentDefinitionName = computed(() => {
 
 const resolvedSchemaDefinition = computed(() => {
   if (!currentDefinitionName.value) return {};
-
-  // Find case-insensitive property reference matches in schema $defs
   const defKey = Object.keys(dataSchema.$defs).find(
     (k) => k.toLowerCase() === currentDefinitionName.value.toLowerCase(),
   );
-
   if (!defKey) return {};
   const defsMap = dataSchema.$defs as Record<string, any>;
   return resolveEffectiveSchema(defsMap[defKey], dataSchema);
 });
 
 /**
- * 4. Property Map Generation
+ * Property Map Generation
  */
 const entityFields = computed(() => {
   const properties = resolvedSchemaDefinition.value.properties || {};
@@ -201,13 +298,90 @@ const subCollections = computed(() => {
       const fieldInfo = resolveEffectiveSchema(properties[key], dataSchema);
       return {
         key,
-        label: fieldInfo.description || key.charAt(0).toUpperCase() + key.slice(1),
+        label:
+          fieldInfo.description || fieldInfo.title || key.charAt(0).toUpperCase() + key.slice(1),
       };
     });
 });
 
 /**
- * 5. Route Modification Handlers
+ * Inline Editing Handlers
+ */
+function startEditing() {
+  if (!activeEntity.value) return;
+  Object.keys(editData).forEach((k) => delete editData[k]);
+  entityFields.value.forEach((f) => {
+    editData[f.key] = activeEntity.value[f.key] !== undefined ? activeEntity.value[f.key] : "";
+  });
+  isEditing.value = true;
+  isFormValid.value = true;
+}
+
+function cancelEditing() {
+  isEditing.value = false;
+}
+
+function checkFormValidity() {
+  nextTick(() => {
+    if (formRef.value) {
+      isFormValid.value = formRef.value.checkValidity();
+    }
+  });
+}
+
+function saveChanges() {
+  if (!activeEntity.value) return;
+
+  const structuralType = resolvedSchemaDefinition.value.title || currentDefinitionName.value;
+  const updatedRecord = {
+    ...activeEntity.value,
+    ...editData,
+  };
+
+  const currentParams = route.params;
+  let computedParentContext: any = undefined;
+
+  if (route.matched.length > 1) {
+    const parentMatch = route.matched[route.matched.length - 2];
+    const parentSegment = parentMatch.path.split("/").pop() || "";
+    if (parentSegment.startsWith(":")) {
+      const parentIdParam = parentSegment.substring(1);
+      const parentId = currentParams[parentIdParam];
+      const parentType = parentIdParam.replace("Id", "").toLowerCase();
+
+      const parentDefKey = Object.keys(dataSchema.$defs).find(
+        (k) => k.toLowerCase() === parentType,
+      );
+      const parentDef = parentDefKey ? (dataSchema.$defs as any)[parentDefKey] : null;
+      let targetPropertyKey = "";
+
+      if (parentDef && parentDef.properties) {
+        targetPropertyKey =
+          Object.keys(parentDef.properties).find((k) => {
+            const childProp = parentDef.properties[k];
+            return (
+              childProp.type === "array" &&
+              JSON.stringify(childProp).toLowerCase().includes(structuralType.toLowerCase())
+            );
+          }) || "";
+      }
+
+      if (parentId && parentType && targetPropertyKey) {
+        computedParentContext = {
+          id: String(parentId),
+          type: parentType,
+          propertyKey: targetPropertyKey,
+        };
+      }
+    }
+  }
+
+  store.value.upsertEntity(structuralType, updatedRecord, computedParentContext);
+  isEditing.value = false;
+}
+
+/**
+ * Route Modification Handlers
  */
 function goBack() {
   const currentPath = route.path;
@@ -226,15 +400,15 @@ function navigateToSubCollection(subKey: string) {
 function getStatusClasses(status: string) {
   switch (status) {
     case "Draft":
-      return "bg-slate-100 text-slate-700";
+      return "bg-slate-100 text-slate-700 border-slate-200";
     case "Ready":
-      return "bg-emerald-50 text-emerald-700 border border-emerald-200";
+      return "bg-emerald-50 text-emerald-700 border-emerald-200";
     case "Ongoing":
-      return "bg-amber-50 text-amber-700 border border-amber-200";
+      return "bg-amber-50 text-amber-700 border-amber-200";
     case "Completed":
-      return "bg-blue-50 text-blue-700 border border-blue-200";
+      return "bg-blue-50 text-blue-700 border-blue-200";
     default:
-      return "bg-slate-100 text-slate-600";
+      return "bg-slate-100 text-slate-600 border-slate-200";
   }
 }
 </script>
