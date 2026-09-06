@@ -97,7 +97,7 @@
                 type="text"
                 :required="field.required"
                 :placeholder="field.description"
-                class="w-full px-3 py-2 border border-slate-300 rounded-lg shadow-xs text-sm focus:outline-hidden focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-slate-50/50 focus:bg-white transition-all placeholder:text-slate-400"
+                class=""
               />
 
               <textarea
@@ -107,24 +107,12 @@
                 :required="field.required"
                 :placeholder="field.description"
                 rows="3"
-                class="w-full px-3 py-2 border border-slate-300 rounded-lg shadow-xs text-sm focus:outline-hidden focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-slate-50/50 focus:bg-white transition-all placeholder:text-slate-400 resize-none"
               ></textarea>
             </div>
 
             <div class="flex justify-end gap-3 mt-6 pt-4 border-t border-slate-100">
-              <button
-                type="button"
-                @click="isModalOpen = false"
-                class="px-4 py-2 border border-slate-300 rounded-lg text-sm font-medium text-slate-700 hover:bg-slate-50 focus:outline-hidden focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors cursor-pointer"
-              >
-                Cancel
-              </button>
-              <button
-                type="submit"
-                class="px-4 py-2 border border-transparent rounded-lg text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-hidden focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 shadow-sm transition-colors cursor-pointer"
-              >
-                Create Record
-              </button>
+              <button type="button" @click="isModalOpen = false" class="secondary">Cancel</button>
+              <button type="submit" class="primary">Create Record</button>
             </div>
           </form>
         </div>
@@ -132,6 +120,10 @@
     </div>
   </div>
 </template>
+
+<style scoped>
+@reference "@/styles/tailwind.css";
+</style>
 
 <script setup lang="ts">
 import { ref, computed, watch, reactive } from "vue";
@@ -294,10 +286,13 @@ function submitForm() {
   const structuralType = resolvedDefinition.value.title; // || props.collectionKey.replace(/s$/, "");
 
   console.log(
-    "Submitting new record:", newRecord, 
-    "Type identifier:", structuralType, 
-    "to root collection storage slot:", props.collectionKey
-  ); 
+    "Submitting new record:",
+    newRecord,
+    "Type identifier:",
+    structuralType,
+    "to root collection storage slot:",
+    props.collectionKey,
+  );
 
   // Pass structuralType as the definitive type parameter to your store engine
   store.value.upsertEntity(structuralType, newRecord, contextData.value.parentContext);

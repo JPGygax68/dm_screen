@@ -43,8 +43,8 @@
   --design-surface: var(--base-neutral-100);
   --design-surface-subtle: var(--base-neutral-95);
   --design-surface-strong: var(--base-neutral-90);
-  --design-border-default: var(--base-neutral-50);
-  --design-border-subtle: var(--base-neutral-80);
+  --design-border-default: var(--base-neutral-80);
+  --design-border-subtle: var(--base-neutral-40);
   --design-accent: var(--base-primary-40);
   --design-accent-foreground: var(--base-primary-100);
   --design-accent-secondary: var(--base-secondary-40);
@@ -187,20 +187,21 @@
   }
 
   label {
-    @apply mb-2 block text-sm font-semibold text-design-page-text;
+    @apply mb-0 block text-sm font-semibold text-design-page-text;
+  }
+
+  input {
+    @apply input-like;
   }
 
   textarea {
-    @apply w-full rounded-lg border border-component-input-border bg-component-input-bg px-3 py-2 text-base text-component-input-text outline-none transition placeholder:text-design-page-muted focus:border-component-button-bg;
+    @apply input-like w-full text-sm shadow-xs resize-none;
   }
 
   select {
     @apply rounded-lg border border-component-input-border bg-component-input-bg px-3 py-2 text-base text-component-input-text outline-none transition placeholder:text-design-page-muted focus:border-component-button-bg;
   }
 
-  input {
-    @apply h-8 rounded-[0.35rem] border border-component-input-border bg-component-input-bg px-2.5 py-[0.35rem] text-[0.9rem] text-component-input-text outline-none transition focus:border-component-button-bg
-  }
 }
 
 @layer components {
@@ -257,6 +258,14 @@
 @utility button-like {
   @apply rounded-lg border border-component-button-border bg-component-button-bg px-4 py-2 text-sm font-medium text-component-button-foreground transition hover:opacity-95 disabled:cursor-not-allowed disabled:border-component-list-item-strong-bg disabled:bg-component-list-item-strong-bg disabled:text-design-page-muted;
 }
+
+@utility input-like {
+  @apply rounded-lg border border-component-input-border bg-component-input-bg px-3 py-2 text-base text-component-input-text 
+  outline-none 
+  focus:outline-hidden focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:bg-white
+  transition-all
+  placeholder:text-shadow-design-page-muted;
+} 
 
 @utility badge-like {
   @apply rounded-full border border-design-border-default bg-component-button-secondary-bg px-3 py-1 text-sm text-design-page-text;
