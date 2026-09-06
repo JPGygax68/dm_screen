@@ -1,0 +1,6 @@
+- "Hierarchical lineages"
+    - Rule for cross-lineage references:
+        1. Aggregate Roots ("who owns it"): true lineage vs association (reference)
+        2. References must point UP to a shared ancestor or to root 
+        3. Absolut identifiers vs relative paths
+- the "local identifier lookup rule"

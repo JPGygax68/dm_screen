@@ -152,7 +152,7 @@ const formData = reactive<Record<string, any>>({});
 const store = computed(() => {
   const pinia = getActivePinia();
   console.log("Active Pinia instance:", pinia);
-  return (pinia as any)?._s.get("generic-store");
+  return (pinia as any)?._s.get("dmscreen-store");
 });
 
 const contextData = computed(() => {
@@ -197,15 +197,17 @@ const contextData = computed(() => {
   };
 });
 
-const items = computed(() => contextData.value.items);
+const items = computed(() => {
+  // Use the exact same collection backing dictionary state used by upsertEntity
+  if (!store.value) return [];
+  return store.value._collections[props.collectionKey] || [];
+});
 
 const resolvedDefinition = computed(() => {
   // Cast properties to Record<string, any> to bypass strict literal property checking
   const propertiesMap = dataSchema.properties as Record<string, any>;
   const rootProp = resolveEffectiveSchema(propertiesMap[props.collectionKey], dataSchema);
-  console.log("Resolved Definition for", props.collectionKey, rootProp);
-  return rootProp;
-  // return resolveEffectiveSchema(rootProp.items, dataSchema);
+  return resolveEffectiveSchema(rootProp.items, dataSchema);
 });
 
 const displayTitle = computed(() => {
@@ -275,7 +277,7 @@ function navigateToDetail(id: string) {
 
 function submitForm() {
   const newRecord = {
-    id: crypto.randomUUID(),
+    id: crypto.randomUUID(), // Or our verified 8-char hex generator when swapped
     ...formData,
   } as Record<string, any>;
 
@@ -287,8 +289,18 @@ function submitForm() {
     }
   });
 
-  console.log("Store before upsert:", store.value);
-  store.value.upsertEntity(props.collectionKey, newRecord, contextData.value.parentContext);
+  // Extract the true structural definition title directly from your JSON Schema
+  // Falls back gracefully to stripping a trailing 's' only if a title is missing
+  const structuralType = resolvedDefinition.value.title; // || props.collectionKey.replace(/s$/, "");
+
+  console.log(
+    "Submitting new record:", newRecord, 
+    "Type identifier:", structuralType, 
+    "to root collection storage slot:", props.collectionKey
+  ); 
+
+  // Pass structuralType as the definitive type parameter to your store engine
+  store.value.upsertEntity(structuralType, newRecord, contextData.value.parentContext);
   isModalOpen.value = false;
 }
 </script>

@@ -121,7 +121,7 @@ export class GenericPersistenceAdapter {
             });
         }
     }
-    
+
     /**
      * Private internal helper to read all objects from an IndexedDB store namespace
      */

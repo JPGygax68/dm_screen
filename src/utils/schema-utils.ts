@@ -3,6 +3,7 @@
  * evaluating recursive $ref targets and handling overrides.
  */
 export function resolveEffectiveSchema(prop: any, schemaRoot: any): any {
+  // console.log('Resolving effective schema for property:', prop, 'within schema root:', schemaRoot);
   if (!prop) return {};
 
   if (prop['$ref']) {
@@ -20,4 +21,3 @@ export function resolveEffectiveSchema(prop: any, schemaRoot: any): any {
 
   return prop;
 }
-
