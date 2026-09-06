@@ -124,7 +124,6 @@
 </template>
 
 <style scoped>
-@reference "@/styles/tailwind.css";
 </style>
 
 <script setup lang="ts">
@@ -133,6 +132,7 @@ import { useRoute, useRouter } from "vue-router";
 import { getActivePinia } from "pinia";
 import dataSchema from "@/generated/models/data.schema.json";
 import { resolveEffectiveSchema } from "@/utils/schema-utils";
+import { useDmScreenStore } from "@/stores/dmScreenStore";
 
 const props = defineProps<{
   collectionKey: string; // The key in the data schema representing the collection to display
@@ -143,11 +143,7 @@ const router = useRouter();
 const isModalOpen = ref(false);
 const formData = reactive<Record<string, any>>({});
 
-const store = computed(() => {
-  const pinia = getActivePinia();
-  console.log("Active Pinia instance:", pinia);
-  return (pinia as any)?._s.get("dmscreen-store");
-});
+const store = computed(() => useDmScreenStore());
 
 const contextData = computed(() => {
   if (!store.value) return { items: [], parentContext: undefined };
@@ -157,7 +153,7 @@ const contextData = computed(() => {
 
   if (paramKeys.length === 0) {
     return {
-      items: store.value[props.collectionKey] || [],
+      items: store.value._collections[props.collectionKey] || [],
       parentContext: undefined,
     };
   }
@@ -180,13 +176,13 @@ const contextData = computed(() => {
           activeParentId = String(activeId);
         }
       }
-    } else if (lastSegment && currentScope && currentScope[lastSegment]) {
-      currentScope = currentScope[lastSegment];
+    } else if (lastSegment && currentScope && typeof currentScope === 'object' && lastSegment in currentScope) {
+      currentScope = (currentScope as Record<string, any>)[lastSegment];
     }
   });
 
   return {
-    items: Array.isArray(currentScope) ? currentScope : currentScope[props.collectionKey] || [],
+    items: Array.isArray(currentScope) ? currentScope : (currentScope as Record<string, any>)[props.collectionKey] || [],
     parentContext: activeParentId ? { key: props.collectionKey, id: activeParentId } : undefined,
   };
 });
@@ -268,20 +264,20 @@ watch(isModalOpen, async (isOpen) => {
   }
 });
 
-// function getStatusClasses(status: string) {
-//   switch (status) {
-//     case "Draft":
-//       return "bg-slate-100 text-slate-700";
-//     case "Ready":
-//       return "bg-emerald-50 text-emerald-700 border border-emerald-200";
-//     case "Ongoing":
-//       return "bg-amber-50 text-amber-700 border border-amber-200";
-//     case "Completed":
-//       return "bg-blue-50 text-blue-700 border border-blue-200";
-//     default:
-//       return "bg-slate-100 text-slate-600";
-//   }
-// }
+function getStatusClasses(status: string) {
+  switch (status) {
+    case "Draft":
+      return "bg-slate-100 text-slate-700";
+    case "Ready":
+      return "bg-emerald-50 text-emerald-700 border border-emerald-200";
+    case "Ongoing":
+      return "bg-amber-50 text-amber-700 border border-amber-200";
+    case "Completed":
+      return "bg-blue-50 text-blue-700 border border-blue-200";
+    default:
+      return "bg-slate-100 text-slate-600";
+  }
+}
 
 function navigateToDetail(id: string) {
   const targetPath = route.path.endsWith("/") ? `${route.path}${id}` : `${route.path}/${id}`;
@@ -292,7 +288,7 @@ function submitForm() {
   const newRecord = {
     id: crypto.randomUUID(), // Or our verified 8-char hex generator when swapped
     ...formData,
-  } as Record<string, any>;
+  } as { [key: string]: any; id: string };
 
   const schemaProps = resolvedDefinition.value.properties || {};
   Object.keys(schemaProps).forEach((key) => {
@@ -316,7 +312,12 @@ function submitForm() {
   );
 
   // Pass structuralType as the definitive type parameter to your store engine
-  store.value.upsertEntity(structuralType, newRecord, contextData.value.parentContext);
+  const parentCtx = contextData.value.parentContext ? {
+    type: contextData.value.parentContext.key,
+    propertyKey: props.collectionKey,
+    id: contextData.value.parentContext.id,
+  } : undefined;
+  store.value.upsertEntity(structuralType, newRecord, parentCtx);
   isModalOpen.value = false;
 }
 </script>
