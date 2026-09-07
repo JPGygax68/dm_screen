@@ -256,20 +256,22 @@
 }
 
 @utility button-like {
-  @apply rounded-lg border border-component-button-border 
+  @apply clickable
+    rounded-lg border border-component-button-border 
     bg-component-button-bg 
     px-4 py-2 text-sm font-medium text-component-button-foreground 
     transition 
     hover:opacity-95 disabled:cursor-not-allowed disabled:border-component-list-item-strong-bg
-    disabled:bg-component-list-item-strong-bg disabled:text-design-page-text[30];
+    disabled:bg-component-list-item-strong-bg disabled:text-design-page-text/30;
 }
 
 @utility input-like {
-  @apply rounded-lg border border-component-input-border bg-component-input-bg px-3 py-2 text-base text-component-input-text 
-  outline-none 
-  focus:outline-hidden focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:bg-white
-  transition-all
-  placeholder:text-shadow-design-page-muted;
+  @apply 
+    rounded-lg border border-component-input-border bg-component-input-bg px-3 py-2 text-sm text-component-input-text 
+    outline-none 
+    focus:outline-hidden focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:bg-white
+    transition-all
+    placeholder:text-shadow-design-page-muted;
 } 
 
 @utility badge-like {

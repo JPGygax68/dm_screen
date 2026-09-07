@@ -39,20 +39,12 @@
 <script setup lang="ts">
 import { computed } from "vue";
 import { useRoute, useRouter } from "vue-router";
-import { getActivePinia } from "pinia";
+import { useDmScreenStore } from "@/stores/dmScreenStore";
+import dataSchema from "@/generated/models/data.schema.json";
 
 const router = useRouter();
 const route = useRoute();
-
-// Dynamically locate the instantiated store instance out of the running Pinia registry
-const store = computed(() => {
-  const pinia = getActivePinia();
-  // Look up the store by the title ID assigned in your schema factory
-  return (
-    (pinia as any)?._s.get("generic-dmscreen-store") ||
-    (pinia as any)?._s.get("DMScreen Data Schema")
-  );
-});
+const store = useDmScreenStore();
 
 interface Crumb {
   label: string;
@@ -64,49 +56,67 @@ function findEntityDisplayLabel(entity: any): string {
   return entity.name || entity.title || entity.label || entity.id || "Untitled Record";
 }
 
+/**
+ * PATH-DRIVEN BREADCRUMB ENGINE
+ * Dissects the physical active browser URL path string token-by-token.
+ * This guarantees that both collection keys and individual record entries are
+ * sequentially tracked regardless of flat route structure declarations.
+ */
 const crumbs = computed<Crumb[]>(() => {
   const trail: Crumb[] = [];
 
-  // Guard access in case store isn't hydrated immediately
-  if (!store.value) return trail;
-  let searchContext: any = store.value;
+  // Guard access in case store or its tracking collection dictionary is missing on boot
+  if (!store || !store._collections) return trail;
+  
+  // Track our context depth location map starting inside Pinia's database root matrix
+  let searchContext: any = store._collections;
+  let accumulatedPath = "";
 
-  route.matched.forEach((match) => {
-    if (match.path === "/" || match.path === "/:pathMatch(.*)*") return;
+  // Split the physical active path string into individual layout folder tokens
+  // e.g., "/campaigns/fa821c09" -> ["campaigns", "fa821c09"]
+  const physicalSegments = route.path.split("/").filter(Boolean);
 
-    let runtimePath = match.path;
-    Object.keys(route.params).forEach((paramKey) => {
-      runtimePath = runtimePath.replace(`:${paramKey}`, String(route.params[paramKey]));
-    });
+  physicalSegments.forEach((segment) => {
+    accumulatedPath += `/${segment}`;
 
-    const segments = match.path.split("/");
-    const currentSegment = segments[segments.length - 1];
-
-    if (currentSegment.startsWith(":")) {
-      const idParamName = currentSegment.substring(1);
-      const currentId = route.params[idParamName];
-
-      if (currentId && Array.isArray(searchContext)) {
-        const activeEntity = searchContext.find((item: any) => item.id === currentId);
-        if (activeEntity) {
-          trail.push({
-            label: findEntityDisplayLabel(activeEntity),
-            path: runtimePath,
-          });
-          searchContext = activeEntity;
-        }
+    // 1. IS IT AN ID RECORD LOOKUP PASS?
+    // If our search context is an array, this path segment represents an individual record ID string
+    if (Array.isArray(searchContext)) {
+      const activeEntity = searchContext.find((item: any) => String(item.id) === String(segment));
+      
+      if (activeEntity) {
+        trail.push({
+          label: findEntityDisplayLabel(activeEntity),
+          path: accumulatedPath,
+        });
+        // Shift our active search target directly into this object context
+        searchContext = activeEntity;
+      } else {
+        // Fallback title card if database records are loading asynchronously
+        trail.push({ label: "Loading...", path: accumulatedPath });
       }
-    } else if (currentSegment) {
-      const listLabel = currentSegment.charAt(0).toUpperCase() + currentSegment.slice(1);
+    } 
+    // 2. IS IT A LITERAL COLLECTION NAME KEY?
+    else if (searchContext && typeof searchContext === "object") {
+      const collectionPropertyKey = segment;
+
+      // Read singular schema def titles directly from metadata profiles to map clean labels
+      const schemaDefKey = Object.keys(dataSchema.$defs).find(
+        (k) => k.toLowerCase() === collectionPropertyKey.replace(/s$/, "").toLowerCase()
+      );
+      const schemaDef = schemaDefKey ? (dataSchema.$defs as any)[schemaDefKey] : null;
+      
+      const listLabel = schemaDef?.title 
+        ? `${schemaDef.title}s` 
+        : collectionPropertyKey.charAt(0).toUpperCase() + collectionPropertyKey.slice(1);
 
       trail.push({
         label: listLabel,
-        path: runtimePath,
+        path: accumulatedPath,
       });
 
-      if (searchContext && searchContext[currentSegment]) {
-        searchContext = searchContext[currentSegment];
-      }
+      // Shift search pointer focus directly down to the targeted sub-array category branch block
+      searchContext = searchContext[collectionPropertyKey];
     }
   });
 

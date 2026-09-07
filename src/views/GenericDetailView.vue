@@ -7,37 +7,17 @@
       <header
         class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-slate-200 pb-4"
       >
-        <button
-          @click="goBack"
-          class="inline-flex items-center px-3 py-1.5 border border-slate-300 rounded-lg text-sm font-medium text-slate-700 bg-white hover:bg-slate-50 shadow-2xs transition-colors cursor-pointer group"
-        >
+        <button @click="goBack" class="secondary inline-flex group">
           <span class="mr-2 transform group-hover:-translate-x-0.5 transition-transform">←</span>
           Back
         </button>
 
         <!-- Dynamic Action Switches -->
         <div class="flex items-center gap-2">
-          <button
-            v-if="!isEditing"
-            @click="startEditing"
-            class="px-4 py-1.5 border border-slate-300 bg-white text-slate-700 hover:bg-slate-50 text-sm font-semibold rounded-lg shadow-2xs transition-colors cursor-pointer"
-          >
-            Edit Record
-          </button>
+          <button v-if="!isEditing" @click="startEditing" class="secondary">Edit Record</button>
           <template v-else>
-            <button
-              @click="cancelEditing"
-              class="px-4 py-1.5 border border-slate-300 bg-white text-slate-700 hover:bg-slate-50 text-sm font-semibold rounded-lg shadow-2xs transition-colors cursor-pointer"
-            >
-              Cancel
-            </button>
-            <button
-              @click="saveChanges"
-              :disabled="!isFormValid"
-              class="px-4 py-1.5 border border-transparent bg-blue-600 text-white hover:bg-blue-700 disabled:bg-slate-300 disabled:cursor-not-allowed text-sm font-semibold rounded-lg shadow-2xs transition-colors cursor-pointer"
-            >
-              Save Changes
-            </button>
+            <button @click="cancelEditing" class="secondary">Cancel</button>
+            <button @click="saveChanges" :disabled="!isFormValid" class="">Save Changes</button>
           </template>
         </div>
       </header>
@@ -91,7 +71,6 @@
                     v-model="editData[field.key]"
                     type="text"
                     @input="checkFormValidity"
-                    class="w-full px-3 py-2 border border-slate-300 rounded-lg shadow-2xs text-sm focus:outline-hidden focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-slate-50/50 focus:bg-white transition-all"
                   />
                   <textarea
                     v-else
@@ -99,7 +78,6 @@
                     v-model="editData[field.key]"
                     rows="4"
                     @input="checkFormValidity"
-                    class="w-full px-3 py-2 border border-slate-300 rounded-lg shadow-2xs text-sm focus:outline-hidden focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-slate-50/50 focus:bg-white transition-all resize-none"
                   ></textarea>
                 </template>
 
@@ -210,7 +188,7 @@ const activeEntity = computed(() => {
   const paramKeys = Object.keys(currentParams);
   if (paramKeys.length === 0) return null;
 
-  let currentScope: any = store.value._collections || (store.value as any);
+  let currentScope: any = store.value || (store.value as any);
   let leafEntity: any = null;
 
   route.matched.forEach((match) => {

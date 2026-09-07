@@ -197,12 +197,12 @@ const resolvedDefinition = computed(() => {
   // Cast properties to Record<string, any> to bypass strict literal property checking
   const propertiesMap = dataSchema.properties as Record<string, any>;
   const rootProp = resolveEffectiveSchema(propertiesMap[props.collectionKey], dataSchema);
-  return resolveEffectiveSchema(rootProp.items, dataSchema);
+  return rootProp;
+  // return resolveEffectiveSchema(rootProp.items, dataSchema);
 });
 
 const displayTitle = computed(() => {
   const propertiesMap = dataSchema.properties as Record<string, any>;
-  console.log("properties", propertiesMap[props.collectionKey]);
   return (
     //propertiesMap[props.collectionKey]?.description ||
     resolvedDefinition.value.title ||
