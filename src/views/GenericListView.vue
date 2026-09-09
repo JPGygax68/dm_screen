@@ -5,10 +5,7 @@
     <div class="mx-auto max-w-6xl px-4 py-4">
       <header class="flex justify-between items-center mb-8">
         <h1 class="text-3xl font-extrabold text-slate-900 tracking-tight">{{ displayTitle }}</h1>
-        <button
-          @click="isModalOpen = true"
-          class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors cursor-pointer"
-        >
+        <button @click="isModalOpen = true" class="primary">
           <span class="mr-1.5 text-lg font-bold leading-none">+</span> Add {{ entityLabel }}
         </button>
       </header>
@@ -123,8 +120,7 @@
   </div>
 </template>
 
-<style scoped>
-</style>
+<style scoped></style>
 
 <script setup lang="ts">
 import { ref, computed, watch, reactive, nextTick } from "vue";
@@ -176,48 +172,73 @@ const contextData = computed(() => {
           activeParentId = String(activeId);
         }
       }
-    } else if (lastSegment && currentScope && typeof currentScope === 'object' && lastSegment in currentScope) {
+    } else if (
+      lastSegment &&
+      currentScope &&
+      typeof currentScope === "object" &&
+      lastSegment in currentScope
+    ) {
       currentScope = (currentScope as Record<string, any>)[lastSegment];
     }
   });
 
   return {
-    items: Array.isArray(currentScope) ? currentScope : (currentScope as Record<string, any>)[props.collectionKey] || [],
+    items: Array.isArray(currentScope)
+      ? currentScope
+      : (currentScope as Record<string, any>)[props.collectionKey] || [],
     parentContext: activeParentId ? { key: props.collectionKey, id: activeParentId } : undefined,
   };
 });
 
+/**
+ * Context-Aware Reactivity Engine
+ * Extracts the real in-memory nested data array parsed by your route history tracker.
+ */
 const items = computed(() => {
-  // Use the exact same collection backing dictionary state used by upsertEntity
-  if (!store.value) return [];
-  return store.value._collections[props.collectionKey] || [];
+  if (!contextData.value) return [];
+  return contextData.value.items || [];
 });
 
-const resolvedDefinition = computed(() => {
-  // Cast properties to Record<string, any> to bypass strict literal property checking
+/**
+ * Nested Schema Resolver
+ * Dynamically traverses your JSON Schema layout based on where you are in the application.
+ */
+const collectionDefinition = computed(() => {
+  // Scenario A: Top-Level Root Collection (e.g. /campaigns)
   const propertiesMap = dataSchema.properties as Record<string, any>;
-  const rootProp = resolveEffectiveSchema(propertiesMap[props.collectionKey], dataSchema);
-  return rootProp;
-  // return resolveEffectiveSchema(rootProp.items, dataSchema);
+  if (propertiesMap[props.collectionKey]) {
+    return resolveEffectiveSchema(propertiesMap[props.collectionKey], dataSchema);
+  }
+
+  // Scenario B: Nested Sub-Collection (e.g. campaigns -> party)
+  // Walk your schema definitions to find which model contains this array property key
+  const defsMap = dataSchema.$defs as Record<string, any>;
+  for (const defKey of Object.keys(defsMap)) {
+    const parentSchema = resolveEffectiveSchema(defsMap[defKey], dataSchema);
+    if (parentSchema.properties && parentSchema.properties[props.collectionKey]) {
+      return resolveEffectiveSchema(parentSchema.properties[props.collectionKey], dataSchema);
+    }
+  }
+
+  return {};
+});
+
+const itemDefinition = computed(() => {
+  return resolveEffectiveSchema(collectionDefinition.value.items, dataSchema);
 });
 
 const displayTitle = computed(() => {
-  const propertiesMap = dataSchema.properties as Record<string, any>;
-  return (
-    //propertiesMap[props.collectionKey]?.description ||
-    resolvedDefinition.value.title ||
-    resolvedDefinition.value.description ||
-    props.collectionKey.charAt(0).toUpperCase() + props.collectionKey.slice(1)
-  );
+  const def = collectionDefinition.value;
+  return def.title || def.description || props.collectionKey.charAt(0).toUpperCase() + props.collectionKey.slice(1);
 });
 
 const entityLabel = computed(() => {
-  return resolvedDefinition.value.title || props.collectionKey.replace(/s$/, "");
+  return itemDefinition.value.title || props.collectionKey.replace(/s$/, "");
 });
 
 const formFields = computed(() => {
-  const schemaProps = resolvedDefinition.value.properties || {};
-  const requiredList = resolvedDefinition.value.required || [];
+  const schemaProps = itemDefinition.value.properties || {};
+  const requiredList = itemDefinition.value.required || [];
 
   return Object.keys(schemaProps)
     .filter((key) => key !== "id" && schemaProps[key].type !== "array")
@@ -255,7 +276,7 @@ watch(isModalOpen, async (isOpen) => {
     formFields.value.forEach((f) => {
       formData[f.key] = f.default !== undefined ? f.default : "";
     });
-    
+
     // Wait for Vue's virtual DOM to mount the form elements before checking validation
     await nextTick();
     checkFormValidity();
@@ -290,7 +311,7 @@ function submitForm() {
     ...formData,
   } as { [key: string]: any; id: string };
 
-  const schemaProps = resolvedDefinition.value.properties || {};
+  const schemaProps = itemDefinition.value.properties || {};
   Object.keys(schemaProps).forEach((key) => {
     const resolvedChild = resolveEffectiveSchema(schemaProps[key], dataSchema);
     if (resolvedChild.type === "array" && !newRecord[key]) {
@@ -300,7 +321,7 @@ function submitForm() {
 
   // Extract the true structural definition title directly from your JSON Schema
   // Falls back gracefully to stripping a trailing 's' only if a title is missing
-  const structuralType = resolvedDefinition.value.title; // || props.collectionKey.replace(/s$/, "");
+  const structuralType = itemDefinition.value.title; // || props.collectionKey.replace(/s$/, "");
 
   console.log(
     "Submitting new record:",
@@ -312,11 +333,13 @@ function submitForm() {
   );
 
   // Pass structuralType as the definitive type parameter to your store engine
-  const parentCtx = contextData.value.parentContext ? {
-    type: contextData.value.parentContext.key,
-    propertyKey: props.collectionKey,
-    id: contextData.value.parentContext.id,
-  } : undefined;
+  const parentCtx = contextData.value.parentContext
+    ? {
+        type: contextData.value.parentContext.key,
+        propertyKey: props.collectionKey,
+        id: contextData.value.parentContext.id,
+      }
+    : undefined;
   store.value.upsertEntity(structuralType, newRecord, parentCtx);
   isModalOpen.value = false;
 }
