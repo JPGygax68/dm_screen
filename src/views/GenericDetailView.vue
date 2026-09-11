@@ -162,7 +162,7 @@ import { useDmScreenStore } from "@/stores/generic-store";
 
 const route = useRoute();
 const router = useRouter();
-const store = computed(() => useDmScreenStore());
+const store = useDmScreenStore();
 
 // Inline Form Modification Hooks
 const isEditing = ref(false);
@@ -182,13 +182,13 @@ function getFieldValue(key: string): any {
  * Deep Nested Entity Context Extractor
  */
 const activeEntity = computed(() => {
-  if (!store.value) return null;
+  if (!store) return null;
 
   const currentParams = route.params;
   const paramKeys = Object.keys(currentParams);
   if (paramKeys.length === 0) return null;
 
-  let currentScope: any = store.value || (store.value as any);
+  let currentScope: any = store;
   let leafEntity: any = null;
 
   route.matched.forEach((match) => {
@@ -310,51 +310,15 @@ function checkFormValidity() {
 function saveChanges() {
   if (!activeEntity.value) return;
 
-  const structuralType = resolvedSchemaDefinition.value.title || currentDefinitionName.value;
-  const updatedRecord = {
-    ...activeEntity.value,
-    ...editData,
-  };
+  // 1. Mutate the active tracked record directly in place
+  // This preserves our hidden non-enumerable metaproperties perfectly!
+  Object.keys(editData).forEach((key) => {
+    (activeEntity.value as Record<string, any>)[key] = editData[key];
+  });
 
-  const currentParams = route.params;
-  let computedParentContext: any = undefined;
+  // 2. Hand the original tracked object reference directly to the store
+  store.persistEntity(activeEntity.value);
 
-  if (route.matched.length > 1) {
-    const parentMatch = route.matched[route.matched.length - 2];
-    const parentSegment = parentMatch.path.split("/").pop() || "";
-    if (parentSegment.startsWith(":")) {
-      const parentIdParam = parentSegment.substring(1);
-      const parentId = currentParams[parentIdParam];
-      const parentType = parentIdParam.replace("Id", "").toLowerCase();
-
-      const parentDefKey = Object.keys(dataSchema.$defs).find(
-        (k) => k.toLowerCase() === parentType,
-      );
-      const parentDef = parentDefKey ? (dataSchema.$defs as any)[parentDefKey] : null;
-      let targetPropertyKey = "";
-
-      if (parentDef && parentDef.properties) {
-        targetPropertyKey =
-          Object.keys(parentDef.properties).find((k) => {
-            const childProp = parentDef.properties[k];
-            return (
-              childProp.type === "array" &&
-              JSON.stringify(childProp).toLowerCase().includes(structuralType.toLowerCase())
-            );
-          }) || "";
-      }
-
-      if (parentId && parentType && targetPropertyKey) {
-        computedParentContext = {
-          id: String(parentId),
-          type: parentType,
-          propertyKey: targetPropertyKey,
-        };
-      }
-    }
-  }
-
-  store.value.upsertEntity(structuralType, updatedRecord, computedParentContext);
   isEditing.value = false;
 }
 

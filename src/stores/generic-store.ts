@@ -93,25 +93,6 @@ export const useDmScreenStore = defineStore('dmscreen-store', {
       } catch (error) {
         console.error(`Failed to commit active object mutation to persistent storage layers:`, error);
       }
-    },
-
-    /**
-     * SINGLE NON-ARRAY ROOT VARIABLE MODIFIER
-     * Direct interface utility to mutate and save top-level configuration objects or primitives.
-     * This is what updates your standalone metadata parameters (like your "dummy" tracking block)!
-     */
-    async updateStandaloneRootProperty(propertyKey: string, newValue: any) {
-      try {
-        const dbAdapter = usePouchDbAdapter();
-        
-        // Update live memory layer
-        this[propertyKey] = newValue;
-        
-        // Push standalone change directly to the database file index
-        await dbAdapter.saveSingleRootRow(propertyKey, newValue);
-      } catch (error) {
-        console.error(`Failed to adjust global root configuration element [${propertyKey}]:`, error);
-      }
     }
   }
 });
