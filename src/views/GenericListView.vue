@@ -125,13 +125,13 @@
 <script setup lang="ts">
 import { ref, computed, watch, reactive, nextTick } from "vue";
 import { useRoute, useRouter } from "vue-router";
-import { getActivePinia } from "pinia";
 import dataSchema from "@/generated/models/data.schema.json";
 import { resolveEffectiveSchema } from "@/utils/schema-utils";
-import { useDmScreenStore } from "@/stores/dmScreenStore";
+import { useDmScreenStore } from "@/stores/generic-store";
+import Breadcrumbs from "@/components/Breadcrumbs.vue";
 
 const props = defineProps<{
-  collectionKey: string; // The key in the data schema representing the collection to display
+  collectionKey: string; // e.g., "campaigns", "party"
 }>();
 
 const route = useRoute();
@@ -139,79 +139,106 @@ const router = useRouter();
 const isModalOpen = ref(false);
 const formData = reactive<Record<string, any>>({});
 
-const store = computed(() => useDmScreenStore());
+const store = useDmScreenStore();
 
+/**
+ * HELPER TO STAMP HIDDEN METADATA
+ * Sets up the non-enumerable properties on newly created records at birth.
+ */
+function stampMetadata(
+  target: any,
+  schemaType: string,
+  parentId: string | null = null,
+  parentType: string | null = null,
+  arrayPropertyName: string | null = null
+): void {
+  if (!target || typeof target !== 'object') return;
+  Object.defineProperties(target, {
+    __schemaType: { value: schemaType, writable: false, enumerable: false, configurable: true },
+    __parentId: { value: parentId, writable: false, enumerable: false, configurable: true },
+    __parentType: { value: parentType, writable: false, enumerable: false, configurable: true },
+    __arrayPropertyName: { value: arrayPropertyName, writable: false, enumerable: false, configurable: true }
+  });
+}
+
+/**
+ * REAKTIVE CONTEXT-DATEN ENGINE (ABSICHERUNG)
+ * Durchsucht den asynchronen Speicherbaum. Verhindert Abstürze beim Anwendungsstart,
+ * falls PouchDB die State-Properties noch nicht fertig geladen hat.
+ */
 const contextData = computed(() => {
-  if (!store.value) return { items: [], parentContext: undefined };
+  // Absicherung falls der Store noch nicht instanziiert oder geladen ist
+  if (!store) return { items: [], parentContext: undefined };
 
   const currentParams = route.params;
   const paramKeys = Object.keys(currentParams);
 
   if (paramKeys.length === 0) {
     return {
-      items: store.value._collections[props.collectionKey] || [],
+      // FEHLERSCHUTZ: Falls die Property auf dem Store-Proxy noch 'undefined' ist,
+      // geben wir ein leeres Fallback-Array zurück anstatt abzustürzen
+      items: store[props.collectionKey] || [],
       parentContext: undefined,
     };
   }
 
-  let currentScope = store.value;
+  let currentScope = store as Record<string, any>;
   let activeParentId = "";
+  let activeParentType = "";
 
   route.matched.forEach((match) => {
-    const segments = match.path.split("/");
-    const lastSegment = segments[segments.length - 1];
+    const segments = match.path.split("/").filter(Boolean);
+    
+    segments.forEach((segment) => {
+      if (segment.startsWith(":")) {
+        const idParamName = segment.substring(1);
+        const activeId = currentParams[idParamName];
 
-    if (lastSegment.startsWith(":")) {
-      const idParamName = lastSegment.substring(1);
-      const activeId = currentParams[idParamName];
+        if (activeId && Array.isArray(currentScope)) {
+          const found = currentScope.find((item: any) => String(item.id) === String(activeId));
+          if (found) {
+            currentScope = found;
+            activeParentId = String(activeId);
+          }
+        }
+      } else {
+        if (currentScope && typeof currentScope === "object") {
+          if (currentScope[segment]) {
+            currentScope = currentScope[segment];
+          }
 
-      if (activeId && Array.isArray(currentScope)) {
-        const found = currentScope.find((item: any) => item.id === activeId);
-        if (found) {
-          currentScope = found;
-          activeParentId = String(activeId);
+          const defsMap = dataSchema.$defs as Record<string, any>;
+          for (const defKey of Object.keys(defsMap)) {
+            const parentSchema = resolveEffectiveSchema(defsMap[defKey], dataSchema);
+            if (parentSchema.properties && parentSchema.properties[segment]) {
+              activeParentType = parentSchema.title || defKey;
+              break;
+            }
+          }
         }
       }
-    } else if (
-      lastSegment &&
-      currentScope &&
-      typeof currentScope === "object" &&
-      lastSegment in currentScope
-    ) {
-      currentScope = (currentScope as Record<string, any>)[lastSegment];
-    }
+    });
   });
 
+  console.log('Context data computed:', JSON.parse(JSON.stringify(contextData.value)));
   return {
     items: Array.isArray(currentScope)
       ? currentScope
-      : (currentScope as Record<string, any>)[props.collectionKey] || [],
-    parentContext: activeParentId ? { key: props.collectionKey, id: activeParentId } : undefined,
+      : (currentScope && currentScope[props.collectionKey]) ? currentScope[props.collectionKey] : [],
+    parentContext: activeParentId 
+      ? { key: props.collectionKey, id: activeParentId, parentType: activeParentType } 
+      : undefined,
   };
 });
 
-/**
- * Context-Aware Reactivity Engine
- * Extracts the real in-memory nested data array parsed by your route history tracker.
- */
-const items = computed(() => {
-  if (!contextData.value) return [];
-  return contextData.value.items || [];
-});
+const items = computed(() => contextData.value.items || []);
 
-/**
- * Nested Schema Resolver
- * Dynamically traverses your JSON Schema layout based on where you are in the application.
- */
 const collectionDefinition = computed(() => {
-  // Scenario A: Top-Level Root Collection (e.g. /campaigns)
   const propertiesMap = dataSchema.properties as Record<string, any>;
   if (propertiesMap[props.collectionKey]) {
     return resolveEffectiveSchema(propertiesMap[props.collectionKey], dataSchema);
   }
 
-  // Scenario B: Nested Sub-Collection (e.g. campaigns -> party)
-  // Walk your schema definitions to find which model contains this array property key
   const defsMap = dataSchema.$defs as Record<string, any>;
   for (const defKey of Object.keys(defsMap)) {
     const parentSchema = resolveEffectiveSchema(defsMap[defKey], dataSchema);
@@ -219,7 +246,6 @@ const collectionDefinition = computed(() => {
       return resolveEffectiveSchema(parentSchema.properties[props.collectionKey], dataSchema);
     }
   }
-
   return {};
 });
 
@@ -229,12 +255,10 @@ const itemDefinition = computed(() => {
 
 const displayTitle = computed(() => {
   const def = collectionDefinition.value;
-  return def.title || def.description || props.collectionKey.charAt(0).toUpperCase() + props.collectionKey.slice(1);
+  return def.title || props.collectionKey.charAt(0).toUpperCase() + props.collectionKey.slice(1);
 });
 
-const entityLabel = computed(() => {
-  return itemDefinition.value.title || props.collectionKey.replace(/s$/, "");
-});
+const entityLabel = computed(() => itemDefinition.value.title || "Record");
 
 const formFields = computed(() => {
   const schemaProps = itemDefinition.value.properties || {};
@@ -260,24 +284,18 @@ const formFields = computed(() => {
 const formRef = ref<HTMLFormElement | null>(null);
 const isFormValid = ref(false);
 
-/**
- * Checks the native HTML5 validity state of the entire form element context
- */
 function checkFormValidity() {
   if (formRef.value) {
     isFormValid.value = formRef.value.checkValidity();
   }
 }
 
-// Reset validity parameters whenever the dialog modal transitions open or shut
 watch(isModalOpen, async (isOpen) => {
   if (isOpen) {
     Object.keys(formData).forEach((k) => delete formData[k]);
     formFields.value.forEach((f) => {
       formData[f.key] = f.default !== undefined ? f.default : "";
     });
-
-    // Wait for Vue's virtual DOM to mount the form elements before checking validation
     await nextTick();
     checkFormValidity();
   } else {
@@ -287,16 +305,11 @@ watch(isModalOpen, async (isOpen) => {
 
 function getStatusClasses(status: string) {
   switch (status) {
-    case "Draft":
-      return "bg-slate-100 text-slate-700";
-    case "Ready":
-      return "bg-emerald-50 text-emerald-700 border border-emerald-200";
-    case "Ongoing":
-      return "bg-amber-50 text-amber-700 border border-amber-200";
-    case "Completed":
-      return "bg-blue-50 text-blue-700 border border-blue-200";
-    default:
-      return "bg-slate-100 text-slate-600";
+    case "Draft": return "bg-slate-100 text-slate-700";
+    case "Ready": return "bg-emerald-50 text-emerald-700 border border-emerald-200";
+    case "Ongoing": return "bg-amber-50 text-amber-700 border border-amber-200";
+    case "Completed": return "bg-blue-50 text-blue-700 border border-blue-200";
+    default: return "bg-slate-100 text-slate-600";
   }
 }
 
@@ -305,42 +318,59 @@ function navigateToDetail(id: string) {
   router.push(targetPath);
 }
 
+/**
+ * PURE METADATA FORM SUBMISSION
+ * Seeds the item record, injects hidden tracking parameters, updates memory arrays,
+ * and passes execution to store.persistEntity().
+ */
 function submitForm() {
-  const newRecord = {
-    id: crypto.randomUUID(), // Or our verified 8-char hex generator when swapped
-    ...formData,
-  } as { [key: string]: any; id: string };
+  const generatedId = crypto.randomUUID().split("-")[0]; // Fast temporary 8-char hex chunk
 
+  const newRecord = {
+    id: generatedId,
+    ...formData,
+  } as Record<string, any>;
+
+  // Pre-seed any child array parameters declared inside the schema definition empty
   const schemaProps = itemDefinition.value.properties || {};
   Object.keys(schemaProps).forEach((key) => {
     const resolvedChild = resolveEffectiveSchema(schemaProps[key], dataSchema);
-    if (resolvedChild.type === "array" && !newRecord[key]) {
+    if (resolvedChild.type === "array") {
       newRecord[key] = [];
     }
   });
 
-  // Extract the true structural definition title directly from your JSON Schema
-  // Falls back gracefully to stripping a trailing 's' only if a title is missing
-  const structuralType = itemDefinition.value.title; // || props.collectionKey.replace(/s$/, "");
+  const structuralType = itemDefinition.value.title || "UnknownType";
+  const parentCtx = contextData.value.parentContext;
 
-  console.log(
-    "Submitting new record:",
-    newRecord,
-    "Type identifier:",
-    structuralType,
-    "to root collection storage slot:",
-    props.collectionKey,
-  );
+  // 1. INJECT INVISIBLE RUNTIME TRACKING METADATA
+  if (parentCtx) {
+    // Nested child item (e.g. PlayerCharacter inside Campaign)
+    stampMetadata(
+      newRecord,
+      structuralType,
+      parentCtx.id,
+      parentCtx.parentType,
+      props.collectionKey
+    );
+  } else {
+    // Root level item (e.g. top-level Campaign)
+    stampMetadata(
+      newRecord,
+      structuralType,
+      null,
+      null,
+      props.collectionKey
+    );
+  }
 
-  // Pass structuralType as the definitive type parameter to your store engine
-  const parentCtx = contextData.value.parentContext
-    ? {
-        type: contextData.value.parentContext.key,
-        propertyKey: props.collectionKey,
-        id: contextData.value.parentContext.id,
-      }
-    : undefined;
-  store.value.upsertEntity(structuralType, newRecord, parentCtx);
+  // 2. MUTATE LOCAL REACTIVE MEMORY LIST ARRAY IN PLACE
+  // Because contextData.items points directly into your live tree layout, pushing updates the UI instantly
+  contextData.value.items.push(newRecord);
+
+  // 3. STREAM THE MUTATED ENTITY STRIPPED AND SHALLOW DOWN TO DISK
+  store.persistEntity(newRecord);
+  
   isModalOpen.value = false;
 }
 </script>

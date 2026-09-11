@@ -496,7 +496,6 @@ type: object
     additionalProperties: false
 
 properties:
-  dummy: { type: string, description: "Dummy property to satisfy JSON Schema requirements" }
   campaigns:
     "$ref": "#/$defs/Campaigns"
     # type: array

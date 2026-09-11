@@ -1,145 +1,117 @@
 import { defineStore } from 'pinia';
-import type { PouchDbAdapter } from '@/db/pouch-adapter';
+import dataSchema from '@/generated/models/data.schema.json';
+import { resolveEffectiveSchema } from '@/utils/schema-utils';
+import { JsonSchemaORM } from '@/db/schema-orm';
+import { usePouchDbAdapter } from '@/db/pouch-adapter';
 
-export interface ParentContext {
+const orm = new JsonSchemaORM();
+
+export interface ActiveContext {
   id: string;
-  type: string;
-  propertyKey: string; // e.g., 'encounters' or 'party'
+  type: string; // The pure, unchanged schema title of the parent container entity (e.g. "Campaign")
 }
 
-export const createGenericStore = (name: string, schema: any, dbAdapter: PouchDbAdapter) => {
-  return defineStore(name, {
-    state: () => ({
-      // A dynamic, schema-driven dictionary holding our top-level root arrays (e.g., campaigns: [])
-      _collections: {} as Record<string, any[]>,
-      _activeContexts: {} as Record<string, string | null>
-    }),
+export const useDmScreenStore = defineStore('dmscreen-store', {
+  /**
+   * PURE SCHEMA-DRIVEN ROOT STATE
+   * Dynamically inspects the data model layout definitions on boot.
+   * Maps arrays to [] and non-array configurations (like your "dummy" field) to defaults.
+   */
+  state: () => {
+    const initialState: Record<string, any> = {};
 
-    actions: {
-      async hydrateFromStorage() {
-        // This method can be called to re-hydrate the store from PouchDB at any time
-        await dbAdapter.hydrateStore(this);
-      },
-      
-      /**
-       * HYDRATION ACCESSOR
-       * Used by the PouchDB adapter on system startup to inject the stitched nested data tree.
-       */
-      setItem(rootKey: string, data: any[]) {
-        this._collections[rootKey] = data;
-      },
+    if (dataSchema.properties) {
+      Object.keys(dataSchema.properties).forEach((key) => {
+        const propSchema = resolveEffectiveSchema((dataSchema.properties as any)[key], dataSchema);
+        initialState[key] = propSchema.type === 'array' ? [] : (propSchema.default ?? null);
+      });
+    }
 
-      /**
-       * GENERIC UPSERT ENGINE
-       * Handles both adding brand-new records and updating existing ones at any nesting level.
-       */
-      async upsertEntity(
-        entityType: string,
-        record: { id: string;[key: string]: any },
-        parentContext?: ParentContext
-      ) {
-        console.log(`Upserting entity [${entityType}:${record.id}] with parent context:`, parentContext);
-        const localType = entityType.toLowerCase();
-        const rootKey = parentContext ? this._getRootCollectionKey(localType) : `${localType}s`;
+    return initialState;
+  },
 
-        // Ensure the base runtime array bucket exists
-        if (!this._collections[rootKey]) {
-          this._collections[rootKey] = [];
+  actions: {
+    /**
+     * SYSTEM REBOOT LIFECYCLE RECONSTRUCTOR
+     * Fires automatically on application initialization to fetch flat PouchDB rows,
+     * weave them into a nested object graph, and inject non-enumerable tracking variables.
+     */
+    async loadDatabaseIntoStore() {
+      try {
+        const dbAdapter = usePouchDbAdapter();
+        
+        // 1. Fetch raw un-nested records from local storage
+        const rawFlatDocuments = await dbAdapter.getAllEntities();
+        console.log('Raw database docs recovered on boot:', rawFlatDocuments);
+
+        // 2. Process documents through the ORM stitching matrix to generate a nested memory tree
+        const fullyHydratedStateTree = orm.reconstruct(rawFlatDocuments);
+
+        // 3. Mount properties directly onto the root reactive state layer
+        Object.keys(fullyHydratedStateTree).forEach((rootPropertyKey) => {
+          this[rootPropertyKey] = fullyHydratedStateTree[rootPropertyKey];
+        });
+
+        console.log('Reactive store state tree successfully synchronized from disk:', this.$state);
+      } catch (error) {
+        console.error('Critical breakdown encountered during database initialization lifecycle:', error);
+      }
+    },
+
+    /**
+     * UNIFIED METADATA-DRIVEN ELEMENT PERSISTENCE
+     * Accepts shallow leaf mutations directly from view forms.
+     * Extracts non-enumerable metadata to update local paths and stream records down to disk.
+     */
+    async persistEntity(mutatedRecord: any) {
+      try {
+        const dbAdapter = usePouchDbAdapter();
+
+        // 1. Instantly read hidden context variables in O(1) time
+        const entityType = mutatedRecord.__schemaType;
+        const parentId = mutatedRecord.__parentId;
+        const parentType = mutatedRecord.__parentType;
+
+        if (!entityType) {
+          console.error('Aborting transaction. Given object context lacks hidden tracking metadata signatures.');
+          return;
         }
 
-        if (!parentContext) {
-          // ROOT LAYER MUTATION (e.g., /campaigns)
-          const targetArray = this._collections[rootKey];
-          const index = targetArray.findIndex(item => String(item.id) === String(record.id));
+        // 2. Run the object payload through the ORM tool to extract a shallow copy stripped of arrays
+        const shallowDatabasePayload = orm.flattenShallowRecord(mutatedRecord);
 
-          if (index !== -1) {
-            targetArray[index] = { ...targetArray[index], ...record };
-          } else {
-            targetArray.push(record);
-          }
+        // 3. Commit cleanly to the flat database sequence partition
+        await dbAdapter.saveEntity(
+          entityType,
+          mutatedRecord.id,
+          parentId,
+          parentType,
+          shallowDatabasePayload
+        );
+        
+        console.log(`Surgically synchronized shallow database row: [${entityType}:${mutatedRecord.id}]`);
+      } catch (error) {
+        console.error(`Failed to commit active object mutation to persistent storage layers:`, error);
+      }
+    },
 
-          // Persist the clean structural change to PouchDB
-          await dbAdapter.saveEntity(localType, record.id, null, null, record);
-        } else {
-          // NESTED SUB-LAYER MUTATION (e.g., campaigns -> c1 -> encounters -> e1)
-          const rootArray = this._collections[rootKey];
-
-          // Traverses the nested tree in memory to find the direct parent object
-          const parentObj = this._findNestedEntityById(rootArray, parentContext.id, parentContext.type);
-
-          if (parentObj) {
-            if (!parentObj[parentContext.propertyKey]) {
-              parentObj[parentContext.propertyKey] = [];
-            }
-
-            const subArray = parentObj[parentContext.propertyKey] as any[];
-            const index = subArray.findIndex(item => String(item.id) === String(record.id));
-
-            if (index !== -1) {
-              subArray[index] = { ...subArray[index], ...record };
-            } else {
-              subArray.push(record);
-            }
-
-            // Persist surgically to PouchDB using the flat parent relational mapping keys
-            await dbAdapter.saveEntity(localType, record.id, parentContext.id, parentContext.type, record);
-          } else {
-            console.error(`Failed to resolve parent context [${parentContext.type}:${parentContext.id}] in memory layout.`);
-          }
-        }
-      },
-
-      /**
-       * ROUTE CONTEXT TRACKER
-       * Tracks which specific items are currently focused in the view layout.
-       */
-      syncActiveContext(entityType: string, id: string | null) {
-        this._activeContexts[entityType.toLowerCase()] = id;
-      },
-
-      /**
-       * INTERNAL HELPER: RECURSIVE TREE SEARCH
-       * Crawls through the nested collection arrays to find an object matching an ID and type.
-       */
-      _findNestedEntityById(currentScope: any, targetId: string, targetType: string): any | null {
-        if (!currentScope) return null;
-
-        if (Array.isArray(currentScope)) {
-          for (const item of currentScope) {
-            if (String(item.id) === String(targetId)) {
-              return item;
-            }
-            // Recursively search nested object properties
-            const found = this._findNestedEntityById(item, targetId, targetType);
-            if (found) return found;
-          }
-        } else if (typeof currentScope === 'object') {
-          for (const key of Object.keys(currentScope)) {
-            if (Array.isArray(currentScope[key])) {
-              const found = this._findNestedEntityById(currentScope[key], targetId, targetType);
-              if (found) return found;
-            }
-          }
-        }
-        return null;
-      },
-
-      /**
-       * INTERNAL HELPER: ROOT SCHEMA KEY RESOLVER
-       * Dynamically calculates which top-level root store array owns a given nested entity type.
-       */
-      _getRootCollectionKey(entityType: string): string {
-        if (!schema.properties) return `${entityType}s`;
-
-        // Scan the root properties configuration to see where the collection belongs
-        for (const rootKey of Object.keys(schema.properties)) {
-          const rootProp = schema.properties[rootKey];
-          if (rootProp.type === 'array' && JSON.stringify(rootProp).toLowerCase().includes(entityType)) {
-            return rootKey;
-          }
-        }
-        return `${entityType}s`;
+    /**
+     * SINGLE NON-ARRAY ROOT VARIABLE MODIFIER
+     * Direct interface utility to mutate and save top-level configuration objects or primitives.
+     * This is what updates your standalone metadata parameters (like your "dummy" tracking block)!
+     */
+    async updateStandaloneRootProperty(propertyKey: string, newValue: any) {
+      try {
+        const dbAdapter = usePouchDbAdapter();
+        
+        // Update live memory layer
+        this[propertyKey] = newValue;
+        
+        // Push standalone change directly to the database file index
+        await dbAdapter.saveSingleRootRow(propertyKey, newValue);
+      } catch (error) {
+        console.error(`Failed to adjust global root configuration element [${propertyKey}]:`, error);
       }
     }
-  });
-};
+  }
+});

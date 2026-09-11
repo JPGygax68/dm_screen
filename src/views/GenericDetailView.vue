@@ -158,7 +158,7 @@ import { ref, computed, reactive, nextTick } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import dataSchema from "@/generated/models/data.schema.json";
 import { resolveEffectiveSchema } from "@/utils/schema-utils";
-import { useDmScreenStore } from "@/stores/dmScreenStore";
+import { useDmScreenStore } from "@/stores/generic-store";
 
 const route = useRoute();
 const router = useRouter();

@@ -39,7 +39,7 @@
 <script setup lang="ts">
 import { computed } from "vue";
 import { useRoute, useRouter } from "vue-router";
-import { useDmScreenStore } from "@/stores/dmScreenStore";
+import { useDmScreenStore } from "@/stores/generic-store";
 import dataSchema from "@/generated/models/data.schema.json";
 
 const router = useRouter();

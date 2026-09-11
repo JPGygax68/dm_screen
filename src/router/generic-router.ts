@@ -1,92 +1,88 @@
 import type { RouteRecordRaw } from 'vue-router';
 import { resolveEffectiveSchema } from '@/utils/schema-utils';
 
+/**
+ * PURE DOMAIN ENGINE ROUTE BUILDER
+ * Generates user navigation entrypoints exclusively for structural data collection arrays.
+ * Global application parameters or primitive keys are bypassed by design.
+ */
 export function buildRoutesFromSchema(schema: any, storeInstance: any): RouteRecordRaw[] {
   const routes: RouteRecordRaw[] = [];
-  const rootProps = schema.properties || {};
+  
+  const effectiveSchema = resolveEffectiveSchema(schema, schema);
+  const rootProps = effectiveSchema.properties || {};
 
   Object.keys(rootProps).forEach(key => {
     const effectiveRootProp = resolveEffectiveSchema(rootProps[key], schema);
 
-    // Only collection root properties (arrays) are considered for route generation
+    // CRUCIAL BOUNDARY: Only build routes for your domain collection arrays!
     if (effectiveRootProp.type === 'array') {
-      const collectionKey = key; // e.g., "campaigns"
+      const collectionKey = key; // "campaigns"
       const itemSchema = resolveEffectiveSchema(effectiveRootProp.items, schema);
       const entityName = itemSchema.title 
         ? itemSchema.title.toLowerCase().replace(/\s+/g, '-') 
-        : collectionKey.replace(/s$/, ''); //
+        : collectionKey.replace(/s$/, '');
 
-      // Step 1: Base list route (e.g., /campaigns)
+      // 1. Root Collection List View (e.g., path: "/campaigns")
       const listRoute: RouteRecordRaw = {
         path: `/${collectionKey}`,
         name: `generic-${collectionKey}-list`,
         component: () => import('@/views/GenericListView.vue'),
-        props: { collectionKey } //
+        props: { collectionKey }
       };
       routes.push(listRoute);
 
-      // Arrays to collect explicit child paths safely so we can prioritize them
       const childListRoutes: RouteRecordRaw[] = [];
       const childDetailRoutes: RouteRecordRaw[] = [];
 
-      // Look inside the item for sub-properties
+      // Unpack nested child attributes inside the item profile definition
       if (itemSchema.properties) {
         Object.keys(itemSchema.properties).forEach(subKey => {
           const effectiveSubProp = resolveEffectiveSchema(itemSchema.properties[subKey], schema);
 
           if (effectiveSubProp.type === 'array') {            
-            const subCollectionKey = subKey; // e.g., "encounters" or "party"
+            const subCollectionKey = subKey; // "party", "encounters"
             const subItemSchema = resolveEffectiveSchema(effectiveSubProp.items, schema);
             const subEntityName = subItemSchema.title 
               ? subItemSchema.title.toLowerCase().replace(/\s+/g, '-') 
-              : subCollectionKey.replace(/s$/, ''); //
+              : subCollectionKey.replace(/s$/, '');
 
-            // Step 2: Flattened child list route (e.g., /campaigns/:campaignId/party)
-            // Absolute path specification bypasses child window layout constraints
+            // Nested flattened collection page link (e.g., /campaigns/:campaignId/party)
             childListRoutes.push({
               path: `/${collectionKey}/:${entityName}Id/${subCollectionKey}`,
               name: `generic-${entityName}-${subCollectionKey}-list`,
               component: () => import('@/views/GenericListView.vue'),
               props: { collectionKey: subCollectionKey }
             });
-            console.log(`Added flat child list route: /${collectionKey}/:${entityName}Id/${subCollectionKey}`); //
 
-            // Step 3: Flattened child detail route (e.g., /campaigns/:campaignId/party/:partyId)
+            // Nested flattened record detail page link (e.g., /campaigns/:campaignId/party/:partyId)
             childDetailRoutes.push({
               path: `/${collectionKey}/:${entityName}Id/${subCollectionKey}/:${subEntityName}Id`,
               name: `generic-${entityName}-${subEntityName}-detail`,
               component: () => import('@/views/GenericDetailView.vue'),
-              props: true,
-              beforeEnter: (to) => {
-                storeInstance.syncActiveContext(subEntityName, to.params[`${subEntityName}Id`] as string);
-              }
+              props: true
             });
           }
         });
       }
 
-      // CRUCIAL ROUTER ORDERING MATRICES:
-      // 1. First push explicit longer sub-list parameters (/campaigns/:id/party)
+      // Prioritize explicit nested sub-collection route matching configurations
       routes.push(...childListRoutes);
-      
-      // 2. Next push explicit longer sub-detail parameters (/campaigns/:id/party/:id)
       routes.push(...childDetailRoutes);
 
-      // 3. Finally push the fallback wildcard pattern entity detail path (/campaigns/:campaignId)
+      // 2. Fallback Root Item Detail View (e.g., path: "/campaigns/:campaignId")
       const detailRoute: RouteRecordRaw = {
         path: `/${collectionKey}/:${entityName}Id`,
         name: `generic-${entityName}-detail`,
         component: () => import('@/views/GenericDetailView.vue'),
-        props: true,
-        beforeEnter: (to) => {
-          storeInstance.syncActiveContext(entityName, to.params[`${entityName}Id`] as string);
-        } //
+        props: true
       };
       routes.push(detailRoute);
     }
+    // Any top-level field that is NOT an array (like "dummy") is gracefully ignored by the router loop.
   });
 
-  // Catch-all route definition remains at the very bottom
-  routes.push({ path: '/:pathMatch(.*)*', redirect: '/campaigns' }); //
+  // Catch-all fallthrough redirection rule maps straight back to your primary data hub path
+  routes.push({ path: '/:pathMatch(.*)*', redirect: '/campaigns' });
   return routes;
 }
