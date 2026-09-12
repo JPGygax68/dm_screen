@@ -66,7 +66,6 @@ const crumbs = computed<Crumb[]>(() => {
   const trail: Crumb[] = [];
 
   // Guard access in case store or its tracking collection dictionary is missing on boot
-  console.log('Store state:', store);
   if (!store) return trail;
   
   // Track our context depth location map starting inside Pinia's database root matrix
@@ -75,7 +74,6 @@ const crumbs = computed<Crumb[]>(() => {
 
   // Split the physical active path string into individual layout folder tokens
   // e.g., "/campaigns/fa821c09" -> ["campaigns", "fa821c09"]
-  console.log('Route path:', route.path);
   const physicalSegments = route.path.split("/").filter(Boolean);
 
   physicalSegments.forEach((segment) => {
@@ -83,7 +81,6 @@ const crumbs = computed<Crumb[]>(() => {
 
     // 1. IS IT AN ID RECORD LOOKUP PASS?
     // If our search context is an array, this path segment represents an individual record ID string
-    console.log('Search context before ID lookup:', searchContext);
     if (Array.isArray(searchContext)) {
       const activeEntity = searchContext.find((item: any) => String(item.id) === String(segment));
       

@@ -220,7 +220,6 @@ const contextData = computed(() => {
     });
   });
 
-  console.log('Context data computed:', JSON.parse(JSON.stringify(contextData.value)));
   return {
     items: Array.isArray(currentScope)
       ? currentScope
