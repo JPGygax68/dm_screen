@@ -55,6 +55,19 @@ Object mutation is usually straightforward:
 - After the debouncing delay, the Store will pass the mutated Data Object to the Database, taking care however to first converted any object arrays it may contain to simple id lists. Note: this is shallow persistence, but it risks no data loss because any changes to nested array objects MUST have been persisted BEFORE the containing Data Object can be persisted.
 - Array item deletion is a somehwat special case. Nested Data Objects in arrays are considered owned by the containing object, and removing one from the array and deleting it MUST be a single operation made available by the Store: DeleteArrayObject, taking the name of the array property and the item index as parameters. It triggers two persistency operations on the Database, an Update on the containing object and a Delete on the nested object. For the sake of safety, the containing object should be updated first; that way, in case an error prevents the deletion of the nested object, that subobject would be orphaned but the active data would remain consistent.
 
+### Object cross-references
+
+Though it is not the case at the of writing of this document, it may become necessary for data objects to reference other objects that are not ancestors. In such cases, it becomes possible for external references to become stale.
+To limit complexity, no attempt shall be made (for now) to prevent such occurrences by technical means (such as reference counting). Instead, I propose the following
+
+RULE: any data that an object depends on must be contained within that same object or one of its ancestors. In case data from outside the ancestry is needed, that data shall be copied from its source. 
+
+RULE #2: in app data that can be referenced from multiple data objects SHOULD have unique ids that are "forever" as well as human-readable.
+
+### External (read-only) data
+
+This app shall ship with a copious amount of DnD-related, static data (e.g. a "Bestiary"). As with out-of-ancestry data, it shall not be assumed that such data will always be available or that it never change, and therefore it too shall be copied, though their ids shall be preserved in the copies to support easy updates, feedback, etc.
+
 ### Client-Side Routing
 
 - Client-side routing shall be the basis for navigation.
