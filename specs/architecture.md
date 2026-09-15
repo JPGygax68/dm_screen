@@ -1,85 +1,203 @@
-"DM Screen" app
-===============
+DM Screen app
+=============
 
-Software architecture
-----------------------
+The JSON Schema is the authoritative definition of the application's persisted
+data. It defines the shape, relationships, defaults, and validity constraints of
+the data. The application SHALL NOT maintain a second, competing data model in
+code.
 
-### Cornerstones
+The application does, however, need runtime information that JSON Schema does
+not express, such as component overrides, workflow routes, and permitted
+operations. A single schema resolver SHALL derive a consistent runtime model
+from the schema and a small amount of application metadata. This runtime model
+is a view of the schema, not an alternative source of truth.
 
-- Uses web technologies (HTML, CSS and their ecosystem) and is intended to run both as a website and as a native app
-- Data as kept in RAM using a "Store" (Pinia)
-- Data is persisted to and from permanent storage via the interfaces made available in browsers, though using abstraction mechanisms (PouchDB)
-- Import/export from documents is left to future versions and will most probably be based on JSON
-- Persisting to online database is a possibility left for future versions
+The application is intended to run as a client-side web application and, in the
+future, as a native application using the same application code and storage
+contracts.
 
+The data structure is defined by the JSON Schema document, currently maintained
+in YAML format. It is based on a top-level collection of campaigns containing
+nested objects and collections. The nesting depth is not formally limited.
 
-### Data structure
+The schema resolver SHALL:
 
-The data structure is defined in a JSON Schema document (currently in yaml format). It is based on a top-level collection of "campaigns", which contain nested objects and collections (arrays). The nesting depth is not formally limited.
+- parse and dereference schema definitions;
+- normalize properties, defaults, required fields, titles, and descriptions;
+- identify object collections and their item definitions;
+- identify entity types and their parent/collection relationships; and
+- expose one resolved representation for routing, views, validation, and
+  persistence.
+Application metadata MAY extend the resolved representation with information
+that is not data shape, for example:
 
+- custom view or workflow components;
+- route aliases and additional workflow routes;
+- permitted create, update, and delete operations; and
+- presentation-specific labels or actions.
 
-### How objects are stored in RAM and on disk
+Such metadata SHALL NOT duplicate the schema's property definitions or
+validation rules.
 
-In RAM (i.e. in the Store), each campaign and all its content is kept in this natural nested form (with objects being made reactive by the Store). However, for persistent storage, those objects are "flattened", meaning that arrays of sub-objects are converted to simple arrays of string ids. That process is reversed when reading objects back from the Database.
+Pinia SHALL hold the natural nested form of the data. A campaign and its
+nested objects and collections are represented as reactive objects, so generic
+and custom views can work with the same object graph.
 
-To persist an object to the Database, the Store simply passes it a reference to the object to be persisted, along with the Schema Definition for that object's type. That Definition will contain not only the type name, but also allow the Database to determine which object properties are object arrays that need to be reduced to id lists, which is the responsibility of the Database. As for the id, it is the Database's responsibility to assign one if the object is new, and the Store's responsibility not to tamper with fields added by the Database.
+Runtime-only metadata MAY be associated with objects when necessary, but it
+SHALL be clearly distinguished from persisted data and SHALL NOT alter the
+schema-defined data contract. Prefer store context or repository context over
+hidden properties on domain objects.
+The persistence layer SHALL be accessed through repositories. Stores and views
+SHALL NOT know the physical database layout.
 
-IMPORTANT NOTES:
-  - Though Store and Database are decoupled, this architecture makes it an explicit requirement software modules or layers SHALL NOT assume that data objects are "pure". Software modules - i.e. the Store and the Database - are EXPLICITLY ALLOWED to store their own fields in any and all data objects, provided those be prefixed with the customary "_" (underline)
-  - It is the DEVELOPER's responsibility to ensure that such "meta-fields" do not cause software layers to clash. At least in that sense, software layers MUST NOT be considered "black boxes".
+The initial persistence strategy is normalized storage:
 
-The Database SHOULD store the type of a persisted object in a special field for debugging purposes.
+- each persisted object has a stable application-assigned ID and a schema type;
+- each object is stored as a separate record;
+- nested object collections are represented in storage by child IDs and explicit
+  relationship metadata;
+- the repository owns flattening before writes and reconstruction after reads;
+- the schema resolver determines which properties contain nested objects; and
+- database-specific fields are kept separate from the schema-defined payload.
 
-To retrieve an object from the Database, the Store simply passes it its id along with its Schema definition. If the object contains nested object arrays, it is the Store's responsibility to then recursively retrieve each item of each such array.
+The normalized storage strategy is intentional. It permits independently
+updating entities, avoids rewriting large aggregates, and leaves room for later
+querying or synchronization. It also means that reconstruction and relationship
+integrity are first-class repository responsibilities.
+The storage implementation SHALL be replaceable. Browser-local persistence is
+required initially; PouchDB or another IndexedDB-backed implementation may be
+used behind the repository interfaces. A future online or synchronized backend
+must not require changes to the views or domain stores.
+Flattening does not imply that every multi-record operation must be a database
+transaction. The repository SHALL enforce the following ordered protocol:
 
-Note: there is currently no need for a "shallow" retrieval of objects; however such a need could appear in the future, if persisting to a remote database has been implemented and collaborative editing becomes a desirable feature. 
+Creating a nested object:
 
-Note #2: except for objects that have never been persisted before, which shall be persisted only upon confirmation by the user (which however may be automatic in some cases), persisting them shall be automatic after any change (triggered by input events) but "debounced" for efficiency.
+1. Validate and persist the child.
+2. Confirm successful persistence.
+3. Link the child from the parent in memory.
+4. Persist the updated parent.
+5. Expose the committed relationship as application state only after the
+   required writes have succeeded.
 
-### Object creation
+Removing a nested object:
 
-Objects shall be created by the Store as "Drafts". The Store SHOULD, if possible, initialize a Draft with default values according to the information defined in the Schema, but MUST NOT immediately persist it to the Database (to avoid orphaned data in the Database).
+1. Remove the child reference from the parent.
+2. Persist the updated parent.
+3. Confirm successful persistence.
+4. Delete the child record.
 
-Drafts can be deleted ("cancelled") anytime (Store operation CancelDraft). They MUST be valid (validated) before being committed. The Store operation CommitDraft shall be distinct from the UpdateDataObject operation.
+If a later step fails, the last successfully persisted graph SHALL remain
+readable and valid. An orphaned child or incomplete cleanup is a recoverable
+repository condition, not a reason to discard data.
 
-### Object deletion
+The repository SHALL:
 
-Objects can only be deleted once they've been Committed to the Store. Objects MUST NOT be deleted while they still contain non-empty nested Data Objects in arrays.
+- make operations retryable and idempotent where possible;
+- detect and report orphaned records and missing references;
+- never silently omit a referenced object during reconstruction;
+- prevent links to objects that have not been successfully persisted; and
+- use a database transaction when it materially improves consistency and is
+  available, without making correctness depend on one particular backend.
 
-Note: it is impossible for a Data Object to be deleted before it has been persisted, and illegal (i.e. a bug) to try: only Data Objects with a valid, Database-assigned id can be Deleted.
+Concurrent writers and ambiguous storage failures SHALL be treated as explicit
+failure modes. Conflict handling may be limited in the first version, but it
+must not silently overwrite data without a defined policy.
+IDs SHALL be generated by the application when an object is created. The
+database may add revision, timestamp, or synchronization metadata, but it does
+not assign or replace the object's identity.
 
-### Object mutation
+IDs must be stable across saves, reloads, and JSON export/import. Where an
+object may be referenced outside its ancestry, its identity SHALL remain stable
+and the reference SHALL be represented explicitly.
 
-Object mutation is usually straightforward:
-- Any change the user makes in the view is immediately reflected to the Data Object, which is provided by the Store, which is responsible for reactively informing all parts of the UI that are displaying the changed information in any way. The Store also internally queues a persisting operation, which will however be debounced for efficiency.
-- After the debouncing delay, the Store will pass the mutated Data Object to the Database, taking care however to first converted any object arrays it may contain to simple id lists. Note: this is shallow persistence, but it risks no data loss because any changes to nested array objects MUST have been persisted BEFORE the containing Data Object can be persisted.
-- Array item deletion is a somehwat special case. Nested Data Objects in arrays are considered owned by the containing object, and removing one from the array and deleting it MUST be a single operation made available by the Store: DeleteArrayObject, taking the name of the array property and the item index as parameters. It triggers two persistency operations on the Database, an Update on the containing object and a Delete on the nested object. For the sake of safety, the containing object should be updated first; that way, in case an error prevents the deletion of the nested object, that subobject would be orphaned but the active data would remain consistent.
+Objects are created as drafts in the Store or an editor-local draft state.
+Defaults MAY be initialized from the schema, but a draft MUST NOT be persisted
+or linked to a collection before explicit confirmation.
 
-### Object cross-references
+The lifecycle operations SHALL be distinct:
 
-Though it is not the case at the of writing of this document, it may become necessary for data objects to reference other objects that are not ancestors. In such cases, it becomes possible for external references to become stale.
-To limit complexity, no attempt shall be made (for now) to prevent such occurrences by technical means (such as reference counting). Instead, I propose the following
+- `BeginDraft` creates an editable draft;
+- `UpdateDraft` changes only the draft;
+- `CancelDraft` discards it without persistence; and
+- `CommitDraft` validates and persists it before adding or linking it.
 
-RULE: any data that an object depends on must be contained within that same object or one of its ancestors. In case data from outside the ancestry is needed, that data shall be copied from its source. 
+Existing committed objects may be edited in a separate update operation. Schema
+validation SHALL occur before commit and before persistence of an updated object.
+Native HTML form validity is not a substitute for schema validation.
+Once an object is committed, changes made through a view are reflected in the
+reactive Store immediately. The Store SHALL queue persistence of the affected
+object or aggregate and debounce repeated changes where appropriate.
 
-RULE #2: in app data that can be referenced from multiple data objects SHOULD have unique ids that are "forever" as well as human-readable.
+The Store SHALL not perform flattening itself. It passes the object and its
+resolved schema context to the repository, which creates a persistence-safe
+representation and applies the ordering rules above.
 
-### External (read-only) data
+Only committed, successfully persisted objects may be deleted. A parent object
+must not be deleted while it contains non-empty owned child collections unless
+the repository performs an explicitly defined cascade operation.
 
-This app shall ship with a copious amount of DnD-related, static data (e.g. a "Bestiary"). As with out-of-ancestry data, it shall not be assumed that such data will always be available or that it never change, and therefore it too shall be copied, though their ids shall be preserved in the copies to support easy updates, feedback, etc.
+Removing an owned child from a collection is one Store operation. It updates
+the parent relationship first and deletes the child record only after that
+update succeeds. Failed cleanup must remain detectable and retryable.
+The preferred data relationship is ancestry: data on which an object depends
+should be contained in that object or one of its ancestors. Cross-references
+are allowed when required, but they SHALL be explicit and validated where
+possible.
 
-### Client-Side Routing
+The application ships with read-only D&D data such as a bestiary. This data is
+catalog data, not user campaign data. When a catalog entry is used to create an
+encounter participant, the relevant values are copied into the participant
+instance together with the source ID. Later catalog changes SHALL NOT overwrite
+DM-edited instance values.
 
-- Client-side routing shall be the basis for navigation.
-- Routes shall be directly derived from the Schema.
-- The Breadcrumbs component shall automatically reflect the route, using additional information taken from the schema
+Client-side routing is the basis for navigation. The structural route tree SHALL
+be derived recursively from the schema's object collections and relationships.
+For example, the schema may produce routes equivalent to:
 
-### Views: generic and custom-made
+```text
+/campaigns
+/campaigns/:campaignId
+/campaigns/:campaignId/party
+/campaigns/:campaignId/party/:participantId
+/campaigns/:campaignId/encounters
+/campaigns/:campaignId/encounters/:encounterId
+```
 
-- Two generic views shall act as fallbacks for any data routes not explicitly matched with a custom view:
-  - A Generic List View shall be the fallback for both top-level and nested arrays
-  - A Generic Detail View shall serve as the fallback editor for data objects
+Structural routes provide the navigation backbone and fallback
+behavior. They do not restrict the application to master-detail navigation.
 
-- The Generic List View shall provide a modal dialog for the purpose of creating new item objects, by allowing the user to input the required fields. Upon confirmation, the new item object shall be committed to the Store and persisted to the Database, after which it shall be added to the array, which shall then be persisted to the Store in a separate operation.
+Breadcrumbs SHALL be derived from the route context and resolved schema
+metadata. Workflow routes may be added for a specific entity, for example:
 
-! RULE: only objects that have been persisted to the Database may be added to arrays or otherwise linked to other data objects.
+```text
+/campaigns/:campaignId/encounters/:encounterId/edit
+/campaigns/:campaignId/encounters/:encounterId/track
+/campaigns/:campaignId/encounters/:encounterId/print
+```
+The application provides two reusable generic fallback views:
+
+- `GenericCollectionView` interprets a resolved collection schema and displays,
+  creates, and navigates to its items; and
+- `GenericDetailView` interprets a resolved entity schema and displays and edits
+  its scalar fields and nested collections.
+
+These are reusable schema interpreters, not generated per-entity views.
+
+All production views may eventually be custom-made. A custom view SHALL be able
+to replace the generic view for an entity or route without changing the schema,
+Store, repository, or structural route machinery. Custom views use the same
+resolved model and lifecycle operations as generic views.
+
+The encounter editor, encounter tracker, character sheet, and print views are
+expected to be custom views. They remain reachable through and consistent with
+the schema-derived navigation backbone.
+JSON export and import are explicit application operations. Exported documents
+SHALL include a format/schema version, preserve stable IDs, and be validated
+before import. Invalid or partially imported data SHALL produce diagnostics;
+the importer must not silently discard records.
+
+Online persistence and multi-device synchronization are future possibilities.
+Repositories and serialized data should preserve that option, but the first
+version need not implement synchronization or conflict resolution.
+
