@@ -111,9 +111,17 @@ IDs must be stable across saves, reloads, and JSON export/import. Where an
 object may be referenced outside its ancestry, its identity SHALL remain stable
 and the reference SHALL be represented explicitly.
 
-Objects are created as drafts in the Store or an editor-local draft state.
-Defaults MAY be initialized from the schema, but a draft MUST NOT be persisted
-or linked to a collection before explicit confirmation.
+Objects are normally created as drafts in the Store or an editor-local draft
+state. Defaults MAY be initialized from the schema, but an uncommitted object
+MUST NOT be persisted or linked to committed data before explicit confirmation.
+
+One user operation MAY create and commit multiple child objects, for example
+when adding a random group from a creature template. Each child SHALL be
+validated, persisted, and linked using the normal child-before-parent ordering
+rules. If a later child fails to persist, already committed children remain
+valid and the error SHALL be reported. The application MAY offer rollback of
+the successfully committed children as a recovery action, but rollback is not
+required for data integrity.
 
 The lifecycle operations SHALL be distinct:
 
