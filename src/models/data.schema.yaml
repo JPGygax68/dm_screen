@@ -53,14 +53,33 @@ type: object
       title: { type: string, description: "Encounter title", minLength: 1 }
       summary: { type: string, description: "Brief summary of the encounter (optional)" }
       location: { type: string, description: "Location of the encounter (optional)" }
+      sessionTag: { type: string, description: "Session name, number, or other encounter tag (optional)" }
+      createdAt: { type: string, format: date-time, description: "Time at which the encounter was created" }
       status: { "$ref": "#/$defs/EncounterStatus" }
       difficulty: { type: string, description: "Encounter difficulty (optional)" }
+      notes: { type: string, description: "Encounter-wide notes and annotations (optional)" }
       participants:
         type: array
         description: List of people and creatures present in the encounter, whether or not they participate in combat
         items:
           "$ref": "#/$defs/Participant"
         uniqueItems: true
+        default: []
+      rounds:
+        type: array
+        description: Rounds recorded during the encounter
+        items:
+          "$ref": "#/$defs/Round"
+        default: []
+      activeTurn:
+        "$ref": "#/$defs/ActiveTurn"
+        description: Current position in the encounter turn workflow (optional)
+      endReason:
+        "$ref": "#/$defs/EncounterEndReason"
+        description: How the encounter concluded (optional until completion)
+      endReasonNote:
+        type: string
+        description: Additional detail for the encounter end reason (optional)
     required:
     - id
     - title
@@ -71,6 +90,33 @@ type: object
     type: string
     description: "Status of an encounter"
     enum: ["Draft", "Ready", "Ongoing", "Completed"]
+
+  EncounterEndReason:
+    type: string
+    enum: ["hostiles_defeated", "retreat", "objective_achieved", "scene_change", "other"]
+    description: How an encounter concluded
+
+  ActiveTurn:
+    type: object
+    description: Current persisted position in the encounter turn workflow
+    properties:
+      roundNumber:
+        type: integer
+        minimum: 1
+        description: Number of the active round
+      turnNumber:
+        type: integer
+        minimum: 1
+        description: One-based position of the active turn within the active round
+      phase:
+        type: string
+        enum: ["start", "turn", "end"]
+        description: Current turn workflow phase
+    required:
+    - roundNumber
+    - turnNumber
+    - phase
+    additionalProperties: false
 
   PlayerCharacter:
     type: object
@@ -124,10 +170,14 @@ type: object
     title: Participant
     description: 'A person or creature present in an encounter (PC, NPC, or creature), whether or not they participate in combat. Lifecycle: current encounter'
     properties:
+      id:
+        type: string
+        minLength: 1
+        description: Unique identifier for this participant instance within the encounter
       type: { "$ref": "#/$defs/ParticipantType" }
-      id: 
+      sourceId:
         oneOf: [ { "$ref": "#/$defs/PlayerId" }, { "$ref": "#/$defs/NpcId" }, { "$ref": "#/$defs/CreatureId" } ]
-        description: 'Unique identifier for the participant (must match a PC, NPC, or creature)'
+        description: Optional identifier of the source PC, NPC, or creature from which this participant was created
       imageId:
         oneOf: [ { "$ref": "#/$defs/PlayerId" }, { "$ref": "#/$defs/NpcId" }, { "$ref": "#/$defs/CreatureId" } ]
         description: 'Identifier for the participant image (optional)'
@@ -135,17 +185,17 @@ type: object
         type: string
         description: Participant name
         minLength: 1
-      initiativeRoll:
+      initiative:
         type: integer
-        description: Initiative roll result, if this participant takes part in combat
+        description: Initiative roll result, including modifiers
       hitPoints:
         type: integer
         minimum: 0
-        description: Current hit points, if tracked (initialized from source, persisted for PCs only)
+        description: Current hit points
       temporaryHitPoints:
         type: integer
         minimum: 0
-        description: Temporary hit points (optional)
+        description: Temporary hit points
       conditions:
         type: array
         description: List of active conditions
@@ -155,7 +205,7 @@ type: object
     - type
     - id
     - name
-    - initiativeRoll
+    - initiative
     - hitPoints
     - conditions
     additionalProperties: false
@@ -168,31 +218,11 @@ type: object
     - creature
     description: Participant type to guide UI behavior
 
-  ParticipantRef:
-    type: object
-    properties:
-      type: { "$ref": "#/$defs/ParticipantType" }
-      id:
-        oneOf: [ { "$ref": "#/$defs/PlayerId" }, { "$ref": "#/$defs/NpcId" }, { "$ref": "#/$defs/CreatureId" } ]
-        description: 'Unique identifier PC, NPC or Creature'
-    description: Unique identifier for a participant (must match a participant id in Encounter.participants)
-
-  ActionType:
+  ParticipantId:
     type: string
-    enum:
-    - attack
-    - cast_spell
-    - interact
-    - dash
-    - disengage
-    - dodge
-    - help
-    - hide
-    - ready
-    - search
-    - use_object
-    description: Type of action taken
-    
+    minLength: 1
+    description: Unique identifier of a participant instance within the encounter
+
   Round:
     type: object
     title: Combat Round
@@ -204,6 +234,9 @@ type: object
         description: List of turns in this round
         items:
           "$ref": "#/$defs/Turn"
+      notes:
+        type: string
+        description: Optional notes for this round
     required:
     - number
     - turns
@@ -215,282 +248,84 @@ type: object
     description: A single participant's turn in a round
     properties:
       participantId:
-        "$ref": "#/$defs/ParticipantRef"
+        "$ref": "#/$defs/ParticipantId"
         description: ID of the participant taking this turn (must match a participant
           id in Encounter.participants)
-      events:
+      status:
+        "$ref": "#/$defs/TurnStatus"
+      startChecklist:
+        "$ref": "#/$defs/PhaseChecklist"
+        description: Proposed or confirmed start-of-turn updates (optional)
+      tokens:
         type: array
-        description: Events that occurred during this turn (can be empty)
+        description: Confirmed shorthand tokens recorded during this turn
         items:
-          "$ref": "#/$defs/Event"
+          type: string
+        default: []
+      note:
+        type: string
+        description: Optional free-text turn note
+      endChecklist:
+        "$ref": "#/$defs/PhaseChecklist"
+        description: Proposed or confirmed end-of-turn updates (optional)
     required:
     - participantId
-    - events
+    - status
+    - tokens
     additionalProperties: false
 
-  Success:
+  TurnStatus:
     type: string
-    enum:
-    - critical_miss
-    - miss
-    - hit
-    - critical_hit
-    description: Degree of success of an attack or spell effect
+    enum: ["pending", "active", "completed", "skipped"]
+    description: Progress of a turn through the encounter workflow
 
-  DamageType:
-    type: string
-    enum:
-    - bludgeoning
-    - piercing
-    - slashing
-    - fire
-    - cold
-    - lightning
-    - acid
-    - poison
-    - psychic
-    - necrotic
-    - radiant
-    - thunder
-    description: Type of damage dealt
-
-  EventType:
-    type: string
-    enum:
-    - action
-    - effect
-    - movement
-    - other
-    description: Classification of an event
-
-  Event:
+  PhaseChecklist:
     type: object
-    title: Combat Event
-    description: An event that occurred during a turn
+    description: Start-of-turn or end-of-turn checklist for one turn
     properties:
-      type: { "$ref": "#/$defs/EventType" }
-      data:
-        oneOf:
-        - "$ref": "#/$defs/ActionEvent"
-        - "$ref": "#/$defs/EffectEvent"
-        - "$ref": "#/$defs/MovementEvent"
-        - "$ref": "#/$defs/OtherEvent"
-        description: Event-specific data
-      comment:
+      phase:
         type: string
-        description: Optional comment about the event
-    required:
-    - type
-    - data
-    additionalProperties: false
-
-  ActionEvent:
-    type: object
-    title: Action
-    description: An action taken by a participant
-    properties:
-      type:
-        "$ref": "#/$defs/ActionType"
-      description:
-        type: string
-        description: Optional description of the action
-    required:
-    - type
-    additionalProperties: false
-  
-  AttackAction:
-    type: object
-    title: Attack Action
-    description: A melee or ranged attack
-    properties:
-      type:
-        const: attack
-      targetId:
-        "$ref": "#/$defs/ParticipantRef"
-        description: ID of target participant (must match a participant id in Encounter.participants)
-      hit: { "$ref": "#/$defs/Success", description: Whether the attack hit }
-      damage: {type: integer, minimum: 0, description: Damage dealt (optional)}
-      damageType: { "$ref": "#/$defs/DamageType" }
-    required:
-    - type
-    - targetId
-    - hit
-    additionalProperties: false
-
-  CastSpellAction:
-    type: object
-    title: Cast Spell Action
-    description: Casting a spell
-    properties:
-      type: { const: cast_spell }
-      spellName: { type: string, description: Name of the spell }
-      target: { type: string, description: Target designation (participant id, 'area', 'self', etc.) }
-      targetIds:
+        enum: ["start", "end"]
+        description: Turn phase to which this checklist applies
+      items:
         type: array
-        description: List of target participant IDs (must match participant ids in Encounter.participants
-          if present)
         items:
-          "$ref": "#/$defs/ParticipantRef"
-      hit: { "$ref": "#/$defs/Success", description: Whether the spell hit/affected targets (optional) }
-      damage: { type: integer, minimum: 0, description: Damage dealt (optional) }
-      damageType: { "$ref": "#/$defs/DamageType", description: Type of damage (optional) }
+          "$ref": "#/$defs/ChecklistItem"
+        default: []
     required:
-    - type
-    - spellName
+    - phase
+    - items
     additionalProperties: false
 
-  InteractAction:
+  ChecklistItem:
     type: object
-    title: Interact Action
-    description: Interacting with an object or creature
+    description: An editable proposed or confirmed shorthand update
     properties:
-      type: { const: interact }
-      target:
+      id:
         type: string
-        description: Target (participant id or designation)
-      description:
-        type: string
-        description: Description of the interaction
-    required:
-    - type
-    additionalProperties: false
-  
-  DashAction:
-    type: object
-    title: Dash Action
-    description: Dashing/moving extra distance
-    properties:
-      type: { const: dash }
-    required:
-    - type
-    additionalProperties: false
-  
-  DisengageAction:
-    type: object
-    title: Disengage Action
-    description: Disengaging to avoid opportunity attacks
-    properties:
-      type: { const: disengage }
-    required:
-    - type
-    additionalProperties: false
-
-  DodgeAction:
-    type: object
-    title: Dodge Action
-    description: Dodging to increase AC
-    properties:
-      type: { const: dodge }
-    required:
-    - type
-    additionalProperties: false
-
-  HelpAction:
-    type: object
-    title: Help Action
-    description: Helping another participant
-    properties:
-      type: { const: help }
-      targetId:
-        "$ref": "#/$defs/ParticipantRef"
-        description: ID of the participant being helped (must match a participant id in
-          Encounter.participants)
-    required:
-    - type
-    - targetId
-    additionalProperties: false
-
-  HideAction:
-    type: object
-    title: Hide Action
-    description: Attempting to hide
-    properties:
-      type: { const: hide }
-    required:
-    - type
-    additionalProperties: false
-
-  ReadyAction:
-    type: object
-    title: Ready Action
-    description: Readying an action for later in the round
-    properties:
-      type: { const: ready }
-      description:
-        type: string
-        description: Description of the readied action
-    required:
-    - type
-    additionalProperties: false
-
-  SearchAction:
-    type: object
-    title: Search Action
-    description: Searching for something
-    properties:
-      type: { const: search }
-      description:
-        type: string
-        description: Description of what is being searched
-    required:
-    - type
-    additionalProperties: false
-
-  UseObjectAction:
-    type: object
-    title: Use Object Action
-    description: Using an object or item
-    properties:
-      type: { const: use_object }
-      description:
-        type: string
-        description: Description of the object being used
-    required:
-    - type
-    additionalProperties: false
-
-  EffectEvent:
-    type: object
-    title: Effect
-    description: A magical or environmental effect
-    properties:
-      name:
-        type: string
-        description: Name of the effect
-      description:
-        type: string
-        description: Description of the effect
-      affectedParticipants:
+        minLength: 1
+        description: Unique identifier for the checklist item
+      tokens:
         type: array
-        description: IDs of affected participants
         items:
-          "$ref": "#/$defs/ParticipantRef"
+          type: string
+        default: []
+      note:
+        type: string
+        description: Optional free-text note for this checklist item
+      overridden:
+        type: boolean
+        default: false
+        description: Whether the DM changed the proposed item
+      applied:
+        type: boolean
+        default: false
+        description: Whether the item has been confirmed and applied
     required:
-    - name
-    additionalProperties: false
-
-  MovementEvent:
-    type: object
-    title: Movement
-    description: Movement of a participant
-    properties:
-      distance:
-        type: number
-        minimum: 0
-        description: Distance moved
-      direction:
-        type: string
-        description: Direction or destination
-    additionalProperties: false
-  
-  OtherEvent:
-    type: object
-    title: Other Event
-    description: Any other event not fitting other categories
-    properties:
-      description:
-        type: string
-        description: Description of the event
+    - id
+    - tokens
+    - overridden
+    - applied
     additionalProperties: false
 
 properties:
