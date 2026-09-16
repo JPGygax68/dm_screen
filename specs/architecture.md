@@ -176,6 +176,26 @@ Removing an owned child from a collection is one Store operation. It updates
 the parent relationship first and deletes the child record only after that
 update succeeds. Failed cleanup must remain detectable and retryable.
 
+### Turn workflow
+
+The tracker normally creates one ordered `Turn` for each participant present
+when a round begins. A participant added while an encounter is running joins at
+the next round by default; the DM may explicitly insert a turn into the current
+round when appropriate.
+
+`ActiveTurn` identifies the current round and one-based turn number within that
+round. Its phase determines whether the tracker presents start-of-turn
+checklist entry, action entry, or end-of-turn checklist entry. The identified
+turn SHALL have status `active` while `ActiveTurn` is present.
+
+Confirmed checklist tokens SHALL be retained in their checklist and appended to
+the parent turn's token list. Completed and skipped turns remain editable only
+through an explicit correction operation.
+
+JSON Schema cannot verify these relationships across nested arrays. The Store
+and validation layer SHALL enforce them when creating rounds, advancing turns,
+adding participants, and restoring an encounter.
+
 ### References and external data
 
 The preferred data relationship is ancestry: data on which an object depends

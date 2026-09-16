@@ -67,13 +67,13 @@ type: object
         default: []
       rounds:
         type: array
-        description: Rounds recorded during the encounter
+        description: Rounds recorded during the encounter; a round normally contains one turn for each participant present when the round begins
         items:
           "$ref": "#/$defs/Round"
         default: []
       activeTurn:
         "$ref": "#/$defs/ActiveTurn"
-        description: Current position in the encounter turn workflow (optional)
+        description: Current position in the encounter turn workflow (optional); must correspond to an active turn in the identified round
       endReason:
         "$ref": "#/$defs/EncounterEndReason"
         description: How the encounter concluded (optional until completion)
@@ -98,7 +98,7 @@ type: object
 
   ActiveTurn:
     type: object
-    description: Current persisted position in the encounter turn workflow
+    description: Current persisted position in the encounter turn workflow; turnNumber is valid only within roundNumber
     properties:
       roundNumber:
         type: integer
@@ -231,7 +231,7 @@ type: object
       number: { type: integer, minimum: 1, description: "Round number (must be in sync with array index in Encounter.rounds)" }
       turns:
         type: array
-        description: List of turns in this round
+        description: One-based ordered list of turns in this round, normally created for every participant present when the round begins
         items:
           "$ref": "#/$defs/Turn"
       notes:
@@ -245,7 +245,7 @@ type: object
   Turn:
     type: object
     title: Combat Turn
-    description: A single participant's turn in a round
+    description: A single participant's turn in a round; completed and skipped turns may be changed only through an explicit correction operation
     properties:
       participantId:
         "$ref": "#/$defs/ParticipantId"
@@ -258,7 +258,7 @@ type: object
         description: Proposed or confirmed start-of-turn updates (optional)
       tokens:
         type: array
-        description: Confirmed shorthand tokens recorded during this turn
+        description: Confirmed shorthand tokens recorded during this turn, including tokens confirmed from phase checklists
         items:
           type: string
         default: []
@@ -277,7 +277,7 @@ type: object
   TurnStatus:
     type: string
     enum: ["pending", "active", "completed", "skipped"]
-    description: Progress of a turn through the encounter workflow
+    description: Progress of a turn through the encounter workflow; the active turn's phase determines whether start checklist, action entry, or end checklist is shown
 
   PhaseChecklist:
     type: object
