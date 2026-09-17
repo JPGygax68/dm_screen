@@ -20,7 +20,9 @@ Each turn row uses the following structure:
 
 - Use `;` to separate compact update tokens.
 - Use `|` to attach a free-text note when the token set is insufficient.
-- Support actor labels with simple names such as `Goblin1`, `PC_A`, or `DM`.
+- The actor is the participant's `label`, such as `Goblin_1`, `PC_A`, or `DM`.
+- Labels are canonical, human-readable identifiers and MUST be unique within an
+  encounter. They contain no spaces and use only letters, digits, `_`, and `-`.
 
 ## Supported update tokens
 
@@ -68,9 +70,11 @@ Each turn row uses the following structure:
 
 ## Targets and labels
 
-- `TARGET` should match the combatant label used in the column headers.
-- Use underscores or hyphens instead of spaces when possible.
-- If needed, implementations may support quoted labels for parsing robustness.
+- `TARGET` should match the target participant's `label`.
+- Actor and target labels MUST use their canonical, space-free participant
+  labels. Quoting is not part of the shorthand grammar.
+- Printed or OCR-derived text MAY display or recognize spaces for readability,
+  but import must normalize it back to the canonical label before validation.
 - When an attack affects another combatant, the attacker's cell should record the provenance with `atk:...`, and the target's cell should record resulting deltas such as `+Nhp`, `-Nhp`, `+NAME`, or `-NAME`.
 
 ## Consumables and resources

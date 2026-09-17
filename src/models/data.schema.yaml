@@ -178,12 +178,17 @@ type: object
       sourceId:
         oneOf: [ { "$ref": "#/$defs/PlayerId" }, { "$ref": "#/$defs/NpcId" }, { "$ref": "#/$defs/CreatureId" } ]
         description: Optional identifier of the source PC, NPC, or creature from which this participant was created
+      label:
+        type: string
+        minLength: 1
+        pattern: "^[A-Za-z0-9][A-Za-z0-9_-]*$"
+        description: Required human-readable identifier used by shorthand and unique within the encounter
       imageId:
         oneOf: [ { "$ref": "#/$defs/PlayerId" }, { "$ref": "#/$defs/NpcId" }, { "$ref": "#/$defs/CreatureId" } ]
         description: 'Identifier for the participant image (optional)'
       name:
         type: string
-        description: Participant name
+        description: Optional proper or descriptive name; shorthand uses label instead
         minLength: 1
       initiative:
         type: integer
@@ -204,7 +209,7 @@ type: object
     required:
     - type
     - id
-    - name
+    - label
     - initiative
     - hitPoints
     - conditions

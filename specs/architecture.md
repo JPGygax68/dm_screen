@@ -209,6 +209,17 @@ encounter participant, the relevant values are copied into the participant
 instance together with the source ID. Later catalog changes SHALL NOT overwrite
 DM-edited instance values.
 
+Participant `id` is an internal stable identity and is not normally shown to
+the user. Participant `label` is the human-readable encounter-local identifier
+used by shorthand, printed columns, and target references. Labels SHALL be
+unique within an encounter and SHALL use the canonical space-free syntax
+defined by the shorthand specification. The Store and import validator SHALL
+enforce this uniqueness; JSON Schema cannot enforce it across array items.
+
+Participant `name` is optional descriptive or proper-name data. It SHALL NOT
+be used as a shorthand reference because it may be absent, non-unique, or
+edited without intending to change references.
+
 ### Client-side routing
 
 Client-side routing is the basis for navigation. The structural route tree SHALL
