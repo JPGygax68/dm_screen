@@ -32,7 +32,6 @@ Each turn row uses the following structure:
 - `hp=N`: set current HP.
 - `maxhp=N`: set maximum HP.
 - `ac=N`, `ac+N`, `ac-N`: set or modify armor class.
-- `init=N`: set initiative value.
 - `move:N`: record movement in feet.
 
 ### Conditions and effects
@@ -42,31 +41,50 @@ Each turn row uses the following structure:
 - `cond:+NAME[N]`: add condition `NAME` with duration `N` rounds/turns.
 - `cond:-NAME`: remove condition `NAME` with duration semantics.
 - `+NAME`, `-NAME`: add or remove a condition in a compact turn-cell token.
-- `temp:NAME N`: add a temporary effect `NAME` lasting `N` rounds/turns.
 
 ### Ability and skill values
 
-- `stat:STR=18`, `str=18`: set a stat value.
-- `save:WIS+2`, `skill:PER+5`: set or adjust saves/skills.
+- `STR=18`: set an ability score.
+- `STR:+2=18`: increase an ability score; the resulting score is required so the app can verify the calculation.
+- `STR:-1`, `STR:-1=16`: decrease an ability score; the resulting score is optional but verified when supplied.
+- `STR:+2=18[1]`: apply a temporary ability adjustment lasting `N` rounds/turns.
+- `stat:STR=18`, `stat:STR:+2=18`, `save:WIS:+2=5`, and `skill:PER:+1=6`: explicit prefixed forms are always accepted.
+- Prefixes are optional only when the name resolves unambiguously as an ability, save, or skill. The app MUST reject ambiguous bare names and ask for an explicit prefix.
 - `res:TYPE`, `vul:TYPE`, `imm:TYPE`: add resistance, vulnerability, or immunity.
 
 ### Actions and notes
 
 - `cast:SPELL`: note a spell casting action.
 - `switch:WEAPON`: record switching to a different weapon. Example: `switch:shortsword`.
-- `switch:FROM->TO`: record a specific weapon transition. Example: `switch:dagger->shortsword`.
+- `switch FROM to TO`: record a specific weapon transition. Example: `switch dagger to shortsword`.
 - `action:TEXT`: record an action or short description.
-- `atk:TARGET+MOD[/dmg=N][/miss]`: record an attack against `TARGET` with an optional modifier, damage, or miss flag.
+- `atk:TARGET +MOD -> RESULT [dmg=N]`: record an attack against `TARGET`; the modifier and result details are optional unless the DM wants to record them.
 - `roll:TEXT`: record a notable roll or check.
 - `note:TEXT`: record a short free-text note inline.
 - `raw:TEXT`: record any update that cannot be expressed with the standard tokens. `raw:` may contain multi-line content and free-form notes; implementations should preserve line breaks when storing and rendering `raw:` entries.
 
+### Parenthesized additional information
+
+Any update token MAY be followed by a space and parenthesized information:
+
+```text
+-7hp (fall damage)
+cond:PRONE[1] (until the end of the next turn)
+STR:+2=18[1] (bless)
+```
+
+The parenthesized text is preserved as human-readable annotation. It is not
+required to be parseable, although a future parser MAY recognize structured
+content within it.
+
 ### Weapon switching notes
 
 - Under DnD 2024 rules, weapon switching is treated as a minor or free combat adjustment, not a full separate action.
-- Use `switch:...` to record the equipment transition without implying an extra action cost.
-- If the combatant attacks with a different weapon in the same turn, the notation should combine the switch and the attack in one row, e.g. `switch:dagger->shortsword; atk:Goblin1+6/dmg=8`.
-- The app may propose `switch:` automatically when the current weapon state differs from the weapon implied by the next attack token.
+- Use `switch ... to ...` to record the equipment transition without implying an extra action cost. The colon is optional, so `switch:shortsword` is also accepted.
+- The source weapon is optional: `switch to shortsword` or `switch dagger to shortsword`.
+- Hand extensions are optional: `switch lh to poison_dagger`, `switch rh to shield`. Future hand specifiers may be added for participants with more than two hands.
+- If the participant attacks with a different weapon in the same turn, the notation should combine the switch and the attack in one row, e.g. `switch dagger to shortsword; atk Goblin_1 +6 -> hit dmg=8`.
+- The app may propose `switch` automatically when the current weapon state differs from the weapon implied by the next attack token.
 
 ## Targets and labels
 
@@ -75,7 +93,7 @@ Each turn row uses the following structure:
   labels. Quoting is not part of the shorthand grammar.
 - Printed or OCR-derived text MAY display or recognize spaces for readability,
   but import must normalize it back to the canonical label before validation.
-- When an attack affects another combatant, the attacker's cell should record the provenance with `atk:...`, and the target's cell should record resulting deltas such as `+Nhp`, `-Nhp`, `+NAME`, or `-NAME`.
+- When an attack affects another participant, the actor's cell should record the provenance with `atk ... -> ...`, and the target's cell should record resulting deltas such as `+Nhp`, `-Nhp`, `+NAME`, or `-NAME`.
 
 ## Consumables and resources
 
@@ -90,18 +108,21 @@ Each turn row uses the following structure:
 
 ## Parsing rules
 
-- Token names are case-insensitive for common keywords such as `hp`, `ac`, `cond`, `clr`, `temp`, `stat`, `save`, `skill`, `res`, `vul`, `imm`, `cast`, `action`, `roll`, `note`, and `raw`.
+- Token names are case-insensitive for common keywords such as `hp`, `ac`, `cond`, `clr`, `stat`, `save`, `skill`, `res`, `vul`, `imm`, `cast`, `action`, `roll`, `note`, and `raw`.
+- A keyword colon is optional where the grammar permits it: `cast Fireball` and `cast:Fireball` are equivalent. A colon may also be followed by a space.
 - Use simple separators and avoid punctuation that conflicts with parsing.
 - If needed, use `note:` or `raw:` to capture exceptional or manual updates.
 - Signed numeric tokens are interpreted as deltas when preceded by `+` or `-`. Example: `+5hp` increases current HP by 5, while `hp=5` sets HP to 5.
 - For tokens that use `:`, the unsigned value retains the per-token meaning. Example: `move:10` records 10 feet moved this turn.
+- For ability, save, and skill adjustments, a positive adjustment MUST include the resulting value, such as `STR:+2=18`; the app verifies that result against the prior value.
+- Ability, save, and skill durations use the same `[N]` suffix as conditions, for example `save:WIS:+2=5[1]`.
 
 ## Example rows
 
-- `Goblin1: -7hp; cond:PRONE; move:10; note: fell from ledge`
-- `PC_A: +5hp; temp:BRACED 1; action:Shield spell`
-- `DM: cond:BLINDED[1]; atk:Spear +4; note: target behind cover`
-- `PC_A: switch:dagger->shortsword; atk:Goblin1+6/dmg=8; note: wielding blade for next turn`
+- `Goblin_1: -7hp; cond:PRONE; move:10; note fell from ledge`
+- `PC_A: +5hp; cond:BRACED[1] (temporary); action Shield spell`
+- `DM: cond:BLINDED[1]; atk Goblin_1 +6 -> hit dmg=8; note target behind cover`
+- `PC_A: switch dagger to shortsword; atk Goblin_1 +6 -> hit dmg=8; note wielding blade`
 - `Ogre: hp=45; ac=13; res:fire; note: rage active`
 - `DM: raw:Grant inspiration; note: team advantage for next check`
 
