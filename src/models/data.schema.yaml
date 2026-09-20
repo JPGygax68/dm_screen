@@ -56,7 +56,6 @@ type: object
       sessionTag: { type: string, description: "Session name, number, or other encounter tag (optional)" }
       createdAt: { type: string, format: date-time, description: "Time at which the encounter was created" }
       status: { "$ref": "#/$defs/EncounterStatus" }
-      difficulty: { type: string, description: "Encounter difficulty (optional)" }
       notes: { type: string, description: "Encounter-wide notes and annotations (optional)" }
       participants:
         type: array
@@ -178,6 +177,10 @@ type: object
       sourceId:
         oneOf: [ { "$ref": "#/$defs/PlayerId" }, { "$ref": "#/$defs/NpcId" }, { "$ref": "#/$defs/CreatureId" } ]
         description: Optional identifier of the source PC, NPC, or creature from which this participant was created
+      experienceValue:
+        type: integer
+        minimum: 0
+        description: Optional XP value retained from the source creature or template for post-encounter attribution
       label:
         type: string
         minLength: 1

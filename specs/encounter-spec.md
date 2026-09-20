@@ -75,8 +75,11 @@ The encounter may contain:
 - `location`: optional location or scene description;
 - `sessionTag`: optional session name, number, date, or other human-facing tag;
 - `createdAt`: creation timestamp;
-- `difficulty`: optional DM assessment or label; and
 - `notes`: encounter-wide notes and annotations.
+
+Encounter difficulty is derived from participant XP values, party composition,
+and the applicable ruleset thresholds. It may be displayed as a proposal or
+comment, but is not persisted as a primary encounter fact.
 
 `sessionTag` is provisional session metadata. It is not a separate Session
 entity and may later be replaced or supplemented when sessions are added to the
@@ -90,6 +93,8 @@ Every encounter participant has:
 - `label`: required, human-readable encounter-local identifier;
 - `type`: `pc`, `npc`, or `creature`;
 - `sourceId`: optional reference to the PC, NPC, or creature used as the source;
+- `experienceValue`: optional XP value retained from a source creature or
+   template for post-encounter attribution;
 - `name`: optional proper or descriptive name;
 - `initiative`: required initiative value;
 - `hitPoints`: required current hit points;
@@ -108,6 +113,11 @@ may display `name` when present and fall back to `label`; shorthand always uses
 
 `sourceId` is provenance, not encounter identity. An improvised participant may
 have no source ID.
+
+The participant's `experienceValue` is retained as input for awarding or
+attributing XP when the encounter ends. It is not itself an encounter
+difficulty measure, and the schema does not infer a final party or per-PC award
+from it.
 
 ## Initiative and setup ordering
 
@@ -270,3 +280,8 @@ Completing an encounter moves it to `Completed` and records an
 The ending workflow may review conditions and final notes before completion.
 The end reason remains editable until the encounter is finalized through the
 application's completion operation.
+
+Completion may use the stored participant XP values to propose an XP award for
+the party or individual PCs. The final attribution is a completion workflow
+decision and may be adjusted by the DM; it is separate from encounter
+difficulty calculation.
