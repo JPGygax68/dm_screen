@@ -54,11 +54,12 @@ Each turn row uses the following structure:
 
 ### Actions and notes
 
-- `cast:SPELL`: note a spell casting action.
-- `switch:WEAPON`: record switching to a different weapon. Example: `switch:shortsword`.
+- Actions MAY include an optional roll suffix: `[d20[+|-] [MODIFIER] = TOTAL [vs AC|DC TARGET] -> OUTCOME]`.
+- `cast:SPELL`: note a spell casting action. The colon is optional, so `cast Fireball` is also valid.
 - `switch FROM to TO`: record a specific weapon transition. Example: `switch dagger to shortsword`.
 - `action:TEXT`: record an action or short description.
-- `atk:TARGET +MOD -> RESULT [dmg=N]`: record an attack against `TARGET`; the modifier and result details are optional unless the DM wants to record them.
+- `atk TARGET [d20[+|-]] [MODIFIER] = TOTAL [vs AC N] -> OUTCOME [dmg=N]`: record an attack against `TARGET`. The roll, modifier, total, comparison, and outcome are individually optional.
+- `influence TARGET`, `magic NAME`, `search SUBJECT`, `study SUBJECT`, and `custom DESCRIPTION` may use the same optional roll suffix.
 - `roll:TEXT`: record a notable roll or check.
 - `note:TEXT`: record a short free-text note inline.
 - `raw:TEXT`: record any update that cannot be expressed with the standard tokens. `raw:` may contain multi-line content and free-form notes; implementations should preserve line breaks when storing and rendering `raw:` entries.
@@ -76,6 +77,27 @@ STR:+2=18[1] (bless)
 The parenthesized text is preserved as human-readable annotation. It is not
 required to be parseable, although a future parser MAY recognize structured
 content within it.
+
+### Rolls and outcomes
+
+`d20+` means advantage and `d20-` means disadvantage. An unmarked `d20` is a
+normal roll. The modifier and total are separated by `=` so the app can verify
+the arithmetic:
+
+```text
+atk Goblin_1 d20+ +6 = 21 vs AC 15 -> hit dmg=8
+study Runes using INT d20- +5 = 9 vs DC 14 -> failure
+```
+
+The `vs AC N` or `vs DC N` comparison is optional. The outcome follows `->` and
+may be omitted when only the roll or comparison is being recorded. The app
+preserves entered shorthand and reports arithmetic or outcome inconsistencies
+instead of silently rewriting it.
+
+Actions may specify the ability or skill used with `using`, for example
+`influence Guard using CHA d20 = 14 vs DC 12 -> success` or
+`search Room using Perception d20+5 = 17 vs DC 15 -> success`. The ability or
+skill is optional, and explicit prefixes such as `skill:Perception` remain valid.
 
 ### Weapon switching notes
 
@@ -95,16 +117,21 @@ content within it.
   but import must normalize it back to the canonical label before validation.
 - When an attack affects another participant, the actor's cell should record the provenance with `atk ... -> ...`, and the target's cell should record resulting deltas such as `+Nhp`, `-Nhp`, `+NAME`, or `-NAME`.
 
-## Consumables and resources
+## Resources and action side effects
 
-- `use:slot:L`: consume one spell slot of level `L`.
-- `use:slot:L:N`: consume `N` slots at level `L`.
-- `set:slot:L=N`: set remaining slots of level `L` to `N`.
-- `use:item:NAME`: consume one unit of `NAME`.
-- `use:item:NAME:N`: consume `N` units.
-- `add:item:NAME:N`: add `N` units.
-- `set:item:NAME=N`: set remaining quantity of `NAME` to `N`.
-- `rest:short`, `rest:long`: apply short/long rest semantics.
+Spell slots, device charges, inventory, and similar resources are participant
+state, not shorthand update tokens. An action may cause the application to
+update that state, but the shorthand records the action itself:
+
+```text
+magic Fireball
+utilize Wand_of_Frost
+```
+
+The application may provide dedicated controls for resource changes. Exceptional
+or out-of-band changes may be mentioned in a parenthesized annotation or a
+`note`/`raw` entry, but the shorthand grammar does not define resource-consumption
+tokens.
 
 ## Parsing rules
 
@@ -138,9 +165,10 @@ A lightweight checklist item can be represented as:
 {
   "id": "uuid",
   "encounterId": "uuid",
-  "turnIndex": 3,
+  "roundNumber": 1,
+  "turnNumber": 3,
   "phase": "end",
-  "actorId": "Goblin1",
+  "participantId": "participant-internal-id",
   "tokens": ["-7hp", "cond:PRONE", "move:10"],
   "tokensHash": "sha256-hex-of-tokens",
   "note": "fell from ledge",
@@ -152,8 +180,9 @@ A lightweight checklist item can be represented as:
 
 ### Field notes
 
-- `turnIndex` is a turn counter for the encounter.
+- `roundNumber` and `turnNumber` identify the round-local turn; `turnNumber` is one-based.
 - `phase` should be `end` or `start`.
+- `participantId` identifies the participant whose turn owns the checklist.
 - `tokens` is the authoritative compact shorthand representation.
 - `tokensHash` is optional integrity data for detecting accidental edits.
 - `overridden` identifies items edited by the GM before confirmation.
