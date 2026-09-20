@@ -89,7 +89,7 @@ data model.
 
 Every encounter participant has:
 
-- `id`: stable internal identity, normally hidden from the user;
+- `id`: globally unique stable internal identity, normally hidden from the user;
 - `label`: required, human-readable encounter-local identifier;
 - `type`: `pc`, `npc`, or `creature`;
 - `sourceId`: optional reference to the PC, NPC, or creature used as the source;
@@ -113,6 +113,11 @@ may display `name` when present and fall back to `label`; shorthand always uses
 
 `sourceId` is provenance, not encounter identity. An improvised participant may
 have no source ID.
+
+All persisted object IDs are globally unique opaque IDs, normally UUIDs. They
+are stable, never reused, and are distinct from human-readable labels. A label
+such as `Goblin_1` may be reused in another encounter because label uniqueness
+is limited to the encounter or other recording unit in which it is defined.
 
 The participant's `experienceValue` is retained as input for awarding or
 attributing XP when the encounter ends. It is not itself an encounter
@@ -265,6 +270,12 @@ validate encounter-wide invariants, including:
 
 Validation failures must be reported explicitly. Import, restore, and shorthand
 parsing must never silently discard data or silently retarget a reference.
+
+If encounter data or shorthand is imported or copied, references are resolved
+against labels in the target encounter first, then against labels in the wider
+campaign data. Unresolved or ambiguous matches are errors requiring DM
+intervention. Resolved application references use global internal IDs; the
+original label remains available in the shorthand or audit text.
 
 ## Completion
 

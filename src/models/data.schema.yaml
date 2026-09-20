@@ -7,6 +7,10 @@ description: Holds data recorded by DnD Dungeon Masters.
 type: object
 
 "$defs":
+  GlobalId:
+    type: string
+    format: uuid
+    description: Globally unique opaque identifier for a persisted object; never displayed by default or reused
   PlayerId: { type: string, minLength: 1, description: "Unique player character identifier" }
   NpcId: { type: string, minLength: 1, description: "Unique non-player character identifier" }
   CreatureId: { type: string, minLength: 1, description: "Unique creature identifier" } 
@@ -23,7 +27,7 @@ type: object
     title: Campaign
     description: The root data structure containing all campaign information
     properties:
-      id: { type: string, description: "Unique campaign identifier" }
+      id: { "$ref": "#/$defs/GlobalId", description: "Globally unique campaign identifier" }
       name: { type: string, description: "Campaign name", default: "New Campaign", minLength: 1 }
       description: { type: string, description: "Campaign description (optional)" }
       party:
@@ -49,7 +53,7 @@ type: object
     title: Encounter
     description: An encounter within a campaign
     properties:
-      id: { type: string, description: "Unique encounter identifier" }
+      id: { "$ref": "#/$defs/GlobalId", description: "Globally unique encounter identifier" }
       title: { type: string, description: "Encounter title", minLength: 1 }
       summary: { type: string, description: "Brief summary of the encounter (optional)" }
       location: { type: string, description: "Location of the encounter (optional)" }
@@ -122,7 +126,7 @@ type: object
     title: Player Character
     description: A player character (PC) in the campaign
     properties:
-      id: { "$ref": "#/$defs/PlayerId" }
+      id: { "$ref": "#/$defs/GlobalId" }
       name: { type: string, description: "Character name", minLength: 1 }
       portrait: { type: string, description: "Character portrait image data URL (optional)" }
       race: { type: string, description: "Character race (recommended)" }
@@ -155,7 +159,7 @@ type: object
     title: Non-Player Character
     description: An NPC in the campaign
     properties:
-      id: { "$ref": "#/$defs/NpcId" }
+      id: { "$ref": "#/$defs/GlobalId" }
       name:
         type: string
         description: NPC name
@@ -170,9 +174,8 @@ type: object
     description: 'A person or creature present in an encounter (PC, NPC, or creature), whether or not they participate in combat. Lifecycle: current encounter'
     properties:
       id:
-        type: string
-        minLength: 1
-        description: Unique identifier for this participant instance within the encounter
+        "$ref": "#/$defs/GlobalId"
+        description: Globally unique opaque identifier for this participant instance
       type: { "$ref": "#/$defs/ParticipantType" }
       sourceId:
         oneOf: [ { "$ref": "#/$defs/PlayerId" }, { "$ref": "#/$defs/NpcId" }, { "$ref": "#/$defs/CreatureId" } ]
@@ -227,9 +230,8 @@ type: object
     description: Participant type to guide UI behavior
 
   ParticipantId:
-    type: string
-    minLength: 1
-    description: Unique identifier of a participant instance within the encounter
+    "$ref": "#/$defs/GlobalId"
+    description: Globally unique identifier of a participant instance
 
   Round:
     type: object
@@ -310,8 +312,7 @@ type: object
     description: An editable proposed or confirmed shorthand update
     properties:
       id:
-        type: string
-        minLength: 1
+        "$ref": "#/$defs/GlobalId"
         description: Unique identifier for the checklist item
       tokens:
         type: array
