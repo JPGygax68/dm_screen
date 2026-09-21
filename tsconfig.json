@@ -2,6 +2,9 @@
   "compilerOptions": {
     "allowJs": true,
     "checkJs": false,
+    "moduleResolution": "bundler",
+    "allowImportingTsExtensions": true,
+    "noEmit": true,
     "paths": {
       "@/*": ["./src/*"]
     }

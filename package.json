@@ -4,6 +4,7 @@
   "description": "",
   "type": "module",
   "imports": {
+    "#/": "./src/",
     "#lib/*": "./lib/*",
     "#styles/*": "./src/styles/*"
   },
@@ -15,7 +16,7 @@
     "dev": "vite --host 0.0.0.0",
     "build": "vite build",
     "preview": "vite preview",
-    "test": "node --experimental-strip-types scripts/test-encounter-validation.ts",
+    "test": "node --experimental-strip-types scripts/test-encounter-validation.ts && node --experimental-strip-types scripts/test-repository.ts && node --experimental-strip-types scripts/test-store.ts",
     "harness": "node harness.mjs"
   },
   "repository": {
