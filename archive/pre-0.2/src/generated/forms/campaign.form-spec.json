@@ -1,0 +1,80 @@
+{
+  "$schema": "https://dm-screen.local/schema/form-spec.schema.json",
+  "$id": "https://dm-screen.local/generated/forms/campaign.form-spec.json",
+  "version": 1,
+  "source": {
+    "dataSchemaId": "https://dm-screen.local/schema/data.schema.yaml",
+    "uiSchemaId": "https://dm-screen.local/schema/campaign.uischema.yaml",
+    "modelRoot": "#/$defs/Campaign"
+  },
+  "form": {
+    "kind": "layout",
+    "uiType": "VerticalLayout",
+    "label": null,
+    "options": {
+      "showUnfocusedDescription": true,
+      "trim": true
+    },
+    "elements": [
+      {
+        "kind": "layout",
+        "uiType": "VerticalLayout",
+        "label": null,
+        "options": {},
+        "elements": [
+          {
+            "kind": "field",
+            "uiType": "Control",
+            "scope": "#/properties/name",
+            "pointer": "/properties/name",
+            "path": "name",
+            "schemaType": "string",
+            "required": true,
+            "label": "Campaign Name",
+            "placeholder": "Campaign name",
+            "options": {}
+          },
+          {
+            "kind": "field",
+            "uiType": "Control",
+            "scope": "#/properties/description",
+            "pointer": "/properties/description",
+            "path": "description",
+            "schemaType": "string",
+            "required": false,
+            "label": "Campaign description",
+            "placeholder": "Campaign description (optional)",
+            "options": {
+              "multi": true,
+              "rows": 5
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "fieldsByPath": {
+    "name": {
+      "scope": "#/properties/name",
+      "pointer": "/properties/name",
+      "schemaType": "string",
+      "required": true,
+      "label": "Campaign Name",
+      "placeholder": "Campaign name",
+      "options": {}
+    },
+    "description": {
+      "scope": "#/properties/description",
+      "pointer": "/properties/description",
+      "schemaType": "string",
+      "required": false,
+      "label": "Campaign description",
+      "placeholder": "Campaign description (optional)",
+      "options": {
+        "multi": true,
+        "rows": 5
+      }
+    }
+  },
+  "warnings": []
+}

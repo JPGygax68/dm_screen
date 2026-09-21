@@ -1,0 +1,527 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://dm-screen.local/schema/data.schema.yaml",
+  "title": "DMScreen Data Schema",
+  "description": "Holds data recorded by DnD Dungeon Masters.",
+  "type": "object",
+  "$defs": {
+    "GlobalId": {
+      "type": "string",
+      "format": "uuid",
+      "description": "Globally unique opaque identifier for a persisted object; never displayed by default or reused"
+    },
+    "PlayerId": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Unique player character identifier"
+    },
+    "NpcId": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Unique non-player character identifier"
+    },
+    "CreatureId": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Unique creature identifier"
+    },
+    "Campaigns": {
+      "type": "array",
+      "description": "Campaigns",
+      "items": {
+        "$ref": "#/$defs/Campaign"
+      },
+      "uniqueItems": true
+    },
+    "Campaign": {
+      "type": "object",
+      "title": "Campaign",
+      "description": "The root data structure containing all campaign information",
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/GlobalId",
+          "description": "Globally unique campaign identifier"
+        },
+        "name": {
+          "type": "string",
+          "description": "Campaign name",
+          "default": "New Campaign",
+          "minLength": 1
+        },
+        "description": {
+          "type": "string",
+          "description": "Campaign description (optional)"
+        },
+        "party": {
+          "type": "array",
+          "description": "Set of player characters",
+          "items": {
+            "$ref": "#/$defs/PlayerCharacter"
+          },
+          "uniqueItems": true
+        },
+        "encounters": {
+          "type": "array",
+          "description": "List of encounters in the campaign",
+          "items": {
+            "$ref": "#/$defs/Encounter"
+          }
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "party"
+      ],
+      "additionalProperties": false
+    },
+    "Encounter": {
+      "type": "object",
+      "title": "Encounter",
+      "description": "An encounter within a campaign",
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/GlobalId",
+          "description": "Globally unique encounter identifier"
+        },
+        "title": {
+          "type": "string",
+          "description": "Encounter title",
+          "minLength": 1
+        },
+        "summary": {
+          "type": "string",
+          "description": "Brief summary of the encounter (optional)"
+        },
+        "location": {
+          "type": "string",
+          "description": "Location of the encounter (optional)"
+        },
+        "sessionTag": {
+          "type": "string",
+          "description": "Session name, number, or other encounter tag (optional)"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Time at which the encounter was created"
+        },
+        "status": {
+          "$ref": "#/$defs/EncounterStatus"
+        },
+        "notes": {
+          "type": "string",
+          "description": "Encounter-wide notes and annotations (optional)"
+        },
+        "participants": {
+          "type": "array",
+          "description": "List of people and creatures present in the encounter, whether or not they participate in combat",
+          "items": {
+            "$ref": "#/$defs/Participant"
+          },
+          "uniqueItems": true,
+          "default": []
+        },
+        "rounds": {
+          "type": "array",
+          "description": "Rounds recorded during the encounter; a round normally contains one turn for each participant present when the round begins",
+          "items": {
+            "$ref": "#/$defs/Round"
+          },
+          "default": []
+        },
+        "activeTurn": {
+          "$ref": "#/$defs/ActiveTurn",
+          "description": "Current position in the encounter turn workflow (optional); must correspond to an active turn in the identified round"
+        },
+        "endReason": {
+          "$ref": "#/$defs/EncounterEndReason",
+          "description": "How the encounter concluded (optional until completion)"
+        },
+        "endReasonNote": {
+          "type": "string",
+          "description": "Additional detail for the encounter end reason (optional)"
+        }
+      },
+      "required": [
+        "id",
+        "title",
+        "status"
+      ],
+      "additionalProperties": false
+    },
+    "EncounterStatus": {
+      "type": "string",
+      "description": "Status of an encounter",
+      "enum": [
+        "Draft",
+        "Ready",
+        "Ongoing",
+        "Completed"
+      ]
+    },
+    "EncounterEndReason": {
+      "type": "string",
+      "enum": [
+        "hostiles_defeated",
+        "retreat",
+        "objective_achieved",
+        "scene_change",
+        "other"
+      ],
+      "description": "How an encounter concluded"
+    },
+    "ActiveTurn": {
+      "type": "object",
+      "description": "Current persisted position in the encounter turn workflow; turnNumber is valid only within roundNumber",
+      "properties": {
+        "roundNumber": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "Number of the active round"
+        },
+        "turnNumber": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "One-based position of the active turn within the active round"
+        },
+        "phase": {
+          "type": "string",
+          "enum": [
+            "start",
+            "turn",
+            "end"
+          ],
+          "description": "Current turn workflow phase"
+        }
+      },
+      "required": [
+        "roundNumber",
+        "turnNumber",
+        "phase"
+      ],
+      "additionalProperties": false
+    },
+    "PlayerCharacter": {
+      "type": "object",
+      "title": "Player Character",
+      "description": "A player character (PC) in the campaign",
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/GlobalId"
+        },
+        "name": {
+          "type": "string",
+          "description": "Character name",
+          "minLength": 1
+        },
+        "portrait": {
+          "type": "string",
+          "description": "Character portrait image data URL (optional)"
+        },
+        "race": {
+          "type": "string",
+          "description": "Character race (recommended)"
+        },
+        "classes": {
+          "type": "array",
+          "description": "Character classes (recommended)",
+          "items": {
+            "type": "string"
+          }
+        },
+        "hitPoints": {
+          "type": "integer",
+          "description": "Current hit points"
+        },
+        "maxHitPoints": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 300,
+          "default": 10,
+          "description": "Maximum hit points"
+        },
+        "conditions": {
+          "type": "array",
+          "description": "List of active conditions (can be empty)",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "maxHitPoints"
+      ],
+      "additionalProperties": true
+    },
+    "NonPlayerCharacter": {
+      "type": "object",
+      "title": "Non-Player Character",
+      "description": "An NPC in the campaign",
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/GlobalId"
+        },
+        "name": {
+          "type": "string",
+          "description": "NPC name"
+        }
+      },
+      "required": [
+        "id",
+        "name"
+      ],
+      "additionalProperties": true
+    },
+    "Participant": {
+      "type": "object",
+      "title": "Participant",
+      "description": "A person or creature present in an encounter (PC, NPC, or creature), whether or not they participate in combat. Lifecycle: current encounter",
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/GlobalId",
+          "description": "Globally unique opaque identifier for this participant instance"
+        },
+        "type": {
+          "$ref": "#/$defs/ParticipantType"
+        },
+        "sourceId": {
+          "oneOf": [
+            {
+              "$ref": "#/$defs/PlayerId"
+            },
+            {
+              "$ref": "#/$defs/NpcId"
+            },
+            {
+              "$ref": "#/$defs/CreatureId"
+            }
+          ],
+          "description": "Optional identifier of the source PC, NPC, or creature from which this participant was created"
+        },
+        "experienceValue": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Optional XP value retained from the source creature or template for post-encounter attribution"
+        },
+        "label": {
+          "type": "string",
+          "minLength": 1,
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_-]*$",
+          "description": "Required human-readable identifier used by shorthand and unique within the encounter"
+        },
+        "imageId": {
+          "oneOf": [
+            {
+              "$ref": "#/$defs/PlayerId"
+            },
+            {
+              "$ref": "#/$defs/NpcId"
+            },
+            {
+              "$ref": "#/$defs/CreatureId"
+            }
+          ],
+          "description": "Identifier for the participant image (optional)"
+        },
+        "name": {
+          "type": "string",
+          "description": "Optional proper or descriptive name; shorthand uses label instead",
+          "minLength": 1
+        },
+        "initiative": {
+          "type": "integer",
+          "description": "Initiative roll result, including modifiers"
+        },
+        "hitPoints": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Current hit points"
+        },
+        "temporaryHitPoints": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Temporary hit points"
+        },
+        "conditions": {
+          "type": "array",
+          "description": "List of active conditions",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "required": [
+        "type",
+        "id",
+        "label",
+        "initiative",
+        "hitPoints",
+        "conditions"
+      ],
+      "additionalProperties": false
+    },
+    "ParticipantType": {
+      "type": "string",
+      "enum": [
+        "pc",
+        "npc",
+        "creature"
+      ],
+      "description": "Participant type to guide UI behavior"
+    },
+    "ParticipantId": {
+      "$ref": "#/$defs/GlobalId",
+      "description": "Globally unique identifier of a participant instance"
+    },
+    "Round": {
+      "type": "object",
+      "title": "Combat Round",
+      "description": "A round of combat containing all turns",
+      "properties": {
+        "number": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "Round number (must be in sync with array index in Encounter.rounds)"
+        },
+        "turns": {
+          "type": "array",
+          "description": "One-based ordered list of turns in this round, normally created for every participant present when the round begins",
+          "items": {
+            "$ref": "#/$defs/Turn"
+          }
+        },
+        "notes": {
+          "type": "string",
+          "description": "Optional notes for this round"
+        }
+      },
+      "required": [
+        "number",
+        "turns"
+      ],
+      "additionalProperties": false
+    },
+    "Turn": {
+      "type": "object",
+      "title": "Combat Turn",
+      "description": "A single participant's turn in a round; completed and skipped turns may be changed only through an explicit correction operation",
+      "properties": {
+        "participantId": {
+          "$ref": "#/$defs/ParticipantId",
+          "description": "ID of the participant taking this turn (must match a participant id in Encounter.participants)"
+        },
+        "status": {
+          "$ref": "#/$defs/TurnStatus"
+        },
+        "startChecklist": {
+          "$ref": "#/$defs/PhaseChecklist",
+          "description": "Proposed or confirmed start-of-turn updates (optional)"
+        },
+        "tokens": {
+          "type": "array",
+          "description": "Confirmed shorthand tokens recorded during this turn, including tokens confirmed from phase checklists",
+          "items": {
+            "type": "string"
+          },
+          "default": []
+        },
+        "note": {
+          "type": "string",
+          "description": "Optional free-text turn note"
+        },
+        "endChecklist": {
+          "$ref": "#/$defs/PhaseChecklist",
+          "description": "Proposed or confirmed end-of-turn updates (optional)"
+        }
+      },
+      "required": [
+        "participantId",
+        "status",
+        "tokens"
+      ],
+      "additionalProperties": false
+    },
+    "TurnStatus": {
+      "type": "string",
+      "enum": [
+        "pending",
+        "active",
+        "completed",
+        "skipped"
+      ],
+      "description": "Progress of a turn through the encounter workflow; the active turn's phase determines whether start checklist, action entry, or end checklist is shown"
+    },
+    "PhaseChecklist": {
+      "type": "object",
+      "description": "Start-of-turn or end-of-turn checklist for one turn",
+      "properties": {
+        "phase": {
+          "type": "string",
+          "enum": [
+            "start",
+            "end"
+          ],
+          "description": "Turn phase to which this checklist applies"
+        },
+        "items": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/ChecklistItem"
+          },
+          "default": []
+        }
+      },
+      "required": [
+        "phase",
+        "items"
+      ],
+      "additionalProperties": false
+    },
+    "ChecklistItem": {
+      "type": "object",
+      "description": "An editable proposed or confirmed shorthand update",
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/GlobalId",
+          "description": "Unique identifier for the checklist item"
+        },
+        "tokens": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "default": []
+        },
+        "note": {
+          "type": "string",
+          "description": "Optional free-text note for this checklist item"
+        },
+        "overridden": {
+          "type": "boolean",
+          "default": false,
+          "description": "Whether the DM changed the proposed item"
+        },
+        "applied": {
+          "type": "boolean",
+          "default": false,
+          "description": "Whether the item has been confirmed and applied"
+        }
+      },
+      "required": [
+        "id",
+        "tokens",
+        "overridden",
+        "applied"
+      ],
+      "additionalProperties": false
+    }
+  },
+  "properties": {
+    "campaigns": {
+      "$ref": "#/$defs/Campaigns"
+    }
+  }
+}

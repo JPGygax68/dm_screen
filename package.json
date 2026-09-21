@@ -8,13 +8,14 @@
     "#styles/*": "./src/styles/*"
   },
   "scripts": {
-    "generate:models": "node scripts/generate-model-json.mjs",
+    "generate:models": "node scripts/generate-schema-json.mjs",
     "predev": "npm run generate:models",
     "prebuild": "npm run generate:models",
+    "pretest": "npm run generate:models",
     "dev": "vite --host 0.0.0.0",
     "build": "vite build",
     "preview": "vite preview",
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "node --experimental-strip-types scripts/test-encounter-validation.ts",
     "harness": "node harness.mjs"
   },
   "repository": {

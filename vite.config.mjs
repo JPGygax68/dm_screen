@@ -30,7 +30,7 @@ function regenerateModels() {
           queued = null;
 
           try {
-            execFileSync(process.execPath, [path.join('scripts', 'generate-model-json.mjs')], {
+            execFileSync(process.execPath, [path.join('scripts', 'generate-schema-json.mjs')], {
               cwd: repoRoot,
               stdio: 'inherit'
             });
