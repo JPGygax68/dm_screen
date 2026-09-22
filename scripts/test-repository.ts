@@ -21,6 +21,32 @@ const encounterEntity = schema.entities.get("Encounter")!;
 const roundsProperty = encounterEntity.properties.find((p) => p.name === "rounds")!;
 assert.equal(roundsProperty.isEntityCollection, false, "Round has no GlobalId, so rounds stay embedded");
 
+const aliasedSchema = resolveSchema({
+	"$defs": {
+		GlobalId: { type: "string", format: "uuid" },
+		EntityId: { "$ref": "#/$defs/GlobalId" },
+		Thing: {
+			type: "object",
+			properties: { id: { "$ref": "#/$defs/EntityId" }, name: { type: "string" } },
+			required: ["id"]
+		},
+		ThingAlias: { "$ref": "#/$defs/Thing", description: "Thing alias" },
+		Things: { type: "array", items: { "$ref": "#/$defs/ThingAlias" } }
+	},
+	properties: { things: { "$ref": "#/$defs/Things" } }
+} as Parameters<typeof resolveSchema>[0]);
+assert.deepEqual(aliasedSchema.rootCollections, [{ field: "things", entityType: "Thing" }]);
+assert.equal(aliasedSchema.entities.get("Thing")?.properties.length, 2);
+
+assert.throws(
+	() => resolveSchema({ "$defs": { Loop: { "$ref": "#/$defs/Loop" } } } as Parameters<typeof resolveSchema>[0]),
+	/Cyclic schema reference/
+);
+assert.throws(
+	() => resolveSchema({ "$defs": { Broken: { "$ref": "#/$defs/Missing" } } } as Parameters<typeof resolveSchema>[0]),
+	/does not resolve to a definition/
+);
+
 // --- Repository round-trip ---
 
 const adapter = new MemoryStorageAdapter();

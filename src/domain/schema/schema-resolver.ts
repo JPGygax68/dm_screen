@@ -46,23 +46,46 @@ interface RootDocumentSchema extends JsonSchema {
 }
 
 const GLOBAL_ID_REF = "#/$defs/GlobalId";
+const LOCAL_DEF_REF = /^#\/\$defs\/([^/]+)$/;
+
+interface ResolvedReference {
+  schema: JsonSchema;
+  definitionName?: string;
+}
 
 export function resolveSchema(schema: RootDocumentSchema): ResolvedSchema {
   const defs = schema["$defs"] ?? {};
 
-  const deref = (node: JsonSchema | undefined): JsonSchema | undefined => {
-    let current = node;
-    while (current?.$ref) {
-      const name = current.$ref.replace("#/$defs/", "");
-      current = defs[name];
+  const deref = (node: JsonSchema | undefined, trail: string[] = []): ResolvedReference | undefined => {
+    if (!node?.$ref) return node ? { schema: node } : undefined;
+
+    const match = LOCAL_DEF_REF.exec(node.$ref);
+    if (!match) {
+      throw new Error(`Unsupported schema reference "${node.$ref}"; only local #/$defs references are supported`);
     }
-    return current;
+
+    const name = match[1];
+    if (trail.includes(name)) {
+      throw new Error(`Cyclic schema reference: ${[...trail, name].join(" -> ")}`);
+    }
+
+    const target = defs[name];
+    if (!target) {
+      throw new Error(`Schema reference "${node.$ref}" does not resolve to a definition`);
+    }
+
+    const resolvedTarget = deref(target, [...trail, name])!;
+    const { $ref: _ignoredRef, ...siblings } = node;
+    return {
+      schema: { ...resolvedTarget.schema, ...siblings },
+      definitionName: resolvedTarget.definitionName ?? name
+    };
   };
 
   const isEntityDef = (defName: string): boolean => {
-    const def = defs[defName];
-    const idProperty = def?.properties?.id;
-    return idProperty?.$ref === GLOBAL_ID_REF;
+    const def = deref(defs[defName])?.schema;
+    const idProperty = deref(def?.properties?.id);
+    return idProperty?.definitionName === "GlobalId" || idProperty?.schema.$ref === GLOBAL_ID_REF;
   };
 
   const entities = new Map<string, ResolvedEntity>();
@@ -70,11 +93,12 @@ export function resolveSchema(schema: RootDocumentSchema): ResolvedSchema {
   for (const [defName, def] of Object.entries(defs)) {
     if (!isEntityDef(defName)) continue;
 
-    const requiredFields = new Set(def.required ?? []);
-    const properties: ResolvedProperty[] = Object.entries(def.properties ?? {}).map(([propName, propSchema]) => {
-      const resolvedPropSchema = deref(propSchema) ?? propSchema;
+    const resolvedDef = deref(def)?.schema ?? def;
+    const requiredFields = new Set(resolvedDef.required ?? []);
+    const properties: ResolvedProperty[] = Object.entries(resolvedDef.properties ?? {}).map(([propName, propSchema]) => {
+      const resolvedPropSchema = deref(propSchema)?.schema ?? propSchema;
       const items = resolvedPropSchema.type === "array" ? deref(resolvedPropSchema.items) : undefined;
-      const itemsRefName = resolvedPropSchema.items?.$ref?.replace("#/$defs/", "");
+      const itemsRefName = items?.definitionName;
       const isEntityCollection = Boolean(
         resolvedPropSchema.type === "array" && itemsRefName && isEntityDef(itemsRefName)
       );
@@ -93,8 +117,8 @@ export function resolveSchema(schema: RootDocumentSchema): ResolvedSchema {
   }
 
   const rootCollections: RootCollection[] = Object.entries(schema.properties ?? {}).flatMap(([field, propSchema]) => {
-    const resolved = deref(propSchema);
-    const itemsRefName = resolved?.items?.$ref?.replace("#/$defs/", "");
+    const resolved = deref(propSchema)?.schema;
+    const itemsRefName = resolved?.type === "array" ? deref(resolved.items)?.definitionName : undefined;
     if (resolved?.type === "array" && itemsRefName && isEntityDef(itemsRefName)) {
       return [{ field, entityType: itemsRefName }];
     }
