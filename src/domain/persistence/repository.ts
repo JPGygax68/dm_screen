@@ -69,6 +69,9 @@ export class Repository {
         this.schema.rootCollections.map((collection) => ({ name: collection.field, entityType: collection.entityType }));
 
       for (const property of collectionProperties) {
+        if (!property.entityType) {
+          throw new Error(`Entity collection "${property.name}" has no entity type`);
+        }
         for (const childId of doc.children[property.name] ?? []) {
           const childDocId = this.docId(property.entityType, childId);
           const child = documents.get(childDocId);
