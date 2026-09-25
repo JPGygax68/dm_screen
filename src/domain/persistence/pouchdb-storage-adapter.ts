@@ -34,7 +34,7 @@ export class PouchDbStorageAdapter implements StorageAdapter {
       startkey: `${type}:`,
       endkey: `${type}:\ufff0`
     });
-    return result.rows.map((row) => row.doc!).filter((doc): doc is StoredDoc => Boolean(doc));
+    return result.rows.filter((row) => row.doc !== undefined).map((row) => row.doc!);
   }
 
   /** Test/dev helper: irreversibly deletes the underlying database. */

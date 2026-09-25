@@ -13,6 +13,17 @@ export interface ParentRef {
   field: string;
 }
 
+export interface CleanupOptions {
+  /** When false, orphaned documents are removed after the scan. Defaults to true. */
+  dryRun?: boolean;
+}
+
+export interface CleanupReport {
+  orphanedDocumentIds: string[];
+  missingReferences: string[];
+  deletedDocumentIds: string[];
+}
+
 /**
  * Normalized repository: each entity is its own storage record; a parent stores
  * only the ordered list of its children's IDs for each entity-collection field.
@@ -36,6 +47,53 @@ export class Repository {
     const existing = await this.adapter.get(this.docId(ROOT_TYPE, ROOT_ID));
     if (existing) return;
     await this.adapter.put({ _id: this.docId(ROOT_TYPE, ROOT_ID), type: ROOT_TYPE, entityId: ROOT_ID, data: {}, children: {} });
+  }
+
+  /** Scans normalized records for unreachable documents; deletion is opt-in. */
+  async cleanup(options: CleanupOptions = {}): Promise<CleanupReport> {
+    const root = await this.adapter.get(this.docId(ROOT_TYPE, ROOT_ID));
+    if (!root) throw new Error("Cannot clean up without a persisted root document");
+
+    const documents = new Map<string, StoredDoc>([[root._id, root]]);
+    for (const entity of this.schema.entities.values()) {
+      for (const doc of await this.adapter.listByType(entity.name)) {
+        documents.set(doc._id, doc);
+      }
+    }
+
+    const reachable = new Set<string>([root._id]);
+    const missingReferences: string[] = [];
+    const visit = (doc: StoredDoc): void => {
+      const entity = doc.type === ROOT_TYPE ? undefined : getEntity(this.schema, doc.type);
+      const collectionProperties = entity?.properties.filter((property) => property.isEntityCollection) ??
+        this.schema.rootCollections.map((collection) => ({ name: collection.field, entityType: collection.entityType }));
+
+      for (const property of collectionProperties) {
+        for (const childId of doc.children[property.name] ?? []) {
+          const childDocId = this.docId(property.entityType, childId);
+          const child = documents.get(childDocId);
+          if (!child) {
+            missingReferences.push(`${doc._id} -> ${childDocId}`);
+          } else if (!reachable.has(childDocId)) {
+            reachable.add(childDocId);
+            visit(child);
+          }
+        }
+      }
+    };
+
+    visit(root);
+
+    const orphanedDocumentIds = [...documents.keys()].filter((docId) => !reachable.has(docId));
+    const deletedDocumentIds: string[] = [];
+    if (options.dryRun === false) {
+      for (const docId of orphanedDocumentIds) {
+        await this.adapter.remove(docId);
+        deletedDocumentIds.push(docId);
+      }
+    }
+
+    return { orphanedDocumentIds, missingReferences, deletedDocumentIds };
   }
 
   /** Reconstructs the full nested tree for one root-level entity-collection field. */

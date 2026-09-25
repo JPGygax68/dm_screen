@@ -83,4 +83,22 @@ const reloadedAfterRemoval = (await repository.loadRootCollection("campaigns"))[
 assert.equal((reloadedAfterRemoval.party as typeof pc[]).length, 0);
 assert.equal(await adapter.get(`PlayerCharacter:${pc.id}`), undefined);
 
+const orphanId = crypto.randomUUID();
+await adapter.put({
+	_id: `PlayerCharacter:${orphanId}`,
+	type: "PlayerCharacter",
+	entityId: orphanId,
+	data: { name: "Orphaned record", maxHitPoints: 1 },
+	children: {}
+});
+
+const dryRunCleanup = await repository.cleanup();
+assert.deepEqual(dryRunCleanup.orphanedDocumentIds, [`PlayerCharacter:${orphanId}`]);
+assert.deepEqual(dryRunCleanup.deletedDocumentIds, []);
+assert.ok(await adapter.get(`PlayerCharacter:${orphanId}`));
+
+const deletingCleanup = await repository.cleanup({ dryRun: false });
+assert.deepEqual(deletingCleanup.deletedDocumentIds, [`PlayerCharacter:${orphanId}`]);
+assert.equal(await adapter.get(`PlayerCharacter:${orphanId}`), undefined);
+
 console.log("Repository round-trip tests passed.");
