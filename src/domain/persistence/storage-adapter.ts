@@ -18,7 +18,16 @@ export interface StoredDoc {
 
 export interface StorageAdapter {
   get(docId: string): Promise<StoredDoc | undefined>;
+  /** Must throw ConflictError if doc._rev does not match the currently stored revision. */
   put(doc: StoredDoc): Promise<void>;
   remove(docId: string): Promise<void>;
   listByType(type: string): Promise<StoredDoc[]>;
+}
+
+/** Thrown by StorageAdapter.put() when doc._rev is stale relative to the stored document. */
+export class ConflictError extends Error {
+  constructor(docId: string) {
+    super(`Storage write conflict on document "${docId}"`);
+    this.name = "ConflictError";
+  }
 }

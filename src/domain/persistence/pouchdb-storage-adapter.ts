@@ -1,5 +1,5 @@
 import PouchDB from "pouchdb";
-import type { StorageAdapter, StoredDoc } from "./storage-adapter.ts";
+import { ConflictError, type StorageAdapter, type StoredDoc } from "./storage-adapter.ts";
 
 /** PouchDB-backed StorageAdapter: the initial browser-local persistence implementation. */
 export class PouchDbStorageAdapter implements StorageAdapter {
@@ -19,7 +19,12 @@ export class PouchDbStorageAdapter implements StorageAdapter {
   }
 
   async put(doc: StoredDoc): Promise<void> {
-    await this.db.put(doc);
+    try {
+      await this.db.put(doc);
+    } catch (error) {
+      if (isConflict(error)) throw new ConflictError(doc._id);
+      throw error;
+    }
   }
 
   async remove(docId: string): Promise<void> {
@@ -45,4 +50,8 @@ export class PouchDbStorageAdapter implements StorageAdapter {
 
 function isNotFound(error: unknown): boolean {
   return typeof error === "object" && error !== null && (error as { status?: number }).status === 404;
+}
+
+function isConflict(error: unknown): boolean {
+  return typeof error === "object" && error !== null && (error as { status?: number }).status === 409;
 }

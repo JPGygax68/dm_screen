@@ -1,5 +1,6 @@
 import type { ResolvedSchema } from "../schema/schema-resolver.ts";
 import { getEntity } from "../schema/schema-resolver.ts";
+import { generateId } from "../id.ts";
 
 /** Builds a new draft object for an entity type, seeded from schema defaults and an assigned ID. */
 export function createDraft(
@@ -8,7 +9,7 @@ export function createDraft(
   overrides: Record<string, unknown> = {}
 ): Record<string, unknown> {
   const entity = getEntity(schema, entityType);
-  const draft: Record<string, unknown> = { id: crypto.randomUUID() };
+  const draft: Record<string, unknown> = { id: generateId() };
 
   for (const property of entity.properties) {
     if (property.name === "id") continue;

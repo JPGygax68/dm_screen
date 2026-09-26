@@ -101,4 +101,45 @@ const deletingCleanup = await repository.cleanup({ dryRun: false });
 assert.deepEqual(deletingCleanup.deletedDocumentIds, [`PlayerCharacter:${orphanId}`]);
 assert.equal(await adapter.get(`PlayerCharacter:${orphanId}`), undefined);
 
+// --- Concurrent local writes: linkChild must retry on a stale parent revision ---
+// instead of silently losing whichever child lost the race. The app only ever
+// runs one Repository instance per tab; a second instance is used here purely
+// as a deterministic way to force the interleaving (real races instead come
+// from another tab, overlapping async calls on the same instance, or future
+// replication) — the fix is about concurrent writers to a document, not about
+// concurrent Repository instances.
+
+const raceAdapter = new MemoryStorageAdapter();
+const raceRepository = new Repository(raceAdapter, schema);
+const otherActorRepository = new Repository(raceAdapter, schema);
+await raceRepository.ensureRoot();
+
+const raceCampaign = { id: crypto.randomUUID(), name: "Racing Keep", party: [], encounters: [] };
+await raceRepository.createEntity("Campaign", raceCampaign, { type: ROOT_TYPE, id: ROOT_ID, field: "campaigns" });
+
+const pcA = { id: crypto.randomUUID(), name: "Actor A", maxHitPoints: 10, hitPoints: 10, conditions: [] };
+const pcB = { id: crypto.randomUUID(), name: "Actor B", maxHitPoints: 10, hitPoints: 10, conditions: [] };
+
+let interfered = false;
+const originalPut = raceAdapter.put.bind(raceAdapter);
+raceAdapter.put = async (doc) => {
+	if (!interfered && doc.type === "Campaign") {
+		interfered = true;
+		// A second, fully independent write to the same parent completes here,
+		// between raceRepository's read and write of the Campaign document.
+		await otherActorRepository.createEntity("PlayerCharacter", pcB, {
+			type: "Campaign",
+			id: raceCampaign.id,
+			field: "party"
+		});
+	}
+	return originalPut(doc);
+};
+
+await raceRepository.createEntity("PlayerCharacter", pcA, { type: "Campaign", id: raceCampaign.id, field: "party" });
+
+const reloadedRaceCampaign = (await raceRepository.loadRootCollection("campaigns"))[0] as typeof raceCampaign;
+const partyIds = (reloadedRaceCampaign.party as typeof pcA[]).map((member) => member.id).sort();
+assert.deepEqual(partyIds, [pcA.id, pcB.id].sort(), "Both concurrently-linked children must survive the retry");
+
 console.log("Repository round-trip tests passed.");

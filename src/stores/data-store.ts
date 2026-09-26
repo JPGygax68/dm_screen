@@ -1,5 +1,4 @@
 import { defineStore } from "pinia";
-import { reactive } from "vue";
 import { resolveSchema, type ResolvedSchema } from "../domain/schema/schema-resolver.ts";
 import { Repository, ROOT_ID, ROOT_TYPE, type ParentRef } from "../domain/persistence/repository.ts";
 import { createDraft } from "../domain/persistence/drafts.ts";
@@ -27,9 +26,9 @@ function requireSchema(): ResolvedSchema {
 export const useDataStore = defineStore("data", {
   state: () => ({
     /** Root-level entity collections, keyed by schema field name (e.g. "campaigns"). */
-    roots: reactive<Record<string, unknown[]>>({}),
+    roots: {} as Record<string, unknown[]>,
     /** In-progress, uncommitted entities, keyed by draft ID. */
-    drafts: reactive<Record<string, Record<string, unknown>>>({})
+    drafts: {} as Record<string, Record<string, unknown>>
   }),
   actions: {
     async load(): Promise<void> {

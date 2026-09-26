@@ -1,6 +1,6 @@
 import type { ResolvedSchema } from "../schema/schema-resolver.ts";
 import { getEntity } from "../schema/schema-resolver.ts";
-import type { StorageAdapter, StoredDoc } from "./storage-adapter.ts";
+import { ConflictError, type StorageAdapter, type StoredDoc } from "./storage-adapter.ts";
 
 /** Pseudo-entity type used to anchor the document root's entity collections (e.g. "campaigns"). */
 export const ROOT_TYPE = "Root";
@@ -139,9 +139,11 @@ export class Repository {
 
   /** Unlinks a child from its parent, then deletes the child (and its descendants). */
   async removeChild(parent: ParentRef, childType: string, childId: string): Promise<void> {
-    const parentDoc = await this.requireDoc(parent.type, parent.id);
-    const list = (parentDoc.children[parent.field] ?? []).filter((id) => id !== childId);
-    await this.adapter.put({ ...parentDoc, children: { ...parentDoc.children, [parent.field]: list } });
+    await this.withConflictRetry(async () => {
+      const parentDoc = await this.requireDoc(parent.type, parent.id);
+      const list = (parentDoc.children[parent.field] ?? []).filter((id) => id !== childId);
+      await this.adapter.put({ ...parentDoc, children: { ...parentDoc.children, [parent.field]: list } });
+    });
     await this.deleteBranch(childType, childId);
   }
 
@@ -189,15 +191,36 @@ export class Repository {
   }
 
   private async linkChild(parent: ParentRef, childId: string): Promise<void> {
-    const parentDoc = await this.requireDoc(parent.type, parent.id);
-    const list = parentDoc.children[parent.field] ?? [];
-    if (!list.includes(childId)) list.push(childId);
-    await this.adapter.put({ ...parentDoc, children: { ...parentDoc.children, [parent.field]: list } });
+    await this.withConflictRetry(async () => {
+      const parentDoc = await this.requireDoc(parent.type, parent.id);
+      const list = parentDoc.children[parent.field] ?? [];
+      if (!list.includes(childId)) list.push(childId);
+      await this.adapter.put({ ...parentDoc, children: { ...parentDoc.children, [parent.field]: list } });
+    });
+  }
+
+  /**
+   * Persists a document, retrying against the latest stored revision on conflict.
+   * For a plain entity upsert this is last-write-wins on that entity's own fields;
+   * for parent linkage (children ID lists) the caller recomputes the list against
+   * the freshly re-read document, so concurrent additions/removals are not lost.
+   */
+  private async withConflictRetry(operation: () => Promise<void>, attempts = 5): Promise<void> {
+    for (let attempt = 1; ; attempt += 1) {
+      try {
+        await operation();
+        return;
+      } catch (error) {
+        if (!(error instanceof ConflictError) || attempt >= attempts) throw error;
+      }
+    }
   }
 
   private async upsert(doc: StoredDoc): Promise<void> {
-    const existing = await this.adapter.get(doc._id);
-    await this.adapter.put(existing ? { ...doc, _rev: existing._rev } : doc);
+    await this.withConflictRetry(async () => {
+      const existing = await this.adapter.get(doc._id);
+      await this.adapter.put(existing ? { ...doc, _rev: existing._rev } : doc);
+    });
   }
 
   private async requireDoc(type: string, id: string): Promise<StoredDoc> {

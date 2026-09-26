@@ -1,4 +1,4 @@
-import type { StorageAdapter, StoredDoc } from "./storage-adapter.ts";
+import { ConflictError, type StorageAdapter, type StoredDoc } from "./storage-adapter.ts";
 
 /** In-memory StorageAdapter, used by tests and available as a no-persistence fallback. */
 export class MemoryStorageAdapter implements StorageAdapter {
@@ -11,6 +11,10 @@ export class MemoryStorageAdapter implements StorageAdapter {
   }
 
   async put(doc: StoredDoc): Promise<void> {
+    const existing = this.docs.get(doc._id);
+    if (existing && existing._rev !== doc._rev) {
+      throw new ConflictError(doc._id);
+    }
     this.revCounter += 1;
     this.docs.set(doc._id, structuredClone({ ...doc, _rev: `${this.revCounter}` }));
   }
