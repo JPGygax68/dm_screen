@@ -17,7 +17,7 @@ The goal of this project is to create a digital "Dungeon Master" screen for Dung
 
 The application should run on:
 
-- Laptops (primary target)
-- Tablets (if feasible without sacrificing features or ease of use)
+- Tablets in landscape orientation (primary target) — the main use case is a DM tracking a campaign live at the table on a tablet.
+- Laptops (secondary target)
 
 Smartphones are *not* an intended target platform, being too limited in display surface and ease of input.

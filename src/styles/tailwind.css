@@ -9,6 +9,7 @@
   --color-copper: oklch(0.65 0.13 57);
   --font-display: Georgia, serif;
   --font-body: "Trebuchet MS", sans-serif;
+  --z-modal: 100;
 }
 
 :root {
