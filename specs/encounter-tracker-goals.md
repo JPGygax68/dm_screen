@@ -25,22 +25,3 @@ Those principles may be impossible to achieve at 100%. But this app must try.
 ### The most important workflow: the straight dive without preparation
 
 This may sound extreme, but it isn't: DnD takes place in shared imagined worlds, and it absolutely *must* be possible to start a game without any preparation whatsoever. Anything less would be a fun killer.
-
-- Judy (soon-to-be Player 1): So, how does one play Dungeons and Dragons? What do we need?
-- Brett (DM-in-training): Well, not much... a set of dice, a story book, a couple of rulebooks, a table, pen and paper...
-- Tony (soon-to-be Player 2): Ow snap. I thought we could give it a go right now... 
-- Brett: Oh but we can! In fact, we could begin with just pen and paper, but I happen to have my tablet with me, so I can use the DM app.
-- Judy: So your app replaces everything you just listed?
-- Brett: Pretty much, but we don't even need it all to begin. So Judy - who are you gonna be?
-- Judy: Pardon me?
-- Brett: Well, it's a roleplaying game, so you will be playing a hero character. You both of course - you too, Tony! So Judy, what kind of hero would you like to be? A fighter? A healer? A witch - well, a female wizard? There's loads of options, but I'd advise you to choose something basic. Don't forget I'm a beginner as a DM.
-- Judy: A DM? What's that?
-- Brett: Well, that's how DnD works. We all play the game, but one person has to be the so-called Dungeon Master. The players each play their hero character, but the DM plays everybody else.
-- Judy: The DM plays everybody else? But that's ridiculous - he would be guaranteed to win!
-- Brett: Ah but you see, DMs cannot "win". They have to run the game, so they're not competing. But in fact, the players aren't really competing either. We're all, the DM included, entering a world in our imaginations; and the goal is not really to "win", but to experience an adventure together.
-- Judy: Sounds really strange, but interesting too. Ok, I'm game. I'd like to be a - hm, I'd like to be a detective! Is that possible?
-- Brett (slightly taken aback): Uh, hm, well. Well actually, a "detective" is not really part of the classes... well never mind that, actually. Why not? It means your character should be smart and perceptive, right? No problem. But how would he or she fight?
-- Judy: Fight? Why should she have to fight? 
-- Brett (getting a little nervous now because he's just realized that he'll be expected to present Judy with a mystery to solve): Well, in DnD, heroes nearly always have to fight sooner or later. Or at least to overcome dangers of various kinds.
-- Judy: Oh, ok. Hm, I guess a detective should have a revolver, so I'll take that.
-- Brett (taking a deep breath to prepare for potentially long explanations): Well you see, DnD takes place in a kind of medieval world. Pistols do exist, but they're not as effective as in our world.

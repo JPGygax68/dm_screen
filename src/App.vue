@@ -4,6 +4,7 @@ import { storeToRefs } from "pinia";
 import { useDataStore } from "./stores/data-store.ts";
 import CampaignList from "./components/CampaignList.vue";
 import NewCampaignDialog from "./components/NewCampaignDialog.vue";
+import CharacterCreator from "./components/CharacterCreator.vue";
 import type { Campaign } from "./types/campaign.ts";
 
 const store = useDataStore();
@@ -25,7 +26,8 @@ onMounted(async () => {
 </script>
 
 <template>
-  <main class="min-h-dvh">
+  <CharacterCreator /> 
+  <main v-if="false" class="min-h-dvh">
     <header class="border-b border-ink/10 bg-moss-dark text-paper">
       <div class="mx-auto flex max-w-6xl items-end justify-between gap-6 px-6 py-8 lg:px-10">
         <div>
