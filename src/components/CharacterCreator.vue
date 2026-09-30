@@ -1,6 +1,6 @@
 <template>
   <main class="min-h-dvh">
-    <header class="border-b border-ink/10 bg-moss-dark text-paper">
+    <header class="border-b border-ink/20 bg-moss-dark text-paper">
       <div
         class="mx-auto flex max-w-6xl items-end justify-between gap-6 px-6 py-8 lg:px-10"
       >
@@ -24,13 +24,13 @@
           id="character-name"
           type="text"
           v-model="characterName"
-          class="border border-ink/10 rounded-md p-2 lg:col-span-3"
+          class="border border-ink/20 rounded-md p-2 lg:col-span-3"
         />
-        <label class="text-sm" for="character-class">Class</label>
+        <label class="text-sm col-start-1" for="character-class">Class</label>
         <select
           id="character-class"
           v-model="characterClass"
-          class="border border-ink/10 rounded-md p-2 w-48"
+          class="border border-ink/20 rounded-md p-2 w-48"
           >
           <option disabled value="">Select class</option>
           <option>Barbarian</option>
@@ -51,15 +51,15 @@
           id="character-background"
           type="text"
           v-model="characterBackground"
-          class="border border-ink/10 rounded-md p-2"
+          class="border border-ink/20 rounded-md p-2"
         /> 
-        <label class="text-sm" for="character-race">Race</label>
+        <label class="text-sm col-start-1" for="character-race">Race</label>
         <select
           id="character-race"
           type="text"
           v-model="characterRace"
           placeholder="Select race"
-          class="border border-ink/10 rounded-md p-2 w-48 lg:col-span-3"
+          class="border border-ink/20 rounded-md p-2 w-48 lg:col-span-3"
         >
           <option disabled value="">Select race</option>
           <option>Human</option>
@@ -76,14 +76,14 @@
           id="character-level"
           type="number"
           v-model="characterLevel"
-          class="number-input border border-ink/10 rounded-md p-2 w-16"
+          class="number-input border border-ink/20 rounded-md p-2 w-16"
         />
         <label class="text-sm" for="max-hp">Max&nbsp;Hitpoints</label>
         <input
           id="max-hp"
           type="number"
           v-model="maxHp"
-          class="number-input border border-ink/10 rounded-md p-2 w-16"
+          class="number-input border border-ink/20 rounded-md p-2 w-16"
         />
       </div>
     </form>
