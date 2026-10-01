@@ -16,8 +16,9 @@
     </header>
 
     <form>
-      <div
-        class="mx-auto max-w-2xl px-6 py-8 lg:px-10 grid grid-cols-[min-content_1fr] sm:grid-cols-[min-content_1fr_min-content_1fr] [&>label]:justify-self-end gap-y-2 gap-x-3 items-baseline"
+      <section
+        id="identity"
+        class="mx-auto max-w-2xl px-6 py-8 lg:px-10 grid grid-cols-[min-content_1fr] sm:grid-cols-[min-content_1fr_min-content_1fr] [&>label]:justify-self-end gap-y-2 gap-x-3 items-baseline [&>select>option]:box-border_p-0"
       >
         <label class="text-sm" for="character-name">Name</label>
         <input
@@ -27,11 +28,7 @@
           class="input lg:col-span-3"
         />
         <label class="text-sm col-start-1" for="character-class">Class</label>
-        <select
-          id="character-class"
-          class="input"
-          v-model="characterClass"
-        >
+        <select id="character-class" class="input" v-model="characterClass">
           <option disabled value="">Select class</option>
           <option>Barbarian</option>
           <option>Bard</option>
@@ -59,7 +56,7 @@
           <option>Evocation</option>
           <option>Divination</option>
         </select>
-        <label class="text-sm" for="character-race">Race</label>  
+        <label class="text-sm" for="character-race">Race</label>
         <select
           id="character-race"
           v-model="characterRace"
@@ -97,7 +94,50 @@
           v-model="maxHp"
           class="number-input border border-ink/20 rounded-md p-2 w-16"
         /> -->
-      </div>
+      </section>
+      <section id="attributes" class="mx-auto max-w-2xl">
+        <table
+          class="w-full border-separate border-spacing-2 [&>tbody>tr>*]:justify-center"
+        >
+          <thead>
+            <tr>
+              <th>Attribute</th>
+              <th>Value</th>
+              <th>Manual</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-for="(value, key) in characterAttributes" :key="key">
+              <td>{{ key.charAt(0).toUpperCase() + key.slice(1) }}</td>
+              <td>
+                <div
+                  @touchstart.prevent="handleTouchStart"
+                  @touchmove.prevent="handleTouchMove"
+                  :data-attribute-key="key"
+                  class="flex flex-row gap-0.5"
+                >
+                  <span
+                    class="attribute-cell text-[0.5rem] text-ink/20 bg-ink/10 w-3 h-8 grow"
+                    :class="{ 'bg-ink/50': characterAttributes[key] >= 7 + n }"
+                    v-for="n in 12"
+                    :key="n"
+                    :data-value="n + 7"
+                    >{{ n + 7 }}</span
+                  >
+                </div>
+              </td>
+              <td>
+                <input
+                  :id="key"
+                  type="number"
+                  v-model="characterAttributes[key]"
+                  class="input w-12"
+                />
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
     </form>
   </main>
 </template>
@@ -106,12 +146,13 @@
 @reference "@/styles/tailwind.css";
 
 .input {
-  @apply border border-ink/20 rounded-md p-2 min-w-48;
+  @apply border border-ink/20 rounded-md p-2;
 }
 </style>
 
 <script setup lang="ts">
 import { ref } from "vue";
+import type { Ref } from "vue";
 
 const characterName = ref("Bruul the Bruiser");
 const characterClass = ref("Barbarian");
@@ -120,4 +161,54 @@ const characterLevel = ref(1);
 const characterBackground = ref("");
 const maxHp = ref(10);
 const characterRace = ref("");
+
+const initialCharacterAttributes = {
+  strength: 10,
+  dexterity: 10,
+  constitution: 10,
+  intelligence: 10,
+  wisdom: 10,
+  charisma: 10,
+};
+
+type CharacterAttributes = typeof initialCharacterAttributes;
+const characterAttributes: Ref<CharacterAttributes> = ref({ ...initialCharacterAttributes });
+
+type AttributeKey = keyof CharacterAttributes;
+
+const touchedAttribute = ref<AttributeKey>();
+
+const handleTouchStart = (event: TouchEvent) => {
+  const cell = event.target as HTMLElement;
+  if (!cell) return;
+  const bar = cell.parentElement;
+  if (!bar) {
+    console.warn("No parent element found for the touched cell.");
+    return;
+  }
+  const attribKey = bar.dataset.attributeKey as AttributeKey;
+  if (!attribKey) return;
+  touchedAttribute.value = attribKey;
+  console.log("Starting touch for attribute:", attribKey);
+};
+
+const handleTouchMove = (event: TouchEvent) => {
+  const cell = getElementUnderFinger(event);
+  if (!cell) return;
+  const bar = cell.parentElement;
+  if (!bar) return;
+  const attribKey = bar.dataset.attributeKey as AttributeKey;
+  if ((!attribKey) || touchedAttribute.value !== attribKey) return;
+  if (!cell.dataset.value) return;
+  const value = parseInt(cell.dataset.value, 10);
+  characterAttributes.value[attribKey] = value;
+};
+
+
+function getElementUnderFinger(event: TouchEvent): HTMLElement | null {
+  const touch = event.touches[0];
+  return document.elementFromPoint(touch.clientX, touch.clientY) as HTMLElement | null;
+}
+
+
 </script>
