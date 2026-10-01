@@ -27,6 +27,7 @@ onMounted(async () => {
 
 <template>
   <CharacterCreator /> 
+  
   <main v-if="false" class="min-h-dvh">
     <header class="border-b border-ink/10 bg-moss-dark text-paper">
       <div class="mx-auto flex max-w-6xl items-end justify-between gap-6 px-6 py-8 lg:px-10">
