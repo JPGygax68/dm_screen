@@ -100,10 +100,11 @@
           class="w-full table-fixed border-separate border-spacing-2 [&>tbody>tr>*]:justify-center"
         >
           <thead>
-            <tr class="*:text-left">
+            <tr class="*:text-left *:overflow-x-hidden">
               <th class="w-1/16">Attribute</th>
               <th class="w-6/16">Value</th>
-              <th class="w-1/16">Manual</th>
+              <th class="w-2/16">Manual</th>
+              <th class="w-2/16">Bonus</th>
               <th class="w-2/16">Modifier</th>
             </tr>
           </thead>
@@ -136,10 +137,44 @@
                 />
               </td>
               <td>
+                <input
+                  :id="key + '-bonus'"
+                  type="number"
+                  v-model="abilityBonuses[key]"
+                  :min="0"
+                  :max="2"
+                  :step="1"
+                  class="input w-12"
+                />
+              </td>
+              <td>
                 {{ getAbilityModifierAsText(getFinalAbilityScore(key)) }}
               </td>
             </tr>
           </tbody>
+          <tfoot>
+            <tr>
+              <td colspan="2" class="text-left">Totals</td>
+              <td>
+                <input
+                  type="number"
+                  readonly
+                  class="input w-12"
+                  :value="getAbilityScoreTotal()"
+                />
+              </td>
+              <td>
+                <input
+                  type="number"
+                  readonly
+                  class="input w-12"
+                  :value="getAbilityBonusTotal()"
+                />
+              </td>
+              <td></td>
+              <td></td>
+            </tr>
+          </tfoot>
         </table>
       </section>
     </form>
@@ -153,6 +188,13 @@
   @apply border border-ink/20 rounded-md p-2;
 }
 
+.input[type="number"] {
+  @apply text-right;
+  &[readonly] {
+    @apply bg-ink/10;
+  }
+}
+
 .select {
   @apply border border-ink/20 rounded-md p-2 pr-10;
 }
@@ -162,7 +204,7 @@
 import { ref } from "vue";
 import type { Ref } from "vue";
 
-type AbilityScoreKey = 'str' | 'dex' | 'con' | 'int' | 'wis' | 'cha';
+type AbilityScoreKey = "str" | "dex" | "con" | "int" | "wis" | "cha";
 
 const AbilityScoreNamesMap_en: { [k in AbilityScoreKey]: string } = {
   str: "strength",
@@ -205,31 +247,20 @@ const criminalBackground: Background = {
 const sageBackground: Background = {
   name: "Sage",
   description: "A scholarly background with extensive knowledge.",
-  boostableAbilityScores: [
-    "int",
-    "wis",
-  ] as AbilityScoreKey[],
+  boostableAbilityScores: ["int", "wis"] as AbilityScoreKey[],
   tools: ["Calligrapher's Supplies"],
 };
 
 const soldierBackground: Background = {
   name: "Soldier",
   description: "A background of military service and discipline.",
-  boostableAbilityScores: [
-    "str",
-    "dex",
-    "con",
-  ] as AbilityScoreKey[],
-  feats: [{ savage_attack: "Savage Attacker"}],
+  boostableAbilityScores: ["str", "dex", "con"] as AbilityScoreKey[],
+  feats: [{ savage_attack: "Savage Attacker" }],
   skills: ["Athletics", "Intimidation"],
   tools: ["Gaming Set"],
 };
 
-const freeBackgrounds = [
-  criminalBackground,
-  sageBackground,
-  soldierBackground,
-];
+const freeBackgrounds = [criminalBackground, sageBackground, soldierBackground];
 
 const availableBackgrounds: Ref<Background[]> = ref([
   ...freeBackgrounds,
@@ -240,6 +271,15 @@ const abilityScores: Ref<AbilityScores> = ref({
   ...initialAbilityScores,
 });
 
+const abilityBonuses: Ref<Record<AbilityScoreKey, number>> = ref({
+  str: 0,
+  dex: 0,
+  con: 0,
+  int: 0,
+  wis: 0,
+  cha: 0,
+});
+
 function getFinalAbilityScore(key: AbilityScoreKey): number {
   // TODO: Apply any modifiers from race, background, or other sources
   return abilityScores.value[key];
@@ -247,7 +287,15 @@ function getFinalAbilityScore(key: AbilityScoreKey): number {
 
 function getAbilityModifierAsText(score: number): string {
   const value = Math.floor((score - 10) / 2);
-  return value === 0 ? '-' : value >= 0 ? `+${value}` : `${value}`;
+  return value === 0 ? "-" : value >= 0 ? `+${value}` : `${value}`;
+}
+
+function getAbilityBonusTotal(): number {
+  const total = Object.values(abilityBonuses.value).reduce(
+    (sum, val) => sum + val,
+    0,
+  );
+  return total;
 }
 
 const touchedAbilityScore = ref<AbilityScoreKey>();
@@ -273,6 +321,10 @@ const handleTouchStart = (event: TouchEvent) => {
   touchedAbilityScore.value = attribKey;
   console.log("Starting touch for attribute:", attribKey);
 };
+
+function getAbilityScoreTotal(): number {
+  return Object.values(abilityScores.value).reduce((sum, val) => sum + val, 0);
+}
 
 const handleTouchMove = (event: TouchEvent) => {
   const cell = getElementUnderFinger(event);
