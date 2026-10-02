@@ -137,15 +137,29 @@
                 />
               </td>
               <td>
-                <input
-                  :id="key + '-bonus'"
-                  type="number"
-                  v-model="abilityBonuses[key]"
-                  :min="0"
-                  :max="2"
-                  :step="1"
-                  class="input w-12"
-                />
+                <div class="flex items-center gap-1">
+                  <span
+                    v-if="abilityBonuses[key] > 0"
+                    @click.prevent="abilityBonuses[key] -= 1"
+                    >◀</span
+                  >
+                  <span v-else>◁</span>
+                  <input
+                    :id="key + '-bonus'"
+                    type="number"
+                    v-model="abilityBonuses[key]"
+                    :min="0"
+                    :max="2"
+                    :step="1"
+                    class="input w-7"
+                  />
+                  <span
+                    v-if="abilityBonuses[key] < 2"
+                    @click.prevent="abilityBonuses[key] += 1"
+                    >▶</span
+                  >
+                  <span v-else>▷</span>
+                </div>
               </td>
               <td>
                 {{ getAbilityModifierAsText(getFinalAbilityScore(key)) }}
