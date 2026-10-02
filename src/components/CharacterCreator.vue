@@ -119,11 +119,10 @@
                   class="flex flex-row gap-0.5"
                 >
                   <span
-                    class="attribute-cell text-[0.5rem] text-ink/20 bg-ink/10 w-3 h-8 grow"
-                    :class="{ 'bg-ink/50': abilityScores[key] >= 7 + n }"
-                    v-for="n in 12"
-                    :key="n"
+                    v-for="n in 13"
+                    :class="(7+n) > getFinalAbilityScore(key) ? 'bg-ink/20' : ((7+n) > abilityScores[key] ? 'bg-blue-600/50' : 'bg-ink/50')"
                     :data-value="n + 7"
+                    class="attribute-cell text-[0.5rem] text-ink/20 w-3 h-8 grow"
                     >{{ n + 7 }}</span
                   >
                 </div>
@@ -168,13 +167,13 @@
           </tbody>
           <tfoot>
             <tr>
-              <td colspan="2" class="text-left">Totals</td>
+              <td colspan="2" class="text-left">Available</td>
               <td>
                 <input
                   type="number"
                   readonly
                   class="input w-12"
-                  :value="getAbilityScoreTotal()"
+                  :value="getAvailableBaseAbilityScorePoints()"
                 />
               </td>
               <td>
@@ -182,7 +181,7 @@
                   type="number"
                   readonly
                   class="input w-12"
-                  :value="getAbilityBonusTotal()"
+                  :value="getAvailableAbilityBonusPoints()"
                 />
               </td>
               <td></td>
@@ -294,24 +293,6 @@ const abilityBonuses: Ref<Record<AbilityScoreKey, number>> = ref({
   cha: 0,
 });
 
-function getFinalAbilityScore(key: AbilityScoreKey): number {
-  // TODO: Apply any modifiers from race, background, or other sources
-  return abilityScores.value[key];
-}
-
-function getAbilityModifierAsText(score: number): string {
-  const value = Math.floor((score - 10) / 2);
-  return value === 0 ? "-" : value >= 0 ? `+${value}` : `${value}`;
-}
-
-function getAbilityBonusTotal(): number {
-  const total = Object.values(abilityBonuses.value).reduce(
-    (sum, val) => sum + val,
-    0,
-  );
-  return total;
-}
-
 const touchedAbilityScore = ref<AbilityScoreKey>();
 
 const characterName = ref("Bruul the Bruiser");
@@ -336,8 +317,34 @@ const handleTouchStart = (event: TouchEvent) => {
   console.log("Starting touch for attribute:", attribKey);
 };
 
-function getAbilityScoreTotal(): number {
+function getBaseAbilityScoresTotal(): number {
   return Object.values(abilityScores.value).reduce((sum, val) => sum + val, 0);
+}
+
+function getFinalAbilityScore(key: AbilityScoreKey): number {
+  // TODO: Apply any modifiers from race, background, or other sources
+  return abilityScores.value[key] + (abilityBonuses.value[key] ?? 0);
+}
+
+function getAbilityModifierAsText(score: number): string {
+  const value = Math.floor((score - 10) / 2);
+  return value === 0 ? "-" : value >= 0 ? `+${value}` : `${value}`;
+}
+
+function getAbilityBonusesTotal(): number {
+  const total = Object.values(abilityBonuses.value).reduce(
+    (sum, val) => sum + val,
+    0,
+  );
+  return total;
+}
+
+function getAvailableBaseAbilityScorePoints(): number {
+  return 72 - getBaseAbilityScoresTotal();
+}
+
+function getAvailableAbilityBonusPoints(): number {
+  return 3 - getAbilityBonusesTotal();
 }
 
 const handleTouchMove = (event: TouchEvent) => {
