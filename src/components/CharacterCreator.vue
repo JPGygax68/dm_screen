@@ -100,13 +100,13 @@
           class="w-full table-fixed border-separate border-spacing-2 overflow-x-auto"
         >
           <thead>
-            <tr class="*:overflow-x-hidden">
-              <th class="w-2/16">Ability</th>
+            <tr class="*:overflow-x-hidden *:text-ellipsis">
+              <th class="w-2/16 text-left">Ability</th>
               <th class="w-10/16 hidden sm:table-cell">Score</th>
               <th class="w-4/16"><div class="w-full sm:hidden">Score</div></th>
-              <th class="w-4/16 text-center">Bonus</th>
-              <th class="w-3/16">Final</th>
-              <th class="w-2/16">Modifier</th>
+              <th class="w-3/16 text-center">Bonus</th>
+              <th class="w-2/16 text-center">Final</th>
+              <th class="w-2/16 text-center">Modifier</th>
             </tr>
           </thead>
           <tbody>
@@ -158,7 +158,7 @@
                   :height="8"
                 />
               </td>
-              <td>
+              <td class="text-center">
                 <input
                   type="number"
                   readonly
@@ -166,7 +166,7 @@
                   class="input w-12"
                 />
               </td>
-              <td>
+              <td class="text-center">
                 <input
                   type="text"
                   readonly
