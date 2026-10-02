@@ -1,23 +1,49 @@
 @import "tailwindcss";
 
-@theme {
-  --color-ink: oklch(0.24 0.03 165);
-  --color-paper: oklch(0.97 0.02 85);
-  --color-paper-deep: oklch(0.92 0.04 82);
-  --color-moss: oklch(0.42 0.09 157);
-  --color-moss-dark: oklch(0.29 0.07 157);
-  --color-copper: oklch(0.65 0.13 57);
-  --font-display: Georgia, serif;
-  --font-body: "Trebuchet MS", sans-serif;
-  --z-modal: 100;
-}
-
 :root {
   font-family: var(--font-body);
   color: var(--color-ink);
   background: var(--color-paper);
   font-synthesis: none;
   text-rendering: optimizeLegibility;
+
+  --color-warning: oklch(56.064% 0.11788 103.669);
+}
+
+@theme {
+  /* --- Base Application Archetype Colors --- */
+  --color-ink: oklch(0.24 0.03 165);
+  --color-paper: oklch(0.97 0.02 85);
+  --color-paper-deep: oklch(0.92 0.04 82);
+  --color-moss: oklch(0.42 0.09 157);
+  --color-moss-dark: oklch(0.29 0.07 157);
+  --color-copper: oklch(0.65 0.13 57);
+
+  /* --- D&D Core Ability Stat Colors --- */
+  --color-str: oklch(0.55 0.20 25);   /* Barbarian Red */
+  --color-dex: oklch(0.60 0.18 140);  /* Ranger Green */
+  --color-wis: oklch(0.50 0.15 250);  /* Cleric Blue */
+
+  /* --- Application UI Semantic States (OKLCH Native Adjustments) --- */
+  /* 1. Base states */
+  --color-success: oklch(51.738% 0.17189 143.165);
+  --color-warning: var(--color-warning);
+  --color-error: oklch(37.511% 0.15314 29.106);
+
+  /* 2. Light variants: Unpack the base color, add 0.35 to Lightness (l) */
+  --color-success-light: oklch(from var(--color-success) calc(l + 0.45) c h);
+  --color-warning-light: oklch(from var(--color-warning) calc(l + 0.35) c h);
+  --color-error-light: oklch(from var(--color-error) calc(l + 0.35) c h);
+
+  /* 3. Dark variants: Unpack the base color, subtract 0.15 from Lightness (l) */
+  --color-success-dark: oklch(from var(--color-success) calc(l - 0.15) c h);
+  --color-warning-dark: oklch(from var(--color-warning) calc(l - 0.45) c h);
+  --color-error-dark: oklch(from var(--color-error) calc(l - 0.15) c h);
+  
+  /* --- Global Theme Extensions --- */
+  --font-display: "Georgia", serif;
+  --font-body: "Trebuchet MS", sans-serif;
+  --z-modal: 100;
 }
 
 body {

@@ -97,14 +97,15 @@
       </section>
       <section id="ability-scores" class="mx-auto max-w-2xl">
         <table
-          class="w-full table-fixed border-separate border-spacing-2 [&>tbody>tr>*]:justify-center"
+          class="w-full table-fixed border-separate border-spacing-2 overflow-x-auto"
         >
           <thead>
-            <tr class="*:text-left *:overflow-x-hidden">
-              <th class="w-1/16">Attribute</th>
-              <th class="w-6/16">Value</th>
-              <th class="w-2/16">Manual</th>
-              <th class="w-2/16">Bonus</th>
+            <tr class="*:overflow-x-hidden">
+              <th class="w-2/16">Attribute</th>
+              <th class="w-10/16">Value</th>
+              <th class="w-4/16">Manual</th>
+              <th class="w-4/16 text-center">Bonus</th>
+              <th class="w-3/16">Final</th>
               <th class="w-2/16">Modifier</th>
             </tr>
           </thead>
@@ -120,7 +121,13 @@
                 >
                   <span
                     v-for="n in 13"
-                    :class="(7+n) > getFinalAbilityScore(key) ? 'bg-ink/20' : ((7+n) > abilityScores[key] ? 'bg-blue-600/50' : 'bg-ink/50')"
+                    :class="
+                      7 + n > finalAbilityScores[key]
+                        ? 'bg-ink/20'
+                        : 7 + n > abilityScores[key]
+                          ? 'bg-blue-600/50'
+                          : 'bg-ink/50'
+                    "
                     :data-value="n + 7"
                     class="attribute-cell text-[0.5rem] text-ink/20 w-3 h-8 grow"
                     >{{ n + 7 }}</span
@@ -128,60 +135,74 @@
                 </div>
               </td>
               <td>
-                <input
+                <NumberStepper
                   :id="key"
-                  type="number"
                   v-model="abilityScores[key]"
+                  :label="`${key} ability score`"
+                  :min="8"
+                  :max="18"
+                  :step="1"
+                  :digits="2"
+                  :height="8"
+                />
+              </td>
+              <td>
+                <NumberStepper
+                  :id="key + '-bonus'"
+                  v-model="abilityBonuses[key]"
+                  :label="`${key} ability bonus`"
+                  :min="0"
+                  :max="2"
+                  :step="1"
+                  :digits="1"
+                  :height="8"
+                />
+              </td>
+              <td>
+                <input
+                  type="number"
+                  readonly
+                  :value="finalAbilityScores[key]"
                   class="input w-12"
                 />
               </td>
               <td>
-                <div class="flex items-center gap-1">
-                  <span
-                    v-if="abilityBonuses[key] > 0"
-                    @click.prevent="abilityBonuses[key] -= 1"
-                    >◀</span
-                  >
-                  <span v-else>◁</span>
-                  <input
-                    :id="key + '-bonus'"
-                    type="number"
-                    v-model="abilityBonuses[key]"
-                    :min="0"
-                    :max="2"
-                    :step="1"
-                    class="input w-7"
-                  />
-                  <span
-                    v-if="abilityBonuses[key] < 2"
-                    @click.prevent="abilityBonuses[key] += 1"
-                    >▶</span
-                  >
-                  <span v-else>▷</span>
-                </div>
-              </td>
-              <td>
-                {{ getAbilityModifierAsText(getFinalAbilityScore(key)) }}
+                <input
+                  type="text"
+                  readonly
+                  :value="finalAbilityModifiersAsText[key]"
+                  class="input w-12 h-8 text-center"
+                />
               </td>
             </tr>
           </tbody>
           <tfoot>
             <tr>
               <td colspan="2" class="text-left">Available</td>
-              <td>
+              <td class="flex flex-row justify-center">
                 <input
                   type="number"
                   readonly
-                  class="input w-12"
-                  :value="getAvailableBaseAbilityScorePoints()"
+                  :value="availableBaseAbilityScorePoints"
+                  :class="{
+                    success: availableBaseAbilityScorePoints == 0,
+                    error: availableBaseAbilityScorePoints < 0,
+                    warning: availableBaseAbilityScorePoints > 0,
+                  }"
+                  class="input w-[4ch]"
                 />
               </td>
-              <td>
+              <td bonus-points>
                 <input
                   type="number"
                   readonly
-                  class="input w-12"
-                  :value="getAvailableAbilityBonusPoints()"
+                  :value="availableAbilityBonusPoints"
+                  :class="{
+                    success: availableAbilityBonusPoints == 0,
+                    error: availableAbilityBonusPoints < 0,
+                    warning: availableAbilityBonusPoints > 0,
+                  }"
+                  class="input w-[3ch]"
                 />
               </td>
               <td></td>
@@ -201,10 +222,23 @@
   @apply border border-ink/20 rounded-md p-2;
 }
 
+table tr > *[bonus-points] {
+  @apply text-center justify-center;
+}
+
 .input[type="number"] {
-  @apply text-right;
+  @apply text-right h-8;
   &[readonly] {
     @apply bg-ink/10;
+  }
+  &.success {
+    @apply bg-success-light border-success text-success-dark;
+  }
+  &.warning {
+    @apply bg-warning-light border-warning text-warning-dark;
+  }
+  &.error {
+    @apply bg-error-light border-error text-error-dark;
   }
 }
 
@@ -214,8 +248,9 @@
 </style>
 
 <script setup lang="ts">
-import { ref } from "vue";
+import { ref, computed } from "vue";
 import type { Ref } from "vue";
+import NumberStepper from "./NumberStepper.vue";
 
 type AbilityScoreKey = "str" | "dex" | "con" | "int" | "wis" | "cha";
 
@@ -317,19 +352,48 @@ const handleTouchStart = (event: TouchEvent) => {
   console.log("Starting touch for attribute:", attribKey);
 };
 
-function getBaseAbilityScoresTotal(): number {
+const baseAbilityScoresTotal = computed(() => {
   return Object.values(abilityScores.value).reduce((sum, val) => sum + val, 0);
-}
+});
 
-function getFinalAbilityScore(key: AbilityScoreKey): number {
-  // TODO: Apply any modifiers from race, background, or other sources
-  return abilityScores.value[key] + (abilityBonuses.value[key] ?? 0);
-}
+const finalAbilityScores = computed(() => {
+  const scores: Record<AbilityScoreKey, number> = {} as Record<
+    AbilityScoreKey,
+    number
+  >;
+  (Object.keys(abilityScores.value) as AbilityScoreKey[]).forEach((key) => {
+    scores[key] = abilityScores.value[key] + (abilityBonuses.value[key] ?? 0);
+  });
+  return scores;
+});
 
-function getAbilityModifierAsText(score: number): string {
-  const value = Math.floor((score - 10) / 2);
-  return value === 0 ? "-" : value >= 0 ? `+${value}` : `${value}`;
-}
+const finalAbilityModifiers = computed(() => {
+  const modifiers: Record<AbilityScoreKey, number> = {} as Record<
+    AbilityScoreKey,
+    number
+  >;
+  (Object.keys(finalAbilityScores.value) as AbilityScoreKey[]).forEach(
+    (key) => {
+      modifiers[key] = Math.floor((finalAbilityScores.value[key] - 10) / 2);
+    },
+  );
+  return modifiers;
+});
+
+const finalAbilityModifiersAsText = computed(() => {
+  const modifiersText: Record<AbilityScoreKey, string> = {} as Record<
+    AbilityScoreKey,
+    string
+  >;
+  (Object.keys(finalAbilityModifiers.value) as AbilityScoreKey[]).forEach(
+    (key) => {
+      const value = finalAbilityModifiers.value[key];
+      modifiersText[key] =
+        value === 0 ? "-" : value >= 0 ? `+${value}` : `${value}`;
+    },
+  );
+  return modifiersText;
+});
 
 function getAbilityBonusesTotal(): number {
   const total = Object.values(abilityBonuses.value).reduce(
@@ -339,13 +403,13 @@ function getAbilityBonusesTotal(): number {
   return total;
 }
 
-function getAvailableBaseAbilityScorePoints(): number {
-  return 72 - getBaseAbilityScoresTotal();
-}
+const availableBaseAbilityScorePoints = computed(() => {
+  return 72 - baseAbilityScoresTotal.value;
+});
 
-function getAvailableAbilityBonusPoints(): number {
+const availableAbilityBonusPoints = computed(() => {
   return 3 - getAbilityBonusesTotal();
-}
+});
 
 const handleTouchMove = (event: TouchEvent) => {
   const cell = getElementUnderFinger(event);
