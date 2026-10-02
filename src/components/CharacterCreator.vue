@@ -25,7 +25,7 @@
           id="character-name"
           type="text"
           v-model="characterName"
-          class="input lg:col-span-3"
+          class="lg:col-span-3"
         />
         <label class="text-sm col-start-1" for="character-class">Class</label>
         <select id="character-class" class="select" v-model="characterClass">
@@ -92,21 +92,21 @@
           id="character-background"
           type="text"
           v-model="characterBackground"
-          class="input"
+          class=""
         /> -->
       </section>
       <section id="ability-scores" class="mx-auto max-w-2xl">
         <table
-          class="w-full table-fixed border-separate border-spacing-2 overflow-x-auto"
+          class="w-full table-fixed border-separate border-spacing-y-2 border-spacing-x-3 overflow-x-auto"
         >
           <thead>
             <tr class="*:overflow-x-hidden *:text-ellipsis">
-              <th class="w-2/16 text-left">Ability</th>
-              <th class="w-10/16 hidden sm:table-cell">Score</th>
-              <th class="w-4/16"><div class="w-full sm:hidden">Score</div></th>
-              <th class="w-3/16 text-center">Bonus</th>
-              <th class="w-2/16 text-center">Final</th>
-              <th class="w-2/16 text-center">Modifier</th>
+              <th class="w-2/24 text-left">Ability</th>
+              <th class="w-11/24 hidden sm:table-cell">Score</th>
+              <th class="w-4/24"><div class="w-full sm:hidden">Score</div></th>
+              <th class="w-3/24 text-center">Bonus</th>
+              <th class="w-2/24 text-center">Final</th>
+              <th class="w-2/24 text-center">Modifier</th>
             </tr>
           </thead>
           <tbody>
@@ -143,7 +143,7 @@
                   :max="18"
                   :step="1"
                   :digits="2"
-                  :height="8"
+                  :height="7"
                 />
               </td>
               <td>
@@ -155,7 +155,7 @@
                   :max="2"
                   :step="1"
                   :digits="1"
-                  :height="8"
+                  :height="7"
                 />
               </td>
               <td class="text-center">
@@ -163,7 +163,7 @@
                   type="number"
                   readonly
                   :value="finalAbilityScores[key]"
-                  class="input w-12"
+                  class="score-field w-10"
                 />
               </td>
               <td class="text-center">
@@ -171,7 +171,7 @@
                   type="text"
                   readonly
                   :value="finalAbilityModifiersAsText[key]"
-                  class="input w-12 h-8 text-center"
+                  class="score-field thick w-10 text-center"
                 />
               </td>
             </tr>
@@ -191,7 +191,7 @@
                       error: availableBaseAbilityScorePoints < 0,
                       warning: availableBaseAbilityScorePoints > 0,
                     }"
-                    class="input w-[4ch]"
+                    class="score-field w-[4ch]"
                   />
                 </div>
               </td>
@@ -205,7 +205,7 @@
                     error: availableAbilityBonusPoints < 0,
                     warning: availableAbilityBonusPoints > 0,
                   }"
-                  class="input w-[4ch]"
+                  class="score-field w-[4ch]"
                 />
               </td>
               <td></td>
@@ -221,16 +221,22 @@
 <style scoped lang="css">
 @reference "@/styles/tailwind.css";
 
-.input {
-  @apply border border-ink/20 rounded-md p-2;
-}
-
 table tr > *[bonus-points] {
   @apply text-center justify-center;
 }
 
-.input[type="number"] {
-  @apply text-right h-8;
+input {
+  @apply border border-ink/20 rounded-md p-2;
+}
+
+input[type="number"] {
+  @apply text-right
+}
+
+input {
+  &.score-field {
+    @apply h-7;
+  }
   &[readonly] {
     @apply bg-ink/10;
   }
@@ -243,9 +249,12 @@ table tr > *[bonus-points] {
   &.error {
     @apply bg-error-light border-error text-error-dark;
   }
+  &.thick {
+    @apply border-3 border-ink/60 font-bold;
+  }
 }
 
-.select {
+select {
   @apply border border-ink/20 rounded-md p-2 pr-10;
 }
 </style>

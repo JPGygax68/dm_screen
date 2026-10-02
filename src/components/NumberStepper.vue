@@ -56,8 +56,9 @@ function increment(): void {
       :min="min"
       :max="max"
       :step="step"
-      :class="`rounded-md border border-ink/20 p-2 text-right h-${props.height}`"
-      :style="props.digits ? `width: ${props.digits + 2}ch;` : ''"
+      :class="`rounded-md border border-ink/20 p-2 text-right`"
+      :style="`width: ${props.digits ? (props.digits + 2) + 'ch' : 'auto'};
+        height: ${props.height ? props.height * 0.25 + 'rem' : 'auto'};`"
     />
     <button
       type="button"
