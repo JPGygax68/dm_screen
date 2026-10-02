@@ -101,9 +101,9 @@
         >
           <thead>
             <tr class="*:overflow-x-hidden">
-              <th class="w-2/16">Attribute</th>
-              <th class="w-10/16">Value</th>
-              <th class="w-4/16">Manual</th>
+              <th class="w-2/16">Ability</th>
+              <th class="w-10/16 hidden sm:table-cell">Score</th>
+              <th class="w-4/16"><div class="w-full sm:hidden">Score</div></th>
               <th class="w-4/16 text-center">Bonus</th>
               <th class="w-3/16">Final</th>
               <th class="w-2/16">Modifier</th>
@@ -112,7 +112,7 @@
           <tbody>
             <tr v-for="(value, key) in abilityScores" :key="key">
               <td>{{ key.charAt(0).toUpperCase() + key.slice(1) }}</td>
-              <td>
+              <td class="hidden sm:table-cell">
                 <div
                   @touchstart.prevent="handleTouchStart"
                   @touchmove.prevent="handleTouchMove"
@@ -178,19 +178,22 @@
           </tbody>
           <tfoot>
             <tr>
-              <td colspan="2" class="text-left">Available</td>
-              <td class="flex flex-row justify-center">
-                <input
-                  type="number"
-                  readonly
-                  :value="availableBaseAbilityScorePoints"
-                  :class="{
-                    success: availableBaseAbilityScorePoints == 0,
-                    error: availableBaseAbilityScorePoints < 0,
-                    warning: availableBaseAbilityScorePoints > 0,
-                  }"
-                  class="input w-[4ch]"
-                />
+              <td class="text-left overflow-visible">Available</td>
+              <td class="hidden sm:table-cell"></td>
+              <td>
+                <div class="w-full flex flex-row justify-center">
+                  <input
+                    type="number"
+                    readonly
+                    :value="availableBaseAbilityScorePoints"
+                    :class="{
+                      success: availableBaseAbilityScorePoints == 0,
+                      error: availableBaseAbilityScorePoints < 0,
+                      warning: availableBaseAbilityScorePoints > 0,
+                    }"
+                    class="input w-[4ch]"
+                  />
+                </div>
               </td>
               <td bonus-points>
                 <input
@@ -202,7 +205,7 @@
                     error: availableAbilityBonusPoints < 0,
                     warning: availableAbilityBonusPoints > 0,
                   }"
-                  class="input w-[3ch]"
+                  class="input w-[4ch]"
                 />
               </td>
               <td></td>
