@@ -28,27 +28,21 @@
           class="lg:col-span-3"
         />
         <label class="text-sm col-start-1" for="character-class">Class</label>
-        <select id="character-class" class="select" v-model="characterClass">
+        <select id="character-class" v-model="characterClass">
           <option disabled value="">Select class</option>
-          <option>Barbarian</option>
-          <option>Bard</option>
-          <option>Cleric</option>
-          <option>Druid</option>
-          <option>Fighter</option>
-          <option>Monk</option>
-          <option>Paladin</option>
-          <option>Ranger</option>
-          <option>Rogue</option>
-          <option>Sorcerer</option>
-          <option>Warlock</option>
-          <option>Wizard</option>
+          <option
+            v-for="classItem in classes"
+            :key="classItem.id"
+            :value="classItem.id"
+          >
+            {{ classItem.name }}
+          </option>
         </select>
         <label class="text-sm" for="character-subclass">Subclass</label>
         <select
           id="character-subclass"
           class="select"
           v-model="characterSubclass"
-          placeholder="Select subclass"
         >
           <option disabled value="">Select subclass</option>
           <option>Champion</option>
@@ -102,16 +96,19 @@
           <thead>
             <tr class="*:overflow-x-hidden *:text-ellipsis">
               <th class="w-2/24 text-left">Ability</th>
-              <th class="w-11/24 hidden sm:table-cell">Score</th>
+              <th class="w-10/24 hidden sm:table-cell">Score</th>
               <th class="w-4/24"><div class="w-full sm:hidden">Score</div></th>
               <th class="w-3/24 text-center">Bonus</th>
               <th class="w-2/24 text-center">Final</th>
               <th class="w-2/24 text-center">Modifier</th>
+              <th class="w-1/24 text-center">Save</th>
             </tr>
           </thead>
           <tbody>
             <tr v-for="(value, key) in abilityScores" :key="key">
-              <td>{{ key.charAt(0).toUpperCase() + key.slice(1) }}</td>
+              <td :class="{ 'font-bold': primaryClassAbilities.includes(key) }">
+                {{ key.charAt(0).toUpperCase() + key.slice(1) }}
+              </td>
               <td class="hidden sm:table-cell">
                 <div
                   @touchstart.prevent="handleTouchStart"
@@ -144,6 +141,7 @@
                   :step="1"
                   :digits="2"
                   :height="7"
+                  :bg-classes="!!baseAbilityScoreProps[key].warning ? 'bg-warning-light' : ''"
                 />
               </td>
               <td>
@@ -174,6 +172,7 @@
                   class="score-field thick w-10 text-center"
                 />
               </td>
+              <td><input type="checkbox" /></td>
             </tr>
           </tbody>
           <tfoot>
@@ -225,12 +224,23 @@ table tr > *[bonus-points] {
   @apply text-center justify-center;
 }
 
-input {
+input:not([type="checkbox"]) {
   @apply border border-ink/20 rounded-md p-2;
 }
 
+input[type="checkbox"] {
+  @apply appearance-none h-4 w-4 rounded border-2 border-ink/80 bg-white 
+         checked:bg-ink/60 checked:border-ink/60 
+         focus:outline-none focus:ring-2 focus:ring-ink/40 focus:ring-offset-2
+         transition-all duration-150 cursor-pointer;
+}
+
+input[type="checkbox"]:disabled {
+  @apply border-transparent;
+}
+
 input[type="number"] {
-  @apply text-right
+  @apply text-right;
 }
 
 input {
@@ -263,10 +273,11 @@ select {
 import { ref, computed } from "vue";
 import type { Ref } from "vue";
 import NumberStepper from "./NumberStepper.vue";
+import { classes } from "@/lib/dnd2024-class-features";
 
-type AbilityScoreKey = "str" | "dex" | "con" | "int" | "wis" | "cha";
+type AbilityKey = "str" | "dex" | "con" | "int" | "wis" | "cha";
 
-const AbilityScoreNamesMap_en: { [k in AbilityScoreKey]: string } = {
+const AbilityScoreNamesMap_en: { [k in AbilityKey]: string } = {
   str: "strength",
   dex: "dexterity",
   con: "constitution",
@@ -275,7 +286,7 @@ const AbilityScoreNamesMap_en: { [k in AbilityScoreKey]: string } = {
   cha: "charisma",
 };
 
-const initialAbilityScores: Record<AbilityScoreKey, number> = {
+const initialAbilityScores: Record<AbilityKey, number> = {
   str: 10,
   dex: 10,
   con: 10,
@@ -289,7 +300,7 @@ type AbilityScores = typeof initialAbilityScores;
 type Background = {
   name: string;
   description?: string;
-  boostableAbilityScores?: AbilityScoreKey[];
+  boostableAbilityScores?: AbilityKey[];
   feats?: { [key: string]: string }[];
   skills?: string[];
   tools?: string[];
@@ -307,14 +318,14 @@ const criminalBackground: Background = {
 const sageBackground: Background = {
   name: "Sage",
   description: "A scholarly background with extensive knowledge.",
-  boostableAbilityScores: ["int", "wis"] as AbilityScoreKey[],
+  boostableAbilityScores: ["int", "wis"] as AbilityKey[],
   tools: ["Calligrapher's Supplies"],
 };
 
 const soldierBackground: Background = {
   name: "Soldier",
   description: "A background of military service and discipline.",
-  boostableAbilityScores: ["str", "dex", "con"] as AbilityScoreKey[],
+  boostableAbilityScores: ["str", "dex", "con"] as AbilityKey[],
   feats: [{ savage_attack: "Savage Attacker" }],
   skills: ["Athletics", "Intimidation"],
   tools: ["Gaming Set"],
@@ -331,7 +342,7 @@ const abilityScores: Ref<AbilityScores> = ref({
   ...initialAbilityScores,
 });
 
-const abilityBonuses: Ref<Record<AbilityScoreKey, number>> = ref({
+const abilityBonuses: Ref<Record<AbilityKey, number>> = ref({
   str: 0,
   dex: 0,
   con: 0,
@@ -340,10 +351,11 @@ const abilityBonuses: Ref<Record<AbilityScoreKey, number>> = ref({
   cha: 0,
 });
 
-const touchedAbilityScore = ref<AbilityScoreKey>();
+const touchedAbilityScore = ref<AbilityKey>();
 
+// TODO: remove the debug defaults
 const characterName = ref("Bruul the Bruiser");
-const characterClass = ref("Barbarian");
+const characterClass = ref("barbarian");
 const characterSubclass = ref("");
 const characterLevel = ref(1);
 const characterBackground = ref("");
@@ -358,52 +370,95 @@ const handleTouchStart = (event: TouchEvent) => {
     console.warn("No parent element found for the touched cell.");
     return;
   }
-  const attribKey = bar.dataset.abilityScoreName as AbilityScoreKey;
+  const attribKey = bar.dataset.abilityScoreName as AbilityKey;
   if (!attribKey) return;
   touchedAbilityScore.value = attribKey;
   console.log("Starting touch for attribute:", attribKey);
 };
 
+const baseAbilityScoreProps = computed(() => {
+  const props: Record<
+    AbilityKey,
+    { isLowest: boolean; isHighest: boolean; warning: string }
+  > = {} as any;
+  let lowest = 99;
+  let highest = -99;
+  (Object.keys(abilityScores.value) as AbilityKey[]).forEach((key) => {
+    const value = abilityScores.value[key];
+    if (value < lowest) lowest = value;
+    if (value > highest) highest = value;
+  });
+  let highestScoreIsOneOfPrimaries = false;
+  (Object.keys(abilityScores.value) as AbilityKey[]).forEach((key) => {
+    const value = abilityScores.value[key];
+    if (primaryClassAbilities.value.includes(key) && value === highest) {
+      highestScoreIsOneOfPrimaries = true;
+    }
+    props[key] = {
+      isLowest: value === lowest,
+      isHighest: value === highest,
+      warning:
+        value === highest && !highestScoreIsOneOfPrimaries
+          ? "Consider boosting a primary ability"
+          : "",
+    };
+  });
+  return props;
+});
+
+const baseAbilityScoreOk = computed(() => {
+  const ok: Record<AbilityKey, boolean> = {} as Record<AbilityKey, boolean>;
+  (Object.keys(abilityScores.value) as AbilityKey[]).forEach((key) => {
+    ok[key] = abilityScores.value[key] <= 18;
+  });
+  return ok;
+});
+
 const baseAbilityScoresTotal = computed(() => {
   return Object.values(abilityScores.value).reduce((sum, val) => sum + val, 0);
 });
 
+const primaryClassAbilities: Ref<AbilityKey[]> = computed(() => {
+  // Consult the class features and extract the primary abilities for the class
+  const cls = classes.find((c) => c.id === characterClass.value);
+  if (!cls) {
+    console.error("Class not found:", characterClass.value);
+    return [];
+  }
+  return Array.isArray(cls.primary_ability)
+    ? cls.primary_ability.map((a) => a.toLowerCase() as AbilityKey)
+    : [cls.primary_ability.toLowerCase() as AbilityKey];
+});
+
 const finalAbilityScores = computed(() => {
-  const scores: Record<AbilityScoreKey, number> = {} as Record<
-    AbilityScoreKey,
-    number
-  >;
-  (Object.keys(abilityScores.value) as AbilityScoreKey[]).forEach((key) => {
+  const scores: Record<AbilityKey, number> = {} as Record<AbilityKey, number>;
+  (Object.keys(abilityScores.value) as AbilityKey[]).forEach((key) => {
     scores[key] = abilityScores.value[key] + (abilityBonuses.value[key] ?? 0);
   });
   return scores;
 });
 
 const finalAbilityModifiers = computed(() => {
-  const modifiers: Record<AbilityScoreKey, number> = {} as Record<
-    AbilityScoreKey,
+  const modifiers: Record<AbilityKey, number> = {} as Record<
+    AbilityKey,
     number
   >;
-  (Object.keys(finalAbilityScores.value) as AbilityScoreKey[]).forEach(
-    (key) => {
-      modifiers[key] = Math.floor((finalAbilityScores.value[key] - 10) / 2);
-    },
-  );
+  (Object.keys(finalAbilityScores.value) as AbilityKey[]).forEach((key) => {
+    modifiers[key] = Math.floor((finalAbilityScores.value[key] - 10) / 2);
+  });
   return modifiers;
 });
 
 const finalAbilityModifiersAsText = computed(() => {
-  const modifiersText: Record<AbilityScoreKey, string> = {} as Record<
-    AbilityScoreKey,
+  const modifiersText: Record<AbilityKey, string> = {} as Record<
+    AbilityKey,
     string
   >;
-  (Object.keys(finalAbilityModifiers.value) as AbilityScoreKey[]).forEach(
-    (key) => {
-      const value = finalAbilityModifiers.value[key];
-      modifiersText[key] =
-        value === 0 ? "-" : value >= 0 ? `+${value}` : `${value}`;
-    },
-  );
+  (Object.keys(finalAbilityModifiers.value) as AbilityKey[]).forEach((key) => {
+    const value = finalAbilityModifiers.value[key];
+    modifiersText[key] =
+      value === 0 ? "-" : value >= 0 ? `+${value}` : `${value}`;
+  });
   return modifiersText;
 });
 
@@ -428,7 +483,7 @@ const handleTouchMove = (event: TouchEvent) => {
   if (!cell) return;
   const bar = cell.parentElement;
   if (!bar) return;
-  const abilityScoreName = bar.dataset.abilityScoreName as AbilityScoreKey;
+  const abilityScoreName = bar.dataset.abilityScoreName as AbilityKey;
   if (!abilityScoreName || touchedAbilityScore.value !== abilityScoreName)
     return;
   if (!cell.dataset.value) return;

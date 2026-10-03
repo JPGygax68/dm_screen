@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed } from "vue";
+import { ClassValue, computed } from "vue";
 
 const model = defineModel<number>({ required: true });
 
@@ -12,6 +12,7 @@ const props = withDefaults(
     step?: number;
     digits?: number;
     height?: number;
+    bgClasses?: ClassValue;
   }>(),
   {
     step: 1,
@@ -43,7 +44,7 @@ function increment(): void {
       type="button"
       :aria-label="`Decrease ${label}`"
       :disabled="!canDecrement"
-      class="size-8 text-ink/70 disabled:cursor-not-allowed disabled:text-ink/25"
+      class="h-8 w-4 text-ink/70 disabled:cursor-not-allowed disabled:text-ink/25"
       @click="decrement"
     >
       {{ canDecrement ? "◀" : "◁" }}
@@ -56,7 +57,7 @@ function increment(): void {
       :min="min"
       :max="max"
       :step="step"
-      :class="`rounded-md border border-ink/20 p-2 text-right`"
+      :class="`rounded-md border border-ink/20 p-2 text-right ${props.bgClasses ?? ''}`"
       :style="`width: ${props.digits ? (props.digits + 2) + 'ch' : 'auto'};
         height: ${props.height ? props.height * 0.25 + 'rem' : 'auto'};`"
     />
@@ -64,7 +65,7 @@ function increment(): void {
       type="button"
       :aria-label="`Increase ${label}`"
       :disabled="!canIncrement"
-      class="size-8 text-ink/70 disabled:cursor-not-allowed disabled:text-ink/45"
+      class="h-8 w-4 text-ink/70 disabled:cursor-not-allowed disabled:text-ink/45"
       @click="increment"
     >
       {{ canIncrement ? "▶" : "▷" }}
