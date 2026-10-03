@@ -20,9 +20,12 @@
   --color-copper: oklch(0.65 0.13 57);
 
   /* --- D&D Core Ability Stat Colors --- */
-  --color-str: oklch(0.55 0.20 25);   /* Barbarian Red */
-  --color-dex: oklch(0.60 0.18 140);  /* Ranger Green */
-  --color-wis: oklch(0.50 0.15 250);  /* Cleric Blue */
+  --color-str: oklch(0.55 0.2 25); /* Barbarian Red */
+  --color-dex: oklch(0.6 0.18 140); /* Ranger Green */
+  --color-wis: oklch(0.5 0.15 250); /* Cleric Blue */
+  --color-int: oklch(0.55 0.18 300); /* Wizard Purple */
+  --color-cha: oklch(0.55 0.18 30); /* Bard Pink */
+  --color-con: oklch(0.55 0.18 90); /* Paladin Gold */
 
   /* --- Application UI Semantic States (OKLCH Native Adjustments) --- */
   /* 1. Base states */
@@ -39,7 +42,7 @@
   --color-success-dark: oklch(from var(--color-success) calc(l - 0.15) c h);
   --color-warning-dark: oklch(from var(--color-warning) calc(l - 0.45) c h);
   --color-error-dark: oklch(from var(--color-error) calc(l - 0.15) c h);
-  
+
   /* --- Global Theme Extensions --- */
   --font-display: "Georgia", serif;
   --font-body: "Trebuchet MS", sans-serif;
@@ -51,11 +54,26 @@ body {
   min-height: 100dvh;
   margin: 0;
   background:
-    linear-gradient(135deg, color-mix(in oklch, var(--color-paper-deep) 45%, transparent), transparent 42%),
+    linear-gradient(
+      135deg,
+      color-mix(in oklch, var(--color-paper-deep) 45%, transparent),
+      transparent 42%
+    ),
     var(--color-paper);
 }
 
 button,
 input {
   font: inherit;
+}
+
+/* Annoying number input spin buttons removal for appearance-none class */
+
+input[type="number"].appearance-none::-webkit-outer-spin-button,
+input[type="number"].appearance-none::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+input[type="number"].appearance-none {
+  -moz-appearance: textfield;
 }

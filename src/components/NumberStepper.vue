@@ -12,6 +12,7 @@ const props = withDefaults(
     step?: number;
     digits?: number;
     height?: number;
+    warning?: string;
     bgClasses?: ClassValue;
   }>(),
   {
@@ -57,9 +58,10 @@ function increment(): void {
       :min="min"
       :max="max"
       :step="step"
-      :class="`rounded-md border border-ink/20 p-2 text-right ${props.bgClasses ?? ''}`"
-      :style="`width: ${props.digits ? (props.digits + 2) + 'ch' : 'auto'};
+      :class="`appearance-none rounded-md border border-ink/20 p-2 text-right ${!!props.warning ? 'bg-warning-light' : ''}`"
+      :style="`width: ${props.digits ? props.digits + 2 + 'ch' : 'auto'};
         height: ${props.height ? props.height * 0.25 + 'rem' : 'auto'};`"
+      @mouseover="!!props.warning ? console.log(props.warning) : null"
     />
     <button
       type="button"
@@ -72,3 +74,6 @@ function increment(): void {
     </button>
   </div>
 </template>
+
+<style scoped lang="css">
+</style>

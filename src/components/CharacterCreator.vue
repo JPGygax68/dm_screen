@@ -141,6 +141,7 @@
                   :step="1"
                   :digits="2"
                   :height="7"
+                  :warning="baseAbilityScoreProps[key].warning"
                   :bg-classes="!!baseAbilityScoreProps[key].warning ? 'bg-warning-light' : ''"
                 />
               </td>
@@ -391,16 +392,22 @@ const baseAbilityScoreProps = computed(() => {
   let highestScoreIsOneOfPrimaries = false;
   (Object.keys(abilityScores.value) as AbilityKey[]).forEach((key) => {
     const value = abilityScores.value[key];
-    if (primaryClassAbilities.value.includes(key) && value === highest) {
+    const isPrimary = primaryClassAbilities.value.includes(key);
+    if (isPrimary && value === highest) {
       highestScoreIsOneOfPrimaries = true;
     }
     props[key] = {
       isLowest: value === lowest,
       isHighest: value === highest,
-      warning:
-        value === highest && !highestScoreIsOneOfPrimaries
-          ? "Consider boosting a primary ability"
-          : "",
+      warning: (() => {
+        if (value < highest && !highestScoreIsOneOfPrimaries) {
+          return "One of the primary abilities should be the highest";
+        }
+        if (isPrimary && Math.floor((value - 10) / value) <= 0) {
+          return "A primary ability score should be high enough to confer a bonus without modifiers, i.e. be 12 or higher";
+        }
+        return "";
+      })(),
     };
   });
   return props;
