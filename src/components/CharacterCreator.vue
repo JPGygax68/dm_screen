@@ -403,7 +403,7 @@ const baseAbilityScoreProps = computed(() => {
         if (value < highest && !highestScoreIsOneOfPrimaries) {
           return "One of the primary abilities should be the highest";
         }
-        if (isPrimary && Math.floor((value - 10) / value) <= 0) {
+        if (isPrimary && Math.floor((value - 10) / 2) <= 0) {
           return "A primary ability score should be high enough to confer a bonus without modifiers, i.e. be 12 or higher";
         }
         return "";

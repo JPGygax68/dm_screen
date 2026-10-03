@@ -67,13 +67,17 @@ input {
   font: inherit;
 }
 
-/* Annoying number input spin buttons removal for appearance-none class */
+/* Number input spin buttons removal for appearance-none and readonly */
 
 input[type="number"].appearance-none::-webkit-outer-spin-button,
-input[type="number"].appearance-none::-webkit-inner-spin-button {
+input[type="number"].appearance-none::-webkit-inner-spin-button,
+input[readonly]::-webkit-outer-spin-button,
+input[readonly]::-webkit-inner-spin-button {
+  appearance: none;
   -webkit-appearance: none;
   margin: 0;
 }
 input[type="number"].appearance-none {
+  appearance: none;
   -moz-appearance: textfield;
 }
