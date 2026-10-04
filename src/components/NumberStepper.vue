@@ -7,6 +7,7 @@ import {
   shallowRef,
   useTemplateRef,
 } from "vue";
+import { useDeviceType } from "@/composables/useDeviceType";
 
 const WARNING_DISPLAY_MS = 3000;
 const WARNING_VIEWPORT_MARGIN_PX = 8;
@@ -21,7 +22,7 @@ const props = withDefaults(
     min?: number;
     max?: number;
     step?: number;
-    digits?: number;
+    digits?: number; /// Determines the number of digits to display in the input field - width only
     height?: number;
     warning?: string;
     bgClasses?: ClassValue;
@@ -31,6 +32,8 @@ const props = withDefaults(
     digits: 2,
   },
 );
+
+const { isMobileOrTablet } = useDeviceType();
 
 const canDecrement = computed(
   () => props.min === undefined || model.value > props.min,
@@ -47,6 +50,15 @@ function decrement(): void {
 function increment(): void {
   if (canIncrement.value)
     model.value = Math.min(props.max ?? Infinity, model.value + props.step);
+}
+
+function checkAndAdjust(): void {
+  if (props.min !== undefined && model.value < props.min) {
+    model.value = props.min;
+  }
+  if (props.max !== undefined && model.value > props.max) {
+    model.value = props.max;
+  }
 }
 
 const isWarningVisible = shallowRef(false);
@@ -85,6 +97,7 @@ async function showWarning(): Promise<void> {
 }
 
 onBeforeUnmount(() => clearTimeout(warningTimer));
+
 </script>
 
 <template>
@@ -110,18 +123,22 @@ onBeforeUnmount(() => clearTimeout(warningTimer));
     </button>
     <input
       :id="id"
+      type="number"
       ref="input"
       v-model.number="model"
-      type="number"
+      :readonly="isMobileOrTablet"
       :aria-label="label"
       :min="min"
       :max="max"
       :step="step"
-      :aria-describedby="isWarningVisible && warning ? `${id}-warning` : undefined"
-      :class="`appearance-none rounded-md border border-ink/20 p-2 text-right ${!!props.warning ? 'bg-warning-light' : ''}`"
+      :aria-describedby="
+        isWarningVisible && warning ? `${id}-warning` : undefined
+      "
+      :class="`appearance-none rounded-md border border-ink/20 p-2 text-right ${!props.warning ? (isMobileOrTablet ? 'bg-red': '') : 'bg-warning-light'}`"
       :style="`width: ${props.digits ? props.digits + 2 + 'ch' : 'auto'};
         height: ${props.height ? props.height * 0.25 + 'rem' : 'auto'};`"
       @mouseenter="showWarning"
+      @blur="checkAndAdjust()"
     />
     <button
       type="button"
@@ -135,5 +152,4 @@ onBeforeUnmount(() => clearTimeout(warningTimer));
   </div>
 </template>
 
-<style scoped lang="css">
-</style>
+<style scoped lang="css"></style>

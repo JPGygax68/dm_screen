@@ -7,7 +7,9 @@
   font-synthesis: none;
   text-rendering: optimizeLegibility;
 
-  --color-warning: oklch(56.565% 0.12245 70.054);
+  --color-success: oklch(51.738% 0.17189 143.165);
+  --color-warning: oklch(47.931% 0.10131 73.675);
+  --color-error: oklch(37.511% 0.15314 29.106);
 }
 
 @theme {
@@ -29,9 +31,9 @@
 
   /* --- Application UI Semantic States (OKLCH Native Adjustments) --- */
   /* 1. Base states */
-  --color-success: oklch(51.738% 0.17189 143.165);
+  --color-success: var(--color-success);
   --color-warning: var(--color-warning);
-  --color-error: oklch(37.511% 0.15314 29.106);
+  --color-error: var(--color-error);
 
   /* 2. Light variants: Unpack the base color, add 0.35 to Lightness (l) */
   --color-success-light: oklch(from var(--color-success) calc(l + 0.45) c h);
