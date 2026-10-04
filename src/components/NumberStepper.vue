@@ -114,6 +114,7 @@ onBeforeUnmount(() => clearTimeout(warningTimer));
     </span>
     <button
       type="button"
+      tabindex="-1"
       :aria-label="`Decrease ${label}`"
       :disabled="!canDecrement"
       class="h-8 w-4 text-ink/70 disabled:cursor-not-allowed disabled:text-ink/25"
@@ -131,10 +132,8 @@ onBeforeUnmount(() => clearTimeout(warningTimer));
       :min="min"
       :max="max"
       :step="step"
-      :aria-describedby="
-        isWarningVisible && warning ? `${id}-warning` : undefined
-      "
-      :class="`appearance-none rounded-md border border-ink/20 p-2 text-right ${!props.warning ? (isMobileOrTablet ? 'bg-red': '') : 'bg-warning-light'}`"
+      :aria-describedby="isWarningVisible && warning ? `${id}-warning` : undefined"
+      :class="`appearance-none rounded-md border border-ink/20 p-2 text-right ${props.warning ? 'bg-warning-light' : ''}`"
       :style="`width: ${props.digits ? props.digits + 2 + 'ch' : 'auto'};
         height: ${props.height ? props.height * 0.25 + 'rem' : 'auto'};`"
       @mouseenter="showWarning"
@@ -142,6 +141,7 @@ onBeforeUnmount(() => clearTimeout(warningTimer));
     />
     <button
       type="button"
+      tabindex="-1"
       :aria-label="`Increase ${label}`"
       :disabled="!canIncrement"
       class="h-8 w-4 text-ink/70 disabled:cursor-not-allowed disabled:text-ink/45"

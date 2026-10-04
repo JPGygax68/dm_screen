@@ -161,6 +161,7 @@
                 <input
                   type="number"
                   readonly
+                  tabindex="-1"
                   :value="finalAbilityScores[key]"
                   class="score-field w-10"
                 />
@@ -169,6 +170,7 @@
                 <input
                   type="text"
                   readonly
+                  tabindex="-1"
                   :value="finalAbilityModifiersAsText[key]"
                   class="score-field thick w-10 text-center"
                 />
