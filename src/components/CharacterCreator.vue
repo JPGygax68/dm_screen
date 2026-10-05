@@ -4,8 +4,12 @@
       <div
         class="mx-auto flex max-w-6xl items-end justify-between gap-6 px-4 py-2 sm:px-6 sm:portrait:py-4 xl:py-8 xl:px-10"
       >
-        <div class="flex flex-row items-baseline gap-6 portrait:gap-2 lg:gap-2 portrait:flex-col lg:flex-col">
-          <p class="text-xs font-bold uppercase tracking-[0.22em] text-copper order-2 lg:order-1 portrait:order-1">
+        <div
+          class="flex flex-row items-baseline gap-6 portrait:gap-2 lg:gap-2 portrait:flex-col lg:flex-col"
+        >
+          <p
+            class="text-xs font-bold uppercase tracking-[0.22em] text-copper order-2 lg:order-1 portrait:order-1"
+          >
             Dungeon Master workspace
           </p>
           <h1 class="font-display text-2xl leading-tight sm:text-3xl order-1">
@@ -21,11 +25,7 @@
         class="mx-auto max-w-3xl px-2 py-4 lg:px-10 grid grid-cols-[min-content_1fr] sm:grid-cols-[min-content_1fr_min-content_1fr] [&>label]:justify-self-end gap-y-2 gap-x-3 items-baseline [&>select>option]:box-border_p-0"
       >
         <label class="text-sm" for="character-name">Name</label>
-        <input
-          id="character-name"
-          type="text"
-          v-model="characterName"
-        />
+        <input id="character-name" type="text" v-model="characterName" />
         <label class="text-sm" for="character-class">Class</label>
         <select id="character-class" v-model="characterClass">
           <option disabled value="">Select class</option>
@@ -88,19 +88,41 @@
         >
           <thead>
             <tr class="*:overflow-x-hidden *:text-ellipsis">
-              <th class="w-2/24 text-left">Ability</th>
+              <th class="w-6/48 text-left">Ability</th>
               <th class="w-10/24 hidden sm:table-cell">Score</th>
               <th class="w-4/24"><div class="w-full sm:hidden">Score</div></th>
-              <th class="w-3/24 text-center">Bonus</th>
+              <th class="w-4/48 text-center">
+                <img
+                  src="/assets/tw-dnd/icons/attribute/bonus.svg"
+                  alt="Bonus"
+                  class="w-5 m-auto"
+                />
+              </th>
               <th class="w-2/24 text-center">Final</th>
               <th class="w-2/24 text-center">Modifier</th>
-              <th class="w-1/24 text-center">Save</th>
+              <th class="w-1/24 text-center">
+                <img
+                  src="/assets/tw-dnd/icons/d20test/saving-throw.svg"
+                  alt="Saving Throw"
+                  class="w-6 m-auto"
+                />
+              </th>
             </tr>
           </thead>
           <tbody>
             <tr v-for="(value, key) in abilityScores" :key="key">
-              <td :class="{ 'font-bold': primaryClassAbilities.includes(key) }">
-                {{ key.charAt(0).toUpperCase() + key.slice(1) }}
+              <td
+                class="flex flex-row justify-between"
+                :class="{ 'font-bold': primaryClassAbilities.includes(key) }"
+              >
+                <span class="inline">{{
+                  key.charAt(0).toUpperCase() + key.slice(1)
+                }}&nbsp;</span>
+                <img
+                  :src="`/assets/tw-dnd/icons/ability/${abilityNamesMap_en[key]}.svg`"
+                  alt="Ability"
+                  class="w-6 inline"
+                />
               </td>
               <td class="hidden sm:table-cell">
                 <div
@@ -276,6 +298,7 @@ select {
 import { ref, computed } from "vue";
 import type { Ref } from "vue";
 import NumberStepper from "./NumberStepper.vue";
+import { abilityNamesMap_en } from "@/lib/dnd2024/base.ts";
 import { classes } from "@/lib/dnd2024/classFeatures.ts";
 import type {
   AbilityKey,
