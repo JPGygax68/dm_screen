@@ -111,8 +111,11 @@
               </td>
               <td class="hidden sm:table-cell">
                 <div
-                  @touchstart.prevent="handleTouchStart"
-                  @touchmove.prevent="handleTouchMove"
+                  @touchstart.prevent="handleAttributeDragStartEvent"
+                  @touchmove.prevent="handleAttributeDragTouchMove"
+                  @mousedown.prevent="handleAttributeDragStartEvent"
+                  @mousemove.prevent="handleAttributeDragMouseMove"
+                  @mouseup.prevent="handleAttributeDragMouseUp"
                   :data-ability-score-name="key"
                   class="flex flex-row gap-0.5"
                 >
@@ -126,7 +129,7 @@
                           : 'bg-ink/50'
                     "
                     :data-value="n + 7"
-                    class="attribute-cell text-[0.5rem] text-ink/20 w-3 h-8 grow"
+                    class="ability-score-cell text-[0.5rem] text-ink/20 w-3 h-8 grow"
                     >{{ n + 7 }}</span
                   >
                 </div>
@@ -142,7 +145,11 @@
                   :digits="2"
                   :height="7"
                   :warning="baseAbilityScoreProps[key].warning"
-                  :bg-classes="!!baseAbilityScoreProps[key].warning ? 'bg-warning-light' : ''"
+                  :bg-classes="
+                    !!baseAbilityScoreProps[key].warning
+                      ? 'bg-warning-light'
+                      : ''
+                  "
                 />
               </td>
               <td>
@@ -365,20 +372,6 @@ const characterBackground = ref("");
 const maxHp = ref(10);
 const characterRace = ref("");
 
-const handleTouchStart = (event: TouchEvent) => {
-  const cell = event.target as HTMLElement;
-  if (!cell) return;
-  const bar = cell.parentElement;
-  if (!bar) {
-    console.warn("No parent element found for the touched cell.");
-    return;
-  }
-  const attribKey = bar.dataset.abilityScoreName as AbilityKey;
-  if (!attribKey) return;
-  touchedAbilityScore.value = attribKey;
-  console.log("Starting touch for attribute:", attribKey);
-};
-
 const baseAbilityScoreProps = computed(() => {
   const props: Record<
     AbilityKey,
@@ -391,6 +384,12 @@ const baseAbilityScoreProps = computed(() => {
     if (value < lowest) lowest = value;
     if (value > highest) highest = value;
   });
+  console.log(
+    "Lowest ability score:",
+    lowest,
+    "Highest ability score:",
+    highest,
+  );
   let highestScoreIsOneOfPrimaries = false;
   (Object.keys(abilityScores.value) as AbilityKey[]).forEach((key) => {
     const value = abilityScores.value[key];
@@ -471,24 +470,52 @@ const finalAbilityModifiersAsText = computed(() => {
   return modifiersText;
 });
 
-function getAbilityBonusesTotal(): number {
-  const total = Object.values(abilityBonuses.value).reduce(
-    (sum, val) => sum + val,
-    0,
-  );
-  return total;
-}
+const abilityBonusesTotal = computed(() => {
+  return Object.values(abilityBonuses.value).reduce((sum, val) => sum + val, 0);
+});
 
 const availableBaseAbilityScorePoints = computed(() => {
   return 72 - baseAbilityScoresTotal.value;
 });
 
 const availableAbilityBonusPoints = computed(() => {
-  return 3 - getAbilityBonusesTotal();
+  return 3 - abilityBonusesTotal.value;
 });
 
-const handleTouchMove = (event: TouchEvent) => {
-  const cell = getElementUnderFinger(event);
+const handleAttributeDragStartEvent = (event: Event) => {
+  // The mouse down or touch start event could fall on a cell within the ability score bar, 
+  // or between cells on the bar itself.
+  const target = event.target as HTMLElement;
+  const cell = target.closest(".ability-score-cell") as HTMLElement | null;
+  if (!cell) {
+    console.warn("No cell found for the drag start event.");
+    return;
+  }
+  const bar = cell.parentElement as HTMLElement | null;
+  if (!bar) {
+    console.warn("No parent element found for the drag start cell.");
+    return;
+  }
+  const attribKey = bar.dataset.abilityScoreName as AbilityKey;
+  if (!attribKey) return;
+  touchedAbilityScore.value = attribKey;
+};
+
+const handleAttributeDragTouchMove = (event: TouchEvent) => {
+  const touch = event.touches[0];
+  return handlePointerMove(touch.clientX, touch.clientY);
+};
+
+function handleAttributeDragMouseMove(event: MouseEvent) {
+  return handlePointerMove(event.clientX, event.clientY);
+}
+
+function handleAttributeDragMouseUp(event: MouseEvent) {
+  touchedAbilityScore.value = undefined;
+}
+
+function handlePointerMove(x: number, y: number) {
+  const cell = getElementAtLocation(x, y);
   if (!cell) return;
   const bar = cell.parentElement;
   if (!bar) return;
@@ -498,13 +525,9 @@ const handleTouchMove = (event: TouchEvent) => {
   if (!cell.dataset.value) return;
   const value = parseInt(cell.dataset.value, 10);
   abilityScores.value[abilityScoreName] = value;
-};
+}
 
-function getElementUnderFinger(event: TouchEvent): HTMLElement | null {
-  const touch = event.touches[0];
-  return document.elementFromPoint(
-    touch.clientX,
-    touch.clientY,
-  ) as HTMLElement | null;
+function getElementAtLocation(x: number, y: number): HTMLElement | null {
+  return document.elementFromPoint(x, y) as HTMLElement | null;
 }
 </script>
