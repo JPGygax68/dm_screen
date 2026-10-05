@@ -2,13 +2,13 @@
   <main class="min-h-dvh">
     <header class="border-b border-ink/20 bg-moss-dark text-paper">
       <div
-        class="mx-auto flex max-w-6xl items-end justify-between gap-6 px-4 py-2 sm:py-6 lg:py-8 lg:px-10"
+        class="mx-auto flex max-w-6xl items-end justify-between gap-6 px-4 py-2 sm:px-6 sm:portrait:py-4 xl:py-8 xl:px-10"
       >
-        <div class="flex flex-row items-baseline gap-6 lg:gap-0 portrait:flex-col lg:flex-col">
-          <p class="text-xs font-bold uppercase tracking-[0.22em] text-copper order-2 lg:order-1">
+        <div class="flex flex-row items-baseline gap-6 portrait:gap-2 lg:gap-2 portrait:flex-col lg:flex-col">
+          <p class="text-xs font-bold uppercase tracking-[0.22em] text-copper order-2 lg:order-1 portrait:order-1">
             Dungeon Master workspace
           </p>
-          <h1 class="lg:mt-2 font-display text-2xl leading-tight sm:text-3xl order-1">
+          <h1 class="font-display text-2xl leading-tight sm:text-3xl order-1">
             Character Creator
           </h1>
         </div>
