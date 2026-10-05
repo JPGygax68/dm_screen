@@ -275,7 +275,7 @@ input {
 }
 
 select {
-  @apply border border-ink/20 rounded-md p-2 pr-10;
+  @apply border-transparent border-r-4 outline-1 outline-ink/20 rounded-md p-2 pr-10;
 }
 </style>
 
@@ -284,7 +284,11 @@ import { ref, computed } from "vue";
 import type { Ref } from "vue";
 import NumberStepper from "./NumberStepper.vue";
 import { classes } from "@/lib/dnd2024/classFeatures.ts";
-import type { AbilityKey, AbilityScores, AbilityBonuses } from "@/lib/dnd2024/base.ts";
+import type {
+  AbilityKey,
+  AbilityScores,
+  AbilityBonuses,
+} from "@/lib/dnd2024/base.ts";
 import type { Background } from "@/lib/dnd2024/backgrounds.ts";
 import { freeBackgrounds } from "@/lib/dnd2024/backgrounds.ts";
 
@@ -324,9 +328,6 @@ const availableBackgrounds: Ref<Background[]> = ref([
   { name: "Custom" },
 ]);
 
-
-// #region Computed properties
-
 const baseAbilityScoreUiProps = computed(() => {
   const props: Record<
     AbilityKey,
@@ -339,12 +340,6 @@ const baseAbilityScoreUiProps = computed(() => {
     if (value < lowest) lowest = value;
     if (value > highest) highest = value;
   });
-  console.log(
-    "Lowest ability score:",
-    lowest,
-    "Highest ability score:",
-    highest,
-  );
   let highestScoreIsOneOfPrimaries = false;
   (Object.keys(abilityScores.value) as AbilityKey[]).forEach((key) => {
     const value = abilityScores.value[key];
@@ -429,12 +424,8 @@ const availableAbilityBonusPoints = computed(() => {
   return 3 - abilityBonusesTotal.value;
 });
 
-// #endregion
-
-// #region Event handlers for ability score drag and drop
-
 const handleAttributeDragStartEvent = (event: Event) => {
-  // The mouse down or touch start event could fall on a cell within the ability score bar, 
+  // The mouse down or touch start event could fall on a cell within the ability score bar,
   // or between cells on the bar itself.
   const target = event.target as HTMLElement;
   const cell = target.closest(".ability-score-cell") as HTMLElement | null;
@@ -481,6 +472,4 @@ function handlePointerMove(x: number, y: number) {
 function getElementAtLocation(x: number, y: number): HTMLElement | null {
   return document.elementFromPoint(x, y) as HTMLElement | null;
 }
-
-// #endregion
 </script>

@@ -1,7 +1,7 @@
 export const classes = [
   {
     id: "barbarian",
-    name: "Barbarian",
+    name: "Barbarian 🪓",
     source: "SRD 5.2",
     primary_ability: "STR",
     saving_throws: ["STR", "CON"],
@@ -47,7 +47,7 @@ export const classes = [
   },
   {
     id: "fighter",
-    name: "Fighter",
+    name: "Fighter ⚔️",
     source: "SRD 5.2",
     primary_ability: ["STR", "DEX"],
     saving_throws: ["STR", "CON"],
@@ -92,7 +92,7 @@ export const classes = [
   },
   {
     id: "rogue",
-    name: "Rogue",
+    name: "Rogue 🗡️",
     source: "SRD 5.2",
     primary_ability: "DEX",
     saving_throws: ["DEX", "INT"],
@@ -137,7 +137,7 @@ export const classes = [
   },
   {
     id: "wizard",
-    name: "Wizard",
+    name: "Wizard 🪄",
     source: "SRD 5.2",
     primary_ability: "INT",
     saving_throws: ["INT", "WIS"],
@@ -171,7 +171,7 @@ export const classes = [
   },
   {
     id: "ranger",
-    name: "Ranger",
+    name: "Ranger 🏹",
     source: "SRD 5.2",
     hit_die: "d10",
     primary_ability: ["STR", "DEX"],
