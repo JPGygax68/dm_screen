@@ -4,7 +4,7 @@
       <div
         class="mx-auto flex max-w-6xl items-end justify-between gap-6 px-4 py-2 sm:py-6 lg:py-8 lg:px-10"
       >
-        <div class="flex flex-row items-baseline gap-6 portrait:flex-col portrait:gap-2 lg:flex-col">
+        <div class="flex flex-row items-baseline gap-6 lg:gap-0 portrait:flex-col lg:flex-col">
           <p class="text-xs font-bold uppercase tracking-[0.22em] text-copper order-2 lg:order-1">
             Dungeon Master workspace
           </p>
