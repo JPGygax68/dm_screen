@@ -2,13 +2,13 @@
   <main class="min-h-dvh">
     <header class="border-b border-ink/20 bg-moss-dark text-paper">
       <div
-        class="mx-auto flex max-w-6xl items-end justify-between gap-6 px-6 py-4 sm:py-6 lg:py-8 lg:px-10"
+        class="mx-auto flex max-w-6xl items-end justify-between gap-6 px-4 py-2 sm:py-6 lg:py-8 lg:px-10"
       >
-        <div>
-          <p class="text-xs font-bold uppercase tracking-[0.22em] text-copper">
+        <div class="flex flex-row items-baseline gap-6 portrait:flex-col portrait:gap-2 lg:flex-col">
+          <p class="text-xs font-bold uppercase tracking-[0.22em] text-copper order-2 lg:order-1">
             Dungeon Master workspace
           </p>
-          <h1 class="mt-2 font-display text-2xl leading-tight sm:text-3xl">
+          <h1 class="lg:mt-2 font-display text-2xl leading-tight sm:text-3xl order-1">
             Character Creator
           </h1>
         </div>
@@ -18,16 +18,15 @@
     <form>
       <section
         id="identity"
-        class="mx-auto max-w-2xl px-6 py-8 lg:px-10 grid grid-cols-[min-content_1fr] sm:grid-cols-[min-content_1fr_min-content_1fr] [&>label]:justify-self-end gap-y-2 gap-x-3 items-baseline [&>select>option]:box-border_p-0"
+        class="mx-auto max-w-3xl px-2 py-4 lg:px-10 grid grid-cols-[min-content_1fr] sm:grid-cols-[min-content_1fr_min-content_1fr] [&>label]:justify-self-end gap-y-2 gap-x-3 items-baseline [&>select>option]:box-border_p-0"
       >
         <label class="text-sm" for="character-name">Name</label>
         <input
           id="character-name"
           type="text"
           v-model="characterName"
-          class="lg:col-span-3"
         />
-        <label class="text-sm col-start-1" for="character-class">Class</label>
+        <label class="text-sm" for="character-class">Class</label>
         <select id="character-class" v-model="characterClass">
           <option disabled value="">Select class</option>
           <option
@@ -38,6 +37,7 @@
             {{ classItem.name }}
           </option>
         </select>
+        <!-- Commented out for now: Subclass selection comes at level 3
         <label class="text-sm" for="character-subclass">Subclass</label>
         <select
           id="character-subclass"
@@ -49,7 +49,7 @@
           <option>Berserker</option>
           <option>Evocation</option>
           <option>Divination</option>
-        </select>
+        </select> -->
         <label class="text-sm" for="character-species">Species</label>
         <select
           id="character-species"
@@ -58,14 +58,13 @@
           class="select"
         >
           <option disabled value="">Select species</option>
-          <option>Human</option>
-          <option>Elf</option>
-          <option>Dwarf</option>
-          <option>Halfling</option>
-          <option>Orc</option>
-          <option>Gnome</option>
-          <option>Dragonborn</option>
-          <option>Tiefling</option>
+          <option
+            v-for="speciesItem in species"
+            :key="speciesItem.id"
+            :value="speciesItem.id"
+          >
+            {{ speciesItem.name }}
+          </option>
         </select>
         <label class="text-sm" for="character-background">Background</label>
         <select
@@ -82,14 +81,8 @@
             {{ background.name }}
           </option>
         </select>
-        <!-- <input
-          id="character-background"
-          type="text"
-          v-model="characterBackground"
-          class=""
-        /> -->
       </section>
-      <section id="ability-scores" class="mx-auto max-w-2xl">
+      <section id="ability-scores" class="mx-auto max-w-3xl">
         <table
           class="w-full table-fixed border-separate border-spacing-y-2 border-spacing-x-3 overflow-x-auto"
         >
@@ -291,6 +284,7 @@ import type {
 } from "@/lib/dnd2024/base.ts";
 import type { Background } from "@/lib/dnd2024/backgrounds.ts";
 import { freeBackgrounds } from "@/lib/dnd2024/backgrounds.ts";
+import { species } from "@/lib/dnd2024/species.ts";
 
 const initialAbilityScores: AbilityScores = {
   str: 10,
