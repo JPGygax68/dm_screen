@@ -50,14 +50,14 @@
           <option>Evocation</option>
           <option>Divination</option>
         </select>
-        <label class="text-sm" for="character-race">Race</label>
+        <label class="text-sm" for="character-species">Species</label>
         <select
-          id="character-race"
-          v-model="characterRace"
-          placeholder="Select race"
+          id="character-species"
+          v-model="characterSpecies"
+          placeholder="Select species"
           class="select"
         >
-          <option disabled value="">Select race</option>
+          <option disabled value="">Select species</option>
           <option>Human</option>
           <option>Elf</option>
           <option>Dwarf</option>
@@ -144,9 +144,9 @@
                   :step="1"
                   :digits="2"
                   :height="7"
-                  :warning="baseAbilityScoreProps[key].warning"
+                  :warning="baseAbilityScoreUiProps[key].warning"
                   :bg-classes="
-                    !!baseAbilityScoreProps[key].warning
+                    !!baseAbilityScoreUiProps[key].warning
                       ? 'bg-warning-light'
                       : ''
                   "
@@ -283,20 +283,12 @@ select {
 import { ref, computed } from "vue";
 import type { Ref } from "vue";
 import NumberStepper from "./NumberStepper.vue";
-import { classes } from "@/lib/dnd2024-class-features";
+import { classes } from "@/lib/dnd2024/classFeatures.ts";
+import type { AbilityKey, AbilityScores, AbilityBonuses } from "@/lib/dnd2024/base.ts";
+import type { Background } from "@/lib/dnd2024/backgrounds.ts";
+import { freeBackgrounds } from "@/lib/dnd2024/backgrounds.ts";
 
-type AbilityKey = "str" | "dex" | "con" | "int" | "wis" | "cha";
-
-const AbilityScoreNamesMap_en: { [k in AbilityKey]: string } = {
-  str: "strength",
-  dex: "dexterity",
-  con: "constitution",
-  int: "intelligence",
-  wis: "wisdom",
-  cha: "charisma",
-};
-
-const initialAbilityScores: Record<AbilityKey, number> = {
+const initialAbilityScores: AbilityScores = {
   str: 10,
   dex: 10,
   con: 10,
@@ -305,54 +297,11 @@ const initialAbilityScores: Record<AbilityKey, number> = {
   cha: 10,
 } as const;
 
-type AbilityScores = typeof initialAbilityScores;
-
-type Background = {
-  name: string;
-  description?: string;
-  boostableAbilityScores?: AbilityKey[];
-  feats?: { [key: string]: string }[];
-  skills?: string[];
-  tools?: string[];
-  startingEquipmentOptions?: string[][];
-};
-
-// SRD 5.2 Free-to-use sample backgrounds
-const criminalBackground: Background = {
-  name: "Criminal",
-  description: "A life of crime and underworld connections.",
-  feats: [{ criminal_contact: "Criminal Contact" }],
-  tools: ["Thieves' Tools"],
-};
-
-const sageBackground: Background = {
-  name: "Sage",
-  description: "A scholarly background with extensive knowledge.",
-  boostableAbilityScores: ["int", "wis"] as AbilityKey[],
-  tools: ["Calligrapher's Supplies"],
-};
-
-const soldierBackground: Background = {
-  name: "Soldier",
-  description: "A background of military service and discipline.",
-  boostableAbilityScores: ["str", "dex", "con"] as AbilityKey[],
-  feats: [{ savage_attack: "Savage Attacker" }],
-  skills: ["Athletics", "Intimidation"],
-  tools: ["Gaming Set"],
-};
-
-const freeBackgrounds = [criminalBackground, sageBackground, soldierBackground];
-
-const availableBackgrounds: Ref<Background[]> = ref([
-  ...freeBackgrounds,
-  { name: "Custom" },
-]);
-
 const abilityScores: Ref<AbilityScores> = ref({
   ...initialAbilityScores,
 });
 
-const abilityBonuses: Ref<Record<AbilityKey, number>> = ref({
+const abilityBonuses: Ref<AbilityBonuses> = ref({
   str: 0,
   dex: 0,
   con: 0,
@@ -367,12 +316,18 @@ const touchedAbilityScore = ref<AbilityKey>();
 const characterName = ref("Bruul the Bruiser");
 const characterClass = ref("barbarian");
 const characterSubclass = ref("");
-const characterLevel = ref(1);
 const characterBackground = ref("");
-const maxHp = ref(10);
-const characterRace = ref("");
+const characterSpecies = ref("");
 
-const baseAbilityScoreProps = computed(() => {
+const availableBackgrounds: Ref<Background[]> = ref([
+  ...freeBackgrounds,
+  { name: "Custom" },
+]);
+
+
+// #region Computed properties
+
+const baseAbilityScoreUiProps = computed(() => {
   const props: Record<
     AbilityKey,
     { isLowest: boolean; isHighest: boolean; warning: string }
@@ -401,7 +356,7 @@ const baseAbilityScoreProps = computed(() => {
       isLowest: value === lowest,
       isHighest: value === highest,
       warning: (() => {
-        if (value < highest && !highestScoreIsOneOfPrimaries) {
+        if (isPrimary && value < highest && !highestScoreIsOneOfPrimaries) {
           return "One of the primary abilities should be the highest";
         }
         if (isPrimary && Math.floor((value - 10) / 2) <= 0) {
@@ -412,14 +367,6 @@ const baseAbilityScoreProps = computed(() => {
     };
   });
   return props;
-});
-
-const baseAbilityScoreOk = computed(() => {
-  const ok: Record<AbilityKey, boolean> = {} as Record<AbilityKey, boolean>;
-  (Object.keys(abilityScores.value) as AbilityKey[]).forEach((key) => {
-    ok[key] = abilityScores.value[key] <= 18;
-  });
-  return ok;
 });
 
 const baseAbilityScoresTotal = computed(() => {
@@ -482,6 +429,10 @@ const availableAbilityBonusPoints = computed(() => {
   return 3 - abilityBonusesTotal.value;
 });
 
+// #endregion
+
+// #region Event handlers for ability score drag and drop
+
 const handleAttributeDragStartEvent = (event: Event) => {
   // The mouse down or touch start event could fall on a cell within the ability score bar, 
   // or between cells on the bar itself.
@@ -530,4 +481,6 @@ function handlePointerMove(x: number, y: number) {
 function getElementAtLocation(x: number, y: number): HTMLElement | null {
   return document.elementFromPoint(x, y) as HTMLElement | null;
 }
+
+// #endregion
 </script>

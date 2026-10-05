@@ -28,10 +28,9 @@
   },
   "editor.semanticHighlighting.enabled": true,
   "editor.foldingStrategy": "auto",
-  "editor.defaultFoldingRangeProvider": "Vue.volar",
   // 1. Force the Vue layout block context to use raw indentation math
   "[vue]": {
-    "editor.foldingStrategy": "indentation",
+    "editor.foldingStrategy": "auto",
     "editor.showFoldingControls": "always",
     "editor.defaultFormatter": "esbenp.prettier-vscode"
   },
