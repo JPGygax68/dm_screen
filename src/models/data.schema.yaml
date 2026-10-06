@@ -15,6 +15,30 @@ type: object
   NpcId: { type: string, minLength: 1, description: "Unique non-player character identifier" }
   CreatureId: { type: string, minLength: 1, description: "Unique creature identifier" } 
 
+  AbilityScores:
+    type: object
+    properties:
+      str: { type: integer, minimum: 8, maximum: 18, default: 10 }
+      dex: { type: integer, minimum: 8, maximum: 18, default: 10 }
+      con: { type: integer, minimum: 8, maximum: 18, default: 10 }
+      int: { type: integer, minimum: 8, maximum: 18, default: 10 }
+      wis: { type: integer, minimum: 8, maximum: 18, default: 10 }
+      cha: { type: integer, minimum: 8, maximum: 18, default: 10 }
+    required: [str, dex, con, int, wis, cha]
+    additionalProperties: false
+
+  AbilityBonuses:
+    type: object
+    properties:
+      str: { type: integer, minimum: 0, maximum: 2, default: 0 }
+      dex: { type: integer, minimum: 0, maximum: 2, default: 0 }
+      con: { type: integer, minimum: 0, maximum: 2, default: 0 }
+      int: { type: integer, minimum: 0, maximum: 2, default: 0 }
+      wis: { type: integer, minimum: 0, maximum: 2, default: 0 }
+      cha: { type: integer, minimum: 0, maximum: 2, default: 0 }
+    required: [str, dex, con, int, wis, cha]
+    additionalProperties: false
+
   Campaigns:
     type: array
     description: Campaigns
@@ -129,11 +153,21 @@ type: object
       id: { "$ref": "#/$defs/GlobalId" }
       name: { type: string, description: "Character name", minLength: 1 }
       portrait: { type: string, description: "Character portrait image data URL (optional)" }
-      race: { type: string, description: "Character race (recommended)" }
+      species: { type: string, minLength: 1, description: "Character species" }
+      gender: { type: string, minLength: 1, description: "Character gender, freely entered by the player" }
       classes:
         type: array
-        description: Character classes (recommended)
-        items: { type: string }
+        minItems: 1
+        uniqueItems: true
+        description: Character classes; initially one class is selected
+        items: { type: string, minLength: 1 }
+      background: { type: string, description: "Character background (optional)" }
+      abilityScores:
+        "$ref": "#/$defs/AbilityScores"
+        default: { str: 10, dex: 10, con: 10, int: 10, wis: 10, cha: 10 }
+      abilityBonuses:
+        "$ref": "#/$defs/AbilityBonuses"
+        default: { str: 0, dex: 0, con: 0, int: 0, wis: 0, cha: 0 }
       hitPoints:
         type: integer
         description: Current hit points
@@ -151,6 +185,9 @@ type: object
     required:
     - id
     - name
+    - species
+    - gender
+    - classes
     - maxHitPoints
     additionalProperties: true
 

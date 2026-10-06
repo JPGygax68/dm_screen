@@ -3,6 +3,7 @@ import { createPinia, setActivePinia } from "pinia";
 import dataSchema from "../src/generated/models/data.schema.json" with { type: "json" };
 import { configureDataStore, useDataStore } from "../src/stores/data-store.ts";
 import { MemoryStorageAdapter } from "../src/domain/persistence/memory-storage-adapter.ts";
+import { EntityValidationError } from "../src/domain/validation/entity-validator.ts";
 
 setActivePinia(createPinia());
 const adapter = new MemoryStorageAdapter();
@@ -27,7 +28,22 @@ store.cancelDraft(cancelledDraftId);
 assert.equal(store.drafts[cancelledDraftId], undefined);
 
 // Committing a child links it into the parent's reactive collection and into storage.
+const invalidPcDraftId = store.beginDraft("PlayerCharacter", { name: "Incomplete" });
+await assert.rejects(
+  store.commitDraft(invalidPcDraftId, "PlayerCharacter", {
+    type: "Campaign",
+    id: (campaign as { id: string }).id,
+    field: "party",
+    collection: (campaign as { party: unknown[] }).party
+  }),
+  EntityValidationError
+);
+assert.equal((campaign as { party: unknown[] }).party.length, 0);
+assert.equal(await adapter.get(`PlayerCharacter:${(store.drafts[invalidPcDraftId] as { id: string }).id}`), undefined);
+store.cancelDraft(invalidPcDraftId);
+
 const pcDraftId = store.beginDraft("PlayerCharacter", { name: "Elandra", maxHitPoints: 30 });
+store.updateDraft(pcDraftId, { species: "elf", gender: "female", classes: ["fighter"] });
 const pc = await store.commitDraft(pcDraftId, "PlayerCharacter", {
   type: "Campaign",
   id: (campaign as { id: string }).id,
@@ -36,6 +52,22 @@ const pc = await store.commitDraft(pcDraftId, "PlayerCharacter", {
 });
 assert.equal((campaign as { party: unknown[] }).party.length, 1);
 assert.equal(((campaign as { party: unknown[] }).party[0] as { id: string }).id, (pc as { id: string }).id);
+assert.deepEqual((pc as { abilityScores: Record<string, number> }).abilityScores, {
+  str: 10,
+  dex: 10,
+  con: 10,
+  int: 10,
+  wis: 10,
+  cha: 10
+});
+assert.deepEqual((pc as { abilityBonuses: Record<string, number> }).abilityBonuses, {
+  str: 0,
+  dex: 0,
+  con: 0,
+  int: 0,
+  wis: 0,
+  cha: 0
+});
 
 // A fresh store instance backed by the same adapter reconstructs the identical nested graph.
 setActivePinia(createPinia());

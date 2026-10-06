@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { RouterLink } from "vue-router";
 import type { Campaign } from "../types/campaign.ts";
 
 defineProps<{
@@ -8,18 +9,17 @@ defineProps<{
 </script>
 
 <template>
-  <section aria-labelledby="campaign-list-title">
-    <div class="flex items-baseline justify-between gap-4 border-b border-ink/15 pb-3">
-      <h2 id="campaign-list-title" class="font-display text-2xl">Your campaigns</h2>
-      <span class="text-sm text-ink/60">{{ campaigns.length }} saved</span>
-    </div>
-
+  <section aria-label="Campaign list">
     <p v-if="isLoading" class="py-10 text-ink/60">Opening your local archive...</p>
     <div v-else-if="campaigns.length" class="grid gap-3 pt-5">
-      <article
+      <RouterLink
         v-for="campaign in campaigns"
         :key="campaign.id"
-        class="border border-ink/15 bg-white/55 p-5 shadow-[0_8px_24px_-18px_oklch(0.24_0.03_165)] transition hover:border-moss/60 hover:bg-white/80"
+        :to="{ name: 'campaign-detail', params: { campaignId: campaign.id } }"
+        class="block"
+      >
+      <article
+        class="border border-ink/15 bg-white/55 p-5 shadow-[0_8px_24px_-18px_oklch(0.24_0.03_165)] transition hover:border-moss/60 hover:bg-white/80 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-moss"
       >
         <div class="flex items-start justify-between gap-4">
           <div>
@@ -33,6 +33,7 @@ defineProps<{
           <span>{{ campaign.encounters?.length ?? 0 }} encounters</span>
         </div>
       </article>
+      </RouterLink>
     </div>
     <div v-else class="border border-dashed border-ink/25 px-6 py-12 text-center">
       <p class="font-display text-xl">The table is clear.</p>

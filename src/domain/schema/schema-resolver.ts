@@ -16,6 +16,7 @@ export interface ResolvedProperty {
 
 export interface ResolvedEntity {
   name: string;
+  title?: string;
   properties: ResolvedProperty[];
 }
 
@@ -113,7 +114,11 @@ export function resolveSchema(schema: RootDocumentSchema): ResolvedSchema {
       } satisfies ResolvedProperty;
     });
 
-    entities.set(defName, { name: defName, properties });
+    entities.set(defName, {
+      name: defName,
+      title: typeof resolvedDef.title === "string" ? resolvedDef.title : undefined,
+      properties
+    });
   }
 
   const rootCollections: RootCollection[] = Object.entries(schema.properties ?? {}).flatMap(([field, propSchema]) => {

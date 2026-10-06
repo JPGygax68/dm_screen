@@ -11,11 +11,17 @@ export {}
 /* prettier-ignore */
 declare module 'vue' {
   export interface GlobalComponents {
+    CampaignDetailView: typeof import('./views/CampaignDetailView.vue')['default']
     CampaignList: typeof import('./components/CampaignList.vue')['default']
-    CharacterCreator: typeof import('./components/CharacterCreator.vue')['default']
+    CampaignListView: typeof import('./views/CampaignListView.vue')['default']
+    CampaignsLayout: typeof import('./views/CampaignsLayout.vue')['default']
     NewCampaignDialog: typeof import('./components/NewCampaignDialog.vue')['default']
+    NewPlayerCharacterDialog: typeof import('./components/NewPlayerCharacterDialog.vue')['default']
     NumberStepper: typeof import('./components/NumberStepper.vue')['default']
+    PlayerCharacterEditor: typeof import('./components/PlayerCharacterEditor.vue')['default']
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']
+    SchemaCollectionView: typeof import('./views/SchemaCollectionView.vue')['default']
+    SchemaEntityView: typeof import('./views/SchemaEntityView.vue')['default']
   }
 }

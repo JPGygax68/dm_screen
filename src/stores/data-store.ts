@@ -3,13 +3,16 @@ import { resolveSchema, type ResolvedSchema } from "../domain/schema/schema-reso
 import { Repository, ROOT_ID, ROOT_TYPE, type ParentRef } from "../domain/persistence/repository.ts";
 import { createDraft } from "../domain/persistence/drafts.ts";
 import type { StorageAdapter } from "../domain/persistence/storage-adapter.ts";
+import { createEntityValidators, EntityValidationError, type EntityValidator } from "../domain/validation/entity-validator.ts";
 
 let repository: Repository | undefined;
 let resolvedSchema: ResolvedSchema | undefined;
+let entityValidators = new Map<string, EntityValidator>();
 
 /** Wires the store to a concrete schema document and storage adapter. Call once at app startup. */
 export function configureDataStore(schemaDocument: object, adapter: StorageAdapter): void {
   resolvedSchema = resolveSchema(schemaDocument as Parameters<typeof resolveSchema>[0]);
+  entityValidators = createEntityValidators(schemaDocument, resolvedSchema.entities.keys());
   repository = new Repository(adapter, resolvedSchema);
 }
 
@@ -21,6 +24,13 @@ function requireRepository(): Repository {
 function requireSchema(): ResolvedSchema {
   if (!resolvedSchema) throw new Error("Data store not configured; call configureDataStore() first");
   return resolvedSchema;
+}
+
+function validateEntity(entityType: string, value: unknown): void {
+  const validator = entityValidators.get(entityType);
+  if (!validator) throw new Error(`No schema validator configured for entity type "${entityType}"`);
+  const issues = validator(value);
+  if (issues.length) throw new EntityValidationError(entityType, issues);
 }
 
 export const useDataStore = defineStore("data", {
@@ -73,6 +83,7 @@ export const useDataStore = defineStore("data", {
         ? { type: parent.type, id: parent.id, field: parent.field }
         : { type: ROOT_TYPE, id: ROOT_ID, field: entityRootField(requireSchema(), entityType) };
 
+      validateEntity(entityType, draft);
       await requireRepository().createEntity(entityType, draft, parentRef);
 
       if (parent) {
@@ -99,6 +110,7 @@ export const useDataStore = defineStore("data", {
 
     /** Persists in-place edits to an already-committed entity's own fields. */
     async updateEntity(entityType: string, entity: Record<string, unknown>): Promise<void> {
+      validateEntity(entityType, entity);
       await requireRepository().updateEntity(entityType, entity);
     }
   }

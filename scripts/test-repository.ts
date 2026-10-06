@@ -56,7 +56,16 @@ await repository.ensureRoot();
 const campaign = { id: crypto.randomUUID(), name: "The Sunken Keep", party: [], encounters: [] };
 await repository.createEntity("Campaign", campaign, { type: ROOT_TYPE, id: ROOT_ID, field: "campaigns" });
 
-const pc = { id: crypto.randomUUID(), name: "Elandra", maxHitPoints: 30, hitPoints: 30, conditions: [] };
+const pc = {
+	id: crypto.randomUUID(),
+	name: "Elandra",
+	species: "elf",
+	gender: "female",
+	classes: ["rogue"],
+	maxHitPoints: 30,
+	hitPoints: 30,
+	conditions: []
+};
 await repository.createEntity("PlayerCharacter", pc, { type: "Campaign", id: campaign.id, field: "party" });
 
 const loadedCampaigns = await repository.loadRootCollection("campaigns");
@@ -117,8 +126,8 @@ await raceRepository.ensureRoot();
 const raceCampaign = { id: crypto.randomUUID(), name: "Racing Keep", party: [], encounters: [] };
 await raceRepository.createEntity("Campaign", raceCampaign, { type: ROOT_TYPE, id: ROOT_ID, field: "campaigns" });
 
-const pcA = { id: crypto.randomUUID(), name: "Actor A", maxHitPoints: 10, hitPoints: 10, conditions: [] };
-const pcB = { id: crypto.randomUUID(), name: "Actor B", maxHitPoints: 10, hitPoints: 10, conditions: [] };
+const pcA = { id: crypto.randomUUID(), name: "Actor A", species: "human", gender: "male", classes: ["fighter"], maxHitPoints: 10, hitPoints: 10, conditions: [] };
+const pcB = { id: crypto.randomUUID(), name: "Actor B", species: "human", gender: "female", classes: ["fighter"], maxHitPoints: 10, hitPoints: 10, conditions: [] };
 
 let interfered = false;
 const originalPut = raceAdapter.put.bind(raceAdapter);

@@ -13,7 +13,7 @@
             Dungeon Master workspace
           </p>
           <h1 class="font-display text-2xl leading-tight sm:text-3xl order-1">
-            Character Creator
+            Player Character Editor
           </h1>
         </div>
       </div>
@@ -297,7 +297,7 @@ select {
 </style>
 
 <script setup lang="ts">
-import { ref, computed, onMounted } from "vue";
+import { ref, computed } from "vue";
 import type { Ref } from "vue";
 import NumberStepper from "./NumberStepper.vue";
 import {
@@ -313,8 +313,6 @@ import type {
 import type { Background } from "@/lib/dnd2024/backgrounds.ts";
 import { freeBackgrounds } from "@/lib/dnd2024/backgrounds.ts";
 import { species } from "@/lib/dnd2024/species.ts";
-import { useDataStore } from "@/stores/data-store.ts";
-import type { PlayerCharacter } from "@/generated/models/data.schema";
 
 const initialAbilityScores: AbilityScores = {
   str: 10,
@@ -339,15 +337,6 @@ const abilityScores: Ref<AbilityScores> = ref({
 });
 
 const touchedAbilityScore = ref<AbilityKey>();
-
-const store = useDataStore();
-
-const pcId = ref<string | undefined>("undefined");
-
-onMounted(() => {
-  // Initialize the draft character when the component is mounted
-  pcId.value = store.beginDraft("PlayerCharacter");
-});
 
 // TODO: remove the debug defaults
 const characterName = ref("Bruul the Bruiser");

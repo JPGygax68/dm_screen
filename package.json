@@ -16,7 +16,7 @@
     "dev": "vite --host 0.0.0.0",
     "build": "vite build",
     "preview": "vite preview",
-    "test": "node --experimental-strip-types scripts/test-encounter-validation.ts && node --experimental-strip-types scripts/test-repository.ts && node --experimental-strip-types scripts/test-store.ts",
+    "test": "node --experimental-strip-types scripts/test-encounter-validation.ts && node --experimental-strip-types scripts/test-repository.ts && node --experimental-strip-types scripts/test-store.ts && node --experimental-strip-types scripts/test-schema-routes.ts",
     "harness": "node harness.mjs"
   },
   "repository": {

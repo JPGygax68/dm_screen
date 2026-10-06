@@ -1,3 +1,4 @@
+import { toRaw } from "vue";
 import type { ResolvedSchema } from "../schema/schema-resolver.ts";
 import { getEntity } from "../schema/schema-resolver.ts";
 import { ConflictError, type StorageAdapter, type StoredDoc } from "./storage-adapter.ts";
@@ -183,7 +184,7 @@ export class Repository {
       if (property.isEntityCollection) {
         children[property.name] = ((value as { id: string }[] | undefined) ?? []).map((child) => child.id);
       } else if (value !== undefined) {
-        data[property.name] = value;
+        data[property.name] = structuredClone(toRaw(value));
       }
     }
 
