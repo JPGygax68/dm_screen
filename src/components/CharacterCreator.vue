@@ -90,7 +90,7 @@
             <tr class="*:overflow-x-hidden *:text-ellipsis">
               <th class="w-6/48 text-left">Ability</th>
               <th class="w-10/24 hidden sm:table-cell">Score</th>
-              <th class="w-4/24"><div class="w-full sm:hidden">Score</div></th>
+              <th class="w-4/24"><div class="w-full sm:hidden">Base</div></th>
               <th class="w-4/48 text-center">
                 <img
                   src="/assets/tw-dnd/icons/attribute/bonus.svg"
@@ -115,9 +115,9 @@
                 class="flex flex-row justify-between"
                 :class="{ 'font-bold': primaryClassAbilities.includes(key) }"
               >
-                <span class="inline">{{
-                  key.charAt(0).toUpperCase() + key.slice(1)
-                }}&nbsp;</span>
+                <span class="inline"
+                  >{{ key.charAt(0).toUpperCase() + key.slice(1) }}&nbsp;</span
+                >
                 <img
                   :src="`/assets/tw-dnd/icons/ability/${abilityNamesMap_en[key]}.svg`"
                   alt="Ability"
@@ -197,7 +197,9 @@
                   class="score-field thick w-10 text-center"
                 />
               </td>
-              <td><input type="checkbox" /></td>
+              <td>
+                <input type="checkbox" disabled :checked="savingThrows[key]" />
+              </td>
             </tr>
           </tbody>
           <tfoot>
@@ -255,13 +257,13 @@ input:not([type="checkbox"]) {
 
 input[type="checkbox"] {
   @apply appearance-none h-4 w-4 rounded border-2 border-ink/80 bg-white 
-         checked:bg-ink/60 checked:border-ink/60 
+         checked:bg-ink/60 checked:border-ink/20 
          focus:outline-none focus:ring-2 focus:ring-ink/40 focus:ring-offset-2
          transition-all duration-150 cursor-pointer;
 }
 
 input[type="checkbox"]:disabled {
-  @apply border-transparent;
+  @apply border-ink/20;
 }
 
 input[type="number"] {
@@ -295,10 +297,13 @@ select {
 </style>
 
 <script setup lang="ts">
-import { ref, computed } from "vue";
+import { ref, computed, onMounted } from "vue";
 import type { Ref } from "vue";
 import NumberStepper from "./NumberStepper.vue";
-import { abilityNamesMap_en } from "@/lib/dnd2024/base.ts";
+import {
+  AbilityKeys as abilityKeys,
+  abilityNamesMap_en,
+} from "@/lib/dnd2024/base.ts";
 import { classes } from "@/lib/dnd2024/classFeatures.ts";
 import type {
   AbilityKey,
@@ -308,6 +313,8 @@ import type {
 import type { Background } from "@/lib/dnd2024/backgrounds.ts";
 import { freeBackgrounds } from "@/lib/dnd2024/backgrounds.ts";
 import { species } from "@/lib/dnd2024/species.ts";
+import { useDataStore } from "@/stores/data-store.ts";
+import type { PlayerCharacter } from "@/generated/models/data.schema";
 
 const initialAbilityScores: AbilityScores = {
   str: 10,
@@ -318,10 +325,6 @@ const initialAbilityScores: AbilityScores = {
   cha: 10,
 } as const;
 
-const abilityScores: Ref<AbilityScores> = ref({
-  ...initialAbilityScores,
-});
-
 const abilityBonuses: Ref<AbilityBonuses> = ref({
   str: 0,
   dex: 0,
@@ -331,7 +334,20 @@ const abilityBonuses: Ref<AbilityBonuses> = ref({
   cha: 0,
 });
 
+const abilityScores: Ref<AbilityScores> = ref({
+  ...initialAbilityScores,
+});
+
 const touchedAbilityScore = ref<AbilityKey>();
+
+const store = useDataStore();
+
+const pcId = ref<string | undefined>("undefined");
+
+onMounted(() => {
+  // Initialize the draft character when the component is mounted
+  pcId.value = store.beginDraft("PlayerCharacter");
+});
 
 // TODO: remove the debug defaults
 const characterName = ref("Bruul the Bruiser");
@@ -344,6 +360,8 @@ const availableBackgrounds: Ref<Background[]> = ref([
   ...freeBackgrounds,
   { name: "Custom" },
 ]);
+
+// #region Computed's
 
 const baseAbilityScoreUiProps = computed(() => {
   const props: Record<
@@ -503,7 +521,13 @@ function handlePointerMove(x: number, y: number) {
   abilityScores.value[abilityScoreName] = value;
 }
 
+// #endregion Event Handlers
+
+// #region Helper Functions
+
 function getElementAtLocation(x: number, y: number): HTMLElement | null {
   return document.elementFromPoint(x, y) as HTMLElement | null;
 }
+
+// #endregion Helper Functions
 </script>

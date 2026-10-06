@@ -1,7 +1,1 @@
-export interface Campaign {
-  id: string;
-  name: string;
-  description?: string;
-  party?: unknown[];
-  encounters?: unknown[];
-}
+export type { Campaign } from "../generated/models/data.schema";
