@@ -441,6 +441,23 @@ const availableAbilityBonusPoints = computed(() => {
   return 3 - abilityBonusesTotal.value;
 });
 
+const savingThrows = computed(() => {
+  const result: Record<AbilityKey, boolean> = {} as Record<AbilityKey, boolean>;
+  const classData = classes.find((c) => c.id === characterClass.value);
+  if (!classData) {
+    console.error("Class not found:", characterClass.value);
+    return result;
+  }
+  abilityKeys.values().forEach((key) => {
+    result[key] = classData.saving_throws.includes(key.toUpperCase());
+  });
+  return result;
+});
+
+// #endregion Computed's
+
+// #region Event Handlers
+
 const handleAttributeDragStartEvent = (event: Event) => {
   // The mouse down or touch start event could fall on a cell within the ability score bar,
   // or between cells on the bar itself.
