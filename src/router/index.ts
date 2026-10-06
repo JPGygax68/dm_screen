@@ -6,15 +6,22 @@ import CampaignListView from "../views/CampaignListView.vue";
 import CampaignDetailView from "../views/CampaignDetailView.vue";
 import SchemaCollectionView from "../views/SchemaCollectionView.vue";
 import SchemaEntityView from "../views/SchemaEntityView.vue";
-import NewPlayerCharacterDialog from "../components/NewPlayerCharacterDialog.vue";
+import PartyCollectionView from "../views/PartyCollectionView.vue";
+import NewPlayerCharacterRouteView from "../views/NewPlayerCharacterRouteView.vue";
+import PlayerCharacterEditor from "../components/PlayerCharacterEditor.vue";
 
 export function createAppRouter(schemaDocument: object) {
   const schema = resolveSchema(schemaDocument as Parameters<typeof resolveSchema>[0]);
   const routeViews = {
     layout: CampaignsLayout,
     rootCollection: (field: string) => field === "campaigns" ? CampaignListView : SchemaCollectionView,
-    collection: SchemaCollectionView,
-    entity: (entityType: string): Component => entityType === "Campaign" ? CampaignDetailView : SchemaEntityView,
+    collection: (parentType: string, field: string): Component =>
+      parentType === "Campaign" && field === "party" ? PartyCollectionView : SchemaCollectionView,
+    entity: (entityType: string): Component => {
+      if (entityType === "Campaign") return CampaignDetailView;
+      if (entityType === "PlayerCharacter") return PlayerCharacterEditor;
+      return SchemaEntityView;
+    },
   };
   const workflows: WorkflowRoute[] = [
     {
@@ -23,7 +30,7 @@ export function createAppRouter(schemaDocument: object) {
       path: "new",
       name: "campaign-party-new",
       breadcrumb: "New character",
-      component: NewPlayerCharacterDialog,
+      component: NewPlayerCharacterRouteView,
     },
   ];
 

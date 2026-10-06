@@ -10,7 +10,7 @@ const schema = resolveSchema(dataSchema as Parameters<typeof resolveSchema>[0]);
 const routes = buildSchemaRoutes(schema, {
   layout: placeholder,
   rootCollection: () => placeholder,
-  collection: placeholder,
+  collection: () => placeholder,
   entity: () => placeholder,
 }, [
   {

@@ -5,8 +5,15 @@ import { getEntity, type ResolvedSchema } from "../domain/schema/schema-resolver
 export interface SchemaRouteViews {
   layout: Component;
   rootCollection: (field: string, entityType: string) => Component;
-  collection: Component;
+  collection: (parentType: string, field: string, entityType: string) => Component;
   entity: (entityType: string) => Component;
+}
+
+export interface RouteBreadcrumb {
+  label: string;
+  href?: string;
+  entityType?: string;
+  paramName?: string;
 }
 
 export interface WorkflowRoute {
@@ -23,90 +30,107 @@ export function buildSchemaRoutes(
   views: SchemaRouteViews,
   workflows: WorkflowRoute[] = [],
 ): RouteRecordRaw[] {
-  const entityRoute = (
-    entityType: string,
-    path: string,
-    name: string,
-    ancestry: string[],
-  ): RouteRecordRaw => {
-    const entity = getEntity(schema, entityType);
-    const children = entity.properties
-      .filter((property) => property.isEntityCollection)
-      .map((property) => collectionRoute(entityType, property.name, property.entityType!, ancestry));
+  const pages: RouteRecordRaw[] = [];
 
-    return {
-      path,
-      name,
+  const entityPages = (
+    entityType: string,
+    entityPath: string,
+    entityParam: string,
+    routeKey: string,
+    parentBreadcrumbs: RouteBreadcrumb[],
+    ancestry: string[],
+  ): void => {
+    const entity = getEntity(schema, entityType);
+    const entityBreadcrumbs = [
+      ...parentBreadcrumbs,
+      {
+        label: entity.title ?? entityType,
+        entityType,
+        paramName: entityParam,
+        href: entityPath,
+      },
+    ];
+
+    pages.push({
+      path: entityPath,
+      name: `${routeKey}-detail`,
       component: views.entity(entityType),
       props: true,
-      meta: { breadcrumb: entity.title ?? entityType, entityType, idParam: path.slice(1) },
-      ...(children.length ? { children } : {}),
-    };
-  };
+      meta: { breadcrumbs: entityBreadcrumbs, entityType, idParam: entityParam },
+    });
 
-  const collectionRoute = (
-    parentType: string,
-    field: string,
-    childType: string,
-    ancestry: string[],
-  ): RouteRecordRaw => {
-    if (!childType) throw new Error(`Entity collection "${parentType}.${field}" has no entity type`);
+    for (const property of entity.properties.filter((candidate) => candidate.isEntityCollection)) {
+      const childType = property.entityType;
+      if (!childType) throw new Error(`Entity collection "${entityType}.${property.name}" has no entity type`);
 
-    const routeKey = [...ancestry, field].map(toKebabCase).join("-");
-    const childParam = `${toCamelCase(childType)}Id`;
-    const children: RouteRecordRaw[] = workflows
-      .filter((workflow) => workflow.parentType === parentType && workflow.collection === field)
-      .map((workflow) => ({
-        path: workflow.path,
-        name: workflow.name,
-        component: workflow.component,
-        meta: { breadcrumb: workflow.breadcrumb, workflow: true },
-      }));
+      const collectionPath = `${entityPath}/${property.name}`;
+      const collectionName = `${routeKey}-${toKebabCase(property.name)}-collection`;
+      const collectionBreadcrumbs = [
+        ...entityBreadcrumbs,
+        { label: titleCase(property.name), href: collectionPath },
+      ];
 
-    if (!ancestry.includes(childType)) {
-      children.push(
-        entityRoute(
-          childType,
-          `:${childParam}`,
-          `${routeKey}-${toKebabCase(childType)}-detail`,
-          [...ancestry, childType],
-        ),
+      pages.push({
+        path: collectionPath,
+        name: collectionName,
+        component: views.collection(entityType, property.name, childType),
+        meta: {
+          breadcrumbs: collectionBreadcrumbs,
+          collectionField: property.name,
+          parentType: entityType,
+        },
+      });
+
+      for (const workflow of workflows.filter((item) => item.parentType === entityType && item.collection === property.name)) {
+        pages.push({
+          path: `${collectionPath}/${workflow.path}`,
+          name: workflow.name,
+          component: workflow.component,
+          meta: {
+            breadcrumbs: [...collectionBreadcrumbs, { label: workflow.breadcrumb }],
+            workflow: true,
+          },
+        });
+      }
+
+      if (ancestry.includes(childType)) continue;
+      const childParam = `${toCamelCase(childType)}Id`;
+      entityPages(
+        childType,
+        `${collectionPath}/:${childParam}`,
+        childParam,
+        `${routeKey}-${toKebabCase(property.name)}-${toKebabCase(childType)}`,
+        collectionBreadcrumbs,
+        [...ancestry, childType],
       );
     }
-
-    return {
-      path: field,
-      name: `${routeKey}-collection`,
-      component: views.collection,
-      meta: { breadcrumb: titleCase(field), collectionField: field, parentType },
-      children,
-    };
   };
 
-  return schema.rootCollections.map(({ field, entityType }) => {
+  for (const { field, entityType } of schema.rootCollections) {
     const rootEntity = getEntity(schema, entityType);
+    const collectionPath = `/${field}`;
+    const rootBreadcrumbs: RouteBreadcrumb[] = [{ label: titleCase(field), href: collectionPath }];
     const entityParam = `${toCamelCase(entityType)}Id`;
+    const entityPath = `${collectionPath}/:${entityParam}`;
 
-    return {
-      path: `/${field}`,
-      component: views.layout,
-      meta: { breadcrumb: titleCase(field), collectionField: field },
-      children: [
-        {
-          path: "",
-          name: `${field}-list`,
-          component: views.rootCollection(field, entityType),
-          meta: { breadcrumb: false },
-        },
-        entityRoute(
-          entityType,
-          `:${entityParam}`,
-          `${toKebabCase(entityType)}-detail`,
-          [entityType],
-        ),
-      ],
-    };
-  });
+    pages.push({
+      path: collectionPath,
+      name: `${field}-list`,
+      component: views.rootCollection(field, entityType),
+      meta: { breadcrumbs: rootBreadcrumbs, collectionField: field },
+    });
+
+    entityPages(
+      entityType,
+      entityPath,
+      entityParam,
+      toKebabCase(entityType),
+      rootBreadcrumbs,
+      [entityType],
+    );
+  }
+
+  return [{ path: "/", component: views.layout, children: pages }];
 }
 
 function toCamelCase(value: string): string {

@@ -79,6 +79,15 @@ const reloadedCampaign = reloadedStore.roots.campaigns[0] as { party: { name: st
 assert.equal(reloadedCampaign.party.length, 1);
 assert.equal(reloadedCampaign.party[0].name, "Elandra");
 
+const reloadedPc = reloadedCampaign.party[0] as { id: string; name: string; species: string };
+await reloadedStore.updateEntity("PlayerCharacter", { ...reloadedPc, name: "Elandra Brightwood" });
+assert.equal((await adapter.get(`PlayerCharacter:${reloadedPc.id}`))?.data.name, "Elandra Brightwood");
+await assert.rejects(
+  reloadedStore.updateEntity("PlayerCharacter", { ...reloadedPc, species: "" }),
+  EntityValidationError
+);
+assert.equal((await adapter.get(`PlayerCharacter:${reloadedPc.id}`))?.data.name, "Elandra Brightwood");
+
 // removeChild unlinks from the in-memory graph and from storage.
 const reloadedPcId = (reloadedCampaign as unknown as { party: { id: string }[] }).party[0].id;
 await reloadedStore.removeChild("PlayerCharacter", reloadedPcId, {

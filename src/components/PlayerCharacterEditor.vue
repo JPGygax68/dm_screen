@@ -1,25 +1,9 @@
 <template>
-  <main class="min-h-dvh">
-    <header class="border-b border-ink/20 bg-moss-dark text-paper">
-      <div
-        class="mx-auto flex max-w-6xl items-end justify-between gap-6 px-4 py-2 sm:px-6 sm:portrait:py-4 xl:py-8 xl:px-10"
-      >
-        <div
-          class="flex flex-row items-baseline gap-6 portrait:gap-2 lg:gap-2 portrait:flex-col lg:flex-col"
-        >
-          <p
-            class="text-xs font-bold uppercase tracking-[0.22em] text-copper order-2 lg:order-1 portrait:order-1"
-          >
-            Dungeon Master workspace
-          </p>
-          <h1 class="font-display text-2xl leading-tight sm:text-3xl order-1">
-            Player Character Editor
-          </h1>
-        </div>
+  <div class="min-h-dvh">
+    <form v-if="isEditorReady" @submit.prevent="savePlayerCharacter">
+      <div class="mx-auto max-w-3xl px-2 pt-6 lg:px-10">
+        <h1 class="font-display text-3xl">Edit {{ characterName }}</h1>
       </div>
-    </header>
-
-    <form>
       <section
         id="identity"
         class="mx-auto max-w-3xl px-2 py-4 lg:px-10 grid grid-cols-[min-content_1fr] sm:grid-cols-[min-content_1fr_min-content_1fr] [&>label]:justify-self-end gap-y-2 gap-x-3 items-baseline [&>select>option]:box-border_p-0"
@@ -66,6 +50,18 @@
             {{ speciesItem.name }}
           </option>
         </select>
+        <label class="text-sm" for="character-gender">Gender</label>
+        <input
+          id="character-gender"
+          v-model="characterGender"
+          list="character-gender-options"
+          required
+          minlength="1"
+        />
+        <datalist id="character-gender-options">
+          <option value="male" />
+          <option value="female" />
+        </datalist>
         <label class="text-sm" for="character-background">Background</label>
         <select
           id="character-background"
@@ -240,8 +236,26 @@
           </tfoot>
         </table>
       </section>
+      <div class="mx-auto flex max-w-3xl justify-end gap-3 px-2 py-6 lg:px-10">
+        <button type="button" class="px-4 py-3 text-sm font-bold text-ink/70 transition hover:text-ink" @click="cancelEditing">
+          Cancel
+        </button>
+        <button
+          type="submit"
+          class="bg-moss-dark px-4 py-3 text-sm font-bold text-paper transition hover:bg-moss disabled:cursor-not-allowed disabled:opacity-50"
+          :disabled="isSaving || !characterName.trim() || !characterClass || !characterSpecies || !characterGender.trim()"
+        >
+          {{ isSaving ? "Saving..." : "Save character" }}
+        </button>
+      </div>
     </form>
-  </main>
+    <p v-else-if="isLoading" class="mx-auto max-w-3xl px-6 py-8 text-ink/60">Loading character...</p>
+    <section v-else class="mx-auto max-w-3xl px-6 py-8">
+      <p class="text-ink/70">Player character not found.</p>
+      <button type="button" class="mt-4 text-moss-dark underline" @click="cancelEditing">Back to campaign</button>
+    </section>
+    <p v-if="errorMessage" class="mx-auto max-w-3xl px-6 pb-8 text-sm text-red-700" role="alert">{{ errorMessage }}</p>
+  </div>
 </template>
 
 <style scoped lang="css">
@@ -297,7 +311,9 @@ select {
 </style>
 
 <script setup lang="ts">
-import { ref, computed } from "vue";
+import { ref, computed, watch } from "vue";
+import { storeToRefs } from "pinia";
+import { onBeforeRouteLeave, onBeforeRouteUpdate, useRoute, useRouter } from "vue-router";
 import type { Ref } from "vue";
 import NumberStepper from "./NumberStepper.vue";
 import {
@@ -313,6 +329,14 @@ import type {
 import type { Background } from "@/lib/dnd2024/backgrounds.ts";
 import { freeBackgrounds } from "@/lib/dnd2024/backgrounds.ts";
 import { species } from "@/lib/dnd2024/species.ts";
+import { useDataStore } from "@/stores/data-store.ts";
+import type { Campaign } from "@/types/campaign.ts";
+import type { PlayerCharacter } from "@/generated/models/data.schema";
+
+const route = useRoute();
+const router = useRouter();
+const store = useDataStore();
+const { roots } = storeToRefs(store);
 
 const initialAbilityScores: AbilityScores = {
   str: 10,
@@ -335,15 +359,110 @@ const abilityBonuses: Ref<AbilityBonuses> = ref({
 const abilityScores: Ref<AbilityScores> = ref({
   ...initialAbilityScores,
 });
+const isEditorReady = ref(false);
+const isLoading = ref(true);
+const isSaving = ref(false);
+const errorMessage = ref("");
 
 const touchedAbilityScore = ref<AbilityKey>();
 
-// TODO: remove the debug defaults
-const characterName = ref("Bruul the Bruiser");
-const characterClass = ref("barbarian");
+const characterName = ref("");
+const characterClass = ref("");
 const characterSubclass = ref("");
 const characterBackground = ref("");
 const characterSpecies = ref("");
+const characterGender = ref("");
+const originalFormSnapshot = ref("");
+const isDiscarding = ref(false);
+
+const campaignId = computed(() => String(route.params.campaignId ?? ""));
+const playerCharacterId = computed(() => String(route.params.playerCharacterId ?? ""));
+const campaign = computed(() =>
+  ((roots.value.campaigns ?? []) as Campaign[]).find((item) => item.id === campaignId.value),
+);
+const playerCharacter = computed(() =>
+  campaign.value?.party.find((member) => member.id === playerCharacterId.value),
+);
+
+function formSnapshot(): string {
+  return JSON.stringify({
+    name: characterName.value,
+    classId: characterClass.value,
+    species: characterSpecies.value,
+    gender: characterGender.value,
+    background: characterBackground.value,
+    abilityScores: abilityScores.value,
+    abilityBonuses: abilityBonuses.value,
+  });
+}
+
+const hasUnsavedChanges = computed(() =>
+  isEditorReady.value && formSnapshot() !== originalFormSnapshot.value,
+);
+
+function hydrateEditor(): void {
+  isEditorReady.value = false;
+  isLoading.value = true;
+  errorMessage.value = "";
+  const character = playerCharacter.value;
+  if (character) {
+    characterName.value = character.name;
+    characterClass.value = character.classes[0] ?? "";
+    characterSpecies.value = character.species;
+    characterGender.value = character.gender;
+    characterBackground.value = character.background ?? "";
+    abilityScores.value = { ...initialAbilityScores, ...character.abilityScores };
+    abilityBonuses.value = { ...abilityBonuses.value, ...character.abilityBonuses };
+    originalFormSnapshot.value = formSnapshot();
+    isEditorReady.value = true;
+  }
+  isLoading.value = false;
+}
+
+watch([campaignId, playerCharacterId, () => roots.value.campaigns], hydrateEditor, { immediate: true });
+
+function confirmDiscard(): boolean {
+  return isDiscarding.value || !hasUnsavedChanges.value || window.confirm("Discard unsaved character changes?");
+}
+
+onBeforeRouteLeave(confirmDiscard);
+onBeforeRouteUpdate((to, from) => {
+  if (to.params.playerCharacterId === from.params.playerCharacterId) return true;
+  return confirmDiscard();
+});
+
+async function savePlayerCharacter(): Promise<void> {
+  const current = playerCharacter.value;
+  if (!current || isSaving.value) return;
+
+  const updated: PlayerCharacter = {
+    ...current,
+    name: characterName.value.trim(),
+    classes: [characterClass.value],
+    species: characterSpecies.value,
+    gender: characterGender.value.trim(),
+    background: characterBackground.value,
+    abilityScores: { ...abilityScores.value },
+    abilityBonuses: { ...abilityBonuses.value },
+  };
+
+  isSaving.value = true;
+  errorMessage.value = "";
+  try {
+    await store.updateEntity("PlayerCharacter", updated);
+    Object.assign(current, updated);
+    await cancelEditing();
+  } catch (error) {
+    errorMessage.value = error instanceof Error ? error.message : "Unable to save player character.";
+  } finally {
+    isSaving.value = false;
+  }
+}
+
+async function cancelEditing(): Promise<void> {
+  isDiscarding.value = true;
+  await router.push({ name: "campaign-detail", params: { campaignId: campaignId.value } });
+}
 
 const availableBackgrounds: Ref<Background[]> = ref([
   ...freeBackgrounds,
