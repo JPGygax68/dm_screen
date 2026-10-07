@@ -54,6 +54,11 @@ interface ResolvedReference {
   definitionName?: string;
 }
 
+/**
+ * Resolves the given JSON Schema into a runtime model of entities and their relationships.
+ * @param schema The root document schema to resolve.
+ * @returns The resolved schema containing entities and root collections.
+ */
 export function resolveSchema(schema: RootDocumentSchema): ResolvedSchema {
   const defs = schema["$defs"] ?? {};
 
