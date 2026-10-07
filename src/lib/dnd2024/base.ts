@@ -1,16 +1,8 @@
-export const AbilityKeys = ["str", "dex", "con", "int", "wis", "cha"];
+import type { AbilityScores } from "@/generated/models/data.schema";
 
-export type AbilityKey = typeof AbilityKeys[number];
+export type AbilityKey = keyof AbilityScores;
 
-export namespace AbilityKey {
-  export function values(): AbilityKey[] {
-    return ["str", "dex", "con", "int", "wis", "cha"];
-  }
-}
-
-export type AbilityScores = Record<AbilityKey, number>;
-
-export type AbilityBonuses = Record<AbilityKey, number>;
+export const abilityKeys: AbilityKey[] = ["str", "dex", "con", "int", "wis", "cha"] as const;
 
 export const abilityNamesMap_en: { [k in AbilityKey]: string } = {
   str: "strength",
@@ -19,4 +11,4 @@ export const abilityNamesMap_en: { [k in AbilityKey]: string } = {
   int: "intelligence",
   wis: "wisdom",
   cha: "charisma",
-};
+} as const;

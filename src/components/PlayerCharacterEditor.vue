@@ -316,22 +316,22 @@ import { storeToRefs } from "pinia";
 import { onBeforeRouteLeave, onBeforeRouteUpdate, useRoute, useRouter } from "vue-router";
 import type { Ref } from "vue";
 import NumberStepper from "./NumberStepper.vue";
+import type {
+  AbilityScores,
+  AbilityBonuses,
+  Campaign,
+  PlayerCharacter,
+} from "@/generated/models/data.schema";
+import type { AbilityKey } from "@/lib/dnd2024/base.ts";
 import {
-  AbilityKeys as abilityKeys,
+  abilityKeys,
   abilityNamesMap_en,
 } from "@/lib/dnd2024/base.ts";
 import { classes } from "@/lib/dnd2024/classFeatures.ts";
-import type {
-  AbilityKey,
-  AbilityScores,
-  AbilityBonuses,
-} from "@/lib/dnd2024/base.ts";
 import type { Background } from "@/lib/dnd2024/backgrounds.ts";
 import { freeBackgrounds } from "@/lib/dnd2024/backgrounds.ts";
 import { species } from "@/lib/dnd2024/species.ts";
 import { useDataStore } from "@/stores/data-store.ts";
-import type { Campaign } from "@/types/campaign.ts";
-import type { PlayerCharacter } from "@/generated/models/data.schema";
 
 const route = useRoute();
 const router = useRouter();
