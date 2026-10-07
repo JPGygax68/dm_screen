@@ -1,5 +1,9 @@
 import type { Component } from "vue";
-import { createRouter, createWebHistory, type RouteRecordRaw } from "vue-router";
+import {
+  createRouter,
+  createWebHistory,
+  type RouteRecordRaw,
+} from "vue-router";
 import { resolveSchema } from "@/domain/schema/schema-resolver.ts";
 import { buildSchemaRoutes, type WorkflowRoute } from "./schema-routes.ts";
 import CampaignsLayout from "@/views/CampaignsLayout.vue";
@@ -10,14 +14,19 @@ import SchemaEntityView from "@/views/SchemaEntityView.vue";
 import PartyCollectionView from "@/views/PartyCollectionView.vue";
 import NewPlayerCharacterRouteView from "@/views/NewPlayerCharacterRouteView.vue";
 import PlayerCharacterView from "@/views/PlayerCharacterView.vue";
-  
+
 export function createAppRouter(schemaDocument: object) {
-  const schema = resolveSchema(schemaDocument as Parameters<typeof resolveSchema>[0]);
+  const schema = resolveSchema(
+    schemaDocument as Parameters<typeof resolveSchema>[0],
+  );
   const routeViews = {
     layout: CampaignsLayout,
-    rootCollection: (field: string) => field === "campaigns" ? CampaignListView : SchemaCollectionView,
+    rootCollection: (field: string) =>
+      field === "campaigns" ? CampaignListView : SchemaCollectionView,
     collection: (parentType: string, field: string): Component =>
-      parentType === "Campaign" && field === "party" ? PartyCollectionView : SchemaCollectionView,
+      parentType === "Campaign" && field === "party"
+        ? PartyCollectionView
+        : SchemaCollectionView,
     entity: (entityType: string): Component => {
       if (entityType === "Campaign") return CampaignDetailView;
       if (entityType === "PlayerCharacter") return PlayerCharacterView;
@@ -41,5 +50,8 @@ export function createAppRouter(schemaDocument: object) {
     { path: "/:pathMatch(.*)*", redirect: { name: "campaigns-list" } },
   ];
 
-  return createRouter({ history: createWebHistory(import.meta.env.BASE_URL), routes });
+  return createRouter({
+    history: createWebHistory(import.meta.env.BASE_URL),
+    routes,
+  });
 }
