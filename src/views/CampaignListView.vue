@@ -1,10 +1,10 @@
 <script setup lang="ts">
 import { computed, ref } from "vue";
 import { storeToRefs } from "pinia";
-import CampaignList from "../components/CampaignList.vue";
-import NewCampaignDialog from "../components/NewCampaignDialog.vue";
-import { useDataStore } from "../stores/data-store.ts";
-import type { Campaign } from "../types/campaign.ts";
+import CampaignList from "@/components/CampaignList.vue";
+import NewCampaignDialog from "@/dialogs/NewCampaignDialog.vue";
+import { useDataStore } from "@/stores/data-store.ts";
+import type { Campaign } from "@/types/campaign.ts";
 
 const store = useDataStore();
 const { roots } = storeToRefs(store);

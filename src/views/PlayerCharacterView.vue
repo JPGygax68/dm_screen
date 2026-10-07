@@ -315,7 +315,7 @@ import { ref, computed, watch } from "vue";
 import { storeToRefs } from "pinia";
 import { onBeforeRouteLeave, onBeforeRouteUpdate, useRoute, useRouter } from "vue-router";
 import type { Ref } from "vue";
-import NumberStepper from "./NumberStepper.vue";
+import NumberStepper from "@/components/NumberStepper.vue";
 import type {
   AbilityScores,
   AbilityBonuses,

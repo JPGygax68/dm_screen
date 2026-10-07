@@ -7,6 +7,7 @@ import { useDataStore } from "../stores/data-store.ts";
 const route = useRoute();
 const store = useDataStore();
 const { roots } = storeToRefs(store);
+
 const breadcrumbs = computed(() => {
   const routeBreadcrumbs = route.meta.breadcrumbs;
   if (!Array.isArray(routeBreadcrumbs)) return [];
@@ -34,9 +35,9 @@ const breadcrumbs = computed(() => {
 <template>
   <main class="min-h-dvh">
     <header class="border-b border-ink/10 bg-moss-dark text-paper">
-      <div class="mx-auto max-w-6xl px-6 py-5 lg:px-10">
-        <p class="text-xs font-bold uppercase tracking-[0.22em] text-copper">Dungeon Master workspace</p>
-        <nav class="mt-2 flex flex-wrap items-center gap-2 text-sm" aria-label="Breadcrumb">
+      <div class="mx-auto max-w-6xl px-2 py-1 lg:px-4 lg:py-2">
+        <!-- <p class="text-xs font-bold uppercase tracking-[0.22em] text-copper">Dungeon Master workspace</p> -->
+        <nav class="flex flex-wrap items-center gap-2 text-sm" aria-label="Breadcrumb">
           <template v-for="(item, index) in breadcrumbs" :key="`${item.label}-${index}`">
             <span v-if="index" aria-hidden="true" class="text-paper/45">/</span>
             <RouterLink v-if="item.href && index < breadcrumbs.length - 1" :to="item.href" class="text-paper/70 hover:text-paper">
