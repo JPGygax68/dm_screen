@@ -2,10 +2,10 @@
 
 > Scope: data authority, persistence, identity, object lifecycle, turn workflow
 > invariants, routing, views, import/export. For behavior and UX see
-> [product-spec.md](product-spec.md) and [tracker-ui.md](tracker-ui.md); for term
-> definitions see [glossary.md](glossary.md). Normative keywords (SHALL/MUST/MAY)
-> are used as in RFC 2119. Section IDs in brackets are stable citation anchors.
-
+> [product-spec.md](product-spec.md) and [tracker-ui.md](tracker-ui.md); for
+> term definitions see [glossary.md](glossary.md). Normative keywords
+> (SHALL/MUST/MAY) are used as in RFC 2119. Section IDs in brackets are stable
+> citation anchors.
 
 ## [ARCH-POSITION] Architectural position
 
@@ -52,9 +52,9 @@ validation rules.
 
 ## [ARCH-MEMORY] In-memory data
 
-Pinia SHALL hold the natural nested form of the data. A campaign and its
-nested objects and collections are represented as reactive objects, so generic
-and custom views can work with the same object graph.
+Pinia SHALL hold the natural nested form of the data. A campaign and its nested
+objects and collections are represented as reactive objects, so generic and
+custom views can work with the same object graph.
 
 Runtime-only metadata MAY be associated with objects when necessary, but it
 SHALL be clearly distinguished from persisted data and SHALL NOT alter the
@@ -147,8 +147,8 @@ One user operation MAY create and commit multiple child objects, for example
 when adding a random group from a creature template. Each child SHALL be
 validated, persisted, and linked using the normal child-before-parent ordering
 rules. If a later child fails to persist, already committed children remain
-valid and the error SHALL be reported. The application MAY offer rollback of
-the successfully committed children as a recovery action, but rollback is not
+valid and the error SHALL be reported. The application MAY offer rollback of the
+successfully committed children as a recovery action, but rollback is not
 required for data integrity.
 
 The lifecycle operations SHALL be distinct:
@@ -202,9 +202,9 @@ Only committed, successfully persisted objects may be deleted. A parent object
 must not be deleted while it contains non-empty owned child collections unless
 the repository performs an explicitly defined cascade operation.
 
-Removing an owned child from a collection is one Store operation. It updates
-the parent relationship first and deletes the child record only after that
-update succeeds. Failed cleanup must remain detectable and retryable.
+Removing an owned child from a collection is one Store operation. It updates the
+parent relationship first and deletes the child record only after that update
+succeeds. Failed cleanup must remain detectable and retryable.
 
 ## [ARCH-TURN] Turn workflow
 
@@ -214,9 +214,9 @@ the next round by default; the DM may explicitly insert a turn into the current
 round when appropriate.
 
 `ActiveTurn` identifies the current round and one-based turn number within that
-round. Its phase determines whether the tracker presents start-of-turn
-checklist entry, action entry, or end-of-turn checklist entry. The identified
-turn SHALL have status `active` while `ActiveTurn` is present.
+round. Its phase determines whether the tracker presents start-of-turn checklist
+entry, action entry, or end-of-turn checklist entry. The identified turn SHALL
+have status `active` while `ActiveTurn` is present.
 
 Confirmed checklist tokens SHALL be retained in their checklist and appended to
 the parent turn's token list. Completed and skipped turns remain editable only
@@ -229,9 +229,8 @@ adding participants, and restoring an encounter.
 ## [ARCH-REFS] References and external data
 
 The preferred data relationship is ancestry: data on which an object depends
-should be contained in that object or one of its ancestors. Cross-references
-are allowed when required, but they SHALL be explicit and validated where
-possible.
+should be contained in that object or one of its ancestors. Cross-references are
+allowed when required, but they SHALL be explicit and validated where possible.
 
 The application ships with read-only D&D data such as a bestiary. This data is
 catalog data, not user campaign data. When a catalog entry is used to create an
@@ -241,15 +240,15 @@ DM-edited instance values.
 
 Participant `id` is a globally unique internal stable identity and is not
 normally shown to the user. Participant `label` is the human-readable
-encounter-local identifier
-used by shorthand, printed columns, and target references. Labels SHALL be
-unique within an encounter and SHALL use the canonical space-free syntax
-defined by the shorthand specification. The Store and import validator SHALL
-enforce this uniqueness; JSON Schema cannot enforce it across array items.
+encounter-local identifier used by shorthand, printed columns, and target
+references. Labels SHALL be unique within an encounter and SHALL use the
+canonical space-free syntax defined by the shorthand specification. The Store
+and import validator SHALL enforce this uniqueness; JSON Schema cannot enforce
+it across array items.
 
-Participant `name` is optional descriptive or proper-name data. It SHALL NOT
-be used as a shorthand reference because it may be absent, non-unique, or
-edited without intending to change references.
+Participant `name` is optional descriptive or proper-name data. It SHALL NOT be
+used as a shorthand reference because it may be absent, non-unique, or edited
+without intending to change references.
 
 ## [ARCH-ROUTING] Client-side routing
 
@@ -266,8 +265,8 @@ For example, the schema may produce routes equivalent to:
 /campaigns/:campaignId/encounters/:encounterId
 ```
 
-Structural routes provide the navigation backbone and fallback
-behavior. They do not restrict the application to master-detail navigation.
+Structural routes provide the navigation backbone and fallback behavior. They do
+not restrict the application to master-detail navigation.
 
 Breadcrumbs SHALL be derived from the route context and resolved schema
 metadata. Workflow routes may be added for a specific entity, for example:
@@ -292,18 +291,18 @@ These are reusable schema interpreters, not generated per-entity views.
 All production views may eventually be custom-made. A custom view SHALL be able
 to replace the generic view for an entity or route without changing the schema,
 Store, repository, or structural route machinery. Custom views use the same
-resolved model and lifecycle operations as generic views.
+resolved model and lifecycle operations as the generic views.
 
-The encounter editor, encounter tracker, character sheet, and print views are
-expected to be custom views. They remain reachable through and consistent with
-the schema-derived navigation backbone.
+The encounter editor, encounter tracker and character sheet views (and probably
+more in the first release version) are expected to be custom views. They remain
+reachable through and consistent with the schema-derived navigation backbone.
 
 ## [ARCH-IMPORT] Import, export, and synchronization
 
 JSON export and import are explicit application operations. Exported documents
 SHALL include a format/schema version, preserve stable IDs, and be validated
-before import. Invalid or partially imported data SHALL produce diagnostics;
-the importer must not silently discard records.
+before import. Invalid or partially imported data SHALL produce diagnostics; the
+importer must not silently discard records.
 
 When encounter data or shorthand is imported or copied, label resolution SHALL
 use this order:
@@ -313,12 +312,11 @@ use this order:
 3. unresolved-reference diagnostics if no match exists.
 
 If more than one candidate matches at the selected scope, the importer SHALL
-report ambiguity and require DM intervention. It must never guess based on
-name similarity or silently retarget a reference. Once resolved, application
+report ambiguity and require DM intervention. It must never guess based on name
+similarity or silently retarget a reference. Once resolved, application
 references use the matched object's global internal ID while preserving the
 human-readable label in the imported shorthand or audit text.
 
 Online persistence and multi-device synchronization are future possibilities.
 Repositories and serialized data should preserve that option, but the first
 version need not implement synchronization or conflict resolution.
-
