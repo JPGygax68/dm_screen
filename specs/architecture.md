@@ -155,15 +155,39 @@ The lifecycle operations SHALL be distinct:
 - `CancelDraft` discards it without persistence; and
 - `CommitDraft` validates and persists it before adding or linking it.
 
-Existing committed objects may be edited in a separate update operation. Schema
-validation SHALL occur before commit and before persistence of an updated object.
-Native HTML form validity is not a substitute for schema validation.
+Existing committed objects are edited through a separate update operation on a
+working copy (see Object mutation). Schema validation SHALL occur before commit
+and before persistence of an updated object. Native HTML form validity is not a
+substitute for schema validation.
 
 ### Object mutation
 
-Once an object is committed, changes made through a view are reflected in the
-reactive Store immediately. The Store SHALL queue persistence of the affected
-object or aggregate and debounce repeated changes where appropriate.
+Changes to a committed object SHALL NOT be made in place. A view edits a working
+copy of the object; the committed object in the Store and the persisted record
+remain unchanged while editing. An invalid or abandoned edit therefore never
+reaches storage or the Store.
+
+Saving an edit SHALL follow this order:
+
+1. Validate the complete working copy against the schema and the Store-level
+   invariants.
+2. If validation fails, report the issues and leave the committed object and its
+   persisted record untouched; the working copy remains editable.
+3. Persist the updated object through the repository.
+4. Apply the change to the committed object in the Store only after persistence
+   has succeeded.
+
+Cancelling discards the working copy. A view SHOULD warn before discarding a
+working copy that has unsaved changes, including when navigation leaves or
+retargets the edited object.
+
+An object is edited as a whole: a single view and a single validation pass cover
+all of its fields, so cross-field validity is never split across partial saves.
+Splitting an object's data across independently saved sections is not permitted
+unless each section is separately valid on its own.
+
+A save that conflicts with a concurrent write SHALL be reported and SHALL NOT
+silently overwrite the other change.
 
 The Store SHALL not perform flattening itself. It passes the object and its
 resolved schema context to the repository, which creates a persistence-safe
