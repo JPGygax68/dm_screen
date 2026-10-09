@@ -2,8 +2,8 @@
 
 > Scope: tracker layout, turn entry panel, checklist-driven turn progression,
 > controls, printed layout, validation behavior. Product-level rules are in
-> [product-spec.md](product-spec.md); turn data invariants (`ActiveTurn`, turn
-> status, token lists) are in `[ARCH-TURN]` in [architecture.md](architecture.md);
+> [product-spec.md](product-spec.md); turn data and workflow rules (`ActiveTurn`, turn
+> status, token lists) are in `[WORK-ACTIVE]` in [tracker-workflow.md](tracker-workflow.md);
 > notation grammar is in [shorthand.md](shorthand.md).
 
 ## [UI-USECASE] Primary use case
@@ -131,19 +131,10 @@ bullets (combatant list, initiative order) do not match this layout.
 - Shorthand action entry for a participant whose turn is complete is
   discouraged: related action buttons may be grayed out or disabled, with raw
   entry available only as an escape hatch. Corrections to completed turns go
-  through the explicit correction operation in `[ARCH-TURN]`.
+  through the explicit correction operation in `[WORK-CORRECT]`.
 - Invalid or malformed shorthand is made impossible by the UI wherever
   practical.
 - The app still validates shorthand internally to catch bugs and prevent
   inconsistent data.
 - Undo/redo is a future enhancement and must not be blocked by the initial
   design.
-
-## [UI-TURNMODEL] Turn data model (UI view)
-
-- Each turn cell persists its data as an array of Note objects.
-- Rounds are objects that wrap an array of turns plus round-level metadata
-  (notes, phase markers, other shared information).
-
-See OPEN-02 in [open-issues.md](open-issues.md): this wording conflicts with the
-token-list model in `[ARCH-TURN]` and [shorthand.md](shorthand.md).

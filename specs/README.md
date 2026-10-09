@@ -8,6 +8,7 @@ anchors: cite them in tasks, reviews, and code comments.
 |---|---|---|
 | [product-spec.md](product-spec.md) | what the app is for, principles, encounter lifecycle, override semantics, templates, party data, print/sync goals | ~1.5k tokens |
 | [tracker-ui.md](tracker-ui.md) | tracker grid layout, turn entry panel, checklists, controls, printed sheet, UI validation | ~1.5k tokens |
+| [tracker-workflow.md](tracker-workflow.md) | rounds, turns, `ActiveTurn`, phases, checklists, turn data model, corrections | ~0.8k tokens |
 | [shorthand.md](shorthand.md) | parsing or generating turn shorthand, tokens, rolls, labels/targets | ~2.5k tokens |
 | [architecture.md](architecture.md) | schema authority, Pinia store, repositories, persistence ordering, IDs, drafts, mutation, deletion, turn invariants, routing, views, import/export | ~3.5k tokens |
 | [glossary.md](glossary.md) | any unfamiliar term; check here before inventing one | ~0.8k tokens |
@@ -27,7 +28,7 @@ anchors: cite them in tasks, reviews, and code comments.
 ## Quick routing for AI agents
 
 - Touching storage, stores, or object lifecycle → `architecture.md`
-- Touching tracker screens or turn entry → `tracker-ui.md` (+ `[ARCH-TURN]`)
+- Touching tracker screens or turn entry → `tracker-ui.md` (+ `tracker-workflow.md`; invariants in `[ARCH-TURN]`)
 - Writing or validating shorthand → `shorthand.md` (+ `[ARCH-REFS]` for labels)
 - Import/export → `[ARCH-IMPORT]` and `[ARCH-IDENTITY]`
 - Print → `[UI-PRINT]`, `[PROD-PRINT]`

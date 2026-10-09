@@ -116,7 +116,7 @@ type: object
   EncounterStatus:
     type: string
     description: "Status of an encounter"
-    enum: ["Draft", "Ready", "Ongoing", "Completed"]
+    enum: ["Creating", "Active", "Ending", "Completed"]
 
   EncounterEndReason:
     type: string

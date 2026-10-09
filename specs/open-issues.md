@@ -17,7 +17,7 @@ use *participant*.
 
 ### OPEN-02: What does a turn contain?
 - Spec: each turn cell persists "an array of Note objects".
-- Architecture (`[ARCH-TURN]`): turns have a token list; confirmed checklist
+- Workflow (`[WORK-CHECKLIST]`): turns have a token list; confirmed checklist
   tokens are appended to it.
 - Shorthand: checklist item `tokens` is "authoritative".
 
@@ -56,7 +56,7 @@ Architecture routes and schema root are campaign-based (`/campaigns/:id/party`,
 examples have no campaign. Confirm campaign is v1.
 
 ### OPEN-07: Turn ordering vs optional initiative sorting
-Architecture creates "one ordered Turn per participant present when a round
+The workflow (`[WORK-ORDER]`) creates "one ordered Turn per participant present when a round
 begins". Spec says initiative sorting is optional and "not assumed for paper".
 Define how turn order is established when initiative sorting is off, and how a
 participant added mid-encounter is placed (architecture: next round by default,

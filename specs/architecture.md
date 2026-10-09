@@ -2,8 +2,8 @@
 
 > Scope: data authority, persistence, identity, object lifecycle, turn workflow
 > invariants, routing, views, import/export. For behavior and UX see
-> [product-spec.md](product-spec.md) and [tracker-ui.md](tracker-ui.md); for
-> term definitions see [glossary.md](glossary.md). Normative keywords
+> [product-spec.md](product-spec.md), [tracker-ui.md](tracker-ui.md), and
+> [tracker-workflow.md](tracker-workflow.md); for term definitions see [glossary.md](glossary.md). Normative keywords
 > (SHALL/MUST/MAY) are used as in RFC 2119. Section IDs in brackets are stable
 > citation anchors.
 
@@ -206,25 +206,14 @@ Removing an owned child from a collection is one Store operation. It updates the
 parent relationship first and deletes the child record only after that update
 succeeds. Failed cleanup must remain detectable and retryable.
 
-## [ARCH-TURN] Turn workflow
+## [ARCH-TURN] Turn workflow invariants
 
-The tracker normally creates one ordered `Turn` for each participant present
-when a round begins. A participant added while an encounter is running joins at
-the next round by default; the DM may explicitly insert a turn into the current
-round when appropriate.
-
-`ActiveTurn` identifies the current round and one-based turn number within that
-round. Its phase determines whether the tracker presents start-of-turn checklist
-entry, action entry, or end-of-turn checklist entry. The identified turn SHALL
-have status `active` while `ActiveTurn` is present.
-
-Confirmed checklist tokens SHALL be retained in their checklist and appended to
-the parent turn's token list. Completed and skipped turns remain editable only
-through an explicit correction operation.
-
-JSON Schema cannot verify these relationships across nested arrays. The Store
-and validation layer SHALL enforce them when creating rounds, advancing turns,
-adding participants, and restoring an encounter.
+Round and turn behavior is specified in [tracker-workflow.md](tracker-workflow.md).
+JSON Schema cannot verify the relationships it defines across nested arrays, for
+example that the turn identified by `ActiveTurn` exists and has status `active`,
+or that a round has one turn per participant present. The Store and validation
+layer SHALL enforce them when creating rounds, advancing turns, adding
+participants, and restoring an encounter.
 
 ## [ARCH-REFS] References and external data
 

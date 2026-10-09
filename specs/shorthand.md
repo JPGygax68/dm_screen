@@ -6,7 +6,7 @@
 
 ## Purpose
 
-This document defines a compact, human-editable notation for recording combat turn updates, consumable actions, and checklist items. It is intended to be usable by an application, a printable sheet, or any other tool that needs a compact representation of encounter changes.
+This document defines a compact, human-editable notation for recording combat turn updates, actions, the use of consumables. It is intended to be usable by an application, a human taking notes on a sheet of paper, or other software tools that need a compact representation of things happening during an encounter.
 
 ## Core goals
 
@@ -20,45 +20,72 @@ This document defines a compact, human-editable notation for recording combat tu
 
 Each turn row uses the following structure:
 
-`Actor: update1; update2; ... [| note]`
+`<participant>: <update 1>; <update 2>; ... [| <note>]`
 
 - Use `;` to separate compact update tokens.
 - Use `|` to attach a free-text note when the token set is insufficient.
-- The actor is the participant's `label`, such as `Goblin_1`, `PC_A`, or `DM`.
+- The participant is identified by his/her _label_, such as `Goblin_1`, `PC_A`, or `DM`.
 - Labels are canonical, human-readable identifiers and MUST be unique within an
-  encounter. They contain no spaces and use only letters, digits, `_`, and `-`.
+  encounter. They contain no spaces (except when handwritten, where they are handled upon scan/importing) and use only letters, digits, `_`, and `-`.
+
+## General rules
+
+### Syntax and grammar rules:
+
+- **Spaces** can be inserted anywhere, but are required only where their absence would fuse words.
+- **In-update comments**: any update can be followed by a comment in parentheses. For example: `+ 5 hp (healed by potion)`.
+
+### Changing numeric values:
+
+- Numeric values can be changed using increments, decrements, or explicit assignments.
+- Increments and decrements are applied relative to the current value.
+- Explicit assignments override the current value.
+- Increments/decrements can be combined with explicit assignments, with the intent of letting the DM see both the change and the resulting value; the app will verify the calculation.
+
+#### Examples:
+  - `ac + 2 = 15` meaning: the armor class was increased by 2, resulting in a new value of 15.
+  - `set ac + 2 = 15 (previously 13)` meaning: the armor class was increased by 2, resulting in a new value of 15, with the previous value noted in a comment.
+  - `+ 2 ac` meaning: increase armor class by 2 (ultra-compact form).
+  - `ac + 2 (blessed)`: another compact form but with a comment.
 
 ## Supported update tokens
 
 ### Health and combat stats
 
-- `+Nhp`, `-Nhp`: change current HP by `N`.
-- `hp=N`: set current HP.
-- `maxhp=N`: set maximum HP.
-- `ac=N`, `ac+N`, `ac-N`: set or modify armor class.
-- `move:N`: record movement in feet.
+- `+ <N>hp`, `- <N>hp`: change current HP by `N`.
+- `[set] hp = N`: set current HP.
+- `[set] maxhp = N`: set maximum HP.
+- `[set] ac = N`, `ac + N`, `ac - N`: set or modify armor class.
+- `move N`: record movement in feet.
 
 ### Conditions and effects
 
-- `cond:NAME`: add condition `NAME`.
-- `clr:NAME`: clear condition `NAME`.
-- `cond:+NAME[N]`: add condition `NAME` with duration `N` rounds/turns.
-- `cond:-NAME`: remove condition `NAME` with duration semantics.
-- `+NAME`, `-NAME`: add or remove a condition in a compact turn-cell token.
+- `cond NAME`: add condition `NAME`. Equivalents: `+ cond NAME`, `set cond NAME`.
+- `clr NAME`: clear condition `NAME`. Equivalents: `clear NAME`, `- cond NAME`, `-NAME` (when unambiguous)
+- `+ cond NAME [N]`: add condition `NAME` with duration `N` rounds/turns.
+  - Allows same variations as the simple form
+  - Other variations:
+
+**Examples**:
+
+> \+ bloodied
+> \- prone
+> confused for 5 turns
 
 ### Ability and skill values
 
 - `STR=18`: set an ability score.
-- `STR:+2=18`: increase an ability score; the resulting score is required so the app can verify the calculation.
-- `STR:-1`, `STR:-1=16`: decrease an ability score; the resulting score is optional but verified when supplied.
+- `STR:+2=18`: explicitly increase an ability score; the resulting score is required so the user is sure to know the new value; the app will verify the calculation.
+- `STR:-1=16`: decrease an ability score; same rules as with explicit increases
 - `STR:+2=18[1]`: apply a temporary ability adjustment lasting `N` rounds/turns.
 - `stat:STR=18`, `stat:STR:+2=18`, `save:WIS:+2=5`, and `skill:PER:+1=6`: explicit prefixed forms are always accepted.
 - Prefixes are optional only when the name resolves unambiguously as an ability, save, or skill. The app MUST reject ambiguous bare names and ask for an explicit prefix.
 - `res:TYPE`, `vul:TYPE`, `imm:TYPE`: add resistance, vulnerability, or immunity.
+- the app MAY accept the full versions of ability, save and skill name; the same goes for `res(istance)`, `vul(nerability)` and `imm(unity)`
 
 ### Actions and notes
 
-- Actions MAY include an optional roll suffix: `[d20[+|-] [MODIFIER] = TOTAL [vs AC|DC TARGET] -> OUTCOME]`.
+- Actions MAY include an optional roll suffix: `[d20 [+|-] [MODIFIER] = TOTAL [vs AC|DC TARGET] -> OUTCOME]`.
 - `cast:SPELL`: note a spell casting action. The colon is optional, so `cast Fireball` is also valid.
 - `switch FROM to TO`: record a specific weapon transition. Example: `switch dagger to shortsword`.
 - `action:TEXT`: record an action or short description.
@@ -179,7 +206,7 @@ Semantically, a checklist item carries:
 - `applied`: set when the item was confirmed and incorporated into state.
 
 Checklist-to-turn relationships (confirmed tokens appended to the parent turn's
-token list) are specified in `[ARCH-TURN]`.
+token list) are specified in `[WORK-CHECKLIST]` in [tracker-workflow.md](tracker-workflow.md).
 
 ## Implementation guidance
 

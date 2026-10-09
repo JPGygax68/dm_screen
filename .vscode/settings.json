@@ -70,5 +70,8 @@
       "class\\s*=\\s*'([^']*)'",
       1
     ]
-  ]
+  ],
+  "github.copilot.enable": {
+    "markdown": true
+  }
 }

@@ -31,24 +31,27 @@ to override any auto-filled value.
 
 ## [PROD-PLATFORM] Target platform
 
-- Laptops (primary)
-- Tablets (secondary)
-
-Smartphones are not a target.
+- Tablets in landscape (primary): the DM's main use case is tracking a campaign
+  at the table on a tablet.
+- Desktop computers: for campaign preparation
+- Smartphones, both in landscape and in portrait mode: when no other device is available. (In a future version, some manner of "player mode" synchronized with the DM's view could help players too. For Player Mode, the smartphone would probably be the primary target platform.)
+- Laptops (secondary)
 
 ## [PROD-LIFECYCLE] Encounter lifecycle
 
-An encounter progresses through three states: **creating**, **active**, **ending**.
+An encounter normally progresses through `Creating` → `Active` → `Ending` →
+`Completed`. These status values are defined by the `EncounterStatus` schema.
 
 - **Creating**: assembling participants, checking or adjusting initial
   conditions, preparing for recording.
 - **Active**: rounds and turns are being recorded.
 - **Ending**: final notes, wrap-up data entry, end-of-encounter review.
+- **Completed**: the encounter has been finalized and is no longer in active
+  play.
 
-The GM marks how the encounter concluded with an explicit **end reason**.
-Suggested reasons: all hostile combatants defeated, retreat/withdrawal,
-objective achieved, time/scene change, GM-defined conclusion. The end reason is
-encounter metadata and is editable until the encounter is finalized.
+Before moving an encounter to `Completed`, the GM SHALL select an end reason
+from the schema's `EncounterEndReason` values. An optional end-reason note may
+provide detail. The reason remains editable until the encounter is finalized.
 
 ## [PROD-OVERRIDE] Data behavior and override semantics
 
@@ -81,17 +84,14 @@ copy-on-create rule in `[ARCH-REFS]`.
 
 ## [PROD-PARTY] Player character data
 
-- The player-character profile supports optional fields; most can be left
-  empty because the GM may manage them manually.
+- The player-character profile supports fields that the GM may manage manually;
+  the schema defines which fields are required and their exact shapes.
 - The model supports both a full profile and an encounter-specific state
   overlay (see OPEN-03).
 - All fields are JSON-serializable and stored in the browser.
 
-Profile fields (all optional, exact shapes in the schema): `id`, `name`,
-`label`, `type`, race, class (may be multiple), level, background, current /
-max / temporary HP, AC, initiative, speed, conditions, ability scores, saves,
-skills, spell slots, resources, equipment, `currentWeapon`, notes, and an
-overrides record of which values the GM adjusted.
+Persisted profile fields and their requiredness are defined only in
+`src/models/data.schema.yaml`; this document does not duplicate the field list.
 
 - `currentWeapon` supports weapon-switch tracking and lets the app propose
   `switch` tokens (see [shorthand.md](shorthand.md)).
@@ -111,7 +111,7 @@ Behavioral requirements only; the persistence design is in `[ARCH-PERSIST]`.
 - Explicit JSON export/import is provided for backup, sharing, and manual
   editing.
 - Storage is independent of internal default/template data.
-- Later: campaign data persists across sessions, and player starting data is
+- Campaign data persists across sessions, and player starting data is
   read-only for the campaign's duration.
 
 ## [PROD-PRINT] Print support
