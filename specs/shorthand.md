@@ -1,29 +1,38 @@
 # Turn Shorthand Notation Specification
 
-> Scope: grammar, tokens, rolls, targets, parsing rules, examples. Participant
+> Scope: log, grammar, tokens, rolls, targets, parsing rules, examples. Participant
 > `label` rules also appear in `[ARCH-REFS]` in [architecture.md](architecture.md).
 > Term definitions: [glossary.md](glossary.md).
 
 ## Purpose
 
-This document defines a compact, human-editable notation for recording combat turn updates, actions, the use of consumables. It is intended to be usable by an application, a human taking notes on a sheet of paper, or other software tools that need a compact representation of things happening during an encounter.
+This document defines a compact, human-editable notation for recording combat log entries. It is intended to be usable by an application, a human taking notes on a sheet of paper, or other software tools that need a compact representation of things happening or having happened in an encounter.
+
+## Terminology
+
+- **Encounter log**: a record of all turn updates, actions, and notes for an encounter.
+- **Log entry**: a single row in the encounter log, representing the actions taken by, and updates to, the state of a participant, possibly complemented by a free-text note.
+- **Participant**: an entity, identified by a unique label, taking actions or receiving updates during a turn.
+- **Action**: an activity performed by a participant during their turn, often resulting in updates to the other participants.
+- **Update**: a compact token or set of tokens describing a change in the game state for a participant.
+- **Note**: free-text information attached to a turn update using the `|` symbol.
+- **Condition**: a status effect applied to a participant, often with a duration.
 
 ## Core goals
 
-- Keep each turn update compact enough to fit in a single row or checklist entry.
 - Use a simple grammar that is easy to parse without AI assistance.
+- Keep that grammar compact enough so that a log entry can be written quickly and read easily, and fits within a single row.
 - Stay readable for humans while remaining compatible with ASCII-oriented tooling.
-- Allow free-text notes when the compact tokens are insufficient.
-- Preserve the notation as the editable source of truth for checklist items and printed output.
+- Allow free-text notes when the formal grammar is insufficient to fully describe what happened in the turn.
 
 ## Row format
 
 Each turn row uses the following structure:
 
-`<participant>: <update 1>; <update 2>; ... [| <note>]`
+`<participant>: <entry 1>; <entry 2>; ... [| <note>]`
 
-- Use `;` to separate compact update tokens.
-- Use `|` to attach a free-text note when the token set is insufficient.
+- Use `;` to separate compact entries.
+- Use `|` to attach a free-text note when the token set itself is insufficient to fully describe what happened in the turn.
 - The participant is identified by his/her _label_, such as `Goblin_1`, `PC_A`, or `DM`.
 - Labels are canonical, human-readable identifiers and MUST be unique within an
   encounter. They contain no spaces (except when handwritten, where they are handled upon scan/importing) and use only letters, digits, `_`, and `-`.
@@ -33,7 +42,21 @@ Each turn row uses the following structure:
 ### Syntax and grammar rules:
 
 - **Spaces** can be inserted anywhere, but are required only where their absence would fuse words.
-- **In-update comments**: any update can be followed by a comment in parentheses. For example: `+ 5 hp (healed by potion)`.
+- **In-update comments**: any update can be followed by a comment in parentheses. For example: `+ 5 hp (healed by potion)`. Important note: the app may decide not to display those comments when display space is limited or brevity is preferred, but will always retain them in the editable source.
+
+### Actions
+
+The shorthand supports all actions defined in the DnD rules: Attack (`attack|atk`), Dash (`dash`), Disengage (`disengage|dis`), Dodge (`dodge`), Help (`help`), Hide (`hide`), Influence (`influence|infl`), Magic (`magic`), Ready (`ready`), Search (`search|srch`), Study (`study`), Utilize (`utilize|util`), and custom actions (`custom|cust`).
+
+- Actions MAY include an optional roll suffix: `[d20 [+|-] [MODIFIER] = TOTAL [vs AC|DC TARGET] -> OUTCOME]`.
+- `cast:SPELL`: note a spell casting action. The colon is optional, so `cast Fireball` is also valid.
+- `switch FROM to TO`: record a specific weapon transition. Example: `switch dagger to shortsword`.
+- `action:TEXT`: record an action or short description.
+- `atk TARGET [d20[+|-]] [MODIFIER] = TOTAL [vs AC N] -> OUTCOME [dmg=N]`: record an attack against `TARGET`. The roll, modifier, total, comparison, and outcome are individually optional.
+- `influence TARGET`, `magic NAME`, `search SUBJECT`, `study SUBJECT`, and `custom DESCRIPTION` may use the same optional roll suffix.
+- `roll:TEXT`: record a notable roll or check.
+- `note:TEXT`: record a short free-text note inline.
+- `raw:TEXT`: record any update that cannot be expressed with the standard tokens. `raw:` may contain multi-line content and free-form notes; implementations should preserve line breaks when storing and rendering `raw:` entries.
 
 ### Changing numeric values:
 
@@ -48,29 +71,23 @@ Each turn row uses the following structure:
   - `+ 2 ac` meaning: increase armor class by 2 (ultra-compact form).
   - `ac + 2 (blessed)`: another compact form but with a comment.
 
-## Supported update tokens
+#### Numeric values (stats and attributes) that can be updated:
 
-### Health and combat stats
-
-- `+ <N>hp`, `- <N>hp`: change current HP by `N`.
-- `[set] hp = N`: set current HP.
-- `[set] maxhp = N`: set maximum HP.
-- `[set] ac = N`, `ac + N`, `ac - N`: set or modify armor class.
-- `move N`: record movement in feet.
+- `hp`: current hit points, `maxhp`: maximum hit points, `ac`: armor class, `speed`: movement speed in feet, `init[iative]`: initiative score, etc. The list is not exhaustive; any numeric stat relevant to the game can be included and updated using the described syntax.
 
 ### Conditions and effects
 
-- `cond NAME`: add condition `NAME`. Equivalents: `+ cond NAME`, `set cond NAME`.
-- `clr NAME`: clear condition `NAME`. Equivalents: `clear NAME`, `- cond NAME`, `-NAME` (when unambiguous)
-- `+ cond NAME [N]`: add condition `NAME` with duration `N` rounds/turns.
-  - Allows same variations as the simple form
-  - Other variations:
+The shorthand notation also allows recording conditions, effects, and other status changes of participants in the encounter.
 
-**Examples**:
-
-> \+ bloodied
-> \- prone
-> confused for 5 turns
+#### Examples:
+- `cond prone`: add the `prone` condition.
+- `+ sleeping`: add the condition `sleeping`
+- `+ cond buzzed`: add the condition `buzzed`; which is a custom condition not defined in the DnD rules, which makes the keyword `cond` necessary to avoid ambiguity.
+- `- cond buzzed (black coffee)`: remove the custom condition `buzzed`; the comment indicates the reason or source of the removal.
+- `+ bloodied`
+- `- prone`: remove the `prone` condition.
+- `confused for 5 turns`: add the `confused` condition with a duration of 5 turns.
+- `confused for 3`: add the `confused` condition with a duration of 3 turns.
 
 ### Ability and skill values
 
@@ -82,18 +99,6 @@ Each turn row uses the following structure:
 - Prefixes are optional only when the name resolves unambiguously as an ability, save, or skill. The app MUST reject ambiguous bare names and ask for an explicit prefix.
 - `res:TYPE`, `vul:TYPE`, `imm:TYPE`: add resistance, vulnerability, or immunity.
 - the app MAY accept the full versions of ability, save and skill name; the same goes for `res(istance)`, `vul(nerability)` and `imm(unity)`
-
-### Actions and notes
-
-- Actions MAY include an optional roll suffix: `[d20 [+|-] [MODIFIER] = TOTAL [vs AC|DC TARGET] -> OUTCOME]`.
-- `cast:SPELL`: note a spell casting action. The colon is optional, so `cast Fireball` is also valid.
-- `switch FROM to TO`: record a specific weapon transition. Example: `switch dagger to shortsword`.
-- `action:TEXT`: record an action or short description.
-- `atk TARGET [d20[+|-]] [MODIFIER] = TOTAL [vs AC N] -> OUTCOME [dmg=N]`: record an attack against `TARGET`. The roll, modifier, total, comparison, and outcome are individually optional.
-- `influence TARGET`, `magic NAME`, `search SUBJECT`, `study SUBJECT`, and `custom DESCRIPTION` may use the same optional roll suffix.
-- `roll:TEXT`: record a notable roll or check.
-- `note:TEXT`: record a short free-text note inline.
-- `raw:TEXT`: record any update that cannot be expressed with the standard tokens. `raw:` may contain multi-line content and free-form notes; implementations should preserve line breaks when storing and rendering `raw:` entries.
 
 ### Parenthesized additional information
 

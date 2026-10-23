@@ -1,15 +1,20 @@
 <template>
   <div class="min-h-dvh">
     <form v-if="isEditorReady" @submit.prevent="savePlayerCharacter">
-      <div class="mx-auto max-w-3xl px-2 pt-6 lg:px-10">
-        <h1 class="font-display text-3xl">Edit {{ characterName }}</h1>
-      </div>
-      <section
-        id="identity"
-        class="mx-auto max-w-3xl px-2 py-4 lg:px-10 grid grid-cols-[min-content_1fr] sm:grid-cols-[min-content_1fr_min-content_1fr] [&>label]:justify-self-end gap-y-2 gap-x-3 items-baseline [&>select>option]:box-border_p-0"
-      >
-        <label class="text-sm" for="character-name">Name</label>
-        <input id="character-name" type="text" v-model="characterName" />
+      <details id="identity" class="mx-auto max-w-3xl border-b border-ink/15 px-2 py-3 lg:px-10">
+        <summary class="flex cursor-pointer flex-wrap items-baseline gap-x-4 gap-y-1 py-2">
+          <span class="font-display text-2xl">Identity</span>
+          <span class="text-sm text-ink/65">
+            {{ characterName || "Unnamed character" }}
+            <template v-if="identityClassName"> · {{ identityClassName }}</template>
+            <template v-if="identitySpeciesName"> · {{ identitySpeciesName }}</template>
+          </span>
+        </summary>
+        <section
+          class="grid grid-cols-[min-content_1fr] items-baseline gap-x-3 gap-y-2 py-3 sm:grid-cols-[min-content_1fr_min-content_1fr] [&>label]:justify-self-end [&>select>option]:box-border_p-0"
+        >
+          <label class="text-sm" for="character-name">Name</label>
+          <input id="character-name" type="text" v-model="characterName" />
         <label class="text-sm" for="character-class">Class</label>
         <select id="character-class" v-model="characterClass">
           <option disabled value="">Select class</option>
@@ -61,6 +66,7 @@
         <datalist id="character-gender-options">
           <option value="male" />
           <option value="female" />
+          <option value="other" />
         </datalist>
         <label class="text-sm" for="character-background">Background</label>
         <select
@@ -77,7 +83,8 @@
             {{ background.name }}
           </option>
         </select>
-      </section>
+        </section>
+      </details>
       <section id="ability-scores" class="mx-auto max-w-3xl">
         <table
           class="w-full table-fixed border-separate border-spacing-y-2 border-spacing-x-3 overflow-x-auto"
@@ -374,6 +381,13 @@ const characterSpecies = ref("");
 const characterGender = ref("");
 const originalFormSnapshot = ref("");
 const isDiscarding = ref(false);
+
+const identityClassName = computed(() =>
+  classes.find((classItem) => classItem.id === characterClass.value)?.name,
+);
+const identitySpeciesName = computed(() =>
+  species.find((speciesItem) => speciesItem.id === characterSpecies.value)?.name,
+);
 
 const campaignId = computed(() => String(route.params.campaignId ?? ""));
 const playerCharacterId = computed(() => String(route.params.playerCharacterId ?? ""));
