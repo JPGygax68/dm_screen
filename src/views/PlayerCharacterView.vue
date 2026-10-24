@@ -1,32 +1,44 @@
 <template>
   <div class="min-h-dvh">
     <form v-if="isEditorReady" @submit.prevent="savePlayerCharacter">
-      <details id="identity" class="mx-auto max-w-3xl border-b border-ink/15 px-2 py-3 lg:px-10">
-        <summary class="flex cursor-pointer flex-wrap items-baseline gap-x-4 gap-y-1 py-2">
-          <span class="font-display text-2xl">Identity</span>
-          <span class="text-sm text-ink/65">
-            {{ characterName || "Unnamed character" }}
-            <template v-if="identityClassName"> · {{ identityClassName }}</template>
-            <template v-if="identitySpeciesName"> · {{ identitySpeciesName }}</template>
+      <details
+        id="identity"
+        class="group mx-auto max-w-3xl border-b border-ink/15 px-2 py-3 lg:px-10"
+      >
+        <summary class="block text-ink/65 group-open:truncate">
+          <!-- <span class="font-display text-2xl">Identity</span> -->
+          <span class="font-bold">{{
+            characterName || "Unnamed character"
+          }}</span>
+          <span class="w-full open:truncate">
+            <template v-if="identityClassName">
+              · {{ identityClassName }}</template
+            >
+            <template v-if="identitySpeciesName">
+              · {{ identitySpeciesName }}</template
+            >
+            <template v-if="identityGenderName">
+              · {{ identityGenderName }}</template
+            >
           </span>
         </summary>
         <section
-          class="grid grid-cols-[min-content_1fr] items-baseline gap-x-3 gap-y-2 py-3 sm:grid-cols-[min-content_1fr_min-content_1fr] [&>label]:justify-self-end [&>select>option]:box-border_p-0"
+          class="grid grid-cols-[min-content_1fr] items-baseline gap-x-2 gap-y-2 py-3 sm:grid-cols-[min-content_1fr_min-content_1fr] [&>label]:justify-self-end [&>select>option]:box-border_p-0"
         >
           <label class="text-sm" for="character-name">Name</label>
           <input id="character-name" type="text" v-model="characterName" />
-        <label class="text-sm" for="character-class">Class</label>
-        <select id="character-class" v-model="characterClass">
-          <option disabled value="">Select class</option>
-          <option
-            v-for="classItem in classes"
-            :key="classItem.id"
-            :value="classItem.id"
-          >
-            {{ classItem.name }}
-          </option>
-        </select>
-        <!-- Commented out for now: Subclass selection comes at level 3
+          <label class="text-sm" for="character-class">Class</label>
+          <select id="character-class" v-model="characterClass">
+            <option disabled value="">Select class</option>
+            <option
+              v-for="classItem in classes"
+              :key="classItem.id"
+              :value="classItem.id"
+            >
+              {{ classItem.name }}
+            </option>
+          </select>
+          <!-- Commented out for now: Subclass selection comes at level 3
         <label class="text-sm" for="character-subclass">Subclass</label>
         <select
           id="character-subclass"
@@ -39,50 +51,50 @@
           <option>Evocation</option>
           <option>Divination</option>
         </select> -->
-        <label class="text-sm" for="character-species">Species</label>
-        <select
-          id="character-species"
-          v-model="characterSpecies"
-          placeholder="Select species"
-          class="select"
-        >
-          <option disabled value="">Select species</option>
-          <option
-            v-for="speciesItem in species"
-            :key="speciesItem.id"
-            :value="speciesItem.id"
+          <label class="text-sm" for="character-species">Species</label>
+          <select
+            id="character-species"
+            v-model="characterSpecies"
+            placeholder="Select species"
+            class="select"
           >
-            {{ speciesItem.name }}
-          </option>
-        </select>
-        <label class="text-sm" for="character-gender">Gender</label>
-        <input
-          id="character-gender"
-          v-model="characterGender"
-          list="character-gender-options"
-          required
-          minlength="1"
-        />
-        <datalist id="character-gender-options">
-          <option value="male" />
-          <option value="female" />
-          <option value="other" />
-        </datalist>
-        <label class="text-sm" for="character-background">Background</label>
-        <select
-          id="character-background"
-          v-model="characterBackground"
-          placeholder="Select background"
-          class="select"
-        >
-          <option disabled value="">Select background</option>
-          <option
-            v-for="background in availableBackgrounds"
-            :key="background.name"
+            <option disabled value="">Select species</option>
+            <option
+              v-for="speciesItem in species"
+              :key="speciesItem.id"
+              :value="speciesItem.id"
+            >
+              {{ speciesItem.name }}
+            </option>
+          </select>
+          <label class="text-sm" for="character-gender">Gender</label>
+          <input
+            id="character-gender"
+            v-model="characterGender"
+            list="character-gender-options"
+            required
+            minlength="1"
+          />
+          <datalist id="character-gender-options">
+            <option value="male" />
+            <option value="female" />
+            <option value="other" />
+          </datalist>
+          <label class="text-sm" for="character-background">Background</label>
+          <select
+            id="character-background"
+            v-model="characterBackground"
+            placeholder="Select background"
+            class="select"
           >
-            {{ background.name }}
-          </option>
-        </select>
+            <option disabled value="">Select background</option>
+            <option
+              v-for="background in availableBackgrounds"
+              :key="background.name"
+            >
+              {{ background.name }}
+            </option>
+          </select>
         </section>
       </details>
       <section id="ability-scores" class="mx-auto max-w-3xl">
@@ -244,24 +256,48 @@
         </table>
       </section>
       <div class="mx-auto flex max-w-3xl justify-end gap-3 px-2 py-6 lg:px-10">
-        <button type="button" class="px-4 py-3 text-sm font-bold text-ink/70 transition hover:text-ink" @click="cancelEditing">
+        <button
+          type="button"
+          class="px-4 py-3 text-sm font-bold text-ink/70 transition hover:text-ink"
+          @click="cancelEditing"
+        >
           Cancel
         </button>
         <button
           type="submit"
           class="bg-moss-dark px-4 py-3 text-sm font-bold text-paper transition hover:bg-moss disabled:cursor-not-allowed disabled:opacity-50"
-          :disabled="isSaving || !characterName.trim() || !characterClass || !characterSpecies || !characterGender.trim()"
+          :disabled="
+            isSaving ||
+            !characterName.trim() ||
+            !characterClass ||
+            !characterSpecies ||
+            !characterGender.trim()
+          "
         >
           {{ isSaving ? "Saving..." : "Save character" }}
         </button>
       </div>
     </form>
-    <p v-else-if="isLoading" class="mx-auto max-w-3xl px-6 py-8 text-ink/60">Loading character...</p>
+    <p v-else-if="isLoading" class="mx-auto max-w-3xl px-6 py-8 text-ink/60">
+      Loading character...
+    </p>
     <section v-else class="mx-auto max-w-3xl px-6 py-8">
       <p class="text-ink/70">Player character not found.</p>
-      <button type="button" class="mt-4 text-moss-dark underline" @click="cancelEditing">Back to campaign</button>
+      <button
+        type="button"
+        class="mt-4 text-moss-dark underline"
+        @click="cancelEditing"
+      >
+        Back to campaign
+      </button>
     </section>
-    <p v-if="errorMessage" class="mx-auto max-w-3xl px-6 pb-8 text-sm text-red-700" role="alert">{{ errorMessage }}</p>
+    <p
+      v-if="errorMessage"
+      class="mx-auto max-w-3xl px-6 pb-8 text-sm text-red-700"
+      role="alert"
+    >
+      {{ errorMessage }}
+    </p>
   </div>
 </template>
 
@@ -320,7 +356,12 @@ select {
 <script setup lang="ts">
 import { ref, computed, watch } from "vue";
 import { storeToRefs } from "pinia";
-import { onBeforeRouteLeave, onBeforeRouteUpdate, useRoute, useRouter } from "vue-router";
+import {
+  onBeforeRouteLeave,
+  onBeforeRouteUpdate,
+  useRoute,
+  useRouter,
+} from "vue-router";
 import type { Ref } from "vue";
 import NumberStepper from "@/components/NumberStepper.vue";
 import type {
@@ -330,10 +371,7 @@ import type {
   PlayerCharacter,
 } from "@/generated/models/data.schema";
 import type { AbilityKey } from "@/lib/dnd2024/base.ts";
-import {
-  abilityKeys,
-  abilityNamesMap_en,
-} from "@/lib/dnd2024/base.ts";
+import { abilityKeys, abilityNamesMap_en } from "@/lib/dnd2024/base.ts";
 import { classes } from "@/lib/dnd2024/classFeatures.ts";
 import type { Background } from "@/lib/dnd2024/backgrounds.ts";
 import { freeBackgrounds } from "@/lib/dnd2024/backgrounds.ts";
@@ -382,17 +420,37 @@ const characterGender = ref("");
 const originalFormSnapshot = ref("");
 const isDiscarding = ref(false);
 
-const identityClassName = computed(() =>
-  classes.find((classItem) => classItem.id === characterClass.value)?.name,
+const identityClassName = computed(
+  () =>
+    classes.find((classItem) => classItem.id === characterClass.value)?.name,
 );
-const identitySpeciesName = computed(() =>
-  species.find((speciesItem) => speciesItem.id === characterSpecies.value)?.name,
+const identitySpeciesName = computed(
+  () =>
+    species.find((speciesItem) => speciesItem.id === characterSpecies.value)
+      ?.name,
 );
+const identityGenderName = computed(() =>
+  characterGender.value ? characterGender.value : "",
+);
+const identityGenderIcon = computed(() => {
+  switch (characterGender.value) {
+    case "male":
+      return "♂";
+    case "female":
+      return "♀";
+    default:
+      return "";
+  }
+});
 
 const campaignId = computed(() => String(route.params.campaignId ?? ""));
-const playerCharacterId = computed(() => String(route.params.playerCharacterId ?? ""));
+const playerCharacterId = computed(() =>
+  String(route.params.playerCharacterId ?? ""),
+);
 const campaign = computed(() =>
-  ((roots.value.campaigns ?? []) as Campaign[]).find((item) => item.id === campaignId.value),
+  ((roots.value.campaigns ?? []) as Campaign[]).find(
+    (item) => item.id === campaignId.value,
+  ),
 );
 const playerCharacter = computed(() =>
   campaign.value?.party.find((member) => member.id === playerCharacterId.value),
@@ -410,8 +468,8 @@ function formSnapshot(): string {
   });
 }
 
-const hasUnsavedChanges = computed(() =>
-  isEditorReady.value && formSnapshot() !== originalFormSnapshot.value,
+const hasUnsavedChanges = computed(
+  () => isEditorReady.value && formSnapshot() !== originalFormSnapshot.value,
 );
 
 function hydrateEditor(): void {
@@ -425,23 +483,38 @@ function hydrateEditor(): void {
     characterSpecies.value = character.species;
     characterGender.value = character.gender;
     characterBackground.value = character.background ?? "";
-    abilityScores.value = { ...initialAbilityScores, ...character.abilityScores };
-    abilityBonuses.value = { ...abilityBonuses.value, ...character.abilityBonuses };
+    abilityScores.value = {
+      ...initialAbilityScores,
+      ...character.abilityScores,
+    };
+    abilityBonuses.value = {
+      ...abilityBonuses.value,
+      ...character.abilityBonuses,
+    };
     originalFormSnapshot.value = formSnapshot();
     isEditorReady.value = true;
   }
   isLoading.value = false;
 }
 
-watch([campaignId, playerCharacterId, () => roots.value.campaigns], hydrateEditor, { immediate: true });
+watch(
+  [campaignId, playerCharacterId, () => roots.value.campaigns],
+  hydrateEditor,
+  { immediate: true },
+);
 
 function confirmDiscard(): boolean {
-  return isDiscarding.value || !hasUnsavedChanges.value || window.confirm("Discard unsaved character changes?");
+  return (
+    isDiscarding.value ||
+    !hasUnsavedChanges.value ||
+    window.confirm("Discard unsaved character changes?")
+  );
 }
 
 onBeforeRouteLeave(confirmDiscard);
 onBeforeRouteUpdate((to, from) => {
-  if (to.params.playerCharacterId === from.params.playerCharacterId) return true;
+  if (to.params.playerCharacterId === from.params.playerCharacterId)
+    return true;
   return confirmDiscard();
 });
 
@@ -467,7 +540,10 @@ async function savePlayerCharacter(): Promise<void> {
     Object.assign(current, updated);
     await cancelEditing();
   } catch (error) {
-    errorMessage.value = error instanceof Error ? error.message : "Unable to save player character.";
+    errorMessage.value =
+      error instanceof Error
+        ? error.message
+        : "Unable to save player character.";
   } finally {
     isSaving.value = false;
   }
@@ -475,7 +551,10 @@ async function savePlayerCharacter(): Promise<void> {
 
 async function cancelEditing(): Promise<void> {
   isDiscarding.value = true;
-  await router.push({ name: "campaign-detail", params: { campaignId: campaignId.value } });
+  await router.push({
+    name: "campaign-detail",
+    params: { campaignId: campaignId.value },
+  });
 }
 
 const availableBackgrounds: Ref<Background[]> = ref([
