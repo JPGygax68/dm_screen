@@ -232,7 +232,7 @@
                   class="score-field thick w-10 text-center"
                 />
               </td>
-              <td>
+              <td align="center">
                 <input type="checkbox" disabled :checked="savingThrows[key]" />
               </td>
             </tr>
