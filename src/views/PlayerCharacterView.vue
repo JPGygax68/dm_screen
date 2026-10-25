@@ -89,38 +89,36 @@
           </select>
         </section>
       </BetterDetails>
-      <BetterDetails id="combat-stats" class="p-2">
+      <BetterDetails id="combat-stats" class="p-2 w-full">
         <template #summary>
-          <div>
+          <span
+            v-for="(ability, _) in abilityKeys"
+            :key="ability"
+            class="group shrink-0 text-nowrap"
+          >
             <span
-              v-for="(ability, _) in abilityKeys"
-              :key="ability"
-              class="group"
-            >
-              <span
-                :class="{
-                  'font-bold': primaryClassAbilities.includes(ability),
+              :class="{
+                'font-bold': primaryClassAbilities.includes(ability),
+              }"
+              >{{ ability.toUpperCase() }}</span
+            >: {{ abilityScores[ability] }}
+            <span v-if="!!abilityModifiers[ability]"
+              >(<span
+                :style="{
+                  'font-weight': 400 + 150 * abilityModifiers[ability],
                 }"
-                >{{ ability.toUpperCase() }}</span
-              >: {{ abilityScores[ability] }}
-              <span v-if="!!abilityModifiers[ability]"
-                >(<span
-                  :style="{
-                    'font-weight': 400 + 150 * abilityModifiers[ability],
-                  }"
-                  >{{ abilityModifiersAsText[ability] }}</span
-                >)
-              </span>
-              <span v-if="savingThrows[ability]">
-                <img
-                  src="/assets/tw-dnd/icons/dice/roll.svg"
-                  alt="Saving Throw"
-                  class="w-4 inline opacity-50"
-                />
-              </span>
-              <span class="group-last:hidden">&nbsp;|&nbsp;</span>
+                >{{ abilityModifiersAsText[ability] }}</span
+              >)
             </span>
-          </div>
+            <span v-if="savingThrows[ability]">
+              <img
+                src="/assets/tw-dnd/icons/dice/roll.svg"
+                alt="Saving Throw"
+                class="w-4 inline opacity-50"
+              />
+            </span>
+            <span class="group-last:hidden">&nbsp;|&nbsp;</span>
+          </span>
         </template>
         <table
           id="ability-scores"
@@ -282,7 +280,28 @@
       </BetterDetails>
       <BetterDetails id="skills">
         <template #summary> Skills </template>
-        <template #default> abcd </template>
+        <div class="grid gap-4 grid-cols-1 sm:grid-cols-2 md:grid-cols-3">
+          <div
+            v-for="ability in abilityKeys"
+            :key="ability"
+            :id="`skillset-${ability}`"
+            class="sm:min-w-8 p-1 border rounded-lg"
+          >
+            <h3 class="text-lg font-bold capitalize">
+              {{ abilityNamesMap_en[ability] }}
+            </h3>
+            <ul>
+              <li
+                v-for="skill in skills.filter(
+                  (s: Skill) => s.ability === ability,
+                )"
+                :key="skill.id"
+              >
+                {{ skillNamesMap_en[skill.id] }}
+              </li>
+            </ul>
+          </div>
+        </div>
       </BetterDetails>
       <div
         id="action-buttons"
@@ -409,6 +428,7 @@ import type { Background } from "@/lib/dnd2024/backgrounds.ts";
 import { freeBackgrounds } from "@/lib/dnd2024/backgrounds.ts";
 import { species } from "@/lib/dnd2024/species.ts";
 import { useDataStore } from "@/stores/data-store.ts";
+import { Skill, skillNamesMap_en, skills } from "@/lib/dnd2024/skills";
 
 const route = useRoute();
 const router = useRouter();
