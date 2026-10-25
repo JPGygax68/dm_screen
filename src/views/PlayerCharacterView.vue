@@ -93,11 +93,16 @@
         <template #summary>
           <div>
             <span
-              v-for="ability in ['str', 'dex', 'con', 'int', 'wis', 'cha']"
+              v-for="(ability, _) in abilityKeys"
               :key="ability"
               class="group"
             >
-              {{ ability.toUpperCase() }}: {{ abilityScores[ability] }}
+              <span
+                :class="{
+                  'font-bold': primaryClassAbilities.includes(ability),
+                }"
+                >{{ ability.toUpperCase() }}</span
+              >: {{ abilityScores[ability] }}
               <span v-if="!!abilityModifiers[ability]"
                 >(<span
                   :style="{
@@ -275,7 +280,14 @@
           </tfoot>
         </table>
       </BetterDetails>
-      <div class="mx-auto flex max-w-3xl justify-end gap-3 px-2 py-6 lg:px-10">
+      <BetterDetails id="skills">
+        <template #summary> Skills </template>
+        <template #default> abcd </template>
+      </BetterDetails>
+      <div
+        id="action-buttons"
+        class="mx-auto flex max-w-3xl justify-end gap-3 px-2 py-6 lg:px-10"
+      >
         <button
           type="button"
           class="px-4 py-3 text-sm font-bold text-ink/70 transition hover:text-ink"
