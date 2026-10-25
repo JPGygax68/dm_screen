@@ -1,27 +1,19 @@
 <template>
   <div class="min-h-dvh text-ink/65">
     <form v-if="isEditorReady" @submit.prevent="savePlayerCharacter">
-      <details
-        id="identity"
-        class="group mx-auto max-w-3xl border-b border-ink/15 px-2 py-3 lg:px-10"
-      >
-        <summary class="block text-ink/65 group-open:truncate">
-          <!-- <span class="font-display text-2xl">Identity</span> -->
-          <span class="font-bold">{{
+      <BetterDetails id="identity">
+        <template #summary>
+          <span class="font-bold shrink">{{
             characterName || "Unnamed character"
           }}</span>
-          <span class="w-full open:truncate">
-            <template v-if="identityClassName">
-              · {{ identityClassName }}</template
-            >
-            <template v-if="identitySpeciesName">
-              · {{ identitySpeciesName }}</template
-            >
-            <template v-if="identityGenderName">
-              · {{ identityGenderName }}</template
-            >
-          </span>
-        </summary>
+          <span v-if="identityClassName">&nbsp;· {{ identityClassName }}</span>
+          <span v-if="identitySpeciesName"
+            >&nbsp;· {{ identitySpeciesName }}</span
+          >
+          <span v-if="identityGenderName"
+            >&nbsp;· {{ identityGenderName }}</span
+          >
+        </template>
         <section
           class="grid grid-cols-[min-content_1fr] items-baseline gap-x-2 gap-y-2 py-3 sm:grid-cols-[min-content_1fr_min-content_1fr] [&>label]:justify-self-end [&>select>option]:box-border_p-0"
         >
@@ -39,18 +31,18 @@
             </option>
           </select>
           <!-- Commented out for now: Subclass selection comes at level 3
-        <label class="text-sm" for="character-subclass">Subclass</label>
-        <select
-          id="character-subclass"
-          class="select"
-          v-model="characterSubclass"
-        >
-          <option disabled value="">Select subclass</option>
-          <option>Champion</option>
-          <option>Berserker</option>
-          <option>Evocation</option>
-          <option>Divination</option>
-        </select> -->
+          <label class="text-sm" for="character-subclass">Subclass</label>
+          <select
+            id="character-subclass"
+            class="select"
+            v-model="characterSubclass"
+          >
+            <option disabled value="">Select subclass</option>
+            <option>Champion</option>
+            <option>Berserker</option>
+            <option>Evocation</option>
+            <option>Divination</option>
+          </select> -->
           <label class="text-sm" for="character-species">Species</label>
           <select
             id="character-species"
@@ -96,33 +88,35 @@
             </option>
           </select>
         </section>
-      </details>
-      <details id="combat-stats" class="p-2">
-        <summary class="block">
-          <span
-            v-for="ability in ['str', 'dex', 'con', 'int', 'wis', 'cha']"
-            :key="ability"
-            class="group"
-          >
-            {{ ability.toUpperCase() }}: {{ abilityScores[ability] }}
-            <span v-if="!!abilityModifiers[ability]"
-              >(<span
-                :style="{
-                  'font-weight': 400 + 150 * abilityModifiers[ability],
-                }"
-                >{{ abilityModifiersAsText[ability] }}</span
-              >)
+      </BetterDetails>
+      <BetterDetails id="combat-stats" class="p-2">
+        <template #summary>
+          <div>
+            <span
+              v-for="ability in ['str', 'dex', 'con', 'int', 'wis', 'cha']"
+              :key="ability"
+              class="group"
+            >
+              {{ ability.toUpperCase() }}: {{ abilityScores[ability] }}
+              <span v-if="!!abilityModifiers[ability]"
+                >(<span
+                  :style="{
+                    'font-weight': 400 + 150 * abilityModifiers[ability],
+                  }"
+                  >{{ abilityModifiersAsText[ability] }}</span
+                >)
+              </span>
+              <span v-if="savingThrows[ability]">
+                <img
+                  src="/assets/tw-dnd/icons/dice/roll.svg"
+                  alt="Saving Throw"
+                  class="w-4 inline opacity-50"
+                />
+              </span>
+              <span class="group-last:hidden">&nbsp;|&nbsp;</span>
             </span>
-            <span v-if="savingThrows[ability]">
-              <img
-                src="/assets/tw-dnd/icons/dice/roll.svg"
-                alt="Saving Throw"
-                class="w-4 inline opacity-50"
-              />
-            </span>
-            <span class="group-last:hidden"> | </span>
-          </span>
-        </summary>
+          </div>
+        </template>
         <table
           id="ability-scores"
           class="min-w-full max-w-none table-fixed border-separate border-spacing-y-2 border-spacing-x-2 -mx-2 overflow-x-auto"
@@ -280,7 +274,7 @@
             </tr>
           </tfoot>
         </table>
-      </details>
+      </BetterDetails>
       <div class="mx-auto flex max-w-3xl justify-end gap-3 px-2 py-6 lg:px-10">
         <button
           type="button"
