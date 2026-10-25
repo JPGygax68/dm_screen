@@ -1,5 +1,5 @@
 <template>
-  <div class="min-h-dvh">
+  <div class="min-h-dvh text-ink/65">
     <form v-if="isEditorReady" @submit.prevent="savePlayerCharacter">
       <details
         id="identity"
@@ -97,9 +97,35 @@
           </select>
         </section>
       </details>
-      <section id="ability-scores" class="mx-auto max-w-3xl">
+      <details id="combat-stats" class="p-2">
+        <summary class="block">
+          <span
+            v-for="ability in ['str', 'dex', 'con', 'int', 'wis', 'cha']"
+            :key="ability"
+            class="group"
+          >
+            {{ ability.toUpperCase() }}: {{ abilityScores[ability] }}
+            <span v-if="!!abilityModifiers[ability]"
+              >(<span
+                :style="{
+                  'font-weight': 400 + 150 * abilityModifiers[ability],
+                }"
+                >{{ abilityModifiersAsText[ability] }}</span
+              >)
+            </span>
+            <span v-if="savingThrows[ability]">
+              <img
+                src="/assets/tw-dnd/icons/dice/roll.svg"
+                alt="Saving Throw"
+                class="w-4 inline opacity-50"
+              />
+            </span>
+            <span class="group-last:hidden"> | </span>
+          </span>
+        </summary>
         <table
-          class="w-full table-fixed border-separate border-spacing-y-2 border-spacing-x-3 overflow-x-auto"
+          id="ability-scores"
+          class="min-w-full max-w-none table-fixed border-separate border-spacing-y-2 border-spacing-x-2 -mx-2 overflow-x-auto"
         >
           <thead>
             <tr class="*:overflow-x-hidden *:text-ellipsis">
@@ -110,16 +136,16 @@
                 <img
                   src="/assets/tw-dnd/icons/attribute/bonus.svg"
                   alt="Bonus"
-                  class="w-5 m-auto"
+                  class="w-5 m-auto opacity-50"
                 />
               </th>
               <th class="w-2/24 text-center">Final</th>
               <th class="w-2/24 text-center">Modifier</th>
               <th class="w-1/24 text-center">
                 <img
-                  src="/assets/tw-dnd/icons/d20test/saving-throw.svg"
+                  src="/assets/tw-dnd/icons/dice/roll.svg"
                   alt="Saving Throw"
-                  class="w-6 m-auto"
+                  class="w-6 m-auto opacity-50"
                 />
               </th>
             </tr>
@@ -254,7 +280,7 @@
             </tr>
           </tfoot>
         </table>
-      </section>
+      </details>
       <div class="mx-auto flex max-w-3xl justify-end gap-3 px-2 py-6 lg:px-10">
         <button
           type="button"
@@ -671,6 +697,30 @@ const savingThrows = computed(() => {
     result[key] = classData.saving_throws.includes(key.toUpperCase());
   });
   return result;
+});
+
+const abilityModifiersAsText = computed(() => {
+  const modifiersText: Record<AbilityKey, string> = {} as Record<
+    AbilityKey,
+    string
+  >;
+  (Object.keys(abilityModifiers.value) as AbilityKey[]).forEach((key) => {
+    const value = abilityModifiers.value[key];
+    modifiersText[key] =
+      value === 0 ? "-" : value >= 0 ? `+${value}` : `${value}`;
+  });
+  return modifiersText;
+});
+
+const abilityModifiers = computed(() => {
+  const modifiers: Record<AbilityKey, number> = {} as Record<
+    AbilityKey,
+    number
+  >;
+  (Object.keys(finalAbilityScores.value) as AbilityKey[]).forEach((key) => {
+    modifiers[key] = Math.floor((finalAbilityScores.value[key] - 10) / 2);
+  });
+  return modifiers;
 });
 
 // #endregion Computed's
