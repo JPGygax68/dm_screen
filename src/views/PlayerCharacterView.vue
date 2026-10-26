@@ -1,18 +1,22 @@
 <template>
   <div class="min-h-dvh text-ink/65">
-    <form v-if="isEditorReady" @submit.prevent="savePlayerCharacter">
+    <form v-if="isEditorReady" @submit.prevent="savePlayerCharacter" class="">
       <BetterDetails id="identity">
         <template #summary>
-          <span class="font-bold shrink">{{
-            characterName || "Unnamed character"
-          }}</span>
-          <span v-if="identityClassName">&nbsp;· {{ identityClassName }}</span>
-          <span v-if="identitySpeciesName"
-            >&nbsp;· {{ identitySpeciesName }}</span
-          >
-          <span v-if="identityGenderName"
-            >&nbsp;· {{ identityGenderName }}</span
-          >
+          <span class="text-sm">
+            <span class="font-bold shrink">{{
+              characterName || "Unnamed character"
+            }}</span>
+            <span v-if="identityClassName"
+              >&nbsp;· {{ identityClassName }}</span
+            >
+            <span v-if="identitySpeciesName"
+              >&nbsp;· {{ identitySpeciesName }}</span
+            >
+            <span v-if="identityGenderName"
+              >&nbsp;· {{ identityGenderName }}</span
+            >
+          </span>
         </template>
         <section
           class="grid grid-cols-[min-content_1fr] items-baseline gap-x-2 gap-y-2 py-3 sm:grid-cols-[min-content_1fr_min-content_1fr] [&>label]:justify-self-end [&>select>option]:box-border_p-0"
@@ -91,9 +95,15 @@
       </BetterDetails>
       <BetterDetails id="combat-stats" class="p-2 w-full">
         <template #summary>
-          <div class="w-full flex flex-row flex-wrap gap-1">
-            <div class="group-open:hidden">
-              <div v-for="(key, _) in abilityKeys" :key="key" class="shrink-0">
+          <div class="w-full text-sm">
+            <div
+              class="group-open:hidden text-[80%] flex flex-row flex-wrap gap-x-2 gap-y-1"
+            >
+              <span
+                v-for="(key, _) in abilityKeys"
+                :key="key"
+                class="shrink-0 border rounded-md py-0 after:not-last:content-[','] px-1"
+              >
                 <span
                   :class="{
                     'font-bold': primaryClassAbilities.includes(key),
@@ -115,37 +125,14 @@
                     class="w-4 inline opacity-50"
                   />
                 </span>
-              </div>
+              </span>
             </div>
-            <div class="hidden group-open:flex flex-row">
-              <template
-                v-for="(key, _) in abilityKeys"
-                :key="key + '-modifier'"
-                class="shrink-0"
-              >
-                <span
-                  v-if="!!abilityModifiers[key]"
-                  class="hidden group-open:inline after:content-['|']"
-                >
-                  <img
-                    :src="`/assets/tw-dnd/icons/ability/${abilityNamesMap_en[key]}.svg`"
-                    alt="Ability"
-                    class="w-5 inline-block opacity-50"
-                  />
-                  <span
-                    :style="{
-                      'font-weight': 400 + 150 * abilityModifiers[key],
-                    }"
-                    >{{ abilityModifiersAsText[key] }}</span
-                  >
-                </span>
-              </template>
-            </div>
+            <div class="hidden group-open:block font-bold">Ability Scores</div>
           </div>
         </template>
         <table
           id="ability-scores"
-          class="w-full max-w-none table-fixed border-separate border-spacing-y-2 border-spacing-x-2 -mx-2 overflow-x-auto"
+          class="w-[calc(100%+1rem)] max-w-none table-fixed border-separate border-spacing-y-2 border-spacing-x-2 -mx-2 overflow-x-auto"
         >
           <thead>
             <tr class="*:overflow-x-hidden *:text-ellipsis">
@@ -171,21 +158,28 @@
             </tr>
           </thead>
           <tbody>
-            <tr v-for="(value, key) in abilityScores" :key="key">
+            <tr
+              v-for="(value, key) in abilityScores"
+              :key="key"
+              class="align-baseline"
+            >
               <td
-                class="flex flex-row justify-between"
+                class="align-baseline flex flex-row justify-between mr-1"
                 :class="{ 'font-bold': primaryClassAbilities.includes(key) }"
               >
                 <span class="inline"
                   >{{ key.charAt(0).toUpperCase() + key.slice(1) }}&nbsp;</span
                 >
-                <img
-                  :src="`/assets/tw-dnd/icons/ability/${abilityNamesMap_en[key]}.svg`"
-                  alt="Ability"
-                  class="w-6 inline"
-                />
+                <svg
+                  viewBox="0 0 100 100"
+                  class="h-5 w-5 inline fill-current stroke-current"
+                >
+                  <use
+                    :href="`/assets/tw-dnd/icons/ability/${abilityNamesMap_en[key]}.svg`"
+                  />
+                </svg>
               </td>
-              <td class="hidden sm:table-cell">
+              <td class="hidden sm:table-cell align-middle">
                 <div
                   @touchstart.prevent="handleAttributeDragStartEvent"
                   @touchmove.prevent="handleAttributeDragTouchMove"
@@ -246,7 +240,7 @@
                   readonly
                   tabindex="-1"
                   :value="finalAbilityScores[key]"
-                  class="score-field w-10"
+                  class="score-field w-9"
                 />
               </td>
               <td class="text-center">
@@ -383,7 +377,7 @@ table tr > *[bonus-points] {
 }
 
 input:not([type="checkbox"]) {
-  @apply border border-ink/20 rounded-md p-2;
+  @apply border border-ink/20 rounded-md px-2;
 }
 
 input[type="checkbox"] {
@@ -398,12 +392,12 @@ input[type="checkbox"]:disabled {
 }
 
 input[type="number"] {
-  @apply text-right;
+  /* @apply text-right; */
 }
 
 input {
   &.score-field {
-    @apply h-7;
+    /* @apply h-7; */
   }
   &[readonly] {
     @apply bg-ink/10;
