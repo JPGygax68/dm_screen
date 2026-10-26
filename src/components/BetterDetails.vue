@@ -5,17 +5,14 @@
     <summary
       class="w-full text-ink/65 flex items-align-start justify-between gap-4"
     >
-      <span
+      <div
         class="flex-1 flex flex-wrap group-open:truncate group-open:flex-nowrap group-open:mask-[linear-gradient(to_right,rgba(0,0,0,1)_85%,rgba(0,0,0,0)_100%)]"
       >
         <slot name="summary" />
-        <!-- <div
-          class="absolute top-0 right-0 h-full w-12 bg-linear-to-r from-transparent to-blue-500  pointer-events-none"
-        ></div> -->
-      </span>
+      </div>
       <svg
         class="w-5 h-5 shrink-0 transition-transform duration-200 group-open:rotate-180"
-        xmlns="http://w3.org"
+        xmlns="http://www.w3.org/2000/svg"
         fill="none"
         viewBox="0 0 24 24"
         stroke="currentColor"

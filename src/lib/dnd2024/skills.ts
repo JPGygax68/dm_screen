@@ -26,7 +26,9 @@ export const skills: Skill[] = [
     { id: "survival", ability: "wis" }
 ] as const;
 
-export const skillNamesMap_en: Record<string, string> = {
+export type SkillId = typeof skills[number]["id"];
+
+export const skillNamesMap_en: Record<SkillId, string> = {
     acrobatics: "Acrobatics",
     animal_handling: "Animal Handling",
     arcana: "Arcana",

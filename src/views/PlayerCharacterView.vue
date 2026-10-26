@@ -91,38 +91,61 @@
       </BetterDetails>
       <BetterDetails id="combat-stats" class="p-2 w-full">
         <template #summary>
-          <span
-            v-for="(ability, _) in abilityKeys"
-            :key="ability"
-            class="group shrink-0 text-nowrap"
-          >
-            <span
-              :class="{
-                'font-bold': primaryClassAbilities.includes(ability),
-              }"
-              >{{ ability.toUpperCase() }}</span
-            >: {{ abilityScores[ability] }}
-            <span v-if="!!abilityModifiers[ability]"
-              >(<span
-                :style="{
-                  'font-weight': 400 + 150 * abilityModifiers[ability],
-                }"
-                >{{ abilityModifiersAsText[ability] }}</span
-              >)
-            </span>
-            <span v-if="savingThrows[ability]">
-              <img
-                src="/assets/tw-dnd/icons/dice/roll.svg"
-                alt="Saving Throw"
-                class="w-4 inline opacity-50"
-              />
-            </span>
-            <span class="group-last:hidden">&nbsp;|&nbsp;</span>
-          </span>
+          <div class="w-full flex flex-row flex-wrap gap-1">
+            <div class="group-open:hidden">
+              <div v-for="(key, _) in abilityKeys" :key="key" class="shrink-0">
+                <span
+                  :class="{
+                    'font-bold': primaryClassAbilities.includes(key),
+                  }"
+                  >{{ key.toUpperCase() }}</span
+                >: {{ abilityScores[key] }}
+                <span v-if="!!abilityModifiers[key]">
+                  (<span
+                    :style="{
+                      'font-weight': 400 + 150 * abilityModifiers[key],
+                    }"
+                    >{{ abilityModifiersAsText[key] }}</span
+                  >)
+                </span>
+                <span v-if="savingThrows[key]">
+                  <img
+                    src="/assets/tw-dnd/icons/dice/roll.svg"
+                    alt="Saving Throw"
+                    class="w-4 inline opacity-50"
+                  />
+                </span>
+              </div>
+            </div>
+            <div class="hidden group-open:flex flex-row">
+              <template
+                v-for="(key, _) in abilityKeys"
+                :key="key + '-modifier'"
+                class="shrink-0"
+              >
+                <span
+                  v-if="!!abilityModifiers[key]"
+                  class="hidden group-open:inline after:content-['|']"
+                >
+                  <img
+                    :src="`/assets/tw-dnd/icons/ability/${abilityNamesMap_en[key]}.svg`"
+                    alt="Ability"
+                    class="w-5 inline-block opacity-50"
+                  />
+                  <span
+                    :style="{
+                      'font-weight': 400 + 150 * abilityModifiers[key],
+                    }"
+                    >{{ abilityModifiersAsText[key] }}</span
+                  >
+                </span>
+              </template>
+            </div>
+          </div>
         </template>
         <table
           id="ability-scores"
-          class="min-w-full max-w-none table-fixed border-separate border-spacing-y-2 border-spacing-x-2 -mx-2 overflow-x-auto"
+          class="w-full max-w-none table-fixed border-separate border-spacing-y-2 border-spacing-x-2 -mx-2 overflow-x-auto"
         >
           <thead>
             <tr class="*:overflow-x-hidden *:text-ellipsis">
@@ -280,7 +303,7 @@
       </BetterDetails>
       <BetterDetails id="skills">
         <template #summary> Skills </template>
-        <div class="grid gap-4 grid-cols-1 sm:grid-cols-2 md:grid-cols-3">
+        <div class="grid gap-4 grid-cols-2 sm:grid-cols-3 md:grid-cols-4">
           <div
             v-for="ability in abilityKeys"
             :key="ability"
@@ -297,7 +320,7 @@
                 )"
                 :key="skill.id"
               >
-                {{ skillNamesMap_en[skill.id] }}
+                <label>{{ skillNamesMap_en[skill.id] }}</label>
               </li>
             </ul>
           </div>

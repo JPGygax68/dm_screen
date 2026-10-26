@@ -13,6 +13,8 @@
 }
 
 @theme {
+  --breakpoint-xs: 30rem;
+  
   /* --- Base Application Archetype Colors --- */
   --color-ink: oklch(0.24 0.03 165);
   --color-paper: oklch(0.97 0.02 85);
