@@ -102,21 +102,29 @@
               <span
                 v-for="(key, _) in abilityKeys"
                 :key="key"
-                class="shrink-0 border rounded-md py-0 after:not-last:content-[','] px-1"
+                class="shrink-0 border rounded-md py-0 after:not-last:content-[','] px-1 hidden sm:inline"
+                :class="{
+                  inline: !!abilityModifiers[key] || savingThrows[key],
+                }"
               >
-                <span
-                  :class="{
-                    'font-bold': primaryClassAbilities.includes(key),
-                  }"
-                  >{{ key.toUpperCase() }}</span
-                >: {{ abilityScores[key] }}
-                <span v-if="!!abilityModifiers[key]">
+                {{ key.toUpperCase()
+                }}<span class="hidden sm:inline"
+                  >: {{ abilityScores[key] }}</span
+                >
+                <span v-if="!!abilityModifiers[key]" class="hidden sm:inline">
                   (<span
                     :style="{
                       'font-weight': 400 + 150 * abilityModifiers[key],
                     }"
                     >{{ abilityModifiersAsText[key] }}</span
                   >)
+                </span>
+                <span
+                  class="inline sm:hidden"
+                  :style="{
+                    'font-weight': 400 + 150 * abilityModifiers[key],
+                  }"
+                  >{{ ' ' + abilityModifiersAsText[key] + " " }}
                 </span>
                 <span v-if="savingThrows[key]">
                   <img
@@ -249,7 +257,8 @@
                   readonly
                   tabindex="-1"
                   :value="finalAbilityModifiersAsText[key]"
-                  class="score-field thick w-10 text-center"
+                  class="score-field w-10 text-center"
+                  :class="{ thick: !!finalAbilityModifiers[key] }"
                 />
               </td>
               <td align="center">
