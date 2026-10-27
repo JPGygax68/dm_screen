@@ -132,7 +132,7 @@
         </template>
         <table
           id="ability-scores"
-          class="w-[calc(100%+1rem)] max-w-none table-fixed border-separate border-spacing-y-2 border-spacing-x-2 -mx-2 overflow-x-auto"
+          class="w-[calc(100%+1rem)] max-w-none table-fixed border-separate border-spacing-y-0.5 border-spacing-x-2 -mx-2 overflow-x-auto"
         >
           <thead>
             <tr class="*:overflow-x-hidden *:text-ellipsis">
@@ -199,7 +199,7 @@
                           : 'bg-ink/50'
                     "
                     :data-value="n + 7"
-                    class="ability-score-cell text-[0.5rem] text-ink/20 w-3 h-8 grow"
+                    class="ability-score-cell text-[0.5rem] text-ink/20 w-3 h-7 grow"
                     >{{ n + 7 }}</span
                   >
                 </div>
@@ -349,7 +349,7 @@
     <p v-else-if="isLoading" class="mx-auto max-w-3xl px-6 py-8 text-ink/60">
       Loading character...
     </p>
-    <section v-else class="mx-auto max-w-3xl px-6 py-8">
+    <section id="not_found" v-else class="mx-auto max-w-3xl px-6 py-8">
       <p class="text-ink/70">Player character not found.</p>
       <button
         type="button"
@@ -360,6 +360,7 @@
       </button>
     </section>
     <p
+      id="error_message"
       v-if="errorMessage"
       class="mx-auto max-w-3xl px-6 pb-8 text-sm text-red-700"
       role="alert"
