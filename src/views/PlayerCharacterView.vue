@@ -149,11 +149,12 @@
               <th class="w-10/24 hidden sm:table-cell">Score</th>
               <th class="w-4/24"><div class="w-full sm:hidden">Base</div></th>
               <th class="w-4/48 text-center">
-                <img
-                  src="/assets/tw-dnd/icons/attribute/bonus.svg"
-                  alt="Bonus"
-                  class="w-5 m-auto opacity-50"
-                />
+                <svg
+                  viewBox="0 0 110 110"
+                  class="h-5 w-5 inline fill-current stroke-current"
+                >
+                  <use :href="`/assets/tw-dnd/icons/attribute/bonus.svg`" />
+                </svg>
               </th>
               <th class="w-2/24 text-center">Final</th>
               <th class="w-2/24 text-center">Modifier</th>
