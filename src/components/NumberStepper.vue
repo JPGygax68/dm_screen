@@ -133,7 +133,7 @@ onBeforeUnmount(() => clearTimeout(warningTimer));
       :max="max"
       :step="step"
       :aria-describedby="isWarningVisible && warning ? `${id}-warning` : undefined"
-      :class="`appearance-none rounded-md border border-ink/20 p-2 text-right ${props.warning ? 'bg-warning-light' : ''}`"
+      :class="`h-5 appearance-none rounded-md border border-ink/20 p-2 text-right ${props.warning ? 'bg-warning-light' : ''}`"
       :style="`width: ${props.digits ? props.digits + 2 + 'ch' : 'auto'};
         height: ${props.height ? props.height * 0.25 + 'rem' : 'auto'};`"
       @mouseenter="showWarning"

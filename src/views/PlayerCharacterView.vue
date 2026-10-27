@@ -105,6 +105,7 @@
                 class="shrink-0 border rounded-md py-0 after:not-last:content-[','] px-1 hidden sm:inline"
                 :class="{
                   inline: !!abilityModifiers[key] || savingThrows[key],
+                  'border-dashed': abilityModifiers[key] < 0,
                 }"
               >
                 {{ key.toUpperCase()
@@ -124,7 +125,7 @@
                   :style="{
                     'font-weight': 400 + 150 * abilityModifiers[key],
                   }"
-                  >{{ ' ' + abilityModifiersAsText[key] + " " }}
+                  >{{ " " + abilityModifiersAsText[key] + " " }}
                 </span>
                 <span v-if="savingThrows[key]">
                   <img
@@ -240,6 +241,7 @@
                   :step="1"
                   :digits="1"
                   :height="7"
+                  class=""
                 />
               </td>
               <td class="text-center">
@@ -248,7 +250,7 @@
                   readonly
                   tabindex="-1"
                   :value="finalAbilityScores[key]"
-                  class="score-field w-9"
+                  class="score-field"
                 />
               </td>
               <td class="text-center">
@@ -257,8 +259,11 @@
                   readonly
                   tabindex="-1"
                   :value="finalAbilityModifiersAsText[key]"
-                  class="score-field w-10 text-center"
-                  :class="{ thick: !!finalAbilityModifiers[key] }"
+                  class="w-[5ch] text-center"
+                  :class="{
+                    thick: !!finalAbilityModifiers[key],
+                    'border-dashed': finalAbilityModifiers[key] < 0,
+                  }"
                 />
               </td>
               <td align="center">
@@ -281,7 +286,7 @@
                       error: availableBaseAbilityScorePoints < 0,
                       warning: availableBaseAbilityScorePoints > 0,
                     }"
-                    class="score-field w-[4ch]"
+                    class="w-[4ch]"
                   />
                 </div>
               </td>
@@ -295,7 +300,7 @@
                     error: availableAbilityBonusPoints < 0,
                     warning: availableAbilityBonusPoints > 0,
                   }"
-                  class="score-field w-[4ch]"
+                  class="w-[3ch]"
                 />
               </td>
               <td></td>
@@ -402,12 +407,12 @@ input[type="checkbox"]:disabled {
 }
 
 input[type="number"] {
-  /* @apply text-right; */
+  /* @apply h-7; */
 }
 
 input {
   &.score-field {
-    /* @apply h-7; */
+    @apply w-[4ch];
   }
   &[readonly] {
     @apply bg-ink/10;

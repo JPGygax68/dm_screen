@@ -3,7 +3,7 @@
     class="group mx-auto max-w-3xl border-b border-ink/15 px-2 py-3 lg:px-10"
   >
     <summary
-      class="w-full text-ink/65 flex items-align-start justify-between gap-4"
+      class="w-full text-ink/65 flex items-align-start justify-between gap-2"
     >
       <div
         class="flex-1 flex flex-wrap group-open:truncate group-open:flex-nowrap group-open:mask-[linear-gradient(to_right,rgba(0,0,0,1)_85%,rgba(0,0,0,0)_100%)]"
