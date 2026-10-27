@@ -158,11 +158,12 @@
               <th class="w-2/24 text-center">Final</th>
               <th class="w-2/24 text-center">Modifier</th>
               <th class="w-1/24 text-center">
-                <img
-                  src="/assets/tw-dnd/icons/dice/roll.svg"
-                  alt="Saving Throw"
-                  class="w-6 m-auto opacity-50"
-                />
+                <svg
+                  viewBox="0 0 100 100"
+                  class="h-5 w-5 inline fill-current stroke-current"
+                >
+                  <use :href="`/assets/tw-dnd/icons/dice/roll.svg`" />
+                </svg>
               </th>
             </tr>
           </thead>
