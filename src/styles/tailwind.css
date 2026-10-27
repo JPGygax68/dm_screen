@@ -85,3 +85,19 @@ input[type="number"].appearance-none {
   appearance: none;
   -moz-appearance: textfield;
 }
+
+/* Scroll fade animation for overflow content */
+
+@theme {
+  --animate-scroll-fade: scroll-fade linear;
+}
+
+@keyframes scroll-fade {
+  from {
+    mask-image: linear-gradient(to bottom, transparent 0%, black 0%);
+  }
+  /* Quickly fade in the mask as soon as the user starts scrolling */
+  to {
+    mask-image: linear-gradient(to bottom, transparent 0%, black 10%);
+  }
+}

@@ -1,5 +1,7 @@
 <template>
-  <div class="min-h-dvh text-ink/65">
+  <div
+    class="h-dvh text-ink/65 overflow-y-auto mask-alpha animate-scroll-fade [scroll-timeline-name:--scroller] [animation-timeline:--scroller] [animation-range:0_10px] [animation-fill-mode:forwards]"
+  >
     <form v-if="isEditorReady" @submit.prevent="savePlayerCharacter" class="">
       <BetterDetails id="identity">
         <template #summary>
