@@ -7,4 +7,4 @@ export const species = [
   { id: 'gnome', name: 'Gnome' },
   { id: 'dragonborn', name: 'Dragonborn' },
   { id: 'tiefling', name: 'Tiefling' },
-];
+] as const;

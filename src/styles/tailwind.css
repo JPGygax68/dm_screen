@@ -98,6 +98,6 @@ input[type="number"].appearance-none {
   }
   /* Quickly fade in the mask as soon as the user starts scrolling */
   to {
-    mask-image: linear-gradient(to bottom, transparent 0%, black 10%);
+    mask-image: linear-gradient(to bottom, transparent 0%, black 15px);
   }
 }
