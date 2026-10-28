@@ -54,7 +54,7 @@ const breadcrumbs = computed(() => {
 
 <template>
   <div class="h-dvh flex flex-col">
-    <header class="border-b border-ink/10 bg-moss-dark text-paper flex-shrink-0">
+    <header class="border-b border-ink/10 bg-moss-dark text-paper shrink-0">
       <div class="mx-auto max-w-6xl px-2 py-1 lg:px-4 lg:py-2">
         <!-- <p class="text-xs font-bold uppercase tracking-[0.22em] text-copper">Dungeon Master workspace</p> -->
         <nav

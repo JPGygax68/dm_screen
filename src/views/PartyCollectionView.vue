@@ -39,7 +39,7 @@ const campaign = computed(() => {
           :to="{ name: 'campaign-party-player-character-detail', params: { campaignId: campaign.id, playerCharacterId: member.id } }"
           class="block px-4 py-4 hover:bg-white/80 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-moss"
         >
-          <span class="font-display text-lg">{{ member.name }}</span>
+          <span class="font-display text-lg">{{ member.name + (member.surname ? " " + member.surname : "") }}</span>
           <span class="mt-1 block text-sm text-ink/60">{{ member.species }} · {{ member.classes.join(", ") }}</span>
         </RouterLink>
       </li>

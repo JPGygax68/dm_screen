@@ -46,7 +46,7 @@ const campaign = computed(() => {
             :to="{ name: 'campaign-party-player-character-detail', params: { campaignId: campaign.id, playerCharacterId: member.id } }"
             class="block px-4 py-3 hover:bg-white/80 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-moss"
           >
-            {{ member.name }}
+            {{ member.name + (member.surname ? " " + member.surname : "") }}
           </RouterLink>
         </li>
       </ul>

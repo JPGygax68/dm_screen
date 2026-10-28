@@ -152,6 +152,7 @@ type: object
     properties:
       id: { "$ref": "#/$defs/GlobalId" }
       name: { type: string, description: "Character name", minLength: 1 }
+      surname: { type: string, description: "Character surname (optional)" }
       portrait: { type: string, description: "Character portrait image data URL (optional)" }
       species: { type: string, minLength: 1, description: "Character species" }
       gender: { type: string, minLength: 1, description: "Character gender, freely entered by the player" }

@@ -8,7 +8,10 @@
       <BetterDetails id="identity">
         <template #summary>
           <span class="text-sm">
-            <span class="font-bold shrink">{{ characterName || "Unnamed character" }}</span>
+            <span class="font-bold shrink">
+              {{ characterName }}
+              <template v-if="characterSurname">{{ characterSurname }}</template>
+            </span>
             <span v-if="identityClassName">&nbsp;· {{ identityClassName }}</span>
             <span v-if="identitySpeciesName">&nbsp;· {{ identitySpeciesName }}</span>
             <span v-if="identityGenderName">&nbsp;· {{ identityGenderName }}</span>
@@ -20,6 +23,8 @@
         >
           <label class="text-sm" for="character-name">Name</label>
           <input id="character-name" type="text" v-model="characterName" />
+          <label class="text-sm" for="character-surname">Surname</label>
+          <input id="character-surname" type="text" v-model="characterSurname" />
           <label class="text-sm" for="character-class">Class</label>
           <select id="character-class" v-model="characterClass">
             <option disabled value="">Select class</option>
@@ -473,6 +478,7 @@ const errorMessage = ref("");
 const touchedAbilityScore = ref<AbilityKey>();
 
 const characterName = ref("");
+const characterSurname = ref("");
 const characterClass = ref("");
 const characterSubclass = ref("");
 const characterBackground = ref("");
@@ -537,6 +543,7 @@ function hydrateEditor(): void {
   const character = playerCharacter.value;
   if (character) {
     characterName.value = character.name;
+    characterSurname.value = character.surname ?? "";
     characterClass.value = character.classes[0] ?? "";
     characterSpecies.value = character.species;
     characterGender.value = character.gender;
@@ -580,6 +587,7 @@ async function savePlayerCharacter(): Promise<void> {
   const updated: PlayerCharacter = {
     ...current,
     name: characterName.value.trim(),
+    surname: characterSurname.value.trim(),
     classes: [characterClass.value],
     species: characterSpecies.value,
     gender: characterGender.value.trim(),
