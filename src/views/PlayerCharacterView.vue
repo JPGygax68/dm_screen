@@ -110,25 +110,35 @@
                   'border-dashed': abilityModifiers[key] < 0,
                 }"
               >
-                {{ key.toUpperCase()
-                }}<span class="hidden sm:inline"
-                  >: {{ abilityScores[key] }}</span
-                >
-                <span v-if="!!abilityModifiers[key]" class="hidden sm:inline">
-                  (<span
-                    :style="{
-                      'font-weight': 400 + 150 * abilityModifiers[key],
-                    }"
-                    >{{ abilityModifiersAsText[key] }}</span
-                  >)
-                </span>
                 <span
+                  :class="{
+                    'font-weight': primaryClassAbilities.includes(key)
+                      ? 'font-bold'
+                      : '',
+                  }"
+                  >{{ key.toUpperCase() }}
+                </span>
+                <!-- We only display the ability score on wider screens -->
+                <span class="hidden sm:inline">: {{ abilityScores[key] }}
+                  <!-- ... and the modifier (if any) is displayed in parentheses-->
+                  <span v-if="!!abilityModifiers[key]">
+                    (<span
+                      :style="{
+                        'font-weight': 400 + 150 * abilityModifiers[key],
+                      }"
+                      >{{ abilityModifiersAsText[key] }}</span
+                    >)
+                  </span>
+                </span>
+                <!-- On really small screens, we only display the modifier, without parentheses -->
+                <span
+                  id="modifier"
                   class="inline sm:hidden"
                   :style="{
                     'font-weight': 400 + 150 * abilityModifiers[key],
-                  }"
-                  >{{ " " + abilityModifiersAsText[key] + " " }}
+                  }"> {{ " " + abilityModifiersAsText[key] + " " }}
                 </span>
+                <!-- We always display the saving throw icon if applicable -->
                 <span v-if="savingThrows[key]">
                   <img
                     src="/assets/tw-dnd/icons/dice/roll.svg"
@@ -262,11 +272,11 @@
                   type="text"
                   readonly
                   tabindex="-1"
-                  :value="finalAbilityModifiersAsText[key]"
+                  :value="abilityModifiersAsText[key] || '-'"
                   class="w-[5ch] text-center"
                   :class="{
-                    thick: !!finalAbilityModifiers[key],
-                    'border-dashed': finalAbilityModifiers[key] < 0,
+                    thick: !!abilityModifiers[key],
+                    'border-dashed': abilityModifiers[key] < 0,
                   }"
                 />
               </td>
@@ -712,30 +722,6 @@ const finalAbilityScores = computed(() => {
   return scores;
 });
 
-const finalAbilityModifiers = computed(() => {
-  const modifiers: Record<AbilityKey, number> = {} as Record<
-    AbilityKey,
-    number
-  >;
-  (Object.keys(finalAbilityScores.value) as AbilityKey[]).forEach((key) => {
-    modifiers[key] = Math.floor((finalAbilityScores.value[key] - 10) / 2);
-  });
-  return modifiers;
-});
-
-const finalAbilityModifiersAsText = computed(() => {
-  const modifiersText: Record<AbilityKey, string> = {} as Record<
-    AbilityKey,
-    string
-  >;
-  (Object.keys(finalAbilityModifiers.value) as AbilityKey[]).forEach((key) => {
-    const value = finalAbilityModifiers.value[key];
-    modifiersText[key] =
-      value === 0 ? "-" : value >= 0 ? `+${value}` : `${value}`;
-  });
-  return modifiersText;
-});
-
 const abilityBonusesTotal = computed(() => {
   return Object.values(abilityBonuses.value).reduce((sum, val) => sum + val, 0);
 });
@@ -761,19 +747,6 @@ const savingThrows = computed(() => {
   return result;
 });
 
-const abilityModifiersAsText = computed(() => {
-  const modifiersText: Record<AbilityKey, string> = {} as Record<
-    AbilityKey,
-    string
-  >;
-  (Object.keys(abilityModifiers.value) as AbilityKey[]).forEach((key) => {
-    const value = abilityModifiers.value[key];
-    modifiersText[key] =
-      value === 0 ? "-" : value >= 0 ? `+${value}` : `${value}`;
-  });
-  return modifiersText;
-});
-
 const abilityModifiers = computed(() => {
   const modifiers: Record<AbilityKey, number> = {} as Record<
     AbilityKey,
@@ -783,6 +756,19 @@ const abilityModifiers = computed(() => {
     modifiers[key] = Math.floor((finalAbilityScores.value[key] - 10) / 2);
   });
   return modifiers;
+});
+
+const abilityModifiersAsText = computed(() => {
+  const modifiersText: Record<AbilityKey, string> = {} as Record<
+    AbilityKey,
+    string
+  >;
+  (Object.keys(abilityModifiers.value) as AbilityKey[]).forEach((key) => {
+    const value = abilityModifiers.value[key];
+    modifiersText[key] =
+      value === 0 ? "" : value >= 0 ? `+${value}` : `${value}`;
+  });
+  return modifiersText;
 });
 
 // #endregion Computed's
