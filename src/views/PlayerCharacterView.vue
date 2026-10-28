@@ -15,7 +15,7 @@
             <span v-if="identityClassName">&nbsp;· {{ identityClassName }}</span>
             <span v-if="identitySpeciesName">&nbsp;· {{ identitySpeciesName }}</span>
             <span v-if="identityGenderName">&nbsp;· {{ identityGenderName }}</span>
-            <span v-if="identityBackgroundName">&nbsp;· {{ identityBackgroundName }}</span>
+            <span v-if="identityBackground">&nbsp;· {{ identityBackground }}</span>
           </span>
         </template>
         <section
@@ -146,7 +146,7 @@
         </template>
         <table
           id="ability-scores"
-          class="w-[calc(100%+1rem)] max-w-none table-fixed border-separate border-spacing-y-0.5 border-spacing-x-2 -mx-2 overflow-x-auto"
+          class="w-[calc(100%+1rem)] max-w-none table-fixed border-separate border-spacing-y-0.5 border-spacing-x-2 border-spacing-y-1 -mx-2 overflow-x-auto"
         >
           <thead>
             <tr class="*:overflow-x-hidden *:text-ellipsis">
@@ -493,7 +493,7 @@ const identityClassName = computed(
 const identitySpeciesName = computed(
   () => species.find((speciesItem) => speciesItem.id === characterSpecies.value)?.name,
 );
-const identityBackgroundName = computed(() => {
+const identityBackground = computed(() => {
   if (characterBackground.value === "custom") {
     return "Custom"; // TODO: replace with the actual name of the custom background
   }

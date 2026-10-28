@@ -1,12 +1,7 @@
+<!-- @format -->
+
 <script setup lang="ts">
-import {
-  ClassValue,
-  computed,
-  nextTick,
-  onBeforeUnmount,
-  shallowRef,
-  useTemplateRef,
-} from "vue";
+import { ClassValue, computed, nextTick, onBeforeUnmount, shallowRef, useTemplateRef } from "vue";
 import { useDeviceType } from "@/composables/useDeviceType";
 
 const WARNING_DISPLAY_MS = 3000;
@@ -35,21 +30,15 @@ const props = withDefaults(
 
 const { isMobileOrTablet } = useDeviceType();
 
-const canDecrement = computed(
-  () => props.min === undefined || model.value > props.min,
-);
-const canIncrement = computed(
-  () => props.max === undefined || model.value < props.max,
-);
+const canDecrement = computed(() => props.min === undefined || model.value > props.min);
+const canIncrement = computed(() => props.max === undefined || model.value < props.max);
 
 function decrement(): void {
-  if (canDecrement.value)
-    model.value = Math.max(props.min ?? -Infinity, model.value - props.step);
+  if (canDecrement.value) model.value = Math.max(props.min ?? -Infinity, model.value - props.step);
 }
 
 function increment(): void {
-  if (canIncrement.value)
-    model.value = Math.min(props.max ?? Infinity, model.value + props.step);
+  if (canIncrement.value) model.value = Math.min(props.max ?? Infinity, model.value + props.step);
 }
 
 function checkAndAdjust(): void {
@@ -97,7 +86,6 @@ async function showWarning(): Promise<void> {
 }
 
 onBeforeUnmount(() => clearTimeout(warningTimer));
-
 </script>
 
 <template>
@@ -117,7 +105,7 @@ onBeforeUnmount(() => clearTimeout(warningTimer));
       tabindex="-1"
       :aria-label="`Decrease ${label}`"
       :disabled="!canDecrement"
-      class="h-8 w-4 text-ink/70 disabled:cursor-not-allowed disabled:text-ink/25"
+      class="w-4 text-ink/70 disabled:cursor-not-allowed disabled:text-ink/25"
       @click="decrement"
     >
       {{ canDecrement ? "◀" : "◁" }}
@@ -144,7 +132,7 @@ onBeforeUnmount(() => clearTimeout(warningTimer));
       tabindex="-1"
       :aria-label="`Increase ${label}`"
       :disabled="!canIncrement"
-      class="h-8 w-4 text-ink/70 disabled:cursor-not-allowed disabled:text-ink/45"
+      class="w-4 text-ink/70 disabled:cursor-not-allowed disabled:text-ink/45"
       @click="increment"
     >
       {{ canIncrement ? "▶" : "▷" }}
@@ -152,4 +140,9 @@ onBeforeUnmount(() => clearTimeout(warningTimer));
   </div>
 </template>
 
-<style scoped lang="css"></style>
+<style scoped lang="css">
+@reference "@/styles/tailwind.css";
+button {
+  @apply h-7;
+}
+</style>
