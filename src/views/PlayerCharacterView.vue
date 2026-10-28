@@ -10,7 +10,7 @@
           <span class="text-sm">
             <span class="font-bold shrink">
               {{ characterName }}
-              <template v-if="characterSurname">{{ characterSurname }}</template>
+              <span v-if="characterSurname" class="hidden sm:inline">{{ characterSurname }}</span>
             </span>
             <span v-if="identityClassName">&nbsp;· {{ identityClassName }}</span>
             <span v-if="identitySpeciesName">&nbsp;· {{ identitySpeciesName }}</span>
@@ -399,6 +399,7 @@ input[type="number"] {
 
 input {
   &.score-field {
+    @apply h-7;
     @apply w-[4ch];
   }
   &[readonly] {
@@ -419,7 +420,7 @@ input {
 }
 
 select {
-  @apply border-transparent border-r-4 outline-1 outline-ink/20 rounded-md p-2 pr-10;
+  @apply h-7 px-1 py-0 border-transparent border-r-4 outline-1 outline-ink/20 rounded-md pr-10;
 }
 </style>
 
