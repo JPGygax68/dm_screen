@@ -1,23 +1,18 @@
+<!-- @format -->
+
 <template>
   <div
-    class="h-dvh text-ink/65 overflow-y-auto mask-alpha animate-scroll-fade [scroll-timeline-name:--scroller] [animation-timeline:--scroller] [animation-range:0_10px] [animation-fill-mode:forwards]"
+    class="h-full text-ink/65 overflow-y-auto mask-alpha animate-scroll-fade [scroll-timeline-name:--scroller] [animation-timeline:--scroller] [animation-range:0_10px] [animation-fill-mode:forwards]"
   >
     <form v-if="isEditorReady" @submit.prevent="savePlayerCharacter" class="">
       <BetterDetails id="identity">
         <template #summary>
           <span class="text-sm">
-            <span class="font-bold shrink">{{
-              characterName || "Unnamed character"
-            }}</span>
-            <span v-if="identityClassName"
-              >&nbsp;· {{ identityClassName }}</span
-            >
-            <span v-if="identitySpeciesName"
-              >&nbsp;· {{ identitySpeciesName }}</span
-            >
-            <span v-if="identityGenderName"
-              >&nbsp;· {{ identityGenderName }}</span
-            >
+            <span class="font-bold shrink">{{ characterName || "Unnamed character" }}</span>
+            <span v-if="identityClassName">&nbsp;· {{ identityClassName }}</span>
+            <span v-if="identitySpeciesName">&nbsp;· {{ identitySpeciesName }}</span>
+            <span v-if="identityGenderName">&nbsp;· {{ identityGenderName }}</span>
+            <span v-if="identityBackgroundName">&nbsp;· {{ identityBackgroundName }}</span>
           </span>
         </template>
         <section
@@ -28,11 +23,7 @@
           <label class="text-sm" for="character-class">Class</label>
           <select id="character-class" v-model="characterClass">
             <option disabled value="">Select class</option>
-            <option
-              v-for="classItem in classes"
-              :key="classItem.id"
-              :value="classItem.id"
-            >
+            <option v-for="classItem in classes" :key="classItem.id" :value="classItem.id">
               {{ classItem.name }}
             </option>
           </select>
@@ -57,11 +48,7 @@
             class="select"
           >
             <option disabled value="">Select species</option>
-            <option
-              v-for="speciesItem in species"
-              :key="speciesItem.id"
-              :value="speciesItem.id"
-            >
+            <option v-for="speciesItem in species" :key="speciesItem.id" :value="speciesItem.id">
               {{ speciesItem.name }}
             </option>
           </select>
@@ -74,9 +61,9 @@
             minlength="1"
           />
           <datalist id="character-gender-options">
-            <option value="male" />
-            <option value="female" />
-            <option value="other" />
+            <option id="male" value="Male" />
+            <option id="female" value="Female" />
+            <option id="other" value="Other" />
           </datalist>
           <label class="text-sm" for="character-background">Background</label>
           <select
@@ -88,19 +75,19 @@
             <option disabled value="">Select background</option>
             <option
               v-for="background in availableBackgrounds"
-              :key="background.name"
+              :key="background.id"
+              :value="background.id"
             >
-              {{ background.name }}
+              {{ background.name_en }}
             </option>
+            <!-- TODO: handle custom background definition -->
           </select>
         </section>
       </BetterDetails>
       <BetterDetails id="combat-stats" class="p-2 w-full">
         <template #summary>
           <div class="w-full text-sm">
-            <div
-              class="group-open:hidden text-[80%] flex flex-row flex-wrap gap-x-2 gap-y-1"
-            >
+            <div class="group-open:hidden text-[80%] flex flex-row flex-wrap gap-x-2 gap-y-1">
               <span
                 v-for="(key, _) in abilityKeys"
                 :key="key"
@@ -112,14 +99,13 @@
               >
                 <span
                   :class="{
-                    'font-weight': primaryClassAbilities.includes(key)
-                      ? 'font-bold'
-                      : '',
+                    'font-weight': primaryClassAbilities.includes(key) ? 'font-bold' : '',
                   }"
                   >{{ key.toUpperCase() }}
                 </span>
                 <!-- We only display the ability score on wider screens -->
-                <span class="hidden sm:inline">: {{ abilityScores[key] }}
+                <span class="hidden sm:inline"
+                  >: {{ abilityScores[key] }}
                   <!-- ... and the modifier (if any) is displayed in parentheses-->
                   <span v-if="!!abilityModifiers[key]">
                     (<span
@@ -136,7 +122,9 @@
                   class="inline sm:hidden"
                   :style="{
                     'font-weight': 400 + 150 * abilityModifiers[key],
-                  }"> {{ " " + abilityModifiersAsText[key] + " " }}
+                  }"
+                >
+                  {{ " " + abilityModifiersAsText[key] + " " }}
                 </span>
                 <!-- We always display the saving throw icon if applicable -->
                 <span v-if="savingThrows[key]">
@@ -161,45 +149,28 @@
               <th class="w-10/24 hidden sm:table-cell">Score</th>
               <th class="w-4/24"><div class="w-full sm:hidden">Base</div></th>
               <th class="w-4/48 text-center">
-                <svg
-                  viewBox="0 0 110 110"
-                  class="h-5 w-5 inline fill-current stroke-current"
-                >
+                <svg viewBox="0 0 110 110" class="h-5 w-5 inline fill-current stroke-current">
                   <use :href="`/assets/tw-dnd/icons/attribute/bonus.svg`" />
                 </svg>
               </th>
               <th class="w-2/24 text-center">Final</th>
               <th class="w-2/24 text-center">Modifier</th>
               <th class="w-1/24 text-center">
-                <svg
-                  viewBox="0 0 100 100"
-                  class="h-5 w-5 inline fill-current stroke-current"
-                >
+                <svg viewBox="0 0 100 100" class="h-5 w-5 inline fill-current stroke-current">
                   <use :href="`/assets/tw-dnd/icons/dice/roll.svg`" />
                 </svg>
               </th>
             </tr>
           </thead>
           <tbody>
-            <tr
-              v-for="(value, key) in abilityScores"
-              :key="key"
-              class="align-baseline"
-            >
+            <tr v-for="(value, key) in abilityScores" :key="key" class="align-baseline">
               <td
                 class="align-baseline flex flex-row justify-between mr-1"
                 :class="{ 'font-bold': primaryClassAbilities.includes(key) }"
               >
-                <span class="inline"
-                  >{{ key.charAt(0).toUpperCase() + key.slice(1) }}&nbsp;</span
-                >
-                <svg
-                  viewBox="0 0 100 100"
-                  class="h-5 w-5 inline fill-current stroke-current"
-                >
-                  <use
-                    :href="`/assets/tw-dnd/icons/ability/${abilityNamesMap_en[key]}.svg`"
-                  />
+                <span class="inline">{{ key.charAt(0).toUpperCase() + key.slice(1) }}&nbsp;</span>
+                <svg viewBox="0 0 100 100" class="h-5 w-5 inline fill-current stroke-current">
+                  <use :href="`/assets/tw-dnd/icons/ability/${abilityNamesMap_en[key]}.svg`" />
                 </svg>
               </td>
               <td class="hidden sm:table-cell align-middle">
@@ -238,15 +209,12 @@
                   :digits="2"
                   :height="7"
                   :warning="baseAbilityScoreUiProps[key].warning"
-                  :bg-classes="
-                    !!baseAbilityScoreUiProps[key].warning
-                      ? 'bg-warning-light'
-                      : ''
-                  "
+                  :bg-classes="!!baseAbilityScoreUiProps[key].warning ? 'bg-warning-light' : ''"
                 />
               </td>
-              <td>
+              <td ability-bonus align="center">
                 <NumberStepper
+                  v-if="backgroundAllowsBoosting[key]"
                   :id="key + '-bonus'"
                   v-model="abilityBonuses[key]"
                   :label="`${key} ability bonus`"
@@ -256,6 +224,14 @@
                   :digits="1"
                   :height="7"
                   class=""
+                />
+                <input
+                  v-else
+                  type="number"
+                  disabled
+                  readonly
+                  :value="abilityBonuses[key]"
+                  class="w-[3ch]"
                 />
               </td>
               <td class="text-center">
@@ -272,6 +248,7 @@
                   type="text"
                   readonly
                   tabindex="-1"
+                  disabled
                   :value="abilityModifiersAsText[key] || '-'"
                   class="w-[5ch] text-center"
                   :class="{
@@ -337,9 +314,7 @@
             </h3>
             <ul>
               <li
-                v-for="skill in skills.filter(
-                  (s: Skill) => s.ability === ability,
-                )"
+                v-for="skill in skills.filter((s: Skill) => s.ability === ability)"
                 :key="skill.id"
               >
                 <label>{{ skillNamesMap_en[skill.id] }}</label>
@@ -348,10 +323,7 @@
           </div>
         </div>
       </BetterDetails>
-      <div
-        id="action-buttons"
-        class="mx-auto flex max-w-3xl justify-end gap-3 px-2 py-6 lg:px-10"
-      >
+      <div id="action-buttons" class="mx-auto flex max-w-3xl justify-end gap-3 px-2 py-6 lg:px-10">
         <button
           type="button"
           class="px-4 py-3 text-sm font-bold text-ink/70 transition hover:text-ink"
@@ -379,11 +351,7 @@
     </p>
     <section id="not_found" v-else class="mx-auto max-w-3xl px-6 py-8">
       <p class="text-ink/70">Player character not found.</p>
-      <button
-        type="button"
-        class="mt-4 text-moss-dark underline"
-        @click="cancelEditing"
-      >
+      <button type="button" class="mt-4 text-moss-dark underline" @click="cancelEditing">
         Back to campaign
       </button>
     </section>
@@ -453,12 +421,7 @@ select {
 <script setup lang="ts">
 import { ref, computed, watch } from "vue";
 import { storeToRefs } from "pinia";
-import {
-  onBeforeRouteLeave,
-  onBeforeRouteUpdate,
-  useRoute,
-  useRouter,
-} from "vue-router";
+import { onBeforeRouteLeave, onBeforeRouteUpdate, useRoute, useRouter } from "vue-router";
 import type { Ref } from "vue";
 import NumberStepper from "@/components/NumberStepper.vue";
 import type {
@@ -471,7 +434,7 @@ import type { AbilityKey } from "@/lib/dnd2024/base.ts";
 import { abilityKeys, abilityNamesMap_en } from "@/lib/dnd2024/base.ts";
 import { classes } from "@/lib/dnd2024/classFeatures.ts";
 import type { Background } from "@/lib/dnd2024/backgrounds.ts";
-import { freeBackgrounds } from "@/lib/dnd2024/backgrounds.ts";
+import { backgrounds, freeBackgrounds } from "@/lib/dnd2024/backgrounds.ts";
 import { species } from "@/lib/dnd2024/species.ts";
 import { useDataStore } from "@/stores/data-store.ts";
 import { Skill, skillNamesMap_en, skills } from "@/lib/dnd2024/skills";
@@ -519,17 +482,18 @@ const originalFormSnapshot = ref("");
 const isDiscarding = ref(false);
 
 const identityClassName = computed(
-  () =>
-    classes.find((classItem) => classItem.id === characterClass.value)?.name,
+  () => classes.find((classItem) => classItem.id === characterClass.value)?.name,
 );
 const identitySpeciesName = computed(
-  () =>
-    species.find((speciesItem) => speciesItem.id === characterSpecies.value)
-      ?.name,
+  () => species.find((speciesItem) => speciesItem.id === characterSpecies.value)?.name,
 );
-const identityGenderName = computed(() =>
-  characterGender.value ? characterGender.value : "",
-);
+const identityBackgroundName = computed(() => {
+  if (characterBackground.value === "custom") {
+    return "Custom"; // TODO: replace with the actual name of the custom background
+  }
+  return backgrounds.find((background) => background.id === characterBackground.value)?.name_en;
+});
+const identityGenderName = computed(() => (characterGender.value ? characterGender.value : ""));
 const identityGenderIcon = computed(() => {
   switch (characterGender.value) {
     case "male":
@@ -542,13 +506,9 @@ const identityGenderIcon = computed(() => {
 });
 
 const campaignId = computed(() => String(route.params.campaignId ?? ""));
-const playerCharacterId = computed(() =>
-  String(route.params.playerCharacterId ?? ""),
-);
+const playerCharacterId = computed(() => String(route.params.playerCharacterId ?? ""));
 const campaign = computed(() =>
-  ((roots.value.campaigns ?? []) as Campaign[]).find(
-    (item) => item.id === campaignId.value,
-  ),
+  ((roots.value.campaigns ?? []) as Campaign[]).find((item) => item.id === campaignId.value),
 );
 const playerCharacter = computed(() =>
   campaign.value?.party.find((member) => member.id === playerCharacterId.value),
@@ -595,11 +555,9 @@ function hydrateEditor(): void {
   isLoading.value = false;
 }
 
-watch(
-  [campaignId, playerCharacterId, () => roots.value.campaigns],
-  hydrateEditor,
-  { immediate: true },
-);
+watch([campaignId, playerCharacterId, () => roots.value.campaigns], hydrateEditor, {
+  immediate: true,
+});
 
 function confirmDiscard(): boolean {
   return (
@@ -611,8 +569,7 @@ function confirmDiscard(): boolean {
 
 onBeforeRouteLeave(confirmDiscard);
 onBeforeRouteUpdate((to, from) => {
-  if (to.params.playerCharacterId === from.params.playerCharacterId)
-    return true;
+  if (to.params.playerCharacterId === from.params.playerCharacterId) return true;
   return confirmDiscard();
 });
 
@@ -639,9 +596,7 @@ async function savePlayerCharacter(): Promise<void> {
     await cancelEditing();
   } catch (error) {
     errorMessage.value =
-      error instanceof Error
-        ? error.message
-        : "Unable to save player character.";
+      error instanceof Error ? error.message : "Unable to save player character.";
   } finally {
     isSaving.value = false;
   }
@@ -657,16 +612,14 @@ async function cancelEditing(): Promise<void> {
 
 const availableBackgrounds: Ref<Background[]> = ref([
   ...freeBackgrounds,
-  { name: "Custom" },
+  { id: "custom", name_en: "Custom" },
 ]);
 
 // #region Computed's
 
 const baseAbilityScoreUiProps = computed(() => {
-  const props: Record<
-    AbilityKey,
-    { isLowest: boolean; isHighest: boolean; warning: string }
-  > = {} as any;
+  const props: Record<AbilityKey, { isLowest: boolean; isHighest: boolean; warning: string }> =
+    {} as any;
   let lowest = 99;
   let highest = -99;
   (Object.keys(abilityScores.value) as AbilityKey[]).forEach((key) => {
@@ -748,10 +701,7 @@ const savingThrows = computed(() => {
 });
 
 const abilityModifiers = computed(() => {
-  const modifiers: Record<AbilityKey, number> = {} as Record<
-    AbilityKey,
-    number
-  >;
+  const modifiers: Record<AbilityKey, number> = {} as Record<AbilityKey, number>;
   (Object.keys(finalAbilityScores.value) as AbilityKey[]).forEach((key) => {
     modifiers[key] = Math.floor((finalAbilityScores.value[key] - 10) / 2);
   });
@@ -759,16 +709,29 @@ const abilityModifiers = computed(() => {
 });
 
 const abilityModifiersAsText = computed(() => {
-  const modifiersText: Record<AbilityKey, string> = {} as Record<
-    AbilityKey,
-    string
-  >;
+  const modifiersText: Record<AbilityKey, string> = {} as Record<AbilityKey, string>;
   (Object.keys(abilityModifiers.value) as AbilityKey[]).forEach((key) => {
     const value = abilityModifiers.value[key];
-    modifiersText[key] =
-      value === 0 ? "" : value >= 0 ? `+${value}` : `${value}`;
+    modifiersText[key] = value === 0 ? "" : value >= 0 ? `+${value}` : `${value}`;
   });
   return modifiersText;
+});
+
+const backgroundAllowsBoosting = computed(() => {
+  const result: Record<AbilityKey, boolean> = {} as Record<AbilityKey, boolean>;
+  if (characterBackground.value === 'custom') {
+    console.log("Custom background allows boosting for all abilities.");
+    for (const key of Object.keys(finalAbilityScores.value) as AbilityKey[]) {
+      result[key] = true;
+    }
+    return result;
+  }
+  const backgroundData = backgrounds.find((b) => b.id === characterBackground.value);
+  if (!backgroundData) return result;
+  (Object.keys(finalAbilityScores.value) as AbilityKey[]).forEach((key) => {
+    result[key] = backgroundData.boostableAbilityScores?.includes(key) ?? false;
+  });
+  return result;
 });
 
 // #endregion Computed's
@@ -813,8 +776,7 @@ function handlePointerMove(x: number, y: number) {
   const bar = cell.parentElement;
   if (!bar) return;
   const abilityScoreName = bar.dataset.abilityScoreName as AbilityKey;
-  if (!abilityScoreName || touchedAbilityScore.value !== abilityScoreName)
-    return;
+  if (!abilityScoreName || touchedAbilityScore.value !== abilityScoreName) return;
   if (!cell.dataset.value) return;
   const value = parseInt(cell.dataset.value, 10);
   abilityScores.value[abilityScoreName] = value;
