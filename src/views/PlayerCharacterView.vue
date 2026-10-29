@@ -5,7 +5,12 @@
     class="h-full text-ink/65 overflow-y-auto mask-alpha animate-scroll-fade [scroll-timeline-name:--scroller] [animation-timeline:--scroller] [animation-range:0_10px] [animation-fill-mode:forwards]"
   >
     <form v-if="isEditorReady" @submit.prevent="savePlayerCharacter" class="">
-      <BetterDetails id="identity" group="player-character" :open="currentSection === 1">
+      <BetterDetails
+        id="identity"
+        group="player-character"
+        :open="currentSection === 'identity'"
+        @toggle="onToggle"
+      >
         <template #summary>
           <span class="text-sm">
             <span class="font-bold shrink">
@@ -93,11 +98,17 @@
             type="button"
             class="button align-right"
             value="Next"
-            @click="currentSection = 2"
+            @click="currentSection = 'combat-stats'"
           />
         </div>
       </BetterDetails>
-      <BetterDetails id="combat-stats" group="player-character" :open="currentSection === 2" class="p-2 w-full">
+      <BetterDetails
+        id="combat-stats"
+        group="player-character"
+        :open="currentSection === 'combat-stats'"
+        @toggle="onToggle"
+        class="p-2 w-full"
+      >
         <template #summary>
           <div class="w-full text-sm">
             <div class="group-open:hidden text-[80%] flex flex-row flex-wrap gap-x-2 gap-y-1">
@@ -317,11 +328,16 @@
             type="button"
             class="button align-right"
             value="Next"
-            @click="currentSection = 3"
+            @click="currentSection = 'skills'"
           />
         </div>
       </BetterDetails>
-      <BetterDetails id="skills" group="player-character" :open="currentSection === 3">
+      <BetterDetails
+        id="skills"
+        group="player-character"
+        :open="currentSection === 'skills'"
+        @toggle="onToggle"
+      >
         <template #summary> Skills </template>
         <div class="grid gap-4 grid-cols-2 sm:grid-cols-3 md:grid-cols-4">
           <div
@@ -343,12 +359,12 @@
             </ul>
           </div>
         </div>
-                <div class="flex justify-end">
+        <div class="flex justify-end">
           <input
             type="button"
             class="button align-right"
             value="Next"
-            @click="currentSection = 1"
+            @click="currentSection = 'identity'"
           />
         </div>
       </BetterDetails>
@@ -513,7 +529,28 @@ const characterGender = ref("");
 const originalFormSnapshot = ref("");
 const isDiscarding = ref(false);
 
-const currentSection = ref(0);
+//#region Properties and Events
+
+function onToggle(event: Event): void {
+  const target = event.target as HTMLDetailsElement;
+  if (target.open) {
+    //console.log(`Toggled open section: ${target.id}`);
+    currentSection.value = target.id;
+  } else {
+    //console.log(`Toggled closed section: ${target.id}`);
+    currentSection.value = "";
+  }
+}
+
+//#endregion Properties and Events
+
+//#region Navigation
+
+const currentSection = ref("");
+
+//#endregion Navigation
+
+//#region Computed properties
 
 const identityClassName = computed(
   () => classes.find((classItem) => classItem.id === characterClass.value)?.name,
@@ -547,6 +584,8 @@ const campaign = computed(() =>
 const playerCharacter = computed(() =>
   campaign.value?.party.find((member) => member.id === playerCharacterId.value),
 );
+
+//#endregion Computed properties
 
 function formSnapshot(): string {
   return JSON.stringify({

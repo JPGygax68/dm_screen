@@ -33,20 +33,22 @@
 </template>
 
 <script setup>
+import { watch } from "vue";  
+
+//#region Properties & Events
 
 const props = defineProps({
   group: String,
   open: Boolean
 });
 
-// `toggle` fires after the open state changed; wait a frame so that layout
-// shifts caused by other grouped <details> closing have been applied.
+const emit = defineEmits(["toggle"]);
+
 function onToggle(event) {
-  const el = event.target;
-  if (!el.open) return;
-  requestAnimationFrame(() => {
-    el.scrollIntoView({ behavior: "smooth", block: "nearest" });
-  });
+  // Just re-emit the toggle event to the parent component
+  emit("toggle", event);
 }
+
+//#endregion Properties
 
 </script>
