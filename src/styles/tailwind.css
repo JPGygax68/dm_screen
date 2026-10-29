@@ -89,7 +89,8 @@ input[type="number"].appearance-none {
 /* Scroll fade animation for overflow content */
 
 @theme {
-  --animate-scroll-fade: scroll-fade linear;
+  /* --animate-scroll-fade: scroll-fade linear; */
+  --animate-scroll-shadow-in: scroll-shadow-in linear;
 }
 
 @keyframes scroll-fade {
@@ -99,5 +100,32 @@ input[type="number"].appearance-none {
   /* Quickly fade in the mask as soon as the user starts scrolling */
   to {
     mask-image: linear-gradient(to bottom, transparent 0%, black 15px);
+  }
+}
+
+.scroll-shadow::before {
+  content: "";
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  display: block;
+  height: 2.5rem;
+  margin-bottom: -2.5rem;
+  pointer-events: none;
+  background: linear-gradient(
+    to bottom,
+    color-mix(in oklch, var(--color-ink) 85%, transparent) 0%,
+    color-mix(in oklch, var(--color-ink) 45%, transparent) 5px,
+    transparent 10px
+  );
+  opacity: 0;
+  animation: scroll-shadow linear forwards;
+  animation-timeline: scroll(nearest block);
+  animation-range: 0 10px;
+}
+
+@keyframes scroll-shadow {
+  to {
+    opacity: 1;
   }
 }

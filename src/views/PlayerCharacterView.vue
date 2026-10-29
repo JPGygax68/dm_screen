@@ -2,7 +2,7 @@
 
 <template>
   <div
-    class="h-full text-ink/65 overflow-y-auto mask-alpha animate-scroll-fade [scroll-timeline-name:--scroller] [animation-timeline:--scroller] [animation-range:0_10px] [animation-fill-mode:forwards]"
+    class="h-full text-ink/65 overflow-y-auto scroll-shadow"
   >
     <form v-if="isEditorReady" @submit.prevent="savePlayerCharacter" class="">
       <BetterDetails
@@ -538,7 +538,6 @@ function onToggle(event: Event): void {
     currentSection.value = target.id;
   } else {
     //console.log(`Toggled closed section: ${target.id}`);
-    currentSection.value = "";
   }
 }
 

@@ -47,6 +47,7 @@ const emit = defineEmits(["toggle"]);
 function onToggle(event) {
   // Just re-emit the toggle event to the parent component
   emit("toggle", event);
+  //event.preventDefault();
 }
 
 //#endregion Properties
