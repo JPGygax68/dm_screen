@@ -1,6 +1,9 @@
 <template>
   <details
-    class="group mx-auto max-w-3xl border-b border-ink/15 px-2 py-3 lg:px-10"
+    :open="props.open"
+    :name="props.group"
+    @toggle="onToggle"
+    class="group mx-auto max-w-3xl border-b border-ink/15 px-2 py-1.5 lg:px-10"
   >
     <summary
       class="w-full text-ink/65 flex items-align-start justify-between gap-2"
@@ -28,3 +31,22 @@
     <slot />
   </details>
 </template>
+
+<script setup>
+
+const props = defineProps({
+  group: String,
+  open: Boolean
+});
+
+// `toggle` fires after the open state changed; wait a frame so that layout
+// shifts caused by other grouped <details> closing have been applied.
+function onToggle(event) {
+  const el = event.target;
+  if (!el.open) return;
+  requestAnimationFrame(() => {
+    el.scrollIntoView({ behavior: "smooth", block: "nearest" });
+  });
+}
+
+</script>

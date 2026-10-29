@@ -5,7 +5,7 @@
     class="h-full text-ink/65 overflow-y-auto mask-alpha animate-scroll-fade [scroll-timeline-name:--scroller] [animation-timeline:--scroller] [animation-range:0_10px] [animation-fill-mode:forwards]"
   >
     <form v-if="isEditorReady" @submit.prevent="savePlayerCharacter" class="">
-      <BetterDetails id="identity">
+      <BetterDetails id="identity" group="player-character" :open="currentSection === 1">
         <template #summary>
           <span class="text-sm">
             <span class="font-bold shrink">
@@ -88,8 +88,16 @@
             <!-- TODO: handle custom background definition -->
           </select>
         </section>
+        <div class="flex justify-end">
+          <input
+            type="button"
+            class="button align-right"
+            value="Next"
+            @click="currentSection = 2"
+          />
+        </div>
       </BetterDetails>
-      <BetterDetails id="combat-stats" class="p-2 w-full">
+      <BetterDetails id="combat-stats" group="player-character" :open="currentSection === 2" class="p-2 w-full">
         <template #summary>
           <div class="w-full text-sm">
             <div class="group-open:hidden text-[80%] flex flex-row flex-wrap gap-x-2 gap-y-1">
@@ -146,7 +154,7 @@
         </template>
         <table
           id="ability-scores"
-          class="w-[calc(100%+1rem)] max-w-none table-fixed border-separate border-spacing-y-0.5 border-spacing-x-2 border-spacing-y-1 -mx-2 overflow-x-auto"
+          class="w-[calc(100%+1rem)] max-w-none table-fixed border-separate border-spacing-x-2 border-spacing-y-1 -mx-2 overflow-x-auto"
         >
           <thead>
             <tr class="*:overflow-x-hidden *:text-ellipsis">
@@ -304,8 +312,16 @@
             </tr>
           </tfoot>
         </table>
+        <div class="flex justify-end">
+          <input
+            type="button"
+            class="button align-right"
+            value="Next"
+            @click="currentSection = 3"
+          />
+        </div>
       </BetterDetails>
-      <BetterDetails id="skills">
+      <BetterDetails id="skills" group="player-character" :open="currentSection === 3">
         <template #summary> Skills </template>
         <div class="grid gap-4 grid-cols-2 sm:grid-cols-3 md:grid-cols-4">
           <div
@@ -327,6 +343,14 @@
             </ul>
           </div>
         </div>
+                <div class="flex justify-end">
+          <input
+            type="button"
+            class="button align-right"
+            value="Next"
+            @click="currentSection = 1"
+          />
+        </div>
       </BetterDetails>
       <div id="action-buttons" class="mx-auto flex max-w-3xl justify-end gap-3 px-2 py-6 lg:px-10">
         <button
@@ -341,6 +365,7 @@
           class="bg-moss-dark px-4 py-3 text-sm font-bold text-paper transition hover:bg-moss disabled:cursor-not-allowed disabled:opacity-50"
           :disabled="
             isSaving ||
+            !hasUnsavedChanges ||
             !characterName.trim() ||
             !characterClass ||
             !characterSpecies ||
@@ -488,6 +513,8 @@ const characterGender = ref("");
 const originalFormSnapshot = ref("");
 const isDiscarding = ref(false);
 
+const currentSection = ref(0);
+
 const identityClassName = computed(
   () => classes.find((classItem) => classItem.id === characterClass.value)?.name,
 );
@@ -524,6 +551,7 @@ const playerCharacter = computed(() =>
 function formSnapshot(): string {
   return JSON.stringify({
     name: characterName.value,
+    surname: characterSurname.value,
     classId: characterClass.value,
     species: characterSpecies.value,
     gender: characterGender.value,
@@ -728,7 +756,7 @@ const abilityModifiersAsText = computed(() => {
 
 const backgroundAllowsBoosting = computed(() => {
   const result: Record<AbilityKey, boolean> = {} as Record<AbilityKey, boolean>;
-  if (characterBackground.value === 'custom') {
+  if (characterBackground.value === "custom") {
     console.log("Custom background allows boosting for all abilities.");
     for (const key of Object.keys(finalAbilityScores.value) as AbilityKey[]) {
       result[key] = true;
