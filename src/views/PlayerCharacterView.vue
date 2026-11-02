@@ -27,7 +27,7 @@
           class="grid grid-cols-[min-content_1fr] items-baseline gap-x-2 gap-y-2 py-3 sm:grid-cols-[min-content_1fr_min-content_1fr] [&>label]:justify-self-end [&>select>option]:box-border_p-0"
         >
           <label class="text-sm" for="character-name">Name</label>
-          <input id="character-name" type="text" v-model="characterName" />
+          <input id="character-name" ref="nameInput" type="text" v-model="characterName" />
           <label class="text-sm" for="character-surname">Surname</label>
           <input id="character-surname" type="text" v-model="characterSurname" />
           <label class="text-sm" for="character-class">Class</label>
@@ -67,8 +67,6 @@
             id="character-gender"
             v-model="characterGender"
             list="character-gender-options"
-            required
-            minlength="1"
           />
           <datalist id="character-gender-options">
             <option id="male" value="Male" />
@@ -103,6 +101,7 @@
         </div>
       </BetterDetails>
       <BetterDetails
+        v-if="!isNew"
         id="combat-stats"
         group="player-character"
         :open="currentSection === 'combat-stats'"
@@ -333,6 +332,7 @@
         </div>
       </BetterDetails>
       <BetterDetails
+        v-if="!isNew"
         id="skills"
         group="player-character"
         :open="currentSection === 'skills'"
@@ -382,13 +382,10 @@
           :disabled="
             isSaving ||
             !hasUnsavedChanges ||
-            !characterName.trim() ||
-            !characterClass ||
-            !characterSpecies ||
-            !characterGender.trim()
+            !characterName.trim()
           "
         >
-          {{ isSaving ? "Saving..." : "Save character" }}
+          {{ isSaving ? "Saving..." : isNew ? "Add to party" : "Save character" }}
         </button>
       </div>
     </form>
@@ -466,7 +463,7 @@ select {
 </style>
 
 <script setup lang="ts">
-import { ref, computed, watch } from "vue";
+import { ref, computed, watch, nextTick, useTemplateRef } from "vue";
 import { storeToRefs } from "pinia";
 import { onBeforeRouteLeave, onBeforeRouteUpdate, useRoute, useRouter } from "vue-router";
 import type { Ref } from "vue";
@@ -580,6 +577,7 @@ const playerCharacterId = computed(() => String(route.params.playerCharacterId ?
 const campaign = computed(() =>
   ((roots.value.campaigns ?? []) as Campaign[]).find((item) => item.id === campaignId.value),
 );
+const isNew = computed(() => !playerCharacterId.value);
 const playerCharacter = computed(() =>
   campaign.value?.party.find((member) => member.id === playerCharacterId.value),
 );
@@ -607,13 +605,28 @@ function hydrateEditor(): void {
   isEditorReady.value = false;
   isLoading.value = true;
   errorMessage.value = "";
+  if (isNew.value) {
+    characterName.value = "";
+    characterSurname.value = "";
+    characterClass.value = "";
+    characterSpecies.value = "";
+    characterGender.value = "";
+    characterBackground.value = "";
+    abilityScores.value = { ...initialAbilityScores };
+    abilityBonuses.value = { str: 0, dex: 0, con: 0, int: 0, wis: 0, cha: 0 };
+    originalFormSnapshot.value = formSnapshot();
+    currentSection.value = "identity";
+    isEditorReady.value = !!campaign.value;
+    isLoading.value = false;
+    return;
+  }
   const character = playerCharacter.value;
   if (character) {
     characterName.value = character.name;
     characterSurname.value = character.surname ?? "";
-    characterClass.value = character.classes[0] ?? "";
-    characterSpecies.value = character.species;
-    characterGender.value = character.gender;
+    characterClass.value = character.classes?.[0] ?? "";
+    characterSpecies.value = character.species ?? "";
+    characterGender.value = character.gender ?? "";
     characterBackground.value = character.background ?? "";
     abilityScores.value = {
       ...initialAbilityScores,
@@ -633,6 +646,19 @@ watch([campaignId, playerCharacterId, () => roots.value.campaigns], hydrateEdito
   immediate: true,
 });
 
+const nameInput = useTemplateRef<HTMLInputElement>("nameInput");
+
+// The form is rendered only once the editor is ready, so focus after it appears.
+watch(
+  isEditorReady,
+  async (ready) => {
+    if (!ready || !isNew.value) return;
+    await nextTick();
+    nameInput.value?.focus();
+  },
+  { immediate: true, flush: "post" },
+);
+
 function confirmDiscard(): boolean {
   return (
     isDiscarding.value ||
@@ -647,21 +673,54 @@ onBeforeRouteUpdate((to, from) => {
   return confirmDiscard();
 });
 
-async function savePlayerCharacter(): Promise<void> {
-  const current = playerCharacter.value;
-  if (!current || isSaving.value) return;
-
-  const updated: PlayerCharacter = {
-    ...current,
+// Optional text fields are left out when empty, as the schema rejects empty strings.
+function editableFields(): Partial<PlayerCharacter> {
+  const fields: Partial<PlayerCharacter> = {
     name: characterName.value.trim(),
-    surname: characterSurname.value.trim(),
-    classes: [characterClass.value],
-    species: characterSpecies.value,
-    gender: characterGender.value.trim(),
-    background: characterBackground.value,
     abilityScores: { ...abilityScores.value },
     abilityBonuses: { ...abilityBonuses.value },
   };
+  const surname = characterSurname.value.trim();
+  const gender = characterGender.value.trim();
+  if (surname) fields.surname = surname;
+  if (characterClass.value) fields.classes = [characterClass.value];
+  if (characterSpecies.value) fields.species = characterSpecies.value;
+  if (gender) fields.gender = gender;
+  if (characterBackground.value) fields.background = characterBackground.value;
+  return fields;
+}
+
+async function createPlayerCharacter(): Promise<void> {
+  const parent = campaign.value;
+  if (!parent || isSaving.value) return;
+
+  isSaving.value = true;
+  errorMessage.value = "";
+  let draftId: string | undefined;
+  try {
+    draftId = store.beginDraft("PlayerCharacter", editableFields());
+    await store.commitDraft(draftId, "PlayerCharacter", {
+      type: "Campaign",
+      id: parent.id,
+      field: "party",
+      collection: parent.party,
+    });
+    draftId = undefined;
+    await cancelEditing();
+  } catch (error) {
+    errorMessage.value = error instanceof Error ? error.message : "Unable to add player character.";
+  } finally {
+    if (draftId) store.cancelDraft(draftId);
+    isSaving.value = false;
+  }
+}
+
+async function savePlayerCharacter(): Promise<void> {
+  if (isNew.value) return createPlayerCharacter();
+  const current = playerCharacter.value;
+  if (!current || isSaving.value) return;
+
+  const updated: PlayerCharacter = { ...current, ...editableFields() };
 
   isSaving.value = true;
   errorMessage.value = "";

@@ -12,7 +12,6 @@ import CampaignDetailView from "@/views/CampaignDetailView.vue";
 import SchemaCollectionView from "@/views/SchemaCollectionView.vue";
 import SchemaEntityView from "@/views/SchemaEntityView.vue";
 import PartyCollectionView from "@/views/PartyCollectionView.vue";
-import NewPlayerCharacterRouteView from "@/views/NewPlayerCharacterRouteView.vue";
 import PlayerCharacterView from "@/views/PlayerCharacterView.vue";
 
 export function createAppRouter(schemaDocument: object) {
@@ -40,7 +39,7 @@ export function createAppRouter(schemaDocument: object) {
       path: "new",
       name: "campaign-party-new",
       breadcrumb: "New character",
-      component: NewPlayerCharacterRouteView,
+      component: PlayerCharacterView,
     },
   ];
 
@@ -51,7 +50,9 @@ export function createAppRouter(schemaDocument: object) {
   ];
 
   return createRouter({
-    history: createWebHistory(import.meta.env.BASE_URL),
+    history: createWebHistory(
+      (import.meta as ImportMeta & { env: { BASE_URL: string } }).env.BASE_URL,
+    ),
     routes,
   });
 }

@@ -12,13 +12,10 @@ export {}
 declare module 'vue' {
   export interface GlobalComponents {
     BetterDetails: typeof import('./components/BetterDetails.vue')['default']
-    BetterSummary: typeof import('./components/BetterSummary.vue')['default']
     CampaignDetailView: typeof import('./views/CampaignDetailView.vue')['default']
     CampaignList: typeof import('./components/CampaignList.vue')['default']
     CampaignListView: typeof import('./views/CampaignListView.vue')['default']
     CampaignsLayout: typeof import('./views/CampaignsLayout.vue')['default']
-    NewPlayerCharacterDialog: typeof import('./components/NewPlayerCharacterDialog.vue')['default']
-    NewPlayerCharacterRouteView: typeof import('./views/NewPlayerCharacterRouteView.vue')['default']
     NumberStepper: typeof import('./components/NumberStepper.vue')['default']
     PartyCollectionView: typeof import('./views/PartyCollectionView.vue')['default']
     PlayerCharacterView: typeof import('./views/PlayerCharacterView.vue')['default']

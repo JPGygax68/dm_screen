@@ -186,10 +186,10 @@ type: object
     required:
     - id
     - name
-    - species
-    - gender
-    - classes
-    - maxHitPoints
+    # - species
+    # - gender
+    # - classes
+    # - maxHitPoints
     additionalProperties: true
 
   NonPlayerCharacter:
