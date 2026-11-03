@@ -12,7 +12,7 @@
         @toggle="onToggle"
       >
         <template #summary>
-          <span class="text-sm">
+          <span>
             <span v-if="isNew">(New): </span>
             <span class="font-bold shrink">
               {{ characterName }}
@@ -27,11 +27,11 @@
         <section
           class="grid grid-cols-[min-content_1fr] items-baseline gap-x-2 gap-y-2 py-3 sm:grid-cols-[min-content_1fr_min-content_1fr] [&>label]:justify-self-end [&>select>option]:box-border_p-0"
         >
-          <label class="text-sm" for="character-name">Name</label>
+          <label for="character-name">Name</label>
           <input id="character-name" ref="nameInput" type="text" v-model="characterName" />
-          <label class="text-sm" for="character-surname">Surname</label>
+          <label for="character-surname">Surname</label>
           <input id="character-surname" type="text" v-model="characterSurname" />
-          <label class="text-sm" for="character-class">Class</label>
+          <label for="character-class">Class</label>
           <select id="character-class" v-model="characterClass">
             <option disabled value="">Select class</option>
             <option v-for="classItem in classes" :key="classItem.id" :value="classItem.id">
@@ -39,7 +39,7 @@
             </option>
           </select>
           <!-- Commented out for now: Subclass selection comes at level 3
-          <label class="text-sm" for="character-subclass">Subclass</label>
+          <label for="character-subclass">Subclass</label>
           <select
             id="character-subclass"
             class="select"
@@ -51,7 +51,7 @@
             <option>Evocation</option>
             <option>Divination</option>
           </select> -->
-          <label class="text-sm" for="character-species">Species</label>
+          <label for="character-species">Species</label>
           <select
             id="character-species"
             v-model="characterSpecies"
@@ -63,7 +63,7 @@
               {{ speciesItem.name }}
             </option>
           </select>
-          <label class="text-sm" for="character-gender">Gender</label>
+          <label for="character-gender">Gender</label>
           <input
             id="character-gender"
             v-model="characterGender"
@@ -74,7 +74,7 @@
             <option id="female" value="Female" />
             <option id="other" value="Other" />
           </datalist>
-          <label class="text-sm" for="character-background">Background</label>
+          <label for="character-background">Background</label>
           <select
             id="character-background"
             v-model="characterBackground"
@@ -110,7 +110,7 @@
         class="p-2 w-full"
       >
         <template #summary>
-          <div class="w-full text-sm">
+          <div class="w-full">
             <div class="group-open:hidden text-[80%] flex flex-row flex-wrap gap-x-2 gap-y-1">
               <span
                 v-for="(key, _) in abilityKeys"
@@ -339,7 +339,7 @@
         :open="currentSection === 'skills'"
         @toggle="onToggle"
       >
-        <template #summary> Skills </template>
+        <template #summary>Skills</template>
         <div class="grid gap-4 grid-cols-2 sm:grid-cols-3 md:grid-cols-4">
           <div
             v-for="ability in abilityKeys"
@@ -347,7 +347,7 @@
             :id="`skillset-${ability}`"
             class="sm:min-w-8 p-1 border rounded-lg"
           >
-            <h3 class="text-lg font-bold capitalize">
+            <h3 class="text-[150%]lg font-bold capitalize">
               {{ abilityNamesMap_en[ability] }}
             </h3>
             <ul>
@@ -373,7 +373,7 @@
         <button
           v-if="!isNew"
           type="button"
-          class="mr-auto bg-error-dark px-4 py-3 text-sm font-bold text-white transition hover:bg-error disabled:cursor-not-allowed disabled:opacity-50"
+          class="mr-auto bg-error-dark px-4 py-3 font-bold text-white transition hover:bg-error disabled:cursor-not-allowed disabled:opacity-50"
           :disabled="isSaving"
           @click="deletePlayerCharacter"
         >
@@ -381,14 +381,14 @@
         </button>
         <button
           type="button"
-          class="px-4 py-3 text-sm font-bold text-ink/70 transition hover:text-ink"
+          class="px-4 py-3 font-bold text-ink/70 transition hover:text-ink"
           @click="cancelEditing"
         >
           Cancel
         </button>
         <button
           type="submit"
-          class="bg-moss-dark px-4 py-3 text-sm font-bold text-paper transition hover:bg-moss disabled:cursor-not-allowed disabled:opacity-50"
+          class="bg-moss-dark px-4 py-3 font-bold text-paper transition hover:bg-moss disabled:cursor-not-allowed disabled:opacity-50"
           :disabled="
             isSaving ||
             !hasUnsavedChanges ||
@@ -411,7 +411,7 @@
     <p
       id="error_message"
       v-if="errorMessage"
-      class="mx-auto max-w-3xl px-6 pb-8 text-sm text-red-700"
+      class="mx-auto max-w-3xl px-6 pb-8 text-red-700"
       role="alert"
     >
       {{ errorMessage }}
