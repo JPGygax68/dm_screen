@@ -370,6 +370,15 @@
       </BetterDetails>
       <div id="action-buttons" class="mx-auto flex max-w-3xl justify-end gap-3 px-2 py-6 lg:px-10">
         <button
+          v-if="!isNew"
+          type="button"
+          class="mr-auto bg-red-600 px-4 py-3 text-sm font-bold text-white transition hover:bg-red-700 disabled:cursor-not-allowed disabled:opacity-50"
+          :disabled="isSaving"
+          @click="deletePlayerCharacter"
+        >
+          Delete
+        </button>
+        <button
           type="button"
           class="px-4 py-3 text-sm font-bold text-ink/70 transition hover:text-ink"
           @click="cancelEditing"
@@ -731,6 +740,32 @@ async function savePlayerCharacter(): Promise<void> {
   } catch (error) {
     errorMessage.value =
       error instanceof Error ? error.message : "Unable to save player character.";
+  } finally {
+    isSaving.value = false;
+  }
+}
+
+async function deletePlayerCharacter(): Promise<void> {
+  const parent = campaign.value;
+  const current = playerCharacter.value;
+  if (!parent || !current || isSaving.value) return;
+  if (!window.confirm(`Delete ${current.name}? This cannot be undone.`)) return;
+
+  isSaving.value = true;
+  errorMessage.value = "";
+  try {
+    isDiscarding.value = true;
+    await store.removeChild("PlayerCharacter", current.id, {
+      type: "Campaign",
+      id: parent.id,
+      field: "party",
+      collection: parent.party,
+    });
+    await cancelEditing();
+  } catch (error) {
+    isDiscarding.value = false;
+    errorMessage.value =
+      error instanceof Error ? error.message : "Unable to delete player character.";
   } finally {
     isSaving.value = false;
   }
