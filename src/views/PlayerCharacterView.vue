@@ -13,6 +13,7 @@
       >
         <template #summary>
           <span class="text-sm">
+            <span v-if="isNew">(New): </span>
             <span class="font-bold shrink">
               {{ characterName }}
               <span v-if="characterSurname" class="hidden sm:inline">{{ characterSurname }}</span>
@@ -91,7 +92,7 @@
             <!-- TODO: handle custom background definition -->
           </select>
         </section>
-        <div class="flex justify-end">
+        <div v-if="!isNew" class="flex justify-end">
           <input
             type="button"
             class="button align-right"
@@ -372,7 +373,7 @@
         <button
           v-if="!isNew"
           type="button"
-          class="mr-auto bg-red-600 px-4 py-3 text-sm font-bold text-white transition hover:bg-red-700 disabled:cursor-not-allowed disabled:opacity-50"
+          class="mr-auto bg-error-dark px-4 py-3 text-sm font-bold text-white transition hover:bg-error disabled:cursor-not-allowed disabled:opacity-50"
           :disabled="isSaving"
           @click="deletePlayerCharacter"
         >
