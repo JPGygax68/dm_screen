@@ -339,13 +339,14 @@
         :open="currentSection === 'skills'"
         @toggle="onToggle"
       >
-        <template #summary>Skills</template>
-        <div class="grid gap-4 grid-cols-2 sm:grid-cols-3 md:grid-cols-4">
+        <template #summary><span class="font-bold">Skills</span></template>
+        <!-- <div class="grid gap-4 grid-cols-2 sm:grid-cols-3 md:grid-cols-4"> -->
+        <div class="columns-2 sm:columns-3 gap-4 space-y-4">
           <div
             v-for="ability in abilityKeys"
             :key="ability"
             :id="`skillset-${ability}`"
-            class="sm:min-w-8 p-1 border rounded-lg"
+            class="sm:min-w-8 p-1 border rounded-lg break-inside-avoid"
           >
             <h3 class="text-[150%]lg font-bold capitalize">
               {{ abilityNamesMap_en[ability] }}
@@ -354,13 +355,15 @@
               <li
                 v-for="skill in skills.filter((s: Skill) => s.ability === ability)"
                 :key="skill.id"
+                class="flex flex-row justify-between"
               >
-                <label>{{ skillNamesMap_en[skill.id] }}</label>
+                <label :for="skill.id">{{ skillNamesMap_en[skill.id] }}</label>
+                <input type="checkbox" :id="skill.id" :value="skill.id" v-model="selectedSkills" />
               </li>
             </ul>
           </div>
         </div>
-        <div class="flex justify-end">
+        <div class="mt-2 flex justify-end">
           <input
             type="button"
             class="button align-right"
@@ -483,6 +486,7 @@ import type {
   AbilityBonuses,
   Campaign,
   PlayerCharacter,
+  SkillId,
 } from "@/generated/models/data.schema";
 import type { AbilityKey } from "@/lib/dnd2024/base.ts";
 import { abilityKeys, abilityNamesMap_en } from "@/lib/dnd2024/base.ts";
@@ -535,6 +539,8 @@ const characterSpecies = ref("");
 const characterGender = ref("");
 const originalFormSnapshot = ref("");
 const isDiscarding = ref(false);
+
+const selectedSkills = ref<SkillId[]>([]);
 
 //#region Properties and Events
 
@@ -604,7 +610,8 @@ function formSnapshot(): string {
     background: characterBackground.value,
     abilityScores: abilityScores.value,
     abilityBonuses: abilityBonuses.value,
-  });
+    skills: selectedSkills.value,
+  })
 }
 
 const hasUnsavedChanges = computed(
@@ -624,6 +631,7 @@ function hydrateEditor(): void {
     characterBackground.value = "";
     abilityScores.value = { ...initialAbilityScores };
     abilityBonuses.value = { str: 0, dex: 0, con: 0, int: 0, wis: 0, cha: 0 };
+    selectedSkills.value = [];
     originalFormSnapshot.value = formSnapshot();
     currentSection.value = "identity";
     isEditorReady.value = !!campaign.value;
@@ -635,6 +643,7 @@ function hydrateEditor(): void {
     characterName.value = character.name;
     characterSurname.value = character.surname ?? "";
     characterClass.value = character.classes?.[0] ?? "";
+    selectedSkills.value = (character.skills ?? []);
     characterSpecies.value = character.species ?? "";
     characterGender.value = character.gender ?? "";
     characterBackground.value = character.background ?? "";
@@ -646,6 +655,7 @@ function hydrateEditor(): void {
       ...abilityBonuses.value,
       ...character.abilityBonuses,
     };
+    selectedSkills.value = (character.skills ?? []);
     originalFormSnapshot.value = formSnapshot();
     isEditorReady.value = true;
   }
@@ -689,6 +699,7 @@ function editableFields(): Partial<PlayerCharacter> {
     name: characterName.value.trim(),
     abilityScores: { ...abilityScores.value },
     abilityBonuses: { ...abilityBonuses.value },
+    skills: [...selectedSkills.value],
   };
   const surname = characterSurname.value.trim();
   const gender = characterGender.value.trim();
