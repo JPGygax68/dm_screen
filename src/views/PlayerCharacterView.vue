@@ -346,7 +346,7 @@
             v-for="ability in abilityKeys"
             :key="ability"
             :id="`skillset-${ability}`"
-            class="sm:min-w-8 p-1 border rounded-lg break-inside-avoid"
+            class="sm:min-w-8 px-2 py-1 border rounded-lg break-inside-avoid"
           >
             <h3 class="text-[150%]lg font-bold capitalize">
               {{ abilityNamesMap_en[ability] }}
