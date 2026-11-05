@@ -48,3 +48,10 @@ export const skillNamesMap_en: Record<SkillId, string> = {
     stealth: "Stealth",
     survival: "Survival"
 };
+
+export const raceSkills: Record<string, SkillId[]> = {
+    human: ["acrobatics", "athletics", "deception"],
+    elf: ["perception", "stealth"],
+    dwarf: ["history", "medicine"],
+    halfling: ["sleight_of_hand", "stealth"]
+};

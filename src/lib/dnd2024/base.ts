@@ -1,3 +1,5 @@
+/** @format */
+
 import type { AbilityScores } from "@/generated/models/data.schema";
 
 export type AbilityKey = keyof AbilityScores;
@@ -12,3 +14,8 @@ export const abilityNamesMap_en: { [k in AbilityKey]: string } = {
   wis: "wisdom",
   cha: "charisma",
 } as const;
+
+export type CreatureSize = "tiny" | "small" | "medium" | "large" | "huge" | "gargantuan";
+
+/* For loops */
+export const creatureSizes: readonly CreatureSize[] = ["tiny", "small", "medium", "large", "huge", "gargantuan"] as const;

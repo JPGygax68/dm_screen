@@ -60,7 +60,7 @@
           >
             <option disabled value="">Select species</option>
             <option v-for="speciesItem in species" :key="speciesItem.id" :value="speciesItem.id">
-              {{ speciesItem.name }}
+              {{ speciesItem.name_en }}
             </option>
           </select>
           <label for="character-gender">Gender</label>
@@ -568,7 +568,7 @@ const identityClassName = computed(
   () => classes.find((classItem) => classItem.id === characterClass.value)?.name,
 );
 const identitySpeciesName = computed(
-  () => species.find((speciesItem) => speciesItem.id === characterSpecies.value)?.name,
+  () => species.find((speciesItem) => speciesItem.id === characterSpecies.value)?.name_en,
 );
 const identityBackground = computed(() => {
   if (characterBackground.value === "custom") {
