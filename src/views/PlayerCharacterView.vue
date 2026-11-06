@@ -1,5 +1,509 @@
 <!-- @format -->
 
+<script setup lang="ts">
+import { ref, computed, watch, nextTick, useTemplateRef } from "vue";
+import { storeToRefs } from "pinia";
+import { onBeforeRouteLeave, onBeforeRouteUpdate, useRoute, useRouter } from "vue-router";
+import type { Ref } from "vue";
+import NumberStepper from "@/components/NumberStepper.vue";
+import type {
+  AbilityScores,
+  AbilityBonuses,
+  Campaign,
+  PlayerCharacter,
+  SkillId,
+} from "@/generated/models/data.schema";
+import type { AbilityKey } from "@/lib/dnd2024/base.ts";
+import { abilityKeys, abilityNamesMap_en } from "@/lib/dnd2024/base.ts";
+import { classes } from "@/lib/dnd2024/classFeatures.ts";
+import type { Background } from "@/lib/dnd2024/backgrounds.ts";
+import { backgrounds, freeBackgrounds } from "@/lib/dnd2024/backgrounds.ts";
+import { draconicAncestries, species } from "@/lib/dnd2024/species.ts";
+import { useDataStore } from "@/stores/data-store.ts";
+import { Skill, skillNamesMap_en, skills } from "@/lib/dnd2024/skills";
+
+const route = useRoute();
+const router = useRouter();
+const store = useDataStore();
+const { roots } = storeToRefs(store);
+
+const initialAbilityScores: AbilityScores = {
+  str: 10,
+  dex: 10,
+  con: 10,
+  int: 10,
+  wis: 10,
+  cha: 10,
+} as const;
+
+const abilityBonuses: Ref<AbilityBonuses> = ref({
+  str: 0,
+  dex: 0,
+  con: 0,
+  int: 0,
+  wis: 0,
+  cha: 0,
+});
+
+const abilityScores: Ref<AbilityScores> = ref({
+  ...initialAbilityScores,
+});
+const isEditorReady = ref(false);
+const isLoading = ref(true);
+const isSaving = ref(false);
+const errorMessage = ref("");
+
+const touchedAbilityScore = ref<AbilityKey>();
+
+const characterName = ref("");
+const characterSurname = ref("");
+const characterClass = ref("");
+const characterSubclass = ref("");
+const characterBackground = ref("");
+const characterSpecies = ref("");
+const characterAncestry = ref("");
+const characterGender = ref("");
+const originalFormSnapshot = ref("");
+const isDiscarding = ref(false);
+
+const selectedSkills = ref<SkillId[]>([]);
+
+//#region Properties and Events
+
+function onToggle(event: Event): void {
+  const target = event.target as HTMLDetailsElement;
+  if (target.open) {
+    //console.log(`Toggled open section: ${target.id}`);
+    currentSection.value = target.id;
+  } else {
+    //console.log(`Toggled closed section: ${target.id}`);
+  }
+}
+
+//#endregion Properties and Events
+
+//#region Navigation
+
+const currentSection = ref("");
+
+//#endregion Navigation
+
+//#region Computed properties
+
+const identityClassName = computed(
+  () => classes.find((classItem) => classItem.id === characterClass.value)?.name,
+);
+const identitySpeciesName = computed(
+  () => species.find((speciesItem) => speciesItem.id === characterSpecies.value)?.name_en,
+);
+const identityBackground = computed(() => {
+  if (characterBackground.value === "custom") {
+    return "Custom"; // TODO: replace with the actual name of the custom background
+  }
+  return backgrounds.find((background) => background.id === characterBackground.value)?.name_en;
+});
+const identityGenderName = computed(() => (characterGender.value ? characterGender.value : ""));
+const identityGenderIcon = computed(() => {
+  switch (characterGender.value) {
+    case "male":
+      return "♂";
+    case "female":
+      return "♀";
+    default:
+      return "";
+  }
+});
+
+const campaignId = computed(() => String(route.params.campaignId ?? ""));
+const playerCharacterId = computed(() => String(route.params.playerCharacterId ?? ""));
+const campaign = computed(() =>
+  ((roots.value.campaigns ?? []) as Campaign[]).find((item) => item.id === campaignId.value),
+);
+const isNew = computed(() => !playerCharacterId.value);
+const playerCharacter = computed(() =>
+  campaign.value?.party.find((member) => member.id === playerCharacterId.value),
+);
+
+//#endregion Computed properties
+
+function formSnapshot(): string {
+  return JSON.stringify({
+    name: characterName.value,
+    surname: characterSurname.value,
+    classId: characterClass.value,
+    species: characterSpecies.value,
+    ancestry: characterAncestry.value,
+    gender: characterGender.value,
+    background: characterBackground.value,
+    abilityScores: abilityScores.value,
+    abilityBonuses: abilityBonuses.value,
+    skills: selectedSkills.value,
+  })
+}
+
+const hasUnsavedChanges = computed(
+  () => isEditorReady.value && formSnapshot() !== originalFormSnapshot.value,
+);
+
+function hydrateEditor(): void {
+  isEditorReady.value = false;
+  isLoading.value = true;
+  errorMessage.value = "";
+  if (isNew.value) {
+    characterName.value = "";
+    characterSurname.value = "";
+    characterClass.value = "";
+    characterSpecies.value = "";
+    characterAncestry.value = "";
+    characterGender.value = "";
+    characterBackground.value = "";
+    abilityScores.value = { ...initialAbilityScores };
+    abilityBonuses.value = { str: 0, dex: 0, con: 0, int: 0, wis: 0, cha: 0 };
+    selectedSkills.value = [];
+    originalFormSnapshot.value = formSnapshot();
+    currentSection.value = "identity";
+    isEditorReady.value = !!campaign.value;
+    isLoading.value = false;
+    return;
+  }
+  const character = playerCharacter.value;
+  if (character) {
+    characterName.value = character.name;
+    characterSurname.value = character.surname ?? "";
+    characterClass.value = character.classes?.[0] ?? "";
+    selectedSkills.value = (character.skills ?? []);
+    characterSpecies.value = character.species ?? "";
+    characterAncestry.value = character.ancestry ?? "";
+    characterGender.value = character.gender ?? "";
+    characterBackground.value = character.background ?? "";
+    abilityScores.value = {
+      ...initialAbilityScores,
+      ...character.abilityScores,
+    };
+    abilityBonuses.value = {
+      ...abilityBonuses.value,
+      ...character.abilityBonuses,
+    };
+    selectedSkills.value = (character.skills ?? []);
+    originalFormSnapshot.value = formSnapshot();
+    isEditorReady.value = true;
+  }
+  isLoading.value = false;
+}
+
+watch([campaignId, playerCharacterId, () => roots.value.campaigns], hydrateEditor, {
+  immediate: true,
+});
+
+const nameInput = useTemplateRef<HTMLInputElement>("nameInput");
+
+// The form is rendered only once the editor is ready, so focus after it appears.
+watch(
+  isEditorReady,
+  async (ready) => {
+    if (!ready || !isNew.value) return;
+    await nextTick();
+    nameInput.value?.focus();
+  },
+  { immediate: true, flush: "post" },
+);
+
+function confirmDiscard(): boolean {
+  return (
+    isDiscarding.value ||
+    !hasUnsavedChanges.value ||
+    window.confirm("Discard unsaved character changes?")
+  );
+}
+
+onBeforeRouteLeave(confirmDiscard);
+onBeforeRouteUpdate((to, from) => {
+  if (to.params.playerCharacterId === from.params.playerCharacterId) return true;
+  return confirmDiscard();
+});
+
+// Optional text fields are left out when empty, as the schema rejects empty strings.
+function editableFields(): Partial<PlayerCharacter> {
+  const fields: Partial<PlayerCharacter> = {
+    name: characterName.value.trim(),
+    abilityScores: { ...abilityScores.value },
+    abilityBonuses: { ...abilityBonuses.value },
+    skills: [...selectedSkills.value],
+  };
+  const surname = characterSurname.value.trim();
+  const gender = characterGender.value.trim();
+  if (surname) fields.surname = surname;
+  if (characterClass.value) fields.classes = [characterClass.value];
+  if (characterSpecies.value) fields.species = characterSpecies.value;
+  if (characterAncestry.value) fields.ancestry = characterAncestry.value;
+  if (gender) fields.gender = gender;
+  if (characterBackground.value) fields.background = characterBackground.value;
+  return fields;
+}
+
+async function createPlayerCharacter(): Promise<void> {
+  const parent = campaign.value;
+  if (!parent || isSaving.value) return;
+
+  isSaving.value = true;
+  errorMessage.value = "";
+  let draftId: string | undefined;
+  try {
+    draftId = store.beginDraft("PlayerCharacter", editableFields());
+    await store.commitDraft(draftId, "PlayerCharacter", {
+      type: "Campaign",
+      id: parent.id,
+      field: "party",
+      collection: parent.party,
+    });
+    draftId = undefined;
+    await cancelEditing();
+  } catch (error) {
+    errorMessage.value = error instanceof Error ? error.message : "Unable to add player character.";
+  } finally {
+    if (draftId) store.cancelDraft(draftId);
+    isSaving.value = false;
+  }
+}
+
+async function savePlayerCharacter(): Promise<void> {
+  if (isNew.value) return createPlayerCharacter();
+  const current = playerCharacter.value;
+  if (!current || isSaving.value) return;
+
+  const updated: PlayerCharacter = { ...current, ...editableFields() };
+
+  isSaving.value = true;
+  errorMessage.value = "";
+  try {
+    await store.updateEntity("PlayerCharacter", updated);
+    Object.assign(current, updated);
+    await cancelEditing();
+  } catch (error) {
+    errorMessage.value =
+      error instanceof Error ? error.message : "Unable to save player character.";
+  } finally {
+    isSaving.value = false;
+  }
+}
+
+async function deletePlayerCharacter(): Promise<void> {
+  const parent = campaign.value;
+  const current = playerCharacter.value;
+  if (!parent || !current || isSaving.value) return;
+  if (!window.confirm(`Delete ${current.name}? This cannot be undone.`)) return;
+
+  isSaving.value = true;
+  errorMessage.value = "";
+  try {
+    isDiscarding.value = true;
+    await store.removeChild("PlayerCharacter", current.id, {
+      type: "Campaign",
+      id: parent.id,
+      field: "party",
+      collection: parent.party,
+    });
+    await cancelEditing();
+  } catch (error) {
+    isDiscarding.value = false;
+    errorMessage.value =
+      error instanceof Error ? error.message : "Unable to delete player character.";
+  } finally {
+    isSaving.value = false;
+  }
+}
+
+async function cancelEditing(): Promise<void> {
+  isDiscarding.value = true;
+  await router.push({
+    name: "campaign-detail",
+    params: { campaignId: campaignId.value },
+  });
+}
+
+const availableBackgrounds: Ref<Background[]> = ref([
+  ...freeBackgrounds,
+  { id: "custom", name_en: "Custom" },
+]);
+
+// #region Computed's
+
+const baseAbilityScoreUiProps = computed(() => {
+  const props: Record<AbilityKey, { isLowest: boolean; isHighest: boolean; warning: string }> =
+    {} as any;
+  let lowest = 99;
+  let highest = -99;
+  (Object.keys(abilityScores.value) as AbilityKey[]).forEach((key) => {
+    const value = abilityScores.value[key];
+    if (value < lowest) lowest = value;
+    if (value > highest) highest = value;
+  });
+  let highestScoreIsOneOfPrimaries = false;
+  (Object.keys(abilityScores.value) as AbilityKey[]).forEach((key) => {
+    const value = abilityScores.value[key];
+    const isPrimary = primaryClassAbilities.value.includes(key);
+    if (isPrimary && value === highest) {
+      highestScoreIsOneOfPrimaries = true;
+    }
+    props[key] = {
+      isLowest: value === lowest,
+      isHighest: value === highest,
+      warning: (() => {
+        if (isPrimary && value < highest && !highestScoreIsOneOfPrimaries) {
+          return "One of the primary abilities should be the highest";
+        }
+        if (isPrimary && Math.floor((value - 10) / 2) <= 0) {
+          return "A primary ability score should be high enough to confer a bonus without modifiers, i.e. be 12 or higher";
+        }
+        return "";
+      })(),
+    };
+  });
+  return props;
+});
+
+const baseAbilityScoresTotal = computed(() => {
+  return Object.values(abilityScores.value).reduce((sum, val) => sum + val, 0);
+});
+
+const primaryClassAbilities: Ref<AbilityKey[]> = computed(() => {
+  // Consult the class features and extract the primary abilities for the class
+  const cls = classes.find((c) => c.id === characterClass.value);
+  if (!cls) {
+    console.error("Class not found:", characterClass.value);
+    return [];
+  }
+  return Array.isArray(cls.primary_ability)
+    ? cls.primary_ability.map((a) => a.toLowerCase() as AbilityKey)
+    : [cls.primary_ability.toLowerCase() as AbilityKey];
+});
+
+const finalAbilityScores = computed(() => {
+  const scores: Record<AbilityKey, number> = {} as Record<AbilityKey, number>;
+  (Object.keys(abilityScores.value) as AbilityKey[]).forEach((key) => {
+    scores[key] = abilityScores.value[key] + (abilityBonuses.value[key] ?? 0);
+  });
+  return scores;
+});
+
+const abilityBonusesTotal = computed(() => {
+  return Object.values(abilityBonuses.value).reduce((sum, val) => sum + val, 0);
+});
+
+const availableBaseAbilityScorePoints = computed(() => {
+  return 72 - baseAbilityScoresTotal.value;
+});
+
+const availableAbilityBonusPoints = computed(() => {
+  return 3 - abilityBonusesTotal.value;
+});
+
+const savingThrows = computed(() => {
+  const result: Record<AbilityKey, boolean> = {} as Record<AbilityKey, boolean>;
+  const classData = classes.find((c) => c.id === characterClass.value);
+  if (!classData) {
+    console.error("Class not found:", characterClass.value);
+    return result;
+  }
+  abilityKeys.values().forEach((key) => {
+    result[key] = classData.saving_throws.includes(key.toUpperCase());
+  });
+  return result;
+});
+
+const abilityModifiers = computed(() => {
+  const modifiers: Record<AbilityKey, number> = {} as Record<AbilityKey, number>;
+  (Object.keys(finalAbilityScores.value) as AbilityKey[]).forEach((key) => {
+    modifiers[key] = Math.floor((finalAbilityScores.value[key] - 10) / 2);
+  });
+  return modifiers;
+});
+
+const abilityModifiersAsText = computed(() => {
+  const modifiersText: Record<AbilityKey, string> = {} as Record<AbilityKey, string>;
+  (Object.keys(abilityModifiers.value) as AbilityKey[]).forEach((key) => {
+    const value = abilityModifiers.value[key];
+    modifiersText[key] = value === 0 ? "" : value >= 0 ? `+${value}` : `${value}`;
+  });
+  return modifiersText;
+});
+
+const backgroundAllowsBoosting = computed(() => {
+  const result: Record<AbilityKey, boolean> = {} as Record<AbilityKey, boolean>;
+  if (characterBackground.value === "custom") {
+    console.log("Custom background allows boosting for all abilities.");
+    for (const key of Object.keys(finalAbilityScores.value) as AbilityKey[]) {
+      result[key] = true;
+    }
+    return result;
+  }
+  const backgroundData = backgrounds.find((b) => b.id === characterBackground.value);
+  if (!backgroundData) return result;
+  (Object.keys(finalAbilityScores.value) as AbilityKey[]).forEach((key) => {
+    result[key] = backgroundData.boostableAbilityScores?.includes(key) ?? false;
+  });
+  return result;
+});
+
+// #endregion Computed's
+
+// #region Event Handlers
+
+const handleAttributeDragStartEvent = (event: Event) => {
+  // The mouse down or touch start event could fall on a cell within the ability score bar,
+  // or between cells on the bar itself.
+  const target = event.target as HTMLElement;
+  const cell = target.closest(".ability-score-cell") as HTMLElement | null;
+  if (!cell) {
+    console.warn("No cell found for the drag start event.");
+    return;
+  }
+  const bar = cell.parentElement as HTMLElement | null;
+  if (!bar) {
+    console.warn("No parent element found for the drag start cell.");
+    return;
+  }
+  const attribKey = bar.dataset.abilityScoreName as AbilityKey;
+  if (!attribKey) return;
+  touchedAbilityScore.value = attribKey;
+};
+
+const handleAttributeDragTouchMove = (event: TouchEvent) => {
+  const touch = event.touches[0];
+  return handlePointerMove(touch.clientX, touch.clientY);
+};
+
+function handleAttributeDragMouseMove(event: MouseEvent) {
+  return handlePointerMove(event.clientX, event.clientY);
+}
+
+function handleAttributeDragMouseUp(event: MouseEvent) {
+  touchedAbilityScore.value = undefined;
+}
+
+function handlePointerMove(x: number, y: number) {
+  const cell = getElementAtLocation(x, y);
+  if (!cell) return;
+  const bar = cell.parentElement;
+  if (!bar) return;
+  const abilityScoreName = bar.dataset.abilityScoreName as AbilityKey;
+  if (!abilityScoreName || touchedAbilityScore.value !== abilityScoreName) return;
+  if (!cell.dataset.value) return;
+  const value = parseInt(cell.dataset.value, 10);
+  abilityScores.value[abilityScoreName] = value;
+}
+
+// #endregion Event Handlers
+
+// #region Helper Functions
+
+function getElementAtLocation(x: number, y: number): HTMLElement | null {
+  return document.elementFromPoint(x, y) as HTMLElement | null;
+}
+
+// #endregion Helper Functions
+</script>
+
 <template>
   <div
     class="h-full text-ink/65 overflow-y-auto scroll-shadow"
@@ -51,7 +555,7 @@
             <option>Evocation</option>
             <option>Divination</option>
           </select> -->
-          <label for="character-species">Species</label>
+          <label for="character-species" class="col-start-1">Species</label>
           <select
             id="character-species"
             v-model="characterSpecies"
@@ -63,6 +567,21 @@
               {{ speciesItem.name_en }}
             </option>
           </select>
+          <template v-if="characterSpecies === 'dragonborn'">
+            <label for="character-draconic-ancestry">Ancestry</label>
+            <select
+              id="character-draconic-ancestry"
+              v-model="characterAncestry"
+              placeholder="Select draconic ancestry"
+              hint="Draconic Ancestry"
+              class="select"
+            >
+              <option disabled value="">Select draconic ancestry</option>
+              <option v-for="ancestry in draconicAncestries" :key="ancestry.id" :value="ancestry.id">
+                {{ ancestry.name_en }}
+              </option>
+            </select>
+          </template>
           <label for="character-gender">Gender</label>
           <input
             id="character-gender"
@@ -474,502 +993,3 @@ select {
   @apply h-7 px-1 py-0 border-transparent border-r-4 outline-1 outline-ink/20 rounded-md pr-10;
 }
 </style>
-
-<script setup lang="ts">
-import { ref, computed, watch, nextTick, useTemplateRef } from "vue";
-import { storeToRefs } from "pinia";
-import { onBeforeRouteLeave, onBeforeRouteUpdate, useRoute, useRouter } from "vue-router";
-import type { Ref } from "vue";
-import NumberStepper from "@/components/NumberStepper.vue";
-import type {
-  AbilityScores,
-  AbilityBonuses,
-  Campaign,
-  PlayerCharacter,
-  SkillId,
-} from "@/generated/models/data.schema";
-import type { AbilityKey } from "@/lib/dnd2024/base.ts";
-import { abilityKeys, abilityNamesMap_en } from "@/lib/dnd2024/base.ts";
-import { classes } from "@/lib/dnd2024/classFeatures.ts";
-import type { Background } from "@/lib/dnd2024/backgrounds.ts";
-import { backgrounds, freeBackgrounds } from "@/lib/dnd2024/backgrounds.ts";
-import { species } from "@/lib/dnd2024/species.ts";
-import { useDataStore } from "@/stores/data-store.ts";
-import { Skill, skillNamesMap_en, skills } from "@/lib/dnd2024/skills";
-
-const route = useRoute();
-const router = useRouter();
-const store = useDataStore();
-const { roots } = storeToRefs(store);
-
-const initialAbilityScores: AbilityScores = {
-  str: 10,
-  dex: 10,
-  con: 10,
-  int: 10,
-  wis: 10,
-  cha: 10,
-} as const;
-
-const abilityBonuses: Ref<AbilityBonuses> = ref({
-  str: 0,
-  dex: 0,
-  con: 0,
-  int: 0,
-  wis: 0,
-  cha: 0,
-});
-
-const abilityScores: Ref<AbilityScores> = ref({
-  ...initialAbilityScores,
-});
-const isEditorReady = ref(false);
-const isLoading = ref(true);
-const isSaving = ref(false);
-const errorMessage = ref("");
-
-const touchedAbilityScore = ref<AbilityKey>();
-
-const characterName = ref("");
-const characterSurname = ref("");
-const characterClass = ref("");
-const characterSubclass = ref("");
-const characterBackground = ref("");
-const characterSpecies = ref("");
-const characterGender = ref("");
-const originalFormSnapshot = ref("");
-const isDiscarding = ref(false);
-
-const selectedSkills = ref<SkillId[]>([]);
-
-//#region Properties and Events
-
-function onToggle(event: Event): void {
-  const target = event.target as HTMLDetailsElement;
-  if (target.open) {
-    //console.log(`Toggled open section: ${target.id}`);
-    currentSection.value = target.id;
-  } else {
-    //console.log(`Toggled closed section: ${target.id}`);
-  }
-}
-
-//#endregion Properties and Events
-
-//#region Navigation
-
-const currentSection = ref("");
-
-//#endregion Navigation
-
-//#region Computed properties
-
-const identityClassName = computed(
-  () => classes.find((classItem) => classItem.id === characterClass.value)?.name,
-);
-const identitySpeciesName = computed(
-  () => species.find((speciesItem) => speciesItem.id === characterSpecies.value)?.name_en,
-);
-const identityBackground = computed(() => {
-  if (characterBackground.value === "custom") {
-    return "Custom"; // TODO: replace with the actual name of the custom background
-  }
-  return backgrounds.find((background) => background.id === characterBackground.value)?.name_en;
-});
-const identityGenderName = computed(() => (characterGender.value ? characterGender.value : ""));
-const identityGenderIcon = computed(() => {
-  switch (characterGender.value) {
-    case "male":
-      return "♂";
-    case "female":
-      return "♀";
-    default:
-      return "";
-  }
-});
-
-const campaignId = computed(() => String(route.params.campaignId ?? ""));
-const playerCharacterId = computed(() => String(route.params.playerCharacterId ?? ""));
-const campaign = computed(() =>
-  ((roots.value.campaigns ?? []) as Campaign[]).find((item) => item.id === campaignId.value),
-);
-const isNew = computed(() => !playerCharacterId.value);
-const playerCharacter = computed(() =>
-  campaign.value?.party.find((member) => member.id === playerCharacterId.value),
-);
-
-//#endregion Computed properties
-
-function formSnapshot(): string {
-  return JSON.stringify({
-    name: characterName.value,
-    surname: characterSurname.value,
-    classId: characterClass.value,
-    species: characterSpecies.value,
-    gender: characterGender.value,
-    background: characterBackground.value,
-    abilityScores: abilityScores.value,
-    abilityBonuses: abilityBonuses.value,
-    skills: selectedSkills.value,
-  })
-}
-
-const hasUnsavedChanges = computed(
-  () => isEditorReady.value && formSnapshot() !== originalFormSnapshot.value,
-);
-
-function hydrateEditor(): void {
-  isEditorReady.value = false;
-  isLoading.value = true;
-  errorMessage.value = "";
-  if (isNew.value) {
-    characterName.value = "";
-    characterSurname.value = "";
-    characterClass.value = "";
-    characterSpecies.value = "";
-    characterGender.value = "";
-    characterBackground.value = "";
-    abilityScores.value = { ...initialAbilityScores };
-    abilityBonuses.value = { str: 0, dex: 0, con: 0, int: 0, wis: 0, cha: 0 };
-    selectedSkills.value = [];
-    originalFormSnapshot.value = formSnapshot();
-    currentSection.value = "identity";
-    isEditorReady.value = !!campaign.value;
-    isLoading.value = false;
-    return;
-  }
-  const character = playerCharacter.value;
-  if (character) {
-    characterName.value = character.name;
-    characterSurname.value = character.surname ?? "";
-    characterClass.value = character.classes?.[0] ?? "";
-    selectedSkills.value = (character.skills ?? []);
-    characterSpecies.value = character.species ?? "";
-    characterGender.value = character.gender ?? "";
-    characterBackground.value = character.background ?? "";
-    abilityScores.value = {
-      ...initialAbilityScores,
-      ...character.abilityScores,
-    };
-    abilityBonuses.value = {
-      ...abilityBonuses.value,
-      ...character.abilityBonuses,
-    };
-    selectedSkills.value = (character.skills ?? []);
-    originalFormSnapshot.value = formSnapshot();
-    isEditorReady.value = true;
-  }
-  isLoading.value = false;
-}
-
-watch([campaignId, playerCharacterId, () => roots.value.campaigns], hydrateEditor, {
-  immediate: true,
-});
-
-const nameInput = useTemplateRef<HTMLInputElement>("nameInput");
-
-// The form is rendered only once the editor is ready, so focus after it appears.
-watch(
-  isEditorReady,
-  async (ready) => {
-    if (!ready || !isNew.value) return;
-    await nextTick();
-    nameInput.value?.focus();
-  },
-  { immediate: true, flush: "post" },
-);
-
-function confirmDiscard(): boolean {
-  return (
-    isDiscarding.value ||
-    !hasUnsavedChanges.value ||
-    window.confirm("Discard unsaved character changes?")
-  );
-}
-
-onBeforeRouteLeave(confirmDiscard);
-onBeforeRouteUpdate((to, from) => {
-  if (to.params.playerCharacterId === from.params.playerCharacterId) return true;
-  return confirmDiscard();
-});
-
-// Optional text fields are left out when empty, as the schema rejects empty strings.
-function editableFields(): Partial<PlayerCharacter> {
-  const fields: Partial<PlayerCharacter> = {
-    name: characterName.value.trim(),
-    abilityScores: { ...abilityScores.value },
-    abilityBonuses: { ...abilityBonuses.value },
-    skills: [...selectedSkills.value],
-  };
-  const surname = characterSurname.value.trim();
-  const gender = characterGender.value.trim();
-  if (surname) fields.surname = surname;
-  if (characterClass.value) fields.classes = [characterClass.value];
-  if (characterSpecies.value) fields.species = characterSpecies.value;
-  if (gender) fields.gender = gender;
-  if (characterBackground.value) fields.background = characterBackground.value;
-  return fields;
-}
-
-async function createPlayerCharacter(): Promise<void> {
-  const parent = campaign.value;
-  if (!parent || isSaving.value) return;
-
-  isSaving.value = true;
-  errorMessage.value = "";
-  let draftId: string | undefined;
-  try {
-    draftId = store.beginDraft("PlayerCharacter", editableFields());
-    await store.commitDraft(draftId, "PlayerCharacter", {
-      type: "Campaign",
-      id: parent.id,
-      field: "party",
-      collection: parent.party,
-    });
-    draftId = undefined;
-    await cancelEditing();
-  } catch (error) {
-    errorMessage.value = error instanceof Error ? error.message : "Unable to add player character.";
-  } finally {
-    if (draftId) store.cancelDraft(draftId);
-    isSaving.value = false;
-  }
-}
-
-async function savePlayerCharacter(): Promise<void> {
-  if (isNew.value) return createPlayerCharacter();
-  const current = playerCharacter.value;
-  if (!current || isSaving.value) return;
-
-  const updated: PlayerCharacter = { ...current, ...editableFields() };
-
-  isSaving.value = true;
-  errorMessage.value = "";
-  try {
-    await store.updateEntity("PlayerCharacter", updated);
-    Object.assign(current, updated);
-    await cancelEditing();
-  } catch (error) {
-    errorMessage.value =
-      error instanceof Error ? error.message : "Unable to save player character.";
-  } finally {
-    isSaving.value = false;
-  }
-}
-
-async function deletePlayerCharacter(): Promise<void> {
-  const parent = campaign.value;
-  const current = playerCharacter.value;
-  if (!parent || !current || isSaving.value) return;
-  if (!window.confirm(`Delete ${current.name}? This cannot be undone.`)) return;
-
-  isSaving.value = true;
-  errorMessage.value = "";
-  try {
-    isDiscarding.value = true;
-    await store.removeChild("PlayerCharacter", current.id, {
-      type: "Campaign",
-      id: parent.id,
-      field: "party",
-      collection: parent.party,
-    });
-    await cancelEditing();
-  } catch (error) {
-    isDiscarding.value = false;
-    errorMessage.value =
-      error instanceof Error ? error.message : "Unable to delete player character.";
-  } finally {
-    isSaving.value = false;
-  }
-}
-
-async function cancelEditing(): Promise<void> {
-  isDiscarding.value = true;
-  await router.push({
-    name: "campaign-detail",
-    params: { campaignId: campaignId.value },
-  });
-}
-
-const availableBackgrounds: Ref<Background[]> = ref([
-  ...freeBackgrounds,
-  { id: "custom", name_en: "Custom" },
-]);
-
-// #region Computed's
-
-const baseAbilityScoreUiProps = computed(() => {
-  const props: Record<AbilityKey, { isLowest: boolean; isHighest: boolean; warning: string }> =
-    {} as any;
-  let lowest = 99;
-  let highest = -99;
-  (Object.keys(abilityScores.value) as AbilityKey[]).forEach((key) => {
-    const value = abilityScores.value[key];
-    if (value < lowest) lowest = value;
-    if (value > highest) highest = value;
-  });
-  let highestScoreIsOneOfPrimaries = false;
-  (Object.keys(abilityScores.value) as AbilityKey[]).forEach((key) => {
-    const value = abilityScores.value[key];
-    const isPrimary = primaryClassAbilities.value.includes(key);
-    if (isPrimary && value === highest) {
-      highestScoreIsOneOfPrimaries = true;
-    }
-    props[key] = {
-      isLowest: value === lowest,
-      isHighest: value === highest,
-      warning: (() => {
-        if (isPrimary && value < highest && !highestScoreIsOneOfPrimaries) {
-          return "One of the primary abilities should be the highest";
-        }
-        if (isPrimary && Math.floor((value - 10) / 2) <= 0) {
-          return "A primary ability score should be high enough to confer a bonus without modifiers, i.e. be 12 or higher";
-        }
-        return "";
-      })(),
-    };
-  });
-  return props;
-});
-
-const baseAbilityScoresTotal = computed(() => {
-  return Object.values(abilityScores.value).reduce((sum, val) => sum + val, 0);
-});
-
-const primaryClassAbilities: Ref<AbilityKey[]> = computed(() => {
-  // Consult the class features and extract the primary abilities for the class
-  const cls = classes.find((c) => c.id === characterClass.value);
-  if (!cls) {
-    console.error("Class not found:", characterClass.value);
-    return [];
-  }
-  return Array.isArray(cls.primary_ability)
-    ? cls.primary_ability.map((a) => a.toLowerCase() as AbilityKey)
-    : [cls.primary_ability.toLowerCase() as AbilityKey];
-});
-
-const finalAbilityScores = computed(() => {
-  const scores: Record<AbilityKey, number> = {} as Record<AbilityKey, number>;
-  (Object.keys(abilityScores.value) as AbilityKey[]).forEach((key) => {
-    scores[key] = abilityScores.value[key] + (abilityBonuses.value[key] ?? 0);
-  });
-  return scores;
-});
-
-const abilityBonusesTotal = computed(() => {
-  return Object.values(abilityBonuses.value).reduce((sum, val) => sum + val, 0);
-});
-
-const availableBaseAbilityScorePoints = computed(() => {
-  return 72 - baseAbilityScoresTotal.value;
-});
-
-const availableAbilityBonusPoints = computed(() => {
-  return 3 - abilityBonusesTotal.value;
-});
-
-const savingThrows = computed(() => {
-  const result: Record<AbilityKey, boolean> = {} as Record<AbilityKey, boolean>;
-  const classData = classes.find((c) => c.id === characterClass.value);
-  if (!classData) {
-    console.error("Class not found:", characterClass.value);
-    return result;
-  }
-  abilityKeys.values().forEach((key) => {
-    result[key] = classData.saving_throws.includes(key.toUpperCase());
-  });
-  return result;
-});
-
-const abilityModifiers = computed(() => {
-  const modifiers: Record<AbilityKey, number> = {} as Record<AbilityKey, number>;
-  (Object.keys(finalAbilityScores.value) as AbilityKey[]).forEach((key) => {
-    modifiers[key] = Math.floor((finalAbilityScores.value[key] - 10) / 2);
-  });
-  return modifiers;
-});
-
-const abilityModifiersAsText = computed(() => {
-  const modifiersText: Record<AbilityKey, string> = {} as Record<AbilityKey, string>;
-  (Object.keys(abilityModifiers.value) as AbilityKey[]).forEach((key) => {
-    const value = abilityModifiers.value[key];
-    modifiersText[key] = value === 0 ? "" : value >= 0 ? `+${value}` : `${value}`;
-  });
-  return modifiersText;
-});
-
-const backgroundAllowsBoosting = computed(() => {
-  const result: Record<AbilityKey, boolean> = {} as Record<AbilityKey, boolean>;
-  if (characterBackground.value === "custom") {
-    console.log("Custom background allows boosting for all abilities.");
-    for (const key of Object.keys(finalAbilityScores.value) as AbilityKey[]) {
-      result[key] = true;
-    }
-    return result;
-  }
-  const backgroundData = backgrounds.find((b) => b.id === characterBackground.value);
-  if (!backgroundData) return result;
-  (Object.keys(finalAbilityScores.value) as AbilityKey[]).forEach((key) => {
-    result[key] = backgroundData.boostableAbilityScores?.includes(key) ?? false;
-  });
-  return result;
-});
-
-// #endregion Computed's
-
-// #region Event Handlers
-
-const handleAttributeDragStartEvent = (event: Event) => {
-  // The mouse down or touch start event could fall on a cell within the ability score bar,
-  // or between cells on the bar itself.
-  const target = event.target as HTMLElement;
-  const cell = target.closest(".ability-score-cell") as HTMLElement | null;
-  if (!cell) {
-    console.warn("No cell found for the drag start event.");
-    return;
-  }
-  const bar = cell.parentElement as HTMLElement | null;
-  if (!bar) {
-    console.warn("No parent element found for the drag start cell.");
-    return;
-  }
-  const attribKey = bar.dataset.abilityScoreName as AbilityKey;
-  if (!attribKey) return;
-  touchedAbilityScore.value = attribKey;
-};
-
-const handleAttributeDragTouchMove = (event: TouchEvent) => {
-  const touch = event.touches[0];
-  return handlePointerMove(touch.clientX, touch.clientY);
-};
-
-function handleAttributeDragMouseMove(event: MouseEvent) {
-  return handlePointerMove(event.clientX, event.clientY);
-}
-
-function handleAttributeDragMouseUp(event: MouseEvent) {
-  touchedAbilityScore.value = undefined;
-}
-
-function handlePointerMove(x: number, y: number) {
-  const cell = getElementAtLocation(x, y);
-  if (!cell) return;
-  const bar = cell.parentElement;
-  if (!bar) return;
-  const abilityScoreName = bar.dataset.abilityScoreName as AbilityKey;
-  if (!abilityScoreName || touchedAbilityScore.value !== abilityScoreName) return;
-  if (!cell.dataset.value) return;
-  const value = parseInt(cell.dataset.value, 10);
-  abilityScores.value[abilityScoreName] = value;
-}
-
-// #endregion Event Handlers
-
-// #region Helper Functions
-
-function getElementAtLocation(x: number, y: number): HTMLElement | null {
-  return document.elementFromPoint(x, y) as HTMLElement | null;
-}
-
-// #endregion Helper Functions
-</script>

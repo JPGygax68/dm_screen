@@ -155,6 +155,7 @@ type: object
       surname: { type: string, description: "Character surname (optional)" }
       portrait: { type: string, description: "Character portrait image data URL (optional)" }
       species: { type: string, minLength: 1, description: "Character species" }
+      ancestry: { type: string, description: "Draconic or Goliath ancestry (optional)" }
       gender: { type: string, minLength: 1, description: "Character gender, freely entered by the player" }
       classes:
         type: array

@@ -63,3 +63,15 @@ export const species: readonly Species[] = [
   },
 ] as const;
 
+export const draconicAncestries: readonly Species[] = [
+  { id: "black", name_en: "Black", size: "medium", traits: [] },
+  { id: "blue", name_en: "Blue", size: "medium", traits: [] },
+  { id: "brass", name_en: "Brass", size: "medium", traits: [] },
+  { id: "bronze", name_en: "Bronze", size: "medium", traits: [] },
+  { id: "copper", name_en: "Copper", size: "medium", traits: [] },
+  { id: "gold", name_en: "Gold", size: "medium", traits: [] },
+  { id: "green", name_en: "Green", size: "medium", traits: [] },
+  { id: "red", name_en: "Red", size: "medium", traits: [] },
+  { id: "silver", name_en: "Silver", size: "medium", traits: [] },
+  { id: "white", name_en: "White", size: "medium", traits: [] },
+] as const;
