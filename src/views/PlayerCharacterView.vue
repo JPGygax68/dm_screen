@@ -18,14 +18,11 @@ import { abilityKeys, abilityNamesMap_en } from "@/lib/dnd2024/base.ts";
 import { classes } from "@/lib/dnd2024/classFeatures.ts";
 import type { Background } from "@/lib/dnd2024/backgrounds.ts";
 import { backgrounds, freeBackgrounds } from "@/lib/dnd2024/backgrounds.ts";
-import { draconicAncestries, species } from "@/lib/dnd2024/species.ts";
+import { draconicAncestries, speciesList } from "@/lib/dnd2024/species.ts";
 import { useDataStore } from "@/stores/data-store.ts";
 import { Skill, skillNamesMap_en, skills } from "@/lib/dnd2024/skills";
 
-const route = useRoute();
-const router = useRouter();
-const store = useDataStore();
-const { roots } = storeToRefs(store);
+//#region Constants
 
 const initialAbilityScores: AbilityScores = {
   str: 10,
@@ -36,24 +33,25 @@ const initialAbilityScores: AbilityScores = {
   cha: 10,
 } as const;
 
-const abilityBonuses: Ref<AbilityBonuses> = ref({
-  str: 0,
-  dex: 0,
-  con: 0,
-  int: 0,
-  wis: 0,
-  cha: 0,
-});
+//#endregion Constants
 
-const abilityScores: Ref<AbilityScores> = ref({
-  ...initialAbilityScores,
-});
+const route = useRoute();
+const router = useRouter();
+const store = useDataStore();
+const { roots } = storeToRefs(store);
+
+//#region View state
+
 const isEditorReady = ref(false);
 const isLoading = ref(true);
 const isSaving = ref(false);
 const errorMessage = ref("");
 
 const touchedAbilityScore = ref<AbilityKey>();
+
+//#endregion View state
+
+//#region Character properties
 
 const characterName = ref("");
 const characterSurname = ref("");
@@ -65,8 +63,81 @@ const characterAncestry = ref("");
 const characterGender = ref("");
 const originalFormSnapshot = ref("");
 const isDiscarding = ref(false);
+const abilityBonuses: Ref<AbilityBonuses> = ref({
+  str: 0,
+  dex: 0,
+  con: 0,
+  int: 0,
+  wis: 0,
+  cha: 0,
+});
+const abilityScores: Ref<AbilityScores> = ref({
+  ...initialAbilityScores,
+});
+const skills: Ref<SkillId[]> = ref([]);
 
-const selectedSkills = ref<SkillId[]>([]);
+function formSnapshot(): string {
+  return JSON.stringify({
+    name: characterName.value,
+    surname: characterSurname.value,
+    classId: characterClass.value,
+    species: characterSpecies.value,
+    ancestry: characterAncestry.value,
+    gender: characterGender.value,
+    background: characterBackground.value,
+    abilityScores: abilityScores.value,
+    abilityBonuses: abilityBonuses.value,
+    skills: skills.value,
+  });
+}
+
+function hydrateEditor(): void {
+  isEditorReady.value = false;
+  isLoading.value = true;
+  errorMessage.value = "";
+  if (isNew.value) {
+    characterName.value = "";
+    characterSurname.value = "";
+    characterClass.value = "";
+    characterSpecies.value = "";
+    characterAncestry.value = "";
+    characterGender.value = "";
+    characterBackground.value = "";
+    abilityScores.value = { ...initialAbilityScores };
+    abilityBonuses.value = { str: 0, dex: 0, con: 0, int: 0, wis: 0, cha: 0 };
+    skills.value = [];
+    originalFormSnapshot.value = formSnapshot();
+    currentSection.value = "identity";
+    isEditorReady.value = !!campaign.value;
+    isLoading.value = false;
+    return;
+  }
+  const character = playerCharacter.value;
+  if (character) {
+    characterName.value = character.name;
+    characterSurname.value = character.surname ?? "";
+    characterClass.value = character.classes?.[0] ?? "";
+    skills.value = character.skills ?? [];
+    characterSpecies.value = character.species ?? "";
+    characterAncestry.value = character.ancestry ?? "";
+    characterGender.value = character.gender ?? "";
+    characterBackground.value = character.background ?? "";
+    abilityScores.value = {
+      ...initialAbilityScores,
+      ...character.abilityScores,
+    };
+    abilityBonuses.value = {
+      ...abilityBonuses.value,
+      ...character.abilityBonuses,
+    };
+    skills.value = character.skills ?? [];
+    originalFormSnapshot.value = formSnapshot();
+    isEditorReady.value = true;
+  }
+  isLoading.value = false;
+}
+
+//#endregion Character properties
 
 //#region Properties and Events
 
@@ -88,13 +159,13 @@ const currentSection = ref("");
 
 //#endregion Navigation
 
-//#region Computed properties
+// #region Computed properties
 
 const identityClassName = computed(
   () => classes.find((classItem) => classItem.id === characterClass.value)?.name,
 );
 const identitySpeciesName = computed(
-  () => species.find((speciesItem) => speciesItem.id === characterSpecies.value)?.name_en,
+  () => speciesList.find((speciesItem) => speciesItem.id === characterSpecies.value)?.name_en,
 );
 const identityBackground = computed(() => {
   if (characterBackground.value === "custom") {
@@ -124,209 +195,22 @@ const playerCharacter = computed(() =>
   campaign.value?.party.find((member) => member.id === playerCharacterId.value),
 );
 
-//#endregion Computed properties
+// TODO: needs overhaul
+const remainingSelectableSkills = computed(() => {
+  if (pcHasTrait("versatility")) {
+    return 1;
+  }
+  return 0;
+});
 
-function formSnapshot(): string {
-  return JSON.stringify({
-    name: characterName.value,
-    surname: characterSurname.value,
-    classId: characterClass.value,
-    species: characterSpecies.value,
-    ancestry: characterAncestry.value,
-    gender: characterGender.value,
-    background: characterBackground.value,
-    abilityScores: abilityScores.value,
-    abilityBonuses: abilityBonuses.value,
-    skills: selectedSkills.value,
-  })
-}
+const pcHasTrait = (trait: string) => {
+  const species = speciesList.find((speciesItem) => speciesItem.id === characterSpecies.value);
+  return species?.traits.includes(trait) ?? false;
+};
 
 const hasUnsavedChanges = computed(
   () => isEditorReady.value && formSnapshot() !== originalFormSnapshot.value,
 );
-
-function hydrateEditor(): void {
-  isEditorReady.value = false;
-  isLoading.value = true;
-  errorMessage.value = "";
-  if (isNew.value) {
-    characterName.value = "";
-    characterSurname.value = "";
-    characterClass.value = "";
-    characterSpecies.value = "";
-    characterAncestry.value = "";
-    characterGender.value = "";
-    characterBackground.value = "";
-    abilityScores.value = { ...initialAbilityScores };
-    abilityBonuses.value = { str: 0, dex: 0, con: 0, int: 0, wis: 0, cha: 0 };
-    selectedSkills.value = [];
-    originalFormSnapshot.value = formSnapshot();
-    currentSection.value = "identity";
-    isEditorReady.value = !!campaign.value;
-    isLoading.value = false;
-    return;
-  }
-  const character = playerCharacter.value;
-  if (character) {
-    characterName.value = character.name;
-    characterSurname.value = character.surname ?? "";
-    characterClass.value = character.classes?.[0] ?? "";
-    selectedSkills.value = (character.skills ?? []);
-    characterSpecies.value = character.species ?? "";
-    characterAncestry.value = character.ancestry ?? "";
-    characterGender.value = character.gender ?? "";
-    characterBackground.value = character.background ?? "";
-    abilityScores.value = {
-      ...initialAbilityScores,
-      ...character.abilityScores,
-    };
-    abilityBonuses.value = {
-      ...abilityBonuses.value,
-      ...character.abilityBonuses,
-    };
-    selectedSkills.value = (character.skills ?? []);
-    originalFormSnapshot.value = formSnapshot();
-    isEditorReady.value = true;
-  }
-  isLoading.value = false;
-}
-
-watch([campaignId, playerCharacterId, () => roots.value.campaigns], hydrateEditor, {
-  immediate: true,
-});
-
-const nameInput = useTemplateRef<HTMLInputElement>("nameInput");
-
-// The form is rendered only once the editor is ready, so focus after it appears.
-watch(
-  isEditorReady,
-  async (ready) => {
-    if (!ready || !isNew.value) return;
-    await nextTick();
-    nameInput.value?.focus();
-  },
-  { immediate: true, flush: "post" },
-);
-
-function confirmDiscard(): boolean {
-  return (
-    isDiscarding.value ||
-    !hasUnsavedChanges.value ||
-    window.confirm("Discard unsaved character changes?")
-  );
-}
-
-onBeforeRouteLeave(confirmDiscard);
-onBeforeRouteUpdate((to, from) => {
-  if (to.params.playerCharacterId === from.params.playerCharacterId) return true;
-  return confirmDiscard();
-});
-
-// Optional text fields are left out when empty, as the schema rejects empty strings.
-function editableFields(): Partial<PlayerCharacter> {
-  const fields: Partial<PlayerCharacter> = {
-    name: characterName.value.trim(),
-    abilityScores: { ...abilityScores.value },
-    abilityBonuses: { ...abilityBonuses.value },
-    skills: [...selectedSkills.value],
-  };
-  const surname = characterSurname.value.trim();
-  const gender = characterGender.value.trim();
-  if (surname) fields.surname = surname;
-  if (characterClass.value) fields.classes = [characterClass.value];
-  if (characterSpecies.value) fields.species = characterSpecies.value;
-  if (characterAncestry.value) fields.ancestry = characterAncestry.value;
-  if (gender) fields.gender = gender;
-  if (characterBackground.value) fields.background = characterBackground.value;
-  return fields;
-}
-
-async function createPlayerCharacter(): Promise<void> {
-  const parent = campaign.value;
-  if (!parent || isSaving.value) return;
-
-  isSaving.value = true;
-  errorMessage.value = "";
-  let draftId: string | undefined;
-  try {
-    draftId = store.beginDraft("PlayerCharacter", editableFields());
-    await store.commitDraft(draftId, "PlayerCharacter", {
-      type: "Campaign",
-      id: parent.id,
-      field: "party",
-      collection: parent.party,
-    });
-    draftId = undefined;
-    await cancelEditing();
-  } catch (error) {
-    errorMessage.value = error instanceof Error ? error.message : "Unable to add player character.";
-  } finally {
-    if (draftId) store.cancelDraft(draftId);
-    isSaving.value = false;
-  }
-}
-
-async function savePlayerCharacter(): Promise<void> {
-  if (isNew.value) return createPlayerCharacter();
-  const current = playerCharacter.value;
-  if (!current || isSaving.value) return;
-
-  const updated: PlayerCharacter = { ...current, ...editableFields() };
-
-  isSaving.value = true;
-  errorMessage.value = "";
-  try {
-    await store.updateEntity("PlayerCharacter", updated);
-    Object.assign(current, updated);
-    await cancelEditing();
-  } catch (error) {
-    errorMessage.value =
-      error instanceof Error ? error.message : "Unable to save player character.";
-  } finally {
-    isSaving.value = false;
-  }
-}
-
-async function deletePlayerCharacter(): Promise<void> {
-  const parent = campaign.value;
-  const current = playerCharacter.value;
-  if (!parent || !current || isSaving.value) return;
-  if (!window.confirm(`Delete ${current.name}? This cannot be undone.`)) return;
-
-  isSaving.value = true;
-  errorMessage.value = "";
-  try {
-    isDiscarding.value = true;
-    await store.removeChild("PlayerCharacter", current.id, {
-      type: "Campaign",
-      id: parent.id,
-      field: "party",
-      collection: parent.party,
-    });
-    await cancelEditing();
-  } catch (error) {
-    isDiscarding.value = false;
-    errorMessage.value =
-      error instanceof Error ? error.message : "Unable to delete player character.";
-  } finally {
-    isSaving.value = false;
-  }
-}
-
-async function cancelEditing(): Promise<void> {
-  isDiscarding.value = true;
-  await router.push({
-    name: "campaign-detail",
-    params: { campaignId: campaignId.value },
-  });
-}
-
-const availableBackgrounds: Ref<Background[]> = ref([
-  ...freeBackgrounds,
-  { id: "custom", name_en: "Custom" },
-]);
-
-// #region Computed's
 
 const baseAbilityScoreUiProps = computed(() => {
   const props: Record<AbilityKey, { isLowest: boolean; isHighest: boolean; warning: string }> =
@@ -445,7 +329,150 @@ const backgroundAllowsBoosting = computed(() => {
   return result;
 });
 
-// #endregion Computed's
+//#endregion Computed properties
+
+//#region Lifecycle hooks
+
+watch([campaignId, playerCharacterId, () => roots.value.campaigns], hydrateEditor, {
+  immediate: true,
+});
+
+const nameInput = useTemplateRef<HTMLInputElement>("nameInput");
+
+// The form is rendered only once the editor is ready, so focus after it appears.
+watch(
+  isEditorReady,
+  async (ready) => {
+    if (!ready || !isNew.value) return;
+    await nextTick();
+    nameInput.value?.focus();
+  },
+  { immediate: true, flush: "post" },
+);
+
+//#endregion Lifecycle hooks
+
+//#region Methods
+
+function confirmDiscard(): boolean {
+  return (
+    isDiscarding.value ||
+    !hasUnsavedChanges.value ||
+    window.confirm("Discard unsaved character changes?")
+  );
+}
+
+onBeforeRouteLeave(confirmDiscard);
+onBeforeRouteUpdate((to, from) => {
+  if (to.params.playerCharacterId === from.params.playerCharacterId) return true;
+  return confirmDiscard();
+});
+
+// Optional text fields are left out when empty, as the schema rejects empty strings.
+function editableFields(): Partial<PlayerCharacter> {
+  const fields: Partial<PlayerCharacter> = {
+    name: characterName.value.trim(),
+    abilityScores: { ...abilityScores.value },
+    abilityBonuses: { ...abilityBonuses.value },
+    skills: [...skills.value],
+  };
+  const surname = characterSurname.value.trim();
+  const gender = characterGender.value.trim();
+  if (surname) fields.surname = surname;
+  if (characterClass.value) fields.classes = [characterClass.value];
+  if (characterSpecies.value) fields.species = characterSpecies.value;
+  if (characterAncestry.value) fields.ancestry = characterAncestry.value;
+  if (gender) fields.gender = gender;
+  if (characterBackground.value) fields.background = characterBackground.value;
+  return fields;
+}
+
+async function createPlayerCharacter(): Promise<void> {
+  const parent = campaign.value;
+  if (!parent || isSaving.value) return;
+
+  isSaving.value = true;
+  errorMessage.value = "";
+  let draftId: string | undefined;
+  try {
+    draftId = store.beginDraft("PlayerCharacter", editableFields());
+    await store.commitDraft(draftId, "PlayerCharacter", {
+      type: "Campaign",
+      id: parent.id,
+      field: "party",
+      collection: parent.party,
+    });
+    draftId = undefined;
+    await cancelEditing();
+  } catch (error) {
+    errorMessage.value = error instanceof Error ? error.message : "Unable to add player character.";
+  } finally {
+    if (draftId) store.cancelDraft(draftId);
+    isSaving.value = false;
+  }
+}
+
+async function savePlayerCharacter(): Promise<void> {
+  if (isNew.value) return createPlayerCharacter();
+  const current = playerCharacter.value;
+  if (!current || isSaving.value) return;
+
+  const updated: PlayerCharacter = { ...current, ...editableFields() };
+
+  isSaving.value = true;
+  errorMessage.value = "";
+  try {
+    await store.updateEntity("PlayerCharacter", updated);
+    Object.assign(current, updated);
+    await cancelEditing();
+  } catch (error) {
+    errorMessage.value =
+      error instanceof Error ? error.message : "Unable to save player character.";
+  } finally {
+    isSaving.value = false;
+  }
+}
+
+async function deletePlayerCharacter(): Promise<void> {
+  const parent = campaign.value;
+  const current = playerCharacter.value;
+  if (!parent || !current || isSaving.value) return;
+  if (!window.confirm(`Delete ${current.name}? This cannot be undone.`)) return;
+
+  isSaving.value = true;
+  errorMessage.value = "";
+  try {
+    isDiscarding.value = true;
+    await store.removeChild("PlayerCharacter", current.id, {
+      type: "Campaign",
+      id: parent.id,
+      field: "party",
+      collection: parent.party,
+    });
+    await cancelEditing();
+  } catch (error) {
+    isDiscarding.value = false;
+    errorMessage.value =
+      error instanceof Error ? error.message : "Unable to delete player character.";
+  } finally {
+    isSaving.value = false;
+  }
+}
+
+async function cancelEditing(): Promise<void> {
+  isDiscarding.value = true;
+  await router.push({
+    name: "campaign-detail",
+    params: { campaignId: campaignId.value },
+  });
+}
+
+const availableBackgrounds: Ref<Background[]> = ref([
+  ...freeBackgrounds,
+  { id: "custom", name_en: "Custom" },
+]);
+
+//#endregion Methods
 
 // #region Event Handlers
 
@@ -502,12 +529,11 @@ function getElementAtLocation(x: number, y: number): HTMLElement | null {
 }
 
 // #endregion Helper Functions
+
 </script>
 
 <template>
-  <div
-    class="h-full text-ink/65 overflow-y-auto scroll-shadow"
-  >
+  <div class="h-full text-ink/65 overflow-y-auto scroll-shadow">
     <form v-if="isEditorReady" @submit.prevent="savePlayerCharacter" class="">
       <BetterDetails
         id="identity"
@@ -563,7 +589,11 @@ function getElementAtLocation(x: number, y: number): HTMLElement | null {
             class="select"
           >
             <option disabled value="">Select species</option>
-            <option v-for="speciesItem in species" :key="speciesItem.id" :value="speciesItem.id">
+            <option
+              v-for="speciesItem in speciesList"
+              :key="speciesItem.id"
+              :value="speciesItem.id"
+            >
               {{ speciesItem.name_en }}
             </option>
           </select>
@@ -577,17 +607,17 @@ function getElementAtLocation(x: number, y: number): HTMLElement | null {
               class="select"
             >
               <option disabled value="">Select draconic ancestry</option>
-              <option v-for="ancestry in draconicAncestries" :key="ancestry.id" :value="ancestry.id">
+              <option
+                v-for="ancestry in draconicAncestries"
+                :key="ancestry.id"
+                :value="ancestry.id"
+              >
                 {{ ancestry.name_en }}
               </option>
             </select>
           </template>
           <label for="character-gender">Gender</label>
-          <input
-            id="character-gender"
-            v-model="characterGender"
-            list="character-gender-options"
-          />
+          <input id="character-gender" v-model="characterGender" list="character-gender-options" />
           <datalist id="character-gender-options">
             <option id="male" value="Male" />
             <option id="female" value="Female" />
@@ -858,7 +888,10 @@ function getElementAtLocation(x: number, y: number): HTMLElement | null {
         :open="currentSection === 'skills'"
         @toggle="onToggle"
       >
-        <template #summary><span class="font-bold">Skills</span></template>
+        <template #summary>
+          <span class="font-bold">Skills</span>
+          <span class="hidden group-open:inline">&nbsp;({{ remainingSelectableSkills }} still assignable)</span>
+        </template>
         <!-- <div class="grid gap-4 grid-cols-2 sm:grid-cols-3 md:grid-cols-4"> -->
         <div class="columns-2 sm:columns-3 gap-4 space-y-4">
           <div
@@ -911,11 +944,7 @@ function getElementAtLocation(x: number, y: number): HTMLElement | null {
         <button
           type="submit"
           class="bg-moss-dark px-4 py-3 font-bold text-paper transition hover:bg-moss disabled:cursor-not-allowed disabled:opacity-50"
-          :disabled="
-            isSaving ||
-            !hasUnsavedChanges ||
-            !characterName.trim()
-          "
+          :disabled="isSaving || !hasUnsavedChanges || !characterName.trim()"
         >
           {{ isSaving ? "Saving..." : isNew ? "Add to party" : "Save character" }}
         </button>

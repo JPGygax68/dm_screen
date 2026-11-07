@@ -15,7 +15,7 @@ export type Species = {
 /**
  * All the 9 core species covered by the free Basic Rules of DnD 2024.
  */
-export const species: readonly Species[] = [
+export const speciesList: readonly Species[] = [
   { id: "human", name_en: "Human", size: "medium", traits: ["resourceful", "skillful", "versatility"] },
   { id: "elf", name_en: "Elf", size: "medium", traits: ["darkvision", "keen_senses", "fey_ancestry", "trance"] },
   {
