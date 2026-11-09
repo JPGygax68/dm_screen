@@ -1,3 +1,4 @@
+# @format
 ---
 "$schema": "https://json-schema.org/draft/2020-12/schema"
 "$id": "https://dm-screen.local/schema/data.schema.yaml"
@@ -13,7 +14,7 @@ type: object
     description: Globally unique opaque identifier for a persisted object; never displayed by default or reused
   PlayerId: { type: string, minLength: 1, description: "Unique player character identifier" }
   NpcId: { type: string, minLength: 1, description: "Unique non-player character identifier" }
-  CreatureId: { type: string, minLength: 1, description: "Unique creature identifier" } 
+  CreatureId: { type: string, minLength: 1, description: "Unique creature identifier" }
 
   AbilityScores:
     type: object
@@ -65,10 +66,10 @@ type: object
         description: List of encounters in the campaign
         items:
           "$ref": "#/$defs/Encounter"
-    required: 
-    - id
-    - name
-    - party
+    required:
+      - id
+      - name
+      - party
     # - encounters
     additionalProperties: false
 
@@ -81,8 +82,10 @@ type: object
       title: { type: string, description: "Encounter title", minLength: 1 }
       summary: { type: string, description: "Brief summary of the encounter (optional)" }
       location: { type: string, description: "Location of the encounter (optional)" }
-      sessionTag: { type: string, description: "Session name, number, or other encounter tag (optional)" }
-      createdAt: { type: string, format: date-time, description: "Time at which the encounter was created" }
+      sessionTag:
+        { type: string, description: "Session name, number, or other encounter tag (optional)" }
+      createdAt:
+        { type: string, format: date-time, description: "Time at which the encounter was created" }
       status: { "$ref": "#/$defs/EncounterStatus" }
       notes: { type: string, description: "Encounter-wide notes and annotations (optional)" }
       participants:
@@ -108,9 +111,9 @@ type: object
         type: string
         description: Additional detail for the encounter end reason (optional)
     required:
-    - id
-    - title
-    - status
+      - id
+      - title
+      - status
     additionalProperties: false
 
   EncounterStatus:
@@ -140,9 +143,9 @@ type: object
         enum: ["start", "turn", "end"]
         description: Current turn workflow phase
     required:
-    - roundNumber
-    - turnNumber
-    - phase
+      - roundNumber
+      - turnNumber
+      - phase
     additionalProperties: false
 
   PlayerCharacter:
@@ -156,14 +159,32 @@ type: object
       portrait: { type: string, description: "Character portrait image data URL (optional)" }
       species: { type: string, minLength: 1, description: "Character species" }
       ancestry: { type: string, description: "Draconic or Goliath ancestry (optional)" }
-      gender: { type: string, minLength: 1, description: "Character gender, freely entered by the player" }
+      gender:
+        {
+          type: string,
+          minLength: 1,
+          description: "Character gender, freely entered by the player",
+        }
       classes:
         type: array
         minItems: 1
         uniqueItems: true
         description: Character classes; initially one class is selected
         items: { type: string, minLength: 1 }
-      background: { type: string, description: "Character background (optional)" }
+      background:
+        oneOf: [
+          {
+            type: "string",
+            description: "Standard background identifier (defined by rules)",
+            minLength: 1
+          },
+          {
+            "$ref": "#/$defs/CustomBackground"
+          }
+        ]
+      originStory:
+        type: string
+        description: "Character origin story (optional; must match background)"
       abilityScores:
         "$ref": "#/$defs/AbilityScores"
         default: { str: 10, dex: 10, con: 10, int: 10, wis: 10, cha: 10 }
@@ -188,22 +209,44 @@ type: object
         items:
           type: string
     required:
-    - id
-    - name
+      - id
+      - name
     # - species
     # - gender
     # - classes
     # - maxHitPoints
     additionalProperties: true
 
+  CustomBackground:
+    type: object
+    properties:
+      description: { type: string, minLength: 1, description: "Description of the custom background" }
+    required:
+      - description
+    additionalProperties: false
+
   Skills:
     type: array
     description: List of skills
     items:
-      "$ref": "#/$defs/SkillId"
+      "$ref": "#/$defs/Skill"
+
+  Skill:
+    type: object
+    title: Skill
+    description: A skill that a character has
+    properties:
+      id: { "$ref": "#/$defs/SkillId" }
+      origin:
+        { enum: [species, class, background], description: "How the skill was acquired" }
+    required:
+      - id
+      - origin
+    additionalProperties: true
 
   SkillId:
     type: string
+    description: Skill identifier, defined by DnD rules (may be complemented by homebrew skills, tbd in the future)
     minLength: 1
 
   NonPlayerCharacter:
@@ -216,21 +259,26 @@ type: object
         type: string
         description: NPC name
     required:
-    - id
-    - name
+      - id
+      - name
     additionalProperties: true
 
   Participant:
     type: object
     title: Participant
-    description: 'A person or creature present in an encounter (PC, NPC, or creature), whether or not they participate in combat. Lifecycle: current encounter'
+    description: "A person or creature present in an encounter (PC, NPC, or creature), whether or not they participate in combat. Lifecycle: current encounter"
     properties:
       id:
         "$ref": "#/$defs/GlobalId"
         description: Globally unique opaque identifier for this participant instance
       type: { "$ref": "#/$defs/ParticipantType" }
       sourceId:
-        oneOf: [ { "$ref": "#/$defs/PlayerId" }, { "$ref": "#/$defs/NpcId" }, { "$ref": "#/$defs/CreatureId" } ]
+        oneOf:
+          [
+            { "$ref": "#/$defs/PlayerId" },
+            { "$ref": "#/$defs/NpcId" },
+            { "$ref": "#/$defs/CreatureId" },
+          ]
         description: Optional identifier of the source PC, NPC, or creature from which this participant was created
       experienceValue:
         type: integer
@@ -242,8 +290,13 @@ type: object
         pattern: "^[A-Za-z0-9][A-Za-z0-9_-]*$"
         description: Required human-readable identifier used by shorthand and unique within the encounter
       imageId:
-        oneOf: [ { "$ref": "#/$defs/PlayerId" }, { "$ref": "#/$defs/NpcId" }, { "$ref": "#/$defs/CreatureId" } ]
-        description: 'Identifier for the participant image (optional)'
+        oneOf:
+          [
+            { "$ref": "#/$defs/PlayerId" },
+            { "$ref": "#/$defs/NpcId" },
+            { "$ref": "#/$defs/CreatureId" },
+          ]
+        description: "Identifier for the participant image (optional)"
       name:
         type: string
         description: Optional proper or descriptive name; shorthand uses label instead
@@ -265,20 +318,20 @@ type: object
         items:
           type: string
     required:
-    - type
-    - id
-    - label
-    - initiative
-    - hitPoints
-    - conditions
+      - type
+      - id
+      - label
+      - initiative
+      - hitPoints
+      - conditions
     additionalProperties: false
 
   ParticipantType:
     type: string
     enum:
-    - pc
-    - npc
-    - creature
+      - pc
+      - npc
+      - creature
     description: Participant type to guide UI behavior
 
   ParticipantId:
@@ -290,7 +343,12 @@ type: object
     title: Combat Round
     description: A round of combat containing all turns
     properties:
-      number: { type: integer, minimum: 1, description: "Round number (must be in sync with array index in Encounter.rounds)" }
+      number:
+        {
+          type: integer,
+          minimum: 1,
+          description: "Round number (must be in sync with array index in Encounter.rounds)",
+        }
       turns:
         type: array
         description: One-based ordered list of turns in this round, normally created for every participant present when the round begins
@@ -300,8 +358,8 @@ type: object
         type: string
         description: Optional notes for this round
     required:
-    - number
-    - turns
+      - number
+      - turns
     additionalProperties: false
 
   Turn:
@@ -331,9 +389,9 @@ type: object
         "$ref": "#/$defs/PhaseChecklist"
         description: Proposed or confirmed end-of-turn updates (optional)
     required:
-    - participantId
-    - status
-    - tokens
+      - participantId
+      - status
+      - tokens
     additionalProperties: false
 
   TurnStatus:
@@ -355,8 +413,8 @@ type: object
           "$ref": "#/$defs/ChecklistItem"
         default: []
     required:
-    - phase
-    - items
+      - phase
+      - items
     additionalProperties: false
 
   ChecklistItem:
@@ -383,10 +441,10 @@ type: object
         default: false
         description: Whether the item has been confirmed and applied
     required:
-    - id
-    - tokens
-    - overridden
-    - applied
+      - id
+      - tokens
+      - overridden
+      - applied
     additionalProperties: false
 
 properties:

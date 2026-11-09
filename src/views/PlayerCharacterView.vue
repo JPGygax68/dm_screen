@@ -40,6 +40,51 @@ const router = useRouter();
 const store = useDataStore();
 const { roots } = storeToRefs(store);
 
+//#region Character property fields
+
+const name = ref("");
+const surname = ref("");
+const pcClass = ref("");
+const subclass = ref("");
+const background: Ref<Background | ""> = ref("");
+const species = ref("");
+const versatilitySkill = ref(""); /// For humans only
+const ancestry = ref("");
+const gendry = ref("");
+// TODO: initialize ability scores and bonuses to undefined?
+const abilityScores: Ref<AbilityScores> = ref({
+  ...initialAbilityScores,
+});
+const abilityBonuses: Ref<AbilityBonuses> = ref({
+  str: 0,
+  dex: 0,
+  con: 0,
+  int: 0,
+  wis: 0,
+  cha: 0,
+});
+/** Skills acquired from the character's background
+ */
+const backgroundSkills: Ref<SkillId[]> = ref([]);
+
+function formSnapshot(): string {
+  return JSON.stringify({
+    name: name.value,
+    surname: surname.value,
+    classId: pcClass.value,
+    species: species.value,
+    versatilitySkill: versatilitySkill.value,
+    ancestry: ancestry.value,
+    gender: gendry.value,
+    background: background.value,
+    backgroundSkills: backgroundSkills.value,
+    abilityScores: abilityScores.value,
+    abilityBonuses: abilityBonuses.value,
+  });
+}
+
+//#endregion Character property fields
+
 //#region View state
 
 const isEditorReady = ref(false);
@@ -49,60 +94,24 @@ const errorMessage = ref("");
 
 const touchedAbilityScore = ref<AbilityKey>();
 
-//#endregion View state
-
-//#region Character properties
-
-const characterName = ref("");
-const characterSurname = ref("");
-const characterClass = ref("");
-const characterSubclass = ref("");
-const characterBackground = ref("");
-const characterSpecies = ref("");
-const characterAncestry = ref("");
-const characterGender = ref("");
 const originalFormSnapshot = ref("");
 const isDiscarding = ref(false);
-const abilityBonuses: Ref<AbilityBonuses> = ref({
-  str: 0,
-  dex: 0,
-  con: 0,
-  int: 0,
-  wis: 0,
-  cha: 0,
-});
-const abilityScores: Ref<AbilityScores> = ref({
-  ...initialAbilityScores,
-});
-const skills: Ref<SkillId[]> = ref([]);
 
-function formSnapshot(): string {
-  return JSON.stringify({
-    name: characterName.value,
-    surname: characterSurname.value,
-    classId: characterClass.value,
-    species: characterSpecies.value,
-    ancestry: characterAncestry.value,
-    gender: characterGender.value,
-    background: characterBackground.value,
-    abilityScores: abilityScores.value,
-    abilityBonuses: abilityBonuses.value,
-    skills: skills.value,
-  });
-}
+// const skills: Ref<SkillId[]> = ref([]);
 
 function hydrateEditor(): void {
   isEditorReady.value = false;
   isLoading.value = true;
   errorMessage.value = "";
   if (isNew.value) {
-    characterName.value = "";
-    characterSurname.value = "";
-    characterClass.value = "";
-    characterSpecies.value = "";
-    characterAncestry.value = "";
-    characterGender.value = "";
-    characterBackground.value = "";
+    name.value = "";
+    surname.value = "";
+    pcClass.value = "";
+    species.value = "";
+    versatilitySkill.value = "";
+    ancestry.value = "";
+    gendry.value = "";
+    background.value = "";
     abilityScores.value = { ...initialAbilityScores };
     abilityBonuses.value = { str: 0, dex: 0, con: 0, int: 0, wis: 0, cha: 0 };
     skills.value = [];
@@ -114,14 +123,15 @@ function hydrateEditor(): void {
   }
   const character = playerCharacter.value;
   if (character) {
-    characterName.value = character.name;
-    characterSurname.value = character.surname ?? "";
-    characterClass.value = character.classes?.[0] ?? "";
+    name.value = character.name;
+    surname.value = character.surname ?? "";
+    pcClass.value = character.classes?.[0] ?? "";
     skills.value = character.skills ?? [];
-    characterSpecies.value = character.species ?? "";
-    characterAncestry.value = character.ancestry ?? "";
-    characterGender.value = character.gender ?? "";
-    characterBackground.value = character.background ?? "";
+    species.value = character.species ?? "";
+    versatilitySkill.value = character.versatilitySkill ?? "";
+    ancestry.value = character.ancestry ?? "";
+    gendry.value = character.gender ?? "";
+    background.value = character.background ?? "";
     abilityScores.value = {
       ...initialAbilityScores,
       ...character.abilityScores,
@@ -137,7 +147,7 @@ function hydrateEditor(): void {
   isLoading.value = false;
 }
 
-//#endregion Character properties
+//#endregion View state
 
 //#region Properties and Events
 
@@ -162,20 +172,20 @@ const currentSection = ref("");
 // #region Computed properties
 
 const identityClassName = computed(
-  () => classes.find((classItem) => classItem.id === characterClass.value)?.name,
+  () => classes.find((classItem) => classItem.id === pcClass.value)?.name,
 );
 const identitySpeciesName = computed(
-  () => speciesList.find((speciesItem) => speciesItem.id === characterSpecies.value)?.name_en,
+  () => speciesList.find((speciesItem) => speciesItem.id === species.value)?.name_en,
 );
 const identityBackground = computed(() => {
-  if (characterBackground.value === "custom") {
+  if (background.value === "custom") {
     return "Custom"; // TODO: replace with the actual name of the custom background
   }
-  return backgrounds.find((background) => background.id === characterBackground.value)?.name_en;
+  return backgrounds.find((background) => background.id === background.value)?.name_en;
 });
-const identityGenderName = computed(() => (characterGender.value ? characterGender.value : ""));
+const identityGenderName = computed(() => (gendry.value ? gendry.value : ""));
 const identityGenderIcon = computed(() => {
-  switch (characterGender.value) {
+  switch (gendry.value) {
     case "male":
       return "♂";
     case "female":
@@ -204,7 +214,7 @@ const remainingSelectableSkills = computed(() => {
 });
 
 const pcHasTrait = (trait: string) => {
-  const species = speciesList.find((speciesItem) => speciesItem.id === characterSpecies.value);
+  const species = speciesList.find((speciesItem) => speciesItem.id === species.value);
   return species?.traits.includes(trait) ?? false;
 };
 
@@ -252,9 +262,9 @@ const baseAbilityScoresTotal = computed(() => {
 
 const primaryClassAbilities: Ref<AbilityKey[]> = computed(() => {
   // Consult the class features and extract the primary abilities for the class
-  const cls = classes.find((c) => c.id === characterClass.value);
+  const cls = classes.find((c) => c.id === pcClass.value);
   if (!cls) {
-    console.error("Class not found:", characterClass.value);
+    console.error("Class not found:", pcClass.value);
     return [];
   }
   return Array.isArray(cls.primary_ability)
@@ -284,9 +294,9 @@ const availableAbilityBonusPoints = computed(() => {
 
 const savingThrows = computed(() => {
   const result: Record<AbilityKey, boolean> = {} as Record<AbilityKey, boolean>;
-  const classData = classes.find((c) => c.id === characterClass.value);
+  const classData = classes.find((c) => c.id === pcClass.value);
   if (!classData) {
-    console.error("Class not found:", characterClass.value);
+    console.error("Class not found:", pcClass.value);
     return result;
   }
   abilityKeys.values().forEach((key) => {
@@ -314,14 +324,14 @@ const abilityModifiersAsText = computed(() => {
 
 const backgroundAllowsBoosting = computed(() => {
   const result: Record<AbilityKey, boolean> = {} as Record<AbilityKey, boolean>;
-  if (characterBackground.value === "custom") {
+  if (background.value === "custom") {
     console.log("Custom background allows boosting for all abilities.");
     for (const key of Object.keys(finalAbilityScores.value) as AbilityKey[]) {
       result[key] = true;
     }
     return result;
   }
-  const backgroundData = backgrounds.find((b) => b.id === characterBackground.value);
+  const backgroundData = backgrounds.find((b) => b.id === background.value);
   if (!backgroundData) return result;
   (Object.keys(finalAbilityScores.value) as AbilityKey[]).forEach((key) => {
     result[key] = backgroundData.boostableAbilityScores?.includes(key) ?? false;
@@ -371,19 +381,19 @@ onBeforeRouteUpdate((to, from) => {
 // Optional text fields are left out when empty, as the schema rejects empty strings.
 function editableFields(): Partial<PlayerCharacter> {
   const fields: Partial<PlayerCharacter> = {
-    name: characterName.value.trim(),
+    name: name.value.trim(),
     abilityScores: { ...abilityScores.value },
     abilityBonuses: { ...abilityBonuses.value },
     skills: [...skills.value],
   };
-  const surname = characterSurname.value.trim();
-  const gender = characterGender.value.trim();
+  const surname = surname.value.trim();
+  const gender = gendry.value.trim();
   if (surname) fields.surname = surname;
-  if (characterClass.value) fields.classes = [characterClass.value];
-  if (characterSpecies.value) fields.species = characterSpecies.value;
-  if (characterAncestry.value) fields.ancestry = characterAncestry.value;
+  if (pcClass.value) fields.classes = [pcClass.value];
+  if (species.value) fields.species = species.value;
+  if (ancestry.value) fields.ancestry = ancestry.value;
   if (gender) fields.gender = gender;
-  if (characterBackground.value) fields.background = characterBackground.value;
+  if (background.value) fields.background = background.value;
   return fields;
 }
 
@@ -529,7 +539,6 @@ function getElementAtLocation(x: number, y: number): HTMLElement | null {
 }
 
 // #endregion Helper Functions
-
 </script>
 
 <template>
@@ -545,8 +554,8 @@ function getElementAtLocation(x: number, y: number): HTMLElement | null {
           <span>
             <span v-if="isNew">(New): </span>
             <span class="font-bold shrink">
-              {{ characterName }}
-              <span v-if="characterSurname" class="hidden sm:inline">{{ characterSurname }}</span>
+              {{ name }}
+              <span v-if="surname" class="hidden sm:inline">{{ surname }}</span>
             </span>
             <span v-if="identityClassName">&nbsp;· {{ identityClassName }}</span>
             <span v-if="identitySpeciesName">&nbsp;· {{ identitySpeciesName }}</span>
@@ -558,11 +567,11 @@ function getElementAtLocation(x: number, y: number): HTMLElement | null {
           class="grid grid-cols-[min-content_1fr] items-baseline gap-x-2 gap-y-2 py-3 sm:grid-cols-[min-content_1fr_min-content_1fr] [&>label]:justify-self-end [&>select>option]:box-border_p-0"
         >
           <label for="character-name">Name</label>
-          <input id="character-name" ref="nameInput" type="text" v-model="characterName" />
+          <input id="character-name" ref="nameInput" type="text" v-model="name" />
           <label for="character-surname">Surname</label>
-          <input id="character-surname" type="text" v-model="characterSurname" />
+          <input id="character-surname" type="text" v-model="surname" />
           <label for="character-class">Class</label>
-          <select id="character-class" v-model="characterClass">
+          <select id="character-class" v-model="pcClass">
             <option disabled value="">Select class</option>
             <option v-for="classItem in classes" :key="classItem.id" :value="classItem.id">
               {{ classItem.name }}
@@ -584,7 +593,7 @@ function getElementAtLocation(x: number, y: number): HTMLElement | null {
           <label for="character-species" class="col-start-1">Species</label>
           <select
             id="character-species"
-            v-model="characterSpecies"
+            v-model="species"
             placeholder="Select species"
             class="select"
           >
@@ -597,11 +606,11 @@ function getElementAtLocation(x: number, y: number): HTMLElement | null {
               {{ speciesItem.name_en }}
             </option>
           </select>
-          <template v-if="characterSpecies === 'dragonborn'">
+          <template v-if="species === 'dragonborn'">
             <label for="character-draconic-ancestry">Ancestry</label>
             <select
               id="character-draconic-ancestry"
-              v-model="characterAncestry"
+              v-model="ancestry"
               placeholder="Select draconic ancestry"
               hint="Draconic Ancestry"
               class="select"
@@ -617,7 +626,7 @@ function getElementAtLocation(x: number, y: number): HTMLElement | null {
             </select>
           </template>
           <label for="character-gender">Gender</label>
-          <input id="character-gender" v-model="characterGender" list="character-gender-options" />
+          <input id="character-gender" v-model="gendry" list="character-gender-options" />
           <datalist id="character-gender-options">
             <option id="male" value="Male" />
             <option id="female" value="Female" />
@@ -626,7 +635,7 @@ function getElementAtLocation(x: number, y: number): HTMLElement | null {
           <label for="character-background">Background</label>
           <select
             id="character-background"
-            v-model="characterBackground"
+            v-model="background"
             placeholder="Select background"
             class="select"
           >
@@ -881,6 +890,7 @@ function getElementAtLocation(x: number, y: number): HTMLElement | null {
           />
         </div>
       </BetterDetails>
+      <!--
       <BetterDetails
         v-if="!isNew"
         id="skills"
@@ -892,7 +902,6 @@ function getElementAtLocation(x: number, y: number): HTMLElement | null {
           <span class="font-bold">Skills</span>
           <span class="hidden group-open:inline">&nbsp;({{ remainingSelectableSkills }} still assignable)</span>
         </template>
-        <!-- <div class="grid gap-4 grid-cols-2 sm:grid-cols-3 md:grid-cols-4"> -->
         <div class="columns-2 sm:columns-3 gap-4 space-y-4">
           <div
             v-for="ability in abilityKeys"
@@ -924,6 +933,7 @@ function getElementAtLocation(x: number, y: number): HTMLElement | null {
           />
         </div>
       </BetterDetails>
+      // -->
       <div id="action-buttons" class="mx-auto flex max-w-3xl justify-end gap-3 px-2 py-6 lg:px-10">
         <button
           v-if="!isNew"
@@ -944,7 +954,7 @@ function getElementAtLocation(x: number, y: number): HTMLElement | null {
         <button
           type="submit"
           class="bg-moss-dark px-4 py-3 font-bold text-paper transition hover:bg-moss disabled:cursor-not-allowed disabled:opacity-50"
-          :disabled="isSaving || !hasUnsavedChanges || !characterName.trim()"
+          :disabled="isSaving || !hasUnsavedChanges || !name.trim()"
         >
           {{ isSaving ? "Saving..." : isNew ? "Add to party" : "Save character" }}
         </button>
