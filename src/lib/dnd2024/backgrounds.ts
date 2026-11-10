@@ -1,9 +1,9 @@
 import type { AbilityKey } from "./base.ts";
-import type { Skill, SkillId } from "@/lib/dnd2024/skills.ts";
+import type { SkillDef, SkillId } from "@/lib/dnd2024/skills.ts";
 import type { Ref } from "vue";
 import { ref } from "vue";
 
-export type Background = {
+export type BackgroundDef = {
   id: string;
   name_en: string;
   description?: string;
@@ -15,7 +15,7 @@ export type Background = {
 };
 
 // SRD 5.2 Free-to-use sample backgrounds
-const criminalBackground: Background = {
+const criminalBackground: BackgroundDef = {
   id: "criminal",
   name_en: "Criminal",
   description: "A life of crime and underworld connections.",
@@ -25,7 +25,7 @@ const criminalBackground: Background = {
   tools: ["Thieves' Tools"],
 };
 
-const sageBackground: Background = {
+const sageBackground: BackgroundDef = {
   id: "sage",
   name_en: "Sage",
   description: "A scholarly background with extensive knowledge.",
@@ -34,7 +34,7 @@ const sageBackground: Background = {
   tools: ["Calligrapher's Supplies"],
 };
 
-const soldierBackground: Background = {
+const soldierBackground: BackgroundDef = {
   id: "soldier",
   name_en: "Soldier",
   description: "A background of military service and discipline.",

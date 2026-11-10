@@ -158,6 +158,9 @@ type: object
       surname: { type: string, description: "Character surname (optional)" }
       portrait: { type: string, description: "Character portrait image data URL (optional)" }
       species: { type: string, minLength: 1, description: "Character species" }
+      versatilitySkill:
+        "$ref": "#/$defs/SkillId"
+        description: "Versatility skill (humans only)"
       ancestry: { type: string, description: "Draconic or Goliath ancestry (optional)" }
       gender:
         {
@@ -172,16 +175,15 @@ type: object
         description: Character classes; initially one class is selected
         items: { type: string, minLength: 1 }
       background:
-        oneOf: [
-          {
-            type: "string",
-            description: "Standard background identifier (defined by rules)",
-            minLength: 1
-          },
-          {
-            "$ref": "#/$defs/CustomBackground"
-          }
-        ]
+        oneOf:
+          [
+            {
+              type: "string",
+              description: "Standard background identifier (defined by rules)",
+              minLength: 1,
+            },
+            { "$ref": "#/$defs/CustomBackground" },
+          ]
       originStory:
         type: string
         description: "Character origin story (optional; must match background)"
@@ -191,9 +193,6 @@ type: object
       abilityBonuses:
         "$ref": "#/$defs/AbilityBonuses"
         default: { str: 0, dex: 0, con: 0, int: 0, wis: 0, cha: 0 }
-      skills:
-        "$ref": "#/$defs/Skills"
-        default: []
       hitPoints:
         type: integer
         description: Current hit points
@@ -220,34 +219,21 @@ type: object
   CustomBackground:
     type: object
     properties:
-      description: { type: string, minLength: 1, description: "Description of the custom background" }
+      designation: { type: string, minLength: 1, description: "Name of the custom background" }
+      description:
+        { type: string, minLength: 1, description: "Description of the custom background" }
+      skills:
+        type: array
+        description: List of skills granted by this custom background
+        items: { "$ref": "#/$defs/SkillId", minLength: 1 }
     required:
-      - description
+      - designation
     additionalProperties: false
-
-  Skills:
-    type: array
-    description: List of skills
-    items:
-      "$ref": "#/$defs/Skill"
-
-  Skill:
-    type: object
-    title: Skill
-    description: A skill that a character has
-    properties:
-      id: { "$ref": "#/$defs/SkillId" }
-      origin:
-        { enum: [species, class, background], description: "How the skill was acquired" }
-    required:
-      - id
-      - origin
-    additionalProperties: true
 
   SkillId:
     type: string
-    description: Skill identifier, defined by DnD rules (may be complemented by homebrew skills, tbd in the future)
     minLength: 1
+    description: "Skill identifier, defined by DnD rules (FUTURE: + homebrew skills)"
 
   NonPlayerCharacter:
     type: object

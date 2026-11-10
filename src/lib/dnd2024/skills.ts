@@ -1,11 +1,11 @@
 import type { AbilityKey } from "@/lib/dnd2024/base.ts";
 
-export interface Skill {
+export interface SkillDef {
     id: string;
     ability: AbilityKey;
 }
 
-export const skills: Skill[] = [
+export const skillAttributes: SkillDef[] = [
     { id: "acrobatics", ability: "dex" },
     { id: "animal_handling", ability: "wis" },
     { id: "arcana", ability: "int" },
@@ -26,7 +26,8 @@ export const skills: Skill[] = [
     { id: "survival", ability: "wis" }
 ] as const;
 
-export type SkillId = typeof skills[number]["id"];
+/** Official skill identifier, as defined by DnD rules */
+export type SkillId = typeof skillAttributes[number]["id"];
 
 export const skillNamesMap_en: Record<SkillId, string> = {
     acrobatics: "Acrobatics",
@@ -47,11 +48,4 @@ export const skillNamesMap_en: Record<SkillId, string> = {
     sleight_of_hand: "Sleight of Hand",
     stealth: "Stealth",
     survival: "Survival"
-};
-
-export const raceSkills: Record<string, SkillId[]> = {
-    human: ["acrobatics", "athletics", "deception"],
-    elf: ["perception", "stealth"],
-    dwarf: ["history", "medicine"],
-    halfling: ["sleight_of_hand", "stealth"]
 };

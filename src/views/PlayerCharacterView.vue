@@ -11,16 +11,16 @@ import type {
   AbilityBonuses,
   Campaign,
   PlayerCharacter,
-  SkillId,
 } from "@/generated/models/data.schema";
 import type { AbilityKey } from "@/lib/dnd2024/base.ts";
 import { abilityKeys, abilityNamesMap_en } from "@/lib/dnd2024/base.ts";
 import { classes } from "@/lib/dnd2024/classFeatures.ts";
-import type { Background } from "@/lib/dnd2024/backgrounds.ts";
+import type { BackgroundDef } from "@/lib/dnd2024/backgrounds.ts";
 import { backgrounds, freeBackgrounds } from "@/lib/dnd2024/backgrounds.ts";
 import { draconicAncestries, speciesList } from "@/lib/dnd2024/species.ts";
 import { useDataStore } from "@/stores/data-store.ts";
-import { Skill, skillNamesMap_en, skills } from "@/lib/dnd2024/skills";
+import type { SkillId, SkillDef } from "@/lib/dnd2024/skills";
+import { skillNamesMap_en, skillAttributes } from "@/lib/dnd2024/skills";
 
 //#region Constants
 
@@ -46,11 +46,14 @@ const name = ref("");
 const surname = ref("");
 const pcClass = ref("");
 const subclass = ref("");
-const background: Ref<Background | ""> = ref("");
+/** The ID of the selected background; the empty string means "no background selected yet" */
+const backgroundId: Ref<string> = ref("");
+/** In case the selected background is custom, this holds the skills granted by it.*/
+const customBgSkills: Ref<SkillId[] | null> = ref([]);
 const species = ref("");
 const versatilitySkill = ref(""); /// For humans only
 const ancestry = ref("");
-const gendry = ref("");
+const gender = ref("");
 // TODO: initialize ability scores and bonuses to undefined?
 const abilityScores: Ref<AbilityScores> = ref({
   ...initialAbilityScores,
@@ -65,7 +68,6 @@ const abilityBonuses: Ref<AbilityBonuses> = ref({
 });
 /** Skills acquired from the character's background
  */
-const backgroundSkills: Ref<SkillId[]> = ref([]);
 
 function formSnapshot(): string {
   return JSON.stringify({
@@ -75,9 +77,9 @@ function formSnapshot(): string {
     species: species.value,
     versatilitySkill: versatilitySkill.value,
     ancestry: ancestry.value,
-    gender: gendry.value,
-    background: background.value,
-    backgroundSkills: backgroundSkills.value,
+    gender: gender.value,
+    background: backgroundId.value,
+    customBgSkills: customBgSkills.value,
     abilityScores: abilityScores.value,
     abilityBonuses: abilityBonuses.value,
   });
@@ -110,11 +112,11 @@ function hydrateEditor(): void {
     species.value = "";
     versatilitySkill.value = "";
     ancestry.value = "";
-    gendry.value = "";
-    background.value = "";
+    gender.value = "";
+    backgroundId.value = "";
     abilityScores.value = { ...initialAbilityScores };
     abilityBonuses.value = { str: 0, dex: 0, con: 0, int: 0, wis: 0, cha: 0 };
-    skills.value = [];
+    customBgSkills.value = [];
     originalFormSnapshot.value = formSnapshot();
     currentSection.value = "identity";
     isEditorReady.value = !!campaign.value;
@@ -126,12 +128,13 @@ function hydrateEditor(): void {
     name.value = character.name;
     surname.value = character.surname ?? "";
     pcClass.value = character.classes?.[0] ?? "";
-    skills.value = character.skills ?? [];
     species.value = character.species ?? "";
     versatilitySkill.value = character.versatilitySkill ?? "";
     ancestry.value = character.ancestry ?? "";
-    gendry.value = character.gender ?? "";
-    background.value = character.background ?? "";
+    gender.value = character.gender ?? "";
+    backgroundId.value = typeof character.background === "string" ? character.background : "custom";
+    customBgSkills.value =
+      typeof character.background === "object" ? (character.background.skills ?? []) : null;
     abilityScores.value = {
       ...initialAbilityScores,
       ...character.abilityScores,
@@ -140,7 +143,6 @@ function hydrateEditor(): void {
       ...abilityBonuses.value,
       ...character.abilityBonuses,
     };
-    skills.value = character.skills ?? [];
     originalFormSnapshot.value = formSnapshot();
     isEditorReady.value = true;
   }
@@ -178,14 +180,14 @@ const identitySpeciesName = computed(
   () => speciesList.find((speciesItem) => speciesItem.id === species.value)?.name_en,
 );
 const identityBackground = computed(() => {
-  if (background.value === "custom") {
-    return "Custom"; // TODO: replace with the actual name of the custom background
+  if (backgroundId.value === "custom") {
+    return "Custom"; // TODO: replace with the actual name of the custom background?
   }
-  return backgrounds.find((background) => background.id === background.value)?.name_en;
+  return backgrounds.find((background) => background.id === backgroundId.value)?.name_en;
 });
-const identityGenderName = computed(() => (gendry.value ? gendry.value : ""));
+const identityGenderName = computed(() => (gender.value ? gender.value : ""));
 const identityGenderIcon = computed(() => {
-  switch (gendry.value) {
+  switch (gender.value) {
     case "male":
       return "♂";
     case "female":
@@ -214,8 +216,8 @@ const remainingSelectableSkills = computed(() => {
 });
 
 const pcHasTrait = (trait: string) => {
-  const species = speciesList.find((speciesItem) => speciesItem.id === species.value);
-  return species?.traits.includes(trait) ?? false;
+  const item = speciesList.find((speciesItem) => speciesItem.id === species.value);
+  return item?.traits.includes(trait) ?? false;
 };
 
 const hasUnsavedChanges = computed(
@@ -324,14 +326,14 @@ const abilityModifiersAsText = computed(() => {
 
 const backgroundAllowsBoosting = computed(() => {
   const result: Record<AbilityKey, boolean> = {} as Record<AbilityKey, boolean>;
-  if (background.value === "custom") {
+  if (backgroundId.value === "custom") {
     console.log("Custom background allows boosting for all abilities.");
     for (const key of Object.keys(finalAbilityScores.value) as AbilityKey[]) {
       result[key] = true;
     }
     return result;
   }
-  const backgroundData = backgrounds.find((b) => b.id === background.value);
+  const backgroundData = backgrounds.find((b) => b.id === backgroundId.value);
   if (!backgroundData) return result;
   (Object.keys(finalAbilityScores.value) as AbilityKey[]).forEach((key) => {
     result[key] = backgroundData.boostableAbilityScores?.includes(key) ?? false;
@@ -384,7 +386,7 @@ function editableFields(): Partial<PlayerCharacter> {
     name: name.value.trim(),
     abilityScores: { ...abilityScores.value },
     abilityBonuses: { ...abilityBonuses.value },
-    skills: [...skills.value],
+    skills: [...skillAttributes.value],
   };
   const surname = surname.value.trim();
   const gender = gendry.value.trim();
@@ -393,7 +395,7 @@ function editableFields(): Partial<PlayerCharacter> {
   if (species.value) fields.species = species.value;
   if (ancestry.value) fields.ancestry = ancestry.value;
   if (gender) fields.gender = gender;
-  if (background.value) fields.background = background.value;
+  if (backgroundId.value) fields.background = backgroundId.value;
   return fields;
 }
 
@@ -477,7 +479,7 @@ async function cancelEditing(): Promise<void> {
   });
 }
 
-const availableBackgrounds: Ref<Background[]> = ref([
+const availableBackgrounds: Ref<BackgroundDef[]> = ref([
   ...freeBackgrounds,
   { id: "custom", name_en: "Custom" },
 ]);
@@ -635,7 +637,7 @@ function getElementAtLocation(x: number, y: number): HTMLElement | null {
           <label for="character-background">Background</label>
           <select
             id="character-background"
-            v-model="background"
+            v-model="backgroundId"
             placeholder="Select background"
             class="select"
           >
