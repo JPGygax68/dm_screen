@@ -1,11 +1,14 @@
 import type { AbilityKey } from "@/lib/dnd2024/base.ts";
 
+// TODO: make this into a composable
+// TODO: provide per-ability skill lists for easier filtering
+
 export interface SkillDef {
     id: string;
     ability: AbilityKey;
 }
 
-export const skillAttributes: SkillDef[] = [
+export const skillDefs: SkillDef[] = [
     { id: "acrobatics", ability: "dex" },
     { id: "animal_handling", ability: "wis" },
     { id: "arcana", ability: "int" },
@@ -27,7 +30,7 @@ export const skillAttributes: SkillDef[] = [
 ] as const;
 
 /** Official skill identifier, as defined by DnD rules */
-export type SkillId = typeof skillAttributes[number]["id"];
+export type SkillId = typeof skillDefs[number]["id"];
 
 export const skillNamesMap_en: Record<SkillId, string> = {
     acrobatics: "Acrobatics",

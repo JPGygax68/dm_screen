@@ -20,7 +20,7 @@ import { backgrounds, freeBackgrounds } from "@/lib/dnd2024/backgrounds.ts";
 import { draconicAncestries, speciesList } from "@/lib/dnd2024/species.ts";
 import { useDataStore } from "@/stores/data-store.ts";
 import type { SkillId, SkillDef } from "@/lib/dnd2024/skills";
-import { skillNamesMap_en, skillAttributes } from "@/lib/dnd2024/skills";
+import { skillNamesMap_en, skillDefs } from "@/lib/dnd2024/skills";
 
 //#region Constants
 
@@ -386,7 +386,7 @@ function editableFields(): Partial<PlayerCharacter> {
     name: name.value.trim(),
     abilityScores: { ...abilityScores.value },
     abilityBonuses: { ...abilityBonuses.value },
-    skills: [...skillAttributes.value],
+    skills: [...skillDefs.value],
   };
   const surname = surname.value.trim();
   const gender = gendry.value.trim();
@@ -628,13 +628,33 @@ function getElementAtLocation(x: number, y: number): HTMLElement | null {
             </select>
           </template>
           <label for="character-gender">Gender</label>
-          <input id="character-gender" v-model="gendry" list="character-gender-options" />
+          <input id="character-gender" v-model="gender" list="character-gender-options" />
           <datalist id="character-gender-options">
             <option id="male" value="Male" />
             <option id="female" value="Female" />
             <option id="other" value="Other" />
           </datalist>
-          <label for="character-background">Background</label>
+          <template v-if="species === 'human'">
+            <label for="versatility-skill" class="whitespace-nowrap">Versatility Skill</label>
+            <select
+              id="versatility-skill"
+              v-model="versatilitySkill"
+              placeholder="Select versatility skill"
+              class="select columns-3"
+            >
+            <option disabled value="">Select versatility skill</option>
+              <optgroup v-for="abilityKey in abilityKeys" :label="abilityNamesMap_en[abilityKey]" class="capitalize">
+                <option
+                  v-for="skill in skillDefs.filter(s => s.ability === abilityKey)"
+                  :key="skill.id"
+                  :value="skill.id"
+                >
+                  {{ skillNamesMap_en[skill.id] }}
+                </option>
+              </optgroup>
+            </select>
+          </template>
+          <label for="character-background" class="col-start-1">Background</label>
           <select
             id="character-background"
             v-model="backgroundId"
