@@ -386,15 +386,15 @@ function editableFields(): Partial<PlayerCharacter> {
     name: name.value.trim(),
     abilityScores: { ...abilityScores.value },
     abilityBonuses: { ...abilityBonuses.value },
-    skills: [...skillDefs.value],
   };
-  const surname = surname.value.trim();
-  const gender = gendry.value.trim();
-  if (surname) fields.surname = surname;
+  const trimmedSurname = surname.value.trim();
+  const trimmedGender = gender.value.trim();
+  if (trimmedSurname) fields.surname = trimmedSurname;
   if (pcClass.value) fields.classes = [pcClass.value];
   if (species.value) fields.species = species.value;
+  if (versatilitySkill.value) fields.versatilitySkill = versatilitySkill.value;
   if (ancestry.value) fields.ancestry = ancestry.value;
-  if (gender) fields.gender = gender;
+  if (trimmedGender) fields.gender = trimmedGender;
   if (backgroundId.value) fields.background = backgroundId.value;
   return fields;
 }
