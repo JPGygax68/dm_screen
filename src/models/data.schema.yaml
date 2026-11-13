@@ -193,6 +193,11 @@ type: object
       abilityBonuses:
         "$ref": "#/$defs/AbilityBonuses"
         default: { str: 0, dex: 0, con: 0, int: 0, wis: 0, cha: 0 }
+      customBackgroundSkills:
+        "$ref": "#/$defs/SkillId"
+        type: array
+        description: "Skills granted by the custom background"
+        items: { "$ref": "#/$defs/SkillId" }
       hitPoints:
         type: integer
         description: Current hit points

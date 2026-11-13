@@ -48,7 +48,7 @@ const pcClass = ref("");
 const subclass = ref("");
 /** The ID of the selected background; the empty string means "no background selected yet" */
 const backgroundId: Ref<string> = ref("");
-/** In case the selected background is custom, this holds the skills granted by it.*/
+/** In case the selected background is custom, this holds the skills granted by it. TODO */
 const customBgSkills: Ref<SkillId[] | null> = ref([]);
 const species = ref("");
 const versatilitySkill = ref(""); /// For humans only
@@ -66,8 +66,6 @@ const abilityBonuses: Ref<AbilityBonuses> = ref({
   wis: 0,
   cha: 0,
 });
-/** Skills acquired from the character's background
- */
 
 function formSnapshot(): string {
   return JSON.stringify({
@@ -207,12 +205,21 @@ const playerCharacter = computed(() =>
   campaign.value?.party.find((member) => member.id === playerCharacterId.value),
 );
 
-// TODO: needs overhaul
-const remainingSelectableSkills = computed(() => {
-  if (pcHasTrait("versatility")) {
-    return 1;
+const hasCustomBackground = computed(() => backgroundId.value === "custom");
+
+const backgroundName = computed(() => {
+  if (backgroundId.value === "custom") {
+    return "Custom";
   }
-  return 0;
+  return backgrounds.find((bg) => bg.id === backgroundId.value)?.name_en ?? "(?unkown background id)";
+});
+
+const backgroundSkills = computed(() => {
+  const background = playerCharacter.value?.background;
+  if (background === "custom") {
+    return playerCharacter.value?.customBackgroundSkills ?? [];
+  }
+  return backgrounds.find((bg) => bg.id === backgroundId.value)?.skills ?? [];
 });
 
 const pcHasTrait = (trait: string) => {
@@ -339,6 +346,11 @@ const backgroundAllowsBoosting = computed(() => {
     result[key] = backgroundData.boostableAbilityScores?.includes(key) ?? false;
   });
   return result;
+});
+
+const hasVersatilityTrait = computed(() => {
+  const speciesData = speciesList.find((s) => s.id === species.value);
+  return speciesData?.traits?.includes("versatility") ?? false;
 });
 
 //#endregion Computed properties
@@ -642,10 +654,14 @@ function getElementAtLocation(x: number, y: number): HTMLElement | null {
               placeholder="Select versatility skill"
               class="select columns-3"
             >
-            <option disabled value="">Select versatility skill</option>
-              <optgroup v-for="abilityKey in abilityKeys" :label="abilityNamesMap_en[abilityKey]" class="capitalize">
+              <option disabled value="">Select versatility skill</option>
+              <optgroup
+                v-for="abilityKey in abilityKeys"
+                :label="abilityNamesMap_en[abilityKey]"
+                class="capitalize"
+              >
                 <option
-                  v-for="skill in skillDefs.filter(s => s.ability === abilityKey)"
+                  v-for="skill in skillDefs.filter((s) => s.ability === abilityKey)"
                   :key="skill.id"
                   :value="skill.id"
                 >
@@ -912,7 +928,6 @@ function getElementAtLocation(x: number, y: number): HTMLElement | null {
           />
         </div>
       </BetterDetails>
-      <!--
       <BetterDetails
         v-if="!isNew"
         id="skills"
@@ -922,40 +937,28 @@ function getElementAtLocation(x: number, y: number): HTMLElement | null {
       >
         <template #summary>
           <span class="font-bold">Skills</span>
-          <span class="hidden group-open:inline">&nbsp;({{ remainingSelectableSkills }} still assignable)</span>
+          <span class="hidden group-open:inline">&nbsp;(TODO: Skill List)</span>
         </template>
-        <div class="columns-2 sm:columns-3 gap-4 space-y-4">
-          <div
-            v-for="ability in abilityKeys"
-            :key="ability"
-            :id="`skillset-${ability}`"
-            class="sm:min-w-8 px-2 py-1 border rounded-lg break-inside-avoid"
-          >
-            <h3 class="text-[150%]lg font-bold capitalize">
-              {{ abilityNamesMap_en[ability] }}
-            </h3>
-            <ul>
-              <li
-                v-for="skill in skills.filter((s: Skill) => s.ability === ability)"
-                :key="skill.id"
-                class="flex flex-row justify-between"
-              >
-                <label :for="skill.id">{{ skillNamesMap_en[skill.id] }}</label>
-                <input type="checkbox" :id="skill.id" :value="skill.id" v-model="selectedSkills" />
-              </li>
-            </ul>
-          </div>
-        </div>
-        <div class="mt-2 flex justify-end">
-          <input
-            type="button"
-            class="button align-right"
-            value="Next"
-            @click="currentSection = 'identity'"
-          />
+        <div class="grid grid-cols-2 sm:grid-cols-4 items-baseline gap-1">
+          <template v-if="hasVersatilityTrait">
+            <label for="versatility-skill">Versatility Skill</label>
+            <select id="versatility-skill" v-model="versatilitySkill">
+              <option v-for="skill in skillDefs" :key="skill.id" :value="skill.id">
+                {{ skillNamesMap_en[skill.id] }}
+              </option>
+            </select>
+          </template>
+          <template v-if="!hasCustomBackground">
+            <label class="col-start-1">{{backgroundName}}</label>
+            <input
+              v-for="skillId in backgroundSkills"
+              :key="skillId"
+              :value="skillNamesMap_en[skillId]"
+              readonly
+            />
+          </template>
         </div>
       </BetterDetails>
-      // -->
       <div id="action-buttons" class="mx-auto flex max-w-3xl justify-end gap-3 px-2 py-6 lg:px-10">
         <button
           v-if="!isNew"
