@@ -939,9 +939,9 @@ function getElementAtLocation(x: number, y: number): HTMLElement | null {
           <span class="font-bold">Skills</span>
           <span class="hidden group-open:inline">&nbsp;(TODO: Skill List)</span>
         </template>
-        <div class="grid grid-cols-2 sm:grid-cols-4 items-baseline gap-1">
+        <div class="grid grid-cols-1 sm:grid-cols-4 sm:items-baseline gap-1">
           <template v-if="hasVersatilityTrait">
-            <label for="versatility-skill">Versatility Skill</label>
+            <label for="versatility-skill" class="mt-1 -mb-1">Versatility</label>
             <select id="versatility-skill" v-model="versatilitySkill">
               <option v-for="skill in skillDefs" :key="skill.id" :value="skill.id">
                 {{ skillNamesMap_en[skill.id] }}
@@ -949,7 +949,7 @@ function getElementAtLocation(x: number, y: number): HTMLElement | null {
             </select>
           </template>
           <template v-if="!hasCustomBackground">
-            <label class="col-start-1">{{backgroundName}}</label>
+            <label class="mt-1 -mb-1 break-before-column sm:col-start-1">{{backgroundName}}</label>
             <input
               v-for="skillId in backgroundSkills"
               :key="skillId"
