@@ -19,8 +19,8 @@ import type { BackgroundDef } from "@/lib/dnd2024/backgrounds.ts";
 import { backgrounds, freeBackgrounds } from "@/lib/dnd2024/backgrounds.ts";
 import { draconicAncestries, speciesList } from "@/lib/dnd2024/species.ts";
 import { useDataStore } from "@/stores/data-store.ts";
-import type { SkillId, SkillDef } from "@/lib/dnd2024/skills";
-import { skillNamesMap_en, skillDefs } from "@/lib/dnd2024/skills";
+import type { SkillId } from "@/lib/dnd2024/skills";
+import { useSkills } from "@/lib/dnd2024/skills";
 
 //#region Constants
 
@@ -39,6 +39,7 @@ const route = useRoute();
 const router = useRouter();
 const store = useDataStore();
 const { roots } = storeToRefs(store);
+const { skillNamesMap_en, skillsByAbility } = useSkills();
 
 //#region Character property fields
 
@@ -211,7 +212,9 @@ const backgroundName = computed(() => {
   if (backgroundId.value === "custom") {
     return "Custom";
   }
-  return backgrounds.find((bg) => bg.id === backgroundId.value)?.name_en ?? "(?unkown background id)";
+  return (
+    backgrounds.find((bg) => bg.id === backgroundId.value)?.name_en ?? "(?unkown background id)"
+  );
 });
 
 const backgroundSkills = computed(() => {
@@ -646,30 +649,6 @@ function getElementAtLocation(x: number, y: number): HTMLElement | null {
             <option id="female" value="Female" />
             <option id="other" value="Other" />
           </datalist>
-          <template v-if="species === 'human'">
-            <label for="versatility-skill" class="whitespace-nowrap">Versatility Skill</label>
-            <select
-              id="versatility-skill"
-              v-model="versatilitySkill"
-              placeholder="Select versatility skill"
-              class="select columns-3"
-            >
-              <option disabled value="">Select versatility skill</option>
-              <optgroup
-                v-for="abilityKey in abilityKeys"
-                :label="abilityNamesMap_en[abilityKey]"
-                class="capitalize"
-              >
-                <option
-                  v-for="skill in skillDefs.filter((s) => s.ability === abilityKey)"
-                  :key="skill.id"
-                  :value="skill.id"
-                >
-                  {{ skillNamesMap_en[skill.id] }}
-                </option>
-              </optgroup>
-            </select>
-          </template>
           <label for="character-background" class="col-start-1">Background</label>
           <select
             id="character-background"
@@ -943,13 +922,22 @@ function getElementAtLocation(x: number, y: number): HTMLElement | null {
           <template v-if="hasVersatilityTrait">
             <label for="versatility-skill" class="mt-1 -mb-1">Versatility</label>
             <select id="versatility-skill" v-model="versatilitySkill">
-              <option v-for="skill in skillDefs" :key="skill.id" :value="skill.id">
-                {{ skillNamesMap_en[skill.id] }}
-              </option>
+              <optgroup
+                v-for="attr in abilityKeys.filter(a => skillsByAbility[a].length > 0)"
+                :key="attr"
+                :label="abilityNamesMap_en[attr]"
+                class="capitalize"
+              >
+                <option v-for="skillId in skillsByAbility[attr]" :key="skillId" :value="skillId">
+                  {{ skillNamesMap_en[skillId] }}
+                </option>
+              </optgroup>
             </select>
           </template>
           <template v-if="!hasCustomBackground">
-            <label class="mt-1 -mb-1 break-before-column sm:col-start-1">{{backgroundName}}</label>
+            <label class="mt-1 -mb-1 break-before-column sm:col-start-1">{{
+              backgroundName
+            }}</label>
             <input
               v-for="skillId in backgroundSkills"
               :key="skillId"

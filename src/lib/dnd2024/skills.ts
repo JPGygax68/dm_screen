@@ -1,14 +1,11 @@
 import type { AbilityKey } from "@/lib/dnd2024/base.ts";
 
-// TODO: make this into a composable
-// TODO: provide per-ability skill lists for easier filtering
-
 export interface SkillDef {
     id: string;
     ability: AbilityKey;
 }
 
-export const skillDefs: SkillDef[] = [
+const skillDefs: SkillDef[] = [
     { id: "acrobatics", ability: "dex" },
     { id: "animal_handling", ability: "wis" },
     { id: "arcana", ability: "int" },
@@ -32,7 +29,7 @@ export const skillDefs: SkillDef[] = [
 /** Official skill identifier, as defined by DnD rules */
 export type SkillId = typeof skillDefs[number]["id"];
 
-export const skillNamesMap_en: Record<SkillId, string> = {
+const skillNamesMap_en: Record<SkillId, string> = {
     acrobatics: "Acrobatics",
     animal_handling: "Animal Handling",
     arcana: "Arcana",
@@ -52,3 +49,28 @@ export const skillNamesMap_en: Record<SkillId, string> = {
     stealth: "Stealth",
     survival: "Survival"
 };
+
+const skillsByAbility: Record<AbilityKey, SkillId[]> = {
+    str: [],
+    dex: [],
+    con: [],
+    int: [],
+    wis: [],
+    cha: [],
+};
+
+for (const skill of skillDefs) {
+    skillsByAbility[skill.ability].push(skill.id);
+}
+
+export function useSkills(): {
+    skillDefs: readonly SkillDef[];
+    skillNamesMap_en: Readonly<Record<SkillId, string>>;
+    skillsByAbility: Readonly<Record<AbilityKey, readonly SkillId[]>>;
+} {
+    return {
+        skillDefs,
+        skillNamesMap_en,
+        skillsByAbility,
+    };
+}
