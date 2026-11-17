@@ -49,8 +49,10 @@ const pcClass = ref("");
 const subclass = ref("");
 /** The ID of the selected background; the empty string means "no background selected yet" */
 const backgroundId: Ref<string> = ref("");
+/** Custom background name */
+const customBackgroundName: Ref<string> = ref("");
 /** In case the selected background is custom, this holds the skills granted by it. TODO */
-const customBgSkills: Ref<SkillId[] | null> = ref([]);
+const customBackgroundSkills: Ref<SkillId[] | null> = ref([]);
 const species = ref("");
 const versatilitySkill = ref(""); /// For humans only
 const ancestry = ref("");
@@ -73,12 +75,14 @@ function formSnapshot(): string {
     name: name.value,
     surname: surname.value,
     classId: pcClass.value,
+    subclass: subclass.value,
     species: species.value,
     versatilitySkill: versatilitySkill.value,
     ancestry: ancestry.value,
     gender: gender.value,
-    background: backgroundId.value,
-    customBgSkills: customBgSkills.value,
+    backgroundId: backgroundId.value,
+    customBackgroundName: customBackgroundName.value,
+    customBackgroundSkills: customBackgroundSkills.value,
     abilityScores: abilityScores.value,
     abilityBonuses: abilityBonuses.value,
   });
@@ -115,7 +119,8 @@ function hydrateEditor(): void {
     backgroundId.value = "";
     abilityScores.value = { ...initialAbilityScores };
     abilityBonuses.value = { str: 0, dex: 0, con: 0, int: 0, wis: 0, cha: 0 };
-    customBgSkills.value = [];
+    customBackgroundName.value = "";
+    customBackgroundSkills.value = [];
     originalFormSnapshot.value = formSnapshot();
     currentSection.value = "identity";
     isEditorReady.value = !!campaign.value;
@@ -131,9 +136,6 @@ function hydrateEditor(): void {
     versatilitySkill.value = character.versatilitySkill ?? "";
     ancestry.value = character.ancestry ?? "";
     gender.value = character.gender ?? "";
-    backgroundId.value = typeof character.background === "string" ? character.background : "custom";
-    customBgSkills.value =
-      typeof character.background === "object" ? (character.background.skills ?? []) : null;
     abilityScores.value = {
       ...initialAbilityScores,
       ...character.abilityScores,
@@ -142,6 +144,8 @@ function hydrateEditor(): void {
       ...abilityBonuses.value,
       ...character.abilityBonuses,
     };
+    customBackgroundName.value = character.customBackgroundName ?? "";
+    customBackgroundSkills.value = character.customBackgroundSkills ?? [];
     originalFormSnapshot.value = formSnapshot();
     isEditorReady.value = true;
   }
@@ -918,10 +922,10 @@ function getElementAtLocation(x: number, y: number): HTMLElement | null {
           <span class="font-bold">Skills</span>
           <span class="hidden group-open:inline">&nbsp;(TODO: Skill List)</span>
         </template>
-        <div class="grid grid-cols-1 sm:grid-cols-4 sm:items-baseline gap-1">
+        <div class="grid w-full grid-cols-[minmax(5rem,auto)_minmax(120px,auto)_minmax(100px,auto)] items-baseline gap-1">
           <template v-if="hasVersatilityTrait">
             <label for="versatility-skill" class="mt-1 -mb-1">Versatility</label>
-            <select id="versatility-skill" v-model="versatilitySkill">
+            <select id="versatility-skill" v-model="versatilitySkill" class="truncate">
               <optgroup
                 v-for="attr in abilityKeys.filter(a => skillsByAbility[a].length > 0)"
                 :key="attr"
@@ -934,8 +938,17 @@ function getElementAtLocation(x: number, y: number): HTMLElement | null {
               </optgroup>
             </select>
           </template>
-          <template v-if="!hasCustomBackground">
-            <label class="mt-1 -mb-1 break-before-column sm:col-start-1">{{
+          <template v-if="hasCustomBackground">
+            <label class="mt-1 -mb-1 break-before-column col-start-1">Custom Background</label>
+            <input
+              v-for="skillId in customBackgroundSkills"
+              :key="skillId"
+              :value="skillNamesMap_en[skillId]"
+              readonly
+            />
+          </template>
+          <template v-else>
+            <label class="mt-1 -mb-1 break-before-column col-start-1">{{
               backgroundName
             }}</label>
             <input
@@ -1042,6 +1055,6 @@ input {
 }
 
 select {
-  @apply h-7 px-1 py-0 border-transparent border-r-4 outline-1 outline-ink/20 rounded-md pr-10;
+  @apply h-7 px-1 py-0 border-transparent border-r-4 outline-1 outline-ink/20 rounded-md pr-2;
 }
 </style>

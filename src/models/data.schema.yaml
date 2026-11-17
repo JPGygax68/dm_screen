@@ -174,16 +174,10 @@ type: object
         uniqueItems: true
         description: Character classes; initially one class is selected
         items: { type: string, minLength: 1 }
-      background:
-        oneOf:
-          [
-            {
-              type: "string",
-              description: "Standard background identifier (defined by rules)",
-              minLength: 1,
-            },
-            { "$ref": "#/$defs/CustomBackground" },
-          ]
+      backgroundId:
+        type: string
+        minLength: 1
+        description: "Background identifier (standard or 'custom')"
       originStory:
         type: string
         description: "Character origin story (optional; must match background)"
@@ -193,8 +187,11 @@ type: object
       abilityBonuses:
         "$ref": "#/$defs/AbilityBonuses"
         default: { str: 0, dex: 0, con: 0, int: 0, wis: 0, cha: 0 }
+      customBackgroundName:
+        type: string
+        minLength: 1
+        description: "Custom background name"
       customBackgroundSkills:
-        "$ref": "#/$defs/SkillId"
         type: array
         description: "Skills granted by the custom background"
         items: { "$ref": "#/$defs/SkillId" }
@@ -224,7 +221,7 @@ type: object
   CustomBackground:
     type: object
     properties:
-      designation: { type: string, minLength: 1, description: "Name of the custom background" }
+      name: { type: string, minLength: 1, description: "Name of the custom background" }
       description:
         { type: string, minLength: 1, description: "Description of the custom background" }
       skills:
@@ -232,7 +229,7 @@ type: object
         description: List of skills granted by this custom background
         items: { "$ref": "#/$defs/SkillId", minLength: 1 }
     required:
-      - designation
+      - name
     additionalProperties: false
 
   SkillId:
