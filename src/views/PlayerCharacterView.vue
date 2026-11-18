@@ -88,22 +88,6 @@ function formSnapshot(): string {
   });
 }
 
-//#endregion Character property fields
-
-//#region View state
-
-const isEditorReady = ref(false);
-const isLoading = ref(true);
-const isSaving = ref(false);
-const errorMessage = ref("");
-
-const touchedAbilityScore = ref<AbilityKey>();
-
-const originalFormSnapshot = ref("");
-const isDiscarding = ref(false);
-
-// const skills: Ref<SkillId[]> = ref([]);
-
 function hydrateEditor(): void {
   isEditorReady.value = false;
   isLoading.value = true;
@@ -136,6 +120,7 @@ function hydrateEditor(): void {
     versatilitySkill.value = character.versatilitySkill ?? "";
     ancestry.value = character.ancestry ?? "";
     gender.value = character.gender ?? "";
+    backgroundId.value = character.backgroundId ?? "";
     abilityScores.value = {
       ...initialAbilityScores,
       ...character.abilityScores,
@@ -152,11 +137,23 @@ function hydrateEditor(): void {
   isLoading.value = false;
 }
 
-//#endregion View state
+//#endregion Character property fields
 
-//#region Properties and Events
+//#region View/Form state
 
-function onToggle(event: Event): void {
+const isEditorReady = ref(false);
+const isLoading = ref(true);
+const isSaving = ref(false);
+const errorMessage = ref("");
+
+const touchedAbilityScore = ref<AbilityKey>();
+
+const originalFormSnapshot = ref("");
+const isDiscarding = ref(false);
+
+const currentSection = ref("");
+
+function onToggleDetails(event: Event): void {
   const target = event.target as HTMLDetailsElement;
   if (target.open) {
     //console.log(`Toggled open section: ${target.id}`);
@@ -166,13 +163,7 @@ function onToggle(event: Event): void {
   }
 }
 
-//#endregion Properties and Events
-
-//#region Navigation
-
-const currentSection = ref("");
-
-//#endregion Navigation
+//#endregion View/Form state
 
 // #region Computed properties
 
@@ -182,12 +173,6 @@ const identityClassName = computed(
 const identitySpeciesName = computed(
   () => speciesList.find((speciesItem) => speciesItem.id === species.value)?.name_en,
 );
-const identityBackground = computed(() => {
-  if (backgroundId.value === "custom") {
-    return "Custom"; // TODO: replace with the actual name of the custom background?
-  }
-  return backgrounds.find((background) => background.id === backgroundId.value)?.name_en;
-});
 const identityGenderName = computed(() => (gender.value ? gender.value : ""));
 const identityGenderIcon = computed(() => {
   switch (gender.value) {
@@ -200,6 +185,13 @@ const identityGenderIcon = computed(() => {
   }
 });
 
+const identityBackground = computed(() => {
+  if (backgroundId.value === "custom") {
+    return customBackgroundName.value ?? "(Undefined Custom)";
+  }
+  return backgrounds.find((bg) => bg.id === backgroundId.value)?.name_en ?? "";
+});
+
 const campaignId = computed(() => String(route.params.campaignId ?? ""));
 const playerCharacterId = computed(() => String(route.params.playerCharacterId ?? ""));
 const campaign = computed(() =>
@@ -210,20 +202,13 @@ const playerCharacter = computed(() =>
   campaign.value?.party.find((member) => member.id === playerCharacterId.value),
 );
 
-const hasCustomBackground = computed(() => backgroundId.value === "custom");
-
 const backgroundName = computed(() => {
-  if (backgroundId.value === "custom") {
-    return "Custom";
-  }
-  return (
-    backgrounds.find((bg) => bg.id === backgroundId.value)?.name_en ?? "(?unkown background id)"
-  );
+  return backgrounds.find((bg) => bg.id === backgroundId.value)?.name_en ?? `(?${backgroundId.value})`;
 });
 
 const backgroundSkills = computed(() => {
-  const background = playerCharacter.value?.background;
-  if (background === "custom") {
+  const bgId = playerCharacter.value?.backgroundId;
+  if (bgId === "custom") {
     return playerCharacter.value?.customBackgroundSkills ?? [];
   }
   return backgrounds.find((bg) => bg.id === backgroundId.value)?.skills ?? [];
@@ -381,23 +366,17 @@ watch(
   { immediate: true, flush: "post" },
 );
 
-//#endregion Lifecycle hooks
-
-//#region Methods
-
-function confirmDiscard(): boolean {
-  return (
-    isDiscarding.value ||
-    !hasUnsavedChanges.value ||
-    window.confirm("Discard unsaved character changes?")
-  );
-}
-
 onBeforeRouteLeave(confirmDiscard);
 onBeforeRouteUpdate((to, from) => {
   if (to.params.playerCharacterId === from.params.playerCharacterId) return true;
   return confirmDiscard();
 });
+
+//#endregion Lifecycle hooks
+
+//#region Methods
+
+//#region Persistence Methods
 
 // Optional text fields are left out when empty, as the schema rejects empty strings.
 function editableFields(): Partial<PlayerCharacter> {
@@ -414,7 +393,7 @@ function editableFields(): Partial<PlayerCharacter> {
   if (versatilitySkill.value) fields.versatilitySkill = versatilitySkill.value;
   if (ancestry.value) fields.ancestry = ancestry.value;
   if (trimmedGender) fields.gender = trimmedGender;
-  if (backgroundId.value) fields.background = backgroundId.value;
+  if (backgroundId.value) fields.backgroundId = backgroundId.value;
   return fields;
 }
 
@@ -449,7 +428,7 @@ async function savePlayerCharacter(): Promise<void> {
   if (!current || isSaving.value) return;
 
   const updated: PlayerCharacter = { ...current, ...editableFields() };
-
+  console.log
   isSaving.value = true;
   errorMessage.value = "";
   try {
@@ -551,6 +530,18 @@ function handlePointerMove(x: number, y: number) {
   abilityScores.value[abilityScoreName] = value;
 }
 
+//#region Dialogs
+
+function confirmDiscard(): boolean {
+  return (
+    isDiscarding.value ||
+    !hasUnsavedChanges.value ||
+    window.confirm("Discard unsaved character changes?")
+  );
+}
+
+// #endregion Dialogs
+
 // #endregion Event Handlers
 
 // #region Helper Functions
@@ -569,7 +560,7 @@ function getElementAtLocation(x: number, y: number): HTMLElement | null {
         id="identity"
         group="player-character"
         :open="currentSection === 'identity'"
-        @toggle="onToggle"
+        @toggle="onToggleDetails"
       >
         <template #summary>
           <span>
@@ -685,7 +676,7 @@ function getElementAtLocation(x: number, y: number): HTMLElement | null {
         id="combat-stats"
         group="player-character"
         :open="currentSection === 'combat-stats'"
-        @toggle="onToggle"
+        @toggle="onToggleDetails"
         class="p-2 w-full"
       >
         <template #summary>
@@ -916,18 +907,20 @@ function getElementAtLocation(x: number, y: number): HTMLElement | null {
         id="skills"
         group="player-character"
         :open="currentSection === 'skills'"
-        @toggle="onToggle"
+        @toggle="onToggleDetails"
       >
         <template #summary>
           <span class="font-bold">Skills</span>
           <span class="hidden group-open:inline">&nbsp;(TODO: Skill List)</span>
         </template>
-        <div class="grid w-full grid-cols-[minmax(5rem,auto)_minmax(120px,auto)_minmax(100px,auto)] items-baseline gap-1">
+        <div
+          class="grid w-full grid-cols-[minmax(5rem,auto)_minmax(120px,auto)_minmax(100px,auto)] items-baseline gap-1"
+        >
           <template v-if="hasVersatilityTrait">
             <label for="versatility-skill" class="mt-1 -mb-1">Versatility</label>
             <select id="versatility-skill" v-model="versatilitySkill" class="truncate">
               <optgroup
-                v-for="attr in abilityKeys.filter(a => skillsByAbility[a].length > 0)"
+                v-for="attr in abilityKeys.filter((a) => skillsByAbility[a].length > 0)"
                 :key="attr"
                 :label="abilityNamesMap_en[attr]"
                 class="capitalize"
@@ -938,19 +931,22 @@ function getElementAtLocation(x: number, y: number): HTMLElement | null {
               </optgroup>
             </select>
           </template>
-          <template v-if="hasCustomBackground">
-            <label class="mt-1 -mb-1 break-before-column col-start-1">Custom Background</label>
-            <input
-              v-for="skillId in customBackgroundSkills"
-              :key="skillId"
-              :value="skillNamesMap_en[skillId]"
-              readonly
-            />
+          <template v-if="!backgroundId">
+            <label class="mt-1 -mb-1 break-before-column col-start-1 col-span-full"
+              >No Background selected yet</label
+            >
+          </template>
+          <template v-else-if="backgroundId === 'custom'">
+            <template v-if="!customBackgroundName">
+              <!-- TODO: link to custom background name input -->
+              <label class="mt-1 -mb-1 break-before-column col-start-1 col-span-full">(Custom background not yet named)</label>
+            </template>
+            <template v-else>
+              <label class="mt-1 -mb-1 break-before-column col-start-1">BG:&nbsp;{{ customBackgroundName }}</label>
+            </template>
           </template>
           <template v-else>
-            <label class="mt-1 -mb-1 break-before-column col-start-1">{{
-              backgroundName
-            }}</label>
+            <label class="mt-1 -mb-1 break-before-column col-start-1">BG:&nbsp;{{ backgroundName }}</label>
             <input
               v-for="skillId in backgroundSkills"
               :key="skillId"
