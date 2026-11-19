@@ -73,5 +73,6 @@
   ],
   "github.copilot.enable": {
     "markdown": true
-  }
+  },
+  "prettier.singleAttributePerLine": false
 }

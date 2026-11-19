@@ -21,6 +21,7 @@ import { draconicAncestries, speciesList } from "@/lib/dnd2024/species.ts";
 import { useDataStore } from "@/stores/data-store.ts";
 import type { SkillId } from "@/lib/dnd2024/skills";
 import { useSkills } from "@/lib/dnd2024/skills";
+import { B } from "vue-router/dist/router-CWoNjPRp.mjs";
 
 //#region Constants
 
@@ -203,7 +204,9 @@ const playerCharacter = computed(() =>
 );
 
 const backgroundName = computed(() => {
-  return backgrounds.find((bg) => bg.id === backgroundId.value)?.name_en ?? `(?${backgroundId.value})`;
+  return (
+    backgrounds.find((bg) => bg.id === backgroundId.value)?.name_en ?? `(?${backgroundId.value})`
+  );
 });
 
 const backgroundSkills = computed(() => {
@@ -428,7 +431,7 @@ async function savePlayerCharacter(): Promise<void> {
   if (!current || isSaving.value) return;
 
   const updated: PlayerCharacter = { ...current, ...editableFields() };
-  console.log
+  console.log;
   isSaving.value = true;
   errorMessage.value = "";
   try {
@@ -659,10 +662,14 @@ function getElementAtLocation(x: number, y: number): HTMLElement | null {
             >
               {{ background.name_en }}
             </option>
-            <!-- TODO: handle custom background definition -->
           </select>
+          <template v-if="backgroundId === 'custom'">
+            <label for="custom-background-name">↳ Name</label>
+            <input id="custom-background-name" v-model="customBackgroundName" />
+          </template>
         </section>
         <div v-if="!isNew" class="flex justify-end">
+          <!-- TODO: color-code or even disable if background not selected -->
           <input
             type="button"
             class="button align-right"
@@ -672,8 +679,8 @@ function getElementAtLocation(x: number, y: number): HTMLElement | null {
         </div>
       </BetterDetails>
       <BetterDetails
-        v-if="!isNew"
         id="combat-stats"
+        v-if="!isNew"
         group="player-character"
         :open="currentSection === 'combat-stats'"
         @toggle="onToggleDetails"
@@ -939,14 +946,23 @@ function getElementAtLocation(x: number, y: number): HTMLElement | null {
           <template v-else-if="backgroundId === 'custom'">
             <template v-if="!customBackgroundName">
               <!-- TODO: link to custom background name input -->
-              <label class="mt-1 -mb-1 break-before-column col-start-1 col-span-full">(Custom background not yet named)</label>
+              <label class="mt-1 -mb-1 break-before-column col-start-1 col-span-full"
+                >Custom background (not yet named):</label
+              >
             </template>
             <template v-else>
-              <label class="mt-1 -mb-1 break-before-column col-start-1">BG:&nbsp;{{ customBackgroundName }}</label>
+              <label class="mt-1 -mb-1 break-before-column col-start-1"
+                >{{ customBackgroundName }} (custom)</label
+              >
             </template>
+            <div class="mt-2 text-sm text-ink/70 col-span-full">
+              TODO: Implement custom background skills selection here.
+            </div>
           </template>
           <template v-else>
-            <label class="mt-1 -mb-1 break-before-column col-start-1">BG:&nbsp;{{ backgroundName }}</label>
+            <label class="mt-1 -mb-1 break-before-column col-start-1"
+              >BG:&nbsp;{{ backgroundName }}</label
+            >
             <input
               v-for="skillId in backgroundSkills"
               :key="skillId"
@@ -955,6 +971,33 @@ function getElementAtLocation(x: number, y: number): HTMLElement | null {
             />
           </template>
         </div>
+        <div v-if="!isNew" class="flex justify-end">
+          <input
+            type="button"
+            class="button align-right"
+            value="Next"
+            @click="currentSection = 'origin'"
+          />
+        </div>
+      </BetterDetails>
+      <BetterDetails
+        id="origin"
+        group="player-character"
+        :open="currentSection === 'origin'"
+        @toggle="onToggleDetails"
+        class="p-2 w-full"
+      >
+        <template #summary>
+          <div class="w-full">
+            <span class="font-bold"
+              >Origin
+              <span class="font-light"
+                >({{ customBackgroundName || "yet unnamed background" }})</span
+              ></span
+            >
+          </div>
+        </template>
+        <section class="p-2">TODO: Implement origin details here.</section>
       </BetterDetails>
       <div id="action-buttons" class="mx-auto flex max-w-3xl justify-end gap-3 px-2 py-6 lg:px-10">
         <button
