@@ -58,6 +58,7 @@ const species = ref("");
 const versatilitySkill = ref(""); /// For humans only
 const ancestry = ref("");
 const gender = ref("");
+const originStory = ref("");
 // TODO: initialize ability scores and bonuses to undefined?
 const abilityScores: Ref<AbilityScores> = ref({
   ...initialAbilityScores,
@@ -84,6 +85,7 @@ function formSnapshot(): string {
     backgroundId: backgroundId.value,
     customBackgroundName: customBackgroundName.value,
     customBackgroundSkills: customBackgroundSkills.value,
+    originStory: originStory.value,
     abilityScores: abilityScores.value,
     abilityBonuses: abilityBonuses.value,
   });
@@ -97,6 +99,7 @@ function hydrateEditor(): void {
     name.value = "";
     surname.value = "";
     pcClass.value = "";
+    subclass.value = "";
     species.value = "";
     versatilitySkill.value = "";
     ancestry.value = "";
@@ -106,6 +109,7 @@ function hydrateEditor(): void {
     abilityBonuses.value = { str: 0, dex: 0, con: 0, int: 0, wis: 0, cha: 0 };
     customBackgroundName.value = "";
     customBackgroundSkills.value = [];
+    originStory.value = "";
     originalFormSnapshot.value = formSnapshot();
     currentSection.value = "identity";
     isEditorReady.value = !!campaign.value;
@@ -117,6 +121,7 @@ function hydrateEditor(): void {
     name.value = character.name;
     surname.value = character.surname ?? "";
     pcClass.value = character.classes?.[0] ?? "";
+    subclass.value = character.classes?.[1] ?? "";
     species.value = character.species ?? "";
     versatilitySkill.value = character.versatilitySkill ?? "";
     ancestry.value = character.ancestry ?? "";
@@ -132,6 +137,7 @@ function hydrateEditor(): void {
     };
     customBackgroundName.value = character.customBackgroundName ?? "";
     customBackgroundSkills.value = character.customBackgroundSkills ?? [];
+    originStory.value = character.originStory ?? "";
     originalFormSnapshot.value = formSnapshot();
     isEditorReady.value = true;
   }
@@ -397,6 +403,9 @@ function editableFields(): Partial<PlayerCharacter> {
   if (ancestry.value) fields.ancestry = ancestry.value;
   if (trimmedGender) fields.gender = trimmedGender;
   if (backgroundId.value) fields.backgroundId = backgroundId.value;
+  if (customBackgroundName.value) fields.customBackgroundName = customBackgroundName.value;
+  if (customBackgroundSkills.value?.length) fields.customBackgroundSkills = [...customBackgroundSkills.value];
+  if (originStory.value) fields.originStory = originStory.value;
   return fields;
 }
 
@@ -997,7 +1006,16 @@ function getElementAtLocation(x: number, y: number): HTMLElement | null {
             >
           </div>
         </template>
-        <section class="p-2">TODO: Implement origin details here.</section>
+        <section>
+          <label class="mt-1 -mb-1"
+            >Story</label
+          >
+          <textarea
+            v-model="originStory"
+            class="w-full border border-ink/20 rounded-md p-2"
+            rows="4"
+          ></textarea>
+        </section>
       </BetterDetails>
       <div id="action-buttons" class="mx-auto flex max-w-3xl justify-end gap-3 px-2 py-6 lg:px-10">
         <button
@@ -1046,6 +1064,7 @@ function getElementAtLocation(x: number, y: number): HTMLElement | null {
 </template>
 
 <style scoped lang="css">
+
 @reference "@/styles/tailwind.css";
 
 table tr > *[bonus-points] {
