@@ -6,12 +6,7 @@ import { storeToRefs } from "pinia";
 import { onBeforeRouteLeave, onBeforeRouteUpdate, useRoute, useRouter } from "vue-router";
 import type { Ref } from "vue";
 import NumberStepper from "@/components/NumberStepper.vue";
-import type {
-  AbilityScores,
-  AbilityBonuses,
-  Campaign,
-  PlayerCharacter,
-} from "@/generated/models/data.schema";
+import type { Campaign, PlayerCharacter } from "@/generated/models/data.schema";
 import type { AbilityKey } from "@/lib/dnd2024/base.ts";
 import { abilityKeys, abilityNamesMap_en } from "@/lib/dnd2024/base.ts";
 import { classes } from "@/lib/dnd2024/classFeatures.ts";
@@ -19,22 +14,8 @@ import type { BackgroundDef } from "@/lib/dnd2024/backgrounds.ts";
 import { backgrounds, freeBackgrounds } from "@/lib/dnd2024/backgrounds.ts";
 import { draconicAncestries, speciesList } from "@/lib/dnd2024/species.ts";
 import { useDataStore } from "@/stores/data-store.ts";
-import type { SkillId } from "@/lib/dnd2024/skills";
 import { useSkills } from "@/lib/dnd2024/skills";
-import { B } from "vue-router/dist/router-CWoNjPRp.mjs";
-
-//#region Constants
-
-const initialAbilityScores: AbilityScores = {
-  str: 10,
-  dex: 10,
-  con: 10,
-  int: 10,
-  wis: 10,
-  cha: 10,
-} as const;
-
-//#endregion Constants
+import { usePlayerCharacterForm } from "@/composables/usePlayerCharacterForm";
 
 const route = useRoute();
 const router = useRouter();
@@ -42,75 +23,16 @@ const store = useDataStore();
 const { roots } = storeToRefs(store);
 const { skillNamesMap_en, skillsByAbility } = useSkills();
 
-//#region Character property fields
+//#region Form handling
 
-const name = ref("");
-const surname = ref("");
-const pcClass = ref("");
-const subclass = ref("");
-/** The ID of the selected background; the empty string means "no background selected yet" */
-const backgroundId: Ref<string> = ref("");
-/** Custom background name */
-const customBackgroundName: Ref<string> = ref("");
-/** In case the selected background is custom, this holds the skills granted by it. TODO */
-const customBackgroundSkills: Ref<SkillId[] | null> = ref([]);
-const species = ref("");
-const versatilitySkill = ref(""); /// For humans only
-const ancestry = ref("");
-const gender = ref("");
-const originStory = ref("");
-// TODO: initialize ability scores and bonuses to undefined?
-const abilityScores: Ref<AbilityScores> = ref({
-  ...initialAbilityScores,
-});
-const abilityBonuses: Ref<AbilityBonuses> = ref({
-  str: 0,
-  dex: 0,
-  con: 0,
-  int: 0,
-  wis: 0,
-  cha: 0,
-});
-
-function formSnapshot(): string {
-  return JSON.stringify({
-    name: name.value,
-    surname: surname.value,
-    classId: pcClass.value,
-    subclass: subclass.value,
-    species: species.value,
-    versatilitySkill: versatilitySkill.value,
-    ancestry: ancestry.value,
-    gender: gender.value,
-    backgroundId: backgroundId.value,
-    customBackgroundName: customBackgroundName.value,
-    customBackgroundSkills: customBackgroundSkills.value,
-    originStory: originStory.value,
-    abilityScores: abilityScores.value,
-    abilityBonuses: abilityBonuses.value,
-  });
-}
+const { form, hasChanges, resetForm } = usePlayerCharacterForm();
 
 function hydrateEditor(): void {
   isEditorReady.value = false;
   isLoading.value = true;
   errorMessage.value = "";
   if (isNew.value) {
-    name.value = "";
-    surname.value = "";
-    pcClass.value = "";
-    subclass.value = "";
-    species.value = "";
-    versatilitySkill.value = "";
-    ancestry.value = "";
-    gender.value = "";
-    backgroundId.value = "";
-    abilityScores.value = { ...initialAbilityScores };
-    abilityBonuses.value = { str: 0, dex: 0, con: 0, int: 0, wis: 0, cha: 0 };
-    customBackgroundName.value = "";
-    customBackgroundSkills.value = [];
-    originStory.value = "";
-    originalFormSnapshot.value = formSnapshot();
+    resetForm();
     currentSection.value = "identity";
     isEditorReady.value = !!campaign.value;
     isLoading.value = false;
@@ -118,33 +40,13 @@ function hydrateEditor(): void {
   }
   const character = playerCharacter.value;
   if (character) {
-    name.value = character.name;
-    surname.value = character.surname ?? "";
-    pcClass.value = character.classes?.[0] ?? "";
-    subclass.value = character.classes?.[1] ?? "";
-    species.value = character.species ?? "";
-    versatilitySkill.value = character.versatilitySkill ?? "";
-    ancestry.value = character.ancestry ?? "";
-    gender.value = character.gender ?? "";
-    backgroundId.value = character.backgroundId ?? "";
-    abilityScores.value = {
-      ...initialAbilityScores,
-      ...character.abilityScores,
-    };
-    abilityBonuses.value = {
-      ...abilityBonuses.value,
-      ...character.abilityBonuses,
-    };
-    customBackgroundName.value = character.customBackgroundName ?? "";
-    customBackgroundSkills.value = character.customBackgroundSkills ?? [];
-    originStory.value = character.originStory ?? "";
-    originalFormSnapshot.value = formSnapshot();
+    resetForm(character);
     isEditorReady.value = true;
   }
   isLoading.value = false;
 }
 
-//#endregion Character property fields
+//#endregion
 
 //#region View/Form state
 
@@ -155,7 +57,6 @@ const errorMessage = ref("");
 
 const touchedAbilityScore = ref<AbilityKey>();
 
-const originalFormSnapshot = ref("");
 const isDiscarding = ref(false);
 
 const currentSection = ref("");
@@ -175,14 +76,14 @@ function onToggleDetails(event: Event): void {
 // #region Computed properties
 
 const identityClassName = computed(
-  () => classes.find((classItem) => classItem.id === pcClass.value)?.name,
+  () => classes.find((classItem) => classItem.id === form.value.pcClass)?.name,
 );
 const identitySpeciesName = computed(
-  () => speciesList.find((speciesItem) => speciesItem.id === species.value)?.name_en,
+  () => speciesList.find((speciesItem) => speciesItem.id === form.value.species)?.name_en,
 );
-const identityGenderName = computed(() => (gender.value ? gender.value : ""));
+const identityGenderName = computed(() => (form.value.gender ? form.value.gender : ""));
 const identityGenderIcon = computed(() => {
-  switch (gender.value) {
+  switch (form.value.gender) {
     case "male":
       return "♂";
     case "female":
@@ -193,10 +94,10 @@ const identityGenderIcon = computed(() => {
 });
 
 const identityBackground = computed(() => {
-  if (backgroundId.value === "custom") {
-    return customBackgroundName.value ?? "(Undefined Custom)";
+  if (form.value.backgroundId === "custom") {
+    return form.value.customBackgroundName ?? "(Undefined Custom)";
   }
-  return backgrounds.find((bg) => bg.id === backgroundId.value)?.name_en ?? "";
+  return backgrounds.find((bg) => bg.id === form.value.backgroundId)?.name_en ?? "";
 });
 
 const campaignId = computed(() => String(route.params.campaignId ?? ""));
@@ -211,7 +112,7 @@ const playerCharacter = computed(() =>
 
 const backgroundName = computed(() => {
   return (
-    backgrounds.find((bg) => bg.id === backgroundId.value)?.name_en ?? `(?${backgroundId.value})`
+    backgrounds.find((bg) => bg.id === form.value.backgroundId)?.name_en ?? `(?${form.value.backgroundId})`
   );
 });
 
@@ -220,16 +121,16 @@ const backgroundSkills = computed(() => {
   if (bgId === "custom") {
     return playerCharacter.value?.customBackgroundSkills ?? [];
   }
-  return backgrounds.find((bg) => bg.id === backgroundId.value)?.skills ?? [];
+  return backgrounds.find((bg) => bg.id === form.value.backgroundId)?.skills ?? [];
 });
 
 const pcHasTrait = (trait: string) => {
-  const item = speciesList.find((speciesItem) => speciesItem.id === species.value);
+  const item = speciesList.find((speciesItem) => speciesItem.id === form.value.species);
   return item?.traits.includes(trait) ?? false;
 };
 
 const hasUnsavedChanges = computed(
-  () => isEditorReady.value && formSnapshot() !== originalFormSnapshot.value,
+  () => isEditorReady.value && hasChanges.value,
 );
 
 const baseAbilityScoreUiProps = computed(() => {
@@ -237,14 +138,14 @@ const baseAbilityScoreUiProps = computed(() => {
     {} as any;
   let lowest = 99;
   let highest = -99;
-  (Object.keys(abilityScores.value) as AbilityKey[]).forEach((key) => {
-    const value = abilityScores.value[key];
+  (Object.keys(form.value.abilityScores) as AbilityKey[]).forEach((key) => {
+    const value = form.value.abilityScores[key];
     if (value < lowest) lowest = value;
     if (value > highest) highest = value;
   });
   let highestScoreIsOneOfPrimaries = false;
-  (Object.keys(abilityScores.value) as AbilityKey[]).forEach((key) => {
-    const value = abilityScores.value[key];
+  (Object.keys(form.value.abilityScores) as AbilityKey[]).forEach((key) => {
+    const value = form.value.abilityScores[key];
     const isPrimary = primaryClassAbilities.value.includes(key);
     if (isPrimary && value === highest) {
       highestScoreIsOneOfPrimaries = true;
@@ -267,14 +168,14 @@ const baseAbilityScoreUiProps = computed(() => {
 });
 
 const baseAbilityScoresTotal = computed(() => {
-  return Object.values(abilityScores.value).reduce((sum, val) => sum + val, 0);
+  return Object.values(form.value.abilityScores).reduce((sum, val) => sum + val, 0);
 });
 
 const primaryClassAbilities: Ref<AbilityKey[]> = computed(() => {
   // Consult the class features and extract the primary abilities for the class
-  const cls = classes.find((c) => c.id === pcClass.value);
+  const cls = classes.find((c) => c.id === form.value.pcClass);
   if (!cls) {
-    console.error("Class not found:", pcClass.value);
+    console.error("Class not found:", form.value.pcClass);
     return [];
   }
   return Array.isArray(cls.primary_ability)
@@ -284,14 +185,14 @@ const primaryClassAbilities: Ref<AbilityKey[]> = computed(() => {
 
 const finalAbilityScores = computed(() => {
   const scores: Record<AbilityKey, number> = {} as Record<AbilityKey, number>;
-  (Object.keys(abilityScores.value) as AbilityKey[]).forEach((key) => {
-    scores[key] = abilityScores.value[key] + (abilityBonuses.value[key] ?? 0);
+  (Object.keys(form.value.abilityScores) as AbilityKey[]).forEach((key) => {
+    scores[key] = form.value.abilityScores[key] + (form.value.abilityBonuses[key] ?? 0);
   });
   return scores;
 });
 
 const abilityBonusesTotal = computed(() => {
-  return Object.values(abilityBonuses.value).reduce((sum, val) => sum + val, 0);
+  return Object.values(form.value.abilityBonuses).reduce((sum, val) => sum + val, 0);
 });
 
 const availableBaseAbilityScorePoints = computed(() => {
@@ -304,9 +205,9 @@ const availableAbilityBonusPoints = computed(() => {
 
 const savingThrows = computed(() => {
   const result: Record<AbilityKey, boolean> = {} as Record<AbilityKey, boolean>;
-  const classData = classes.find((c) => c.id === pcClass.value);
+  const classData = classes.find((c) => c.id === form.value.pcClass);
   if (!classData) {
-    console.error("Class not found:", pcClass.value);
+    console.error("Class not found:", form.value.pcClass);
     return result;
   }
   abilityKeys.values().forEach((key) => {
@@ -334,14 +235,14 @@ const abilityModifiersAsText = computed(() => {
 
 const backgroundAllowsBoosting = computed(() => {
   const result: Record<AbilityKey, boolean> = {} as Record<AbilityKey, boolean>;
-  if (backgroundId.value === "custom") {
+  if (form.value.backgroundId === "custom") {
     console.log("Custom background allows boosting for all abilities.");
     for (const key of Object.keys(finalAbilityScores.value) as AbilityKey[]) {
       result[key] = true;
     }
     return result;
   }
-  const backgroundData = backgrounds.find((b) => b.id === backgroundId.value);
+  const backgroundData = backgrounds.find((b) => b.id === form.value.backgroundId);
   if (!backgroundData) return result;
   (Object.keys(finalAbilityScores.value) as AbilityKey[]).forEach((key) => {
     result[key] = backgroundData.boostableAbilityScores?.includes(key) ?? false;
@@ -350,7 +251,7 @@ const backgroundAllowsBoosting = computed(() => {
 });
 
 const hasVersatilityTrait = computed(() => {
-  const speciesData = speciesList.find((s) => s.id === species.value);
+  const speciesData = speciesList.find((s) => s.id === form.value.species);
   return speciesData?.traits?.includes("versatility") ?? false;
 });
 
@@ -390,22 +291,22 @@ onBeforeRouteUpdate((to, from) => {
 // Optional text fields are left out when empty, as the schema rejects empty strings.
 function editableFields(): Partial<PlayerCharacter> {
   const fields: Partial<PlayerCharacter> = {
-    name: name.value.trim(),
-    abilityScores: { ...abilityScores.value },
-    abilityBonuses: { ...abilityBonuses.value },
+    name: form.value.name.trim(),
+    abilityScores: { ...form.value.abilityScores },
+    abilityBonuses: { ...form.value.abilityBonuses },
   };
-  const trimmedSurname = surname.value.trim();
-  const trimmedGender = gender.value.trim();
+  const trimmedSurname = form.value.surname.trim();
+  const trimmedGender = form.value.gender.trim();
   if (trimmedSurname) fields.surname = trimmedSurname;
-  if (pcClass.value) fields.classes = [pcClass.value];
-  if (species.value) fields.species = species.value;
-  if (versatilitySkill.value) fields.versatilitySkill = versatilitySkill.value;
-  if (ancestry.value) fields.ancestry = ancestry.value;
+  if (form.value.pcClass) fields.classes = [form.value.pcClass];
+  if (form.value.species) fields.species = form.value.species;
+  if (form.value.versatilitySkill) fields.versatilitySkill = form.value.versatilitySkill;
+  if (form.value.ancestry) fields.ancestry = form.value.ancestry;
   if (trimmedGender) fields.gender = trimmedGender;
-  if (backgroundId.value) fields.backgroundId = backgroundId.value;
-  if (customBackgroundName.value) fields.customBackgroundName = customBackgroundName.value;
-  if (customBackgroundSkills.value?.length) fields.customBackgroundSkills = [...customBackgroundSkills.value];
-  if (originStory.value) fields.originStory = originStory.value;
+  if (form.value.backgroundId) fields.backgroundId = form.value.backgroundId;
+  if (form.value.customBackgroundName) fields.customBackgroundName = form.value.customBackgroundName;
+  if (form.value.customBackgroundSkills?.length) fields.customBackgroundSkills = [...form.value.customBackgroundSkills];
+  if (form.value.originStory) fields.originStory = form.value.originStory;
   return fields;
 }
 
@@ -539,7 +440,7 @@ function handlePointerMove(x: number, y: number) {
   if (!abilityScoreName || touchedAbilityScore.value !== abilityScoreName) return;
   if (!cell.dataset.value) return;
   const value = parseInt(cell.dataset.value, 10);
-  abilityScores.value[abilityScoreName] = value;
+  form.value.abilityScores[abilityScoreName] = value;
 }
 
 //#region Dialogs
@@ -578,8 +479,8 @@ function getElementAtLocation(x: number, y: number): HTMLElement | null {
           <span>
             <span v-if="isNew">(New): </span>
             <span class="font-bold shrink">
-              {{ name }}
-              <span v-if="surname" class="hidden sm:inline">{{ surname }}</span>
+              {{ form.name }}
+              <span v-if="form.surname" class="hidden sm:inline">{{ form.surname }}</span>
             </span>
             <span v-if="identityClassName">&nbsp;· {{ identityClassName }}</span>
             <span v-if="identitySpeciesName">&nbsp;· {{ identitySpeciesName }}</span>
@@ -591,11 +492,11 @@ function getElementAtLocation(x: number, y: number): HTMLElement | null {
           class="grid grid-cols-[min-content_1fr] items-baseline gap-x-2 gap-y-2 py-3 sm:grid-cols-[min-content_1fr_min-content_1fr] [&>label]:justify-self-end [&>select>option]:box-border_p-0"
         >
           <label for="character-name">Name</label>
-          <input id="character-name" ref="nameInput" type="text" v-model="name" />
+          <input id="character-name" ref="nameInput" type="text" v-model="form.name" />
           <label for="character-surname">Surname</label>
-          <input id="character-surname" type="text" v-model="surname" />
+          <input id="character-surname" type="text" v-model="form.surname" />
           <label for="character-class">Class</label>
-          <select id="character-class" v-model="pcClass">
+          <select id="character-class" v-model="form.pcClass">
             <option disabled value="">Select class</option>
             <option v-for="classItem in classes" :key="classItem.id" :value="classItem.id">
               {{ classItem.name }}
@@ -617,7 +518,7 @@ function getElementAtLocation(x: number, y: number): HTMLElement | null {
           <label for="character-species" class="col-start-1">Species</label>
           <select
             id="character-species"
-            v-model="species"
+            v-model="form.species"
             placeholder="Select species"
             class="select"
           >
@@ -630,11 +531,11 @@ function getElementAtLocation(x: number, y: number): HTMLElement | null {
               {{ speciesItem.name_en }}
             </option>
           </select>
-          <template v-if="species === 'dragonborn'">
+          <template v-if="form.species === 'dragonborn'">
             <label for="character-draconic-ancestry">Ancestry</label>
             <select
               id="character-draconic-ancestry"
-              v-model="ancestry"
+              v-model="form.ancestry"
               placeholder="Select draconic ancestry"
               hint="Draconic Ancestry"
               class="select"
@@ -650,7 +551,7 @@ function getElementAtLocation(x: number, y: number): HTMLElement | null {
             </select>
           </template>
           <label for="character-gender">Gender</label>
-          <input id="character-gender" v-model="gender" list="character-gender-options" />
+          <input id="character-gender" v-model="form.gender" list="character-gender-options" />
           <datalist id="character-gender-options">
             <option id="male" value="Male" />
             <option id="female" value="Female" />
@@ -659,7 +560,7 @@ function getElementAtLocation(x: number, y: number): HTMLElement | null {
           <label for="character-background" class="col-start-1">Background</label>
           <select
             id="character-background"
-            v-model="backgroundId"
+            v-model="form.backgroundId"
             placeholder="Select background"
             class="select"
           >
@@ -672,9 +573,9 @@ function getElementAtLocation(x: number, y: number): HTMLElement | null {
               {{ background.name_en }}
             </option>
           </select>
-          <template v-if="backgroundId === 'custom'">
+          <template v-if="form.backgroundId === 'custom'">
             <label for="custom-background-name">↳ Name</label>
-            <input id="custom-background-name" v-model="customBackgroundName" />
+            <input id="custom-background-name" v-model="form.customBackgroundName" />
           </template>
         </section>
         <div v-if="!isNew" class="flex justify-end">
@@ -715,7 +616,7 @@ function getElementAtLocation(x: number, y: number): HTMLElement | null {
                 </span>
                 <!-- We only display the ability score on wider screens -->
                 <span class="hidden sm:inline"
-                  >: {{ abilityScores[key] }}
+                  >: {{ form.abilityScores[key] }}
                   <!-- ... and the modifier (if any) is displayed in parentheses-->
                   <span v-if="!!abilityModifiers[key]">
                     (<span
@@ -773,7 +674,7 @@ function getElementAtLocation(x: number, y: number): HTMLElement | null {
             </tr>
           </thead>
           <tbody>
-            <tr v-for="(value, key) in abilityScores" :key="key" class="align-baseline">
+            <tr v-for="(value, key) in form.abilityScores" :key="key" class="align-baseline">
               <td
                 class="align-baseline flex flex-row justify-between mr-1"
                 :class="{ 'font-bold': primaryClassAbilities.includes(key) }"
@@ -798,7 +699,7 @@ function getElementAtLocation(x: number, y: number): HTMLElement | null {
                     :class="
                       7 + n > finalAbilityScores[key]
                         ? 'bg-ink/20'
-                        : 7 + n > abilityScores[key]
+                        : 7 + n > form.abilityScores[key]
                           ? 'bg-blue-600/50'
                           : 'bg-ink/50'
                     "
@@ -811,7 +712,7 @@ function getElementAtLocation(x: number, y: number): HTMLElement | null {
               <td>
                 <NumberStepper
                   :id="key"
-                  v-model="abilityScores[key]"
+                  v-model="form.abilityScores[key]"
                   :label="`${key} ability score`"
                   :min="8"
                   :max="18"
@@ -826,7 +727,7 @@ function getElementAtLocation(x: number, y: number): HTMLElement | null {
                 <NumberStepper
                   v-if="backgroundAllowsBoosting[key]"
                   :id="key + '-bonus'"
-                  v-model="abilityBonuses[key]"
+                  v-model="form.abilityBonuses[key]"
                   :label="`${key} ability bonus`"
                   :min="0"
                   :max="2"
@@ -840,7 +741,7 @@ function getElementAtLocation(x: number, y: number): HTMLElement | null {
                   type="number"
                   disabled
                   readonly
-                  :value="abilityBonuses[key]"
+                  :value="form.abilityBonuses[key]"
                   class="w-[3ch]"
                 />
               </td>
@@ -934,7 +835,7 @@ function getElementAtLocation(x: number, y: number): HTMLElement | null {
         >
           <template v-if="hasVersatilityTrait">
             <label for="versatility-skill" class="mt-1 -mb-1">Versatility</label>
-            <select id="versatility-skill" v-model="versatilitySkill" class="truncate">
+            <select id="versatility-skill" v-model="form.versatilitySkill" class="truncate">
               <optgroup
                 v-for="attr in abilityKeys.filter((a) => skillsByAbility[a].length > 0)"
                 :key="attr"
@@ -947,13 +848,13 @@ function getElementAtLocation(x: number, y: number): HTMLElement | null {
               </optgroup>
             </select>
           </template>
-          <template v-if="!backgroundId">
+          <template v-if="!form.backgroundId">
             <label class="mt-1 -mb-1 break-before-column col-start-1 col-span-full"
               >No Background selected yet</label
             >
           </template>
-          <template v-else-if="backgroundId === 'custom'">
-            <template v-if="!customBackgroundName">
+          <template v-else-if="form.backgroundId === 'custom'">
+            <template v-if="!form.customBackgroundName">
               <!-- TODO: link to custom background name input -->
               <label class="mt-1 -mb-1 break-before-column col-start-1 col-span-full"
                 >Custom background (not yet named):</label
@@ -961,7 +862,7 @@ function getElementAtLocation(x: number, y: number): HTMLElement | null {
             </template>
             <template v-else>
               <label class="mt-1 -mb-1 break-before-column col-start-1"
-                >{{ customBackgroundName }} (custom)</label
+                >{{ form.customBackgroundName }} (custom)</label
               >
             </template>
             <div class="mt-2 text-sm text-ink/70 col-span-full">
@@ -1001,7 +902,7 @@ function getElementAtLocation(x: number, y: number): HTMLElement | null {
             <span class="font-bold"
               >Origin
               <span class="font-light"
-                >({{ customBackgroundName || "yet unnamed background" }})</span
+                >({{ form.customBackgroundName || "yet unnamed background" }})</span
               ></span
             >
           </div>
@@ -1011,7 +912,7 @@ function getElementAtLocation(x: number, y: number): HTMLElement | null {
             >Story</label
           >
           <textarea
-            v-model="originStory"
+            v-model="form.originStory"
             class="w-full border border-ink/20 rounded-md p-2"
             rows="4"
           ></textarea>
@@ -1037,7 +938,7 @@ function getElementAtLocation(x: number, y: number): HTMLElement | null {
         <button
           type="submit"
           class="bg-moss-dark px-4 py-3 font-bold text-paper transition hover:bg-moss disabled:cursor-not-allowed disabled:opacity-50"
-          :disabled="isSaving || !hasUnsavedChanges || !name.trim()"
+          :disabled="isSaving || !hasUnsavedChanges || !form.name.trim()"
         >
           {{ isSaving ? "Saving..." : isNew ? "Add to party" : "Save character" }}
         </button>

@@ -195,10 +195,6 @@ type: object
         type: array
         description: "Skills granted by the custom background"
         items: { "$ref": "#/$defs/SkillId" }
-      originStory:
-        type: string
-        minLength: 10
-        description: "Character origin story (optional; must match background)"
       hitPoints:
         type: integer
         description: Current hit points
