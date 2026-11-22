@@ -1,37 +1,67 @@
 import { computed, ref } from "vue";
-import type { AbilityBonuses, AbilityScores, PlayerCharacter } from "@/generated/models/data.schema";
+import {
+  createPlayerCharacterFormState,
+  snapshotFormState,
+  formStateChanged,
+  type PlayerCharacterFormState,
+} from "@/generated/composables/usePlayerCharacterForm.generated";
+import type { PlayerCharacter } from "@/generated/models/data.schema";
 
-function createForm(character?: PlayerCharacter) {
-  const defaultScores: AbilityScores = { str: 10, dex: 10, con: 10, int: 10, wis: 10, cha: 10 };
-  const defaultBonuses: AbilityBonuses = { str: 0, dex: 0, con: 0, int: 0, wis: 0, cha: 0 };
+/**
+ * Composable for managing PlayerCharacter form state.
+ * 
+ * Generated base (from schema) handles:
+ * - Form state shape and defaults
+ * - Change tracking
+ * - Type definitions
+ * 
+ * Handwritten logic adds:
+ * - Visibility rules (which fields are shown when)
+ * - Computed properties (derived state)
+ * - Validation beyond schema constraints
+ * - Domain-specific business logic
+ */
+export function usePlayerCharacterForm() {
+  const form = ref<PlayerCharacterFormState>(createPlayerCharacterFormState());
+  const originalSnapshot = ref(snapshotFormState(form.value));
+
+  // ===== GENERATED MECHANICS (from base) =====
+  const hasChanges = computed(() =>
+    formStateChanged(snapshotFormState(form.value), originalSnapshot.value)
+  );
+
+  // ===== HANDWRITTEN DOMAIN LOGIC BELOW =====
+
+  /**
+   * Whether versatility skill should be visible (humans only).
+   */
+  const isVersatilitySkillVisible = computed(() => form.value.species === "human");
+
+  /**
+   * Whether ancestry selection should be visible (dragonborn only).
+   */
+  const isAncestryVisible = computed(() => form.value.species === "dragonborn");
+
+  /**
+   * Whether custom background details should be shown.
+   */
+  const isCustomBackgroundDetailsVisible = computed(
+    () => form.value.backgroundId === "custom"
+  );
+
+  function resetForm(character?: PlayerCharacter): void {
+    form.value = createPlayerCharacterFormState(character);
+    originalSnapshot.value = snapshotFormState(form.value);
+  }
 
   return {
-    name: character?.name ?? "",
-    surname: character?.surname ?? "",
-    pcClass: character?.classes?.[0] ?? "",
-    subclass: character?.classes?.[1] ?? "",
-    species: character?.species ?? "",
-    versatilitySkill: character?.versatilitySkill ?? "",
-    ancestry: character?.ancestry ?? "",
-    gender: character?.gender ?? "",
-    backgroundId: character?.backgroundId ?? "",
-    customBackgroundName: character?.customBackgroundName ?? "",
-    customBackgroundSkills: [...(character?.customBackgroundSkills ?? [])],
-    originStory: character?.originStory ?? "",
-    abilityScores: { ...defaultScores, ...character?.abilityScores },
-    abilityBonuses: { ...defaultBonuses, ...character?.abilityBonuses },
+    form,
+    hasChanges,
+    resetForm,
+    // Handwritten visibility and validation computed properties
+    isVersatilitySkillVisible,
+    isAncestryVisible,
+    isCustomBackgroundDetailsVisible,
   };
 }
 
-export function usePlayerCharacterForm() {
-  const form = ref(createForm());
-  const originalSnapshot = ref(JSON.stringify(form.value));
-  const hasChanges = computed(() => JSON.stringify(form.value) !== originalSnapshot.value);
-
-  function resetForm(character?: PlayerCharacter): void {
-    form.value = createForm(character);
-    originalSnapshot.value = JSON.stringify(form.value);
-  }
-
-  return { form, hasChanges, resetForm };
-}
