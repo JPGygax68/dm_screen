@@ -18,7 +18,7 @@
     "dev": "vite --host 0.0.0.0",
     "build": "vite build",
     "preview": "vite preview",
-    "test": "node --experimental-strip-types scripts/test-encounter-validation.ts && node --experimental-strip-types scripts/test-repository.ts && node --experimental-strip-types scripts/test-store.ts && node --experimental-strip-types scripts/test-schema-routes.ts && node --experimental-strip-types scripts/test-skills.ts && node --experimental-strip-types scripts/test-player-character-form.ts",
+    "test": "tsx scripts/test-encounter-validation.ts && tsx scripts/test-repository.ts && tsx scripts/test-store.ts && tsx scripts/test-schema-routes.ts && tsx scripts/test-skills.ts && tsx scripts/test-player-character-form.ts",
     "harness": "node harness.mjs"
   },
   "repository": {
@@ -58,6 +58,7 @@
     "pug": "^3.0.4",
     "sass": "^1.101.0",
     "tailwindcss": "^4.1.11",
+    "tsx": "^4.23.15",
     "unplugin-vue-components": "^32.1.0",
     "vite": "^8.1.4"
   }
