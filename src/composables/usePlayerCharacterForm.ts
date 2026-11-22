@@ -34,16 +34,20 @@ export function usePlayerCharacterForm() {
   const originalSnapshot = ref(snapshotFormState(form.value));
 
   // ===== GENERATED MECHANICS (from base) =====
+
+  /**
+   * Reset the form to defaults or hydrate from a character.
+   */
+  function resetForm(character?: PlayerCharacter): void {
+    form.value = createPlayerCharacterFormState(character);
+    originalSnapshot.value = snapshotFormState(form.value);
+  }
+
   const hasChanges = computed(() =>
     formStateChanged(snapshotFormState(form.value), originalSnapshot.value)
   );
 
   // ===== VISIBILITY RULES =====
-
-  /**
-   * Whether versatility skill should be visible (humans only).
-   */
-  const isVersatilitySkillVisible = computed(() => form.value.species === "human");
 
   /**
    * Whether ancestry selection should be visible (dragonborn only).
@@ -139,7 +143,7 @@ export function usePlayerCharacterForm() {
   const primaryClassAbilities: Ref<AbilityKey[]> = computed(() => {
     const cls = classes.find((c) => c.id === form.value.pcClass);
     if (!cls) {
-      console.error("Class not found:", form.value.pcClass);
+      //console.error("Class not found:", form.value.pcClass);
       return [];
     }
     return Array.isArray(cls.primary_ability)
@@ -255,7 +259,7 @@ export function usePlayerCharacterForm() {
     const result: Record<AbilityKey, boolean> = {} as Record<AbilityKey, boolean>;
     const classData = classes.find((c) => c.id === form.value.pcClass);
     if (!classData) {
-      console.error("Class not found:", form.value.pcClass);
+      //console.error("Class not found:", form.value.pcClass);
       return result;
     }
     abilityKeys.values().forEach((key) => {
@@ -288,18 +292,10 @@ export function usePlayerCharacterForm() {
   /**
    * Check if a character has a specific species trait.
    */
-  function pcHasTrait(trait: string): boolean {
+  const pcHasTrait = computed(() => {
     const item = speciesList.find((speciesItem) => speciesItem.id === form.value.species);
-    return item?.traits.includes(trait) ?? false;
-  }
-
-  /**
-   * Reset the form to defaults or hydrate from a character.
-   */
-  function resetForm(character?: PlayerCharacter): void {
-    form.value = createPlayerCharacterFormState(character);
-    originalSnapshot.value = snapshotFormState(form.value);
-  }
+    return (trait: string): boolean => item?.traits.includes(trait) ?? false;
+  });
 
   return {
     // State
@@ -309,7 +305,6 @@ export function usePlayerCharacterForm() {
     hasChanges,
     
     // Visibility rules
-    isVersatilitySkillVisible,
     isAncestryVisible,
     isCustomBackgroundDetailsVisible,
     hasVersatilityTrait,

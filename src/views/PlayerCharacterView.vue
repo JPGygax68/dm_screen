@@ -1,13 +1,16 @@
 <!-- @format -->
 
 <script setup lang="ts">
+import type { Ref } from "vue";
 import { ref, computed, watch, nextTick, useTemplateRef } from "vue";
 import { storeToRefs } from "pinia";
 import { onBeforeRouteLeave, onBeforeRouteUpdate, useRoute, useRouter } from "vue-router";
 import NumberStepper from "@/components/NumberStepper.vue";
 import type { Campaign, PlayerCharacter } from "@/generated/models/data.schema";
 import type { AbilityKey } from "@/lib/dnd2024/base.ts";
-import { abilityNamesMap_en } from "@/lib/dnd2024/base.ts";
+import { abilityKeys, abilityNamesMap_en } from "@/lib/dnd2024/base.ts";
+import { classes } from "@/lib/dnd2024/classFeatures.ts";
+import { BackgroundDef } from "@/lib/dnd2024/backgrounds.ts";
 import { backgrounds, freeBackgrounds } from "@/lib/dnd2024/backgrounds.ts";
 import { draconicAncestries, speciesList } from "@/lib/dnd2024/species.ts";
 import { useDataStore } from "@/stores/data-store.ts";
@@ -24,10 +27,9 @@ const { skillNamesMap_en, skillsByAbility } = useSkills();
 
 const {
   form,
-  hasChanges,
   resetForm,
+  hasChanges,
   // Visibility rules
-  isVersatilitySkillVisible,
   isAncestryVisible,
   isCustomBackgroundDetailsVisible,
   hasVersatilityTrait,
@@ -465,7 +467,9 @@ function getElementAtLocation(x: number, y: number): HTMLElement | null {
         <template #summary>
           <div class="w-full">
             <div class="group-open:hidden text-[80%] flex flex-row flex-wrap gap-x-2 gap-y-1">
+              <span v-if="!form.pcClass">(No class selected yet ⟶ no primary abilities)</span>
               <span
+                v-else
                 v-for="(key, _) in abilityKeys"
                 :key="key"
                 class="shrink-0 border rounded-md py-0 after:not-last:content-[','] px-1 hidden sm:inline"
