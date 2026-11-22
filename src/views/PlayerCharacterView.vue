@@ -4,13 +4,10 @@
 import { ref, computed, watch, nextTick, useTemplateRef } from "vue";
 import { storeToRefs } from "pinia";
 import { onBeforeRouteLeave, onBeforeRouteUpdate, useRoute, useRouter } from "vue-router";
-import type { Ref } from "vue";
 import NumberStepper from "@/components/NumberStepper.vue";
 import type { Campaign, PlayerCharacter } from "@/generated/models/data.schema";
 import type { AbilityKey } from "@/lib/dnd2024/base.ts";
-import { abilityKeys, abilityNamesMap_en } from "@/lib/dnd2024/base.ts";
-import { classes } from "@/lib/dnd2024/classFeatures.ts";
-import type { BackgroundDef } from "@/lib/dnd2024/backgrounds.ts";
+import { abilityNamesMap_en } from "@/lib/dnd2024/base.ts";
 import { backgrounds, freeBackgrounds } from "@/lib/dnd2024/backgrounds.ts";
 import { draconicAncestries, speciesList } from "@/lib/dnd2024/species.ts";
 import { useDataStore } from "@/stores/data-store.ts";
@@ -23,9 +20,40 @@ const store = useDataStore();
 const { roots } = storeToRefs(store);
 const { skillNamesMap_en, skillsByAbility } = useSkills();
 
-//#region Form handling
+//#region Form state
 
-const { form, hasChanges, resetForm } = usePlayerCharacterForm();
+const {
+  form,
+  hasChanges,
+  resetForm,
+  // Visibility rules
+  isVersatilitySkillVisible,
+  isAncestryVisible,
+  isCustomBackgroundDetailsVisible,
+  hasVersatilityTrait,
+  // Identity & display formatting
+  identityClassName,
+  identitySpeciesName,
+  identityGenderName,
+  identityGenderIcon,
+  identityBackground,
+  backgroundName,
+  backgroundSkills,
+  // Ability score calculations
+  primaryClassAbilities,
+  baseAbilityScoresTotal,
+  abilityBonusesTotal,
+  availableBaseAbilityScorePoints,
+  availableAbilityBonusPoints,
+  finalAbilityScores,
+  abilityModifiers,
+  abilityModifiersAsText,
+  baseAbilityScoreUiProps,
+  // Class & background features
+  savingThrows,
+  backgroundAllowsBoosting,
+  pcHasTrait,
+} = usePlayerCharacterForm();
 
 function hydrateEditor(): void {
   isEditorReady.value = false;
@@ -48,7 +76,7 @@ function hydrateEditor(): void {
 
 //#endregion
 
-//#region View/Form state
+//#region View state
 
 const isEditorReady = ref(false);
 const isLoading = ref(true);
@@ -71,34 +99,9 @@ function onToggleDetails(event: Event): void {
   }
 }
 
-//#endregion View/Form state
+//#endregion
 
-// #region Computed properties
-
-const identityClassName = computed(
-  () => classes.find((classItem) => classItem.id === form.value.pcClass)?.name,
-);
-const identitySpeciesName = computed(
-  () => speciesList.find((speciesItem) => speciesItem.id === form.value.species)?.name_en,
-);
-const identityGenderName = computed(() => (form.value.gender ? form.value.gender : ""));
-const identityGenderIcon = computed(() => {
-  switch (form.value.gender) {
-    case "male":
-      return "♂";
-    case "female":
-      return "♀";
-    default:
-      return "";
-  }
-});
-
-const identityBackground = computed(() => {
-  if (form.value.backgroundId === "custom") {
-    return form.value.customBackgroundName ?? "(Undefined Custom)";
-  }
-  return backgrounds.find((bg) => bg.id === form.value.backgroundId)?.name_en ?? "";
-});
+//#region Computed properties (route-dependent only)
 
 const campaignId = computed(() => String(route.params.campaignId ?? ""));
 const playerCharacterId = computed(() => String(route.params.playerCharacterId ?? ""));
@@ -110,150 +113,13 @@ const playerCharacter = computed(() =>
   campaign.value?.party.find((member) => member.id === playerCharacterId.value),
 );
 
-const backgroundName = computed(() => {
-  return (
-    backgrounds.find((bg) => bg.id === form.value.backgroundId)?.name_en ?? `(?${form.value.backgroundId})`
-  );
-});
-
-const backgroundSkills = computed(() => {
-  const bgId = playerCharacter.value?.backgroundId;
-  if (bgId === "custom") {
-    return playerCharacter.value?.customBackgroundSkills ?? [];
-  }
-  return backgrounds.find((bg) => bg.id === form.value.backgroundId)?.skills ?? [];
-});
-
-const pcHasTrait = (trait: string) => {
-  const item = speciesList.find((speciesItem) => speciesItem.id === form.value.species);
-  return item?.traits.includes(trait) ?? false;
-};
-
+/**
+ * Combines form state's hasChanges with editor ready state.
+ * Shows unsaved changes only when editor is actively displayed.
+ */
 const hasUnsavedChanges = computed(
   () => isEditorReady.value && hasChanges.value,
 );
-
-const baseAbilityScoreUiProps = computed(() => {
-  const props: Record<AbilityKey, { isLowest: boolean; isHighest: boolean; warning: string }> =
-    {} as any;
-  let lowest = 99;
-  let highest = -99;
-  (Object.keys(form.value.abilityScores) as AbilityKey[]).forEach((key) => {
-    const value = form.value.abilityScores[key];
-    if (value < lowest) lowest = value;
-    if (value > highest) highest = value;
-  });
-  let highestScoreIsOneOfPrimaries = false;
-  (Object.keys(form.value.abilityScores) as AbilityKey[]).forEach((key) => {
-    const value = form.value.abilityScores[key];
-    const isPrimary = primaryClassAbilities.value.includes(key);
-    if (isPrimary && value === highest) {
-      highestScoreIsOneOfPrimaries = true;
-    }
-    props[key] = {
-      isLowest: value === lowest,
-      isHighest: value === highest,
-      warning: (() => {
-        if (isPrimary && value < highest && !highestScoreIsOneOfPrimaries) {
-          return "One of the primary abilities should be the highest";
-        }
-        if (isPrimary && Math.floor((value - 10) / 2) <= 0) {
-          return "A primary ability score should be high enough to confer a bonus without modifiers, i.e. be 12 or higher";
-        }
-        return "";
-      })(),
-    };
-  });
-  return props;
-});
-
-const baseAbilityScoresTotal = computed(() => {
-  return Object.values(form.value.abilityScores).reduce((sum, val) => sum + val, 0);
-});
-
-const primaryClassAbilities: Ref<AbilityKey[]> = computed(() => {
-  // Consult the class features and extract the primary abilities for the class
-  const cls = classes.find((c) => c.id === form.value.pcClass);
-  if (!cls) {
-    console.error("Class not found:", form.value.pcClass);
-    return [];
-  }
-  return Array.isArray(cls.primary_ability)
-    ? cls.primary_ability.map((a) => a.toLowerCase() as AbilityKey)
-    : [cls.primary_ability.toLowerCase() as AbilityKey];
-});
-
-const finalAbilityScores = computed(() => {
-  const scores: Record<AbilityKey, number> = {} as Record<AbilityKey, number>;
-  (Object.keys(form.value.abilityScores) as AbilityKey[]).forEach((key) => {
-    scores[key] = form.value.abilityScores[key] + (form.value.abilityBonuses[key] ?? 0);
-  });
-  return scores;
-});
-
-const abilityBonusesTotal = computed(() => {
-  return Object.values(form.value.abilityBonuses).reduce((sum, val) => sum + val, 0);
-});
-
-const availableBaseAbilityScorePoints = computed(() => {
-  return 72 - baseAbilityScoresTotal.value;
-});
-
-const availableAbilityBonusPoints = computed(() => {
-  return 3 - abilityBonusesTotal.value;
-});
-
-const savingThrows = computed(() => {
-  const result: Record<AbilityKey, boolean> = {} as Record<AbilityKey, boolean>;
-  const classData = classes.find((c) => c.id === form.value.pcClass);
-  if (!classData) {
-    console.error("Class not found:", form.value.pcClass);
-    return result;
-  }
-  abilityKeys.values().forEach((key) => {
-    result[key] = classData.saving_throws.includes(key.toUpperCase());
-  });
-  return result;
-});
-
-const abilityModifiers = computed(() => {
-  const modifiers: Record<AbilityKey, number> = {} as Record<AbilityKey, number>;
-  (Object.keys(finalAbilityScores.value) as AbilityKey[]).forEach((key) => {
-    modifiers[key] = Math.floor((finalAbilityScores.value[key] - 10) / 2);
-  });
-  return modifiers;
-});
-
-const abilityModifiersAsText = computed(() => {
-  const modifiersText: Record<AbilityKey, string> = {} as Record<AbilityKey, string>;
-  (Object.keys(abilityModifiers.value) as AbilityKey[]).forEach((key) => {
-    const value = abilityModifiers.value[key];
-    modifiersText[key] = value === 0 ? "" : value >= 0 ? `+${value}` : `${value}`;
-  });
-  return modifiersText;
-});
-
-const backgroundAllowsBoosting = computed(() => {
-  const result: Record<AbilityKey, boolean> = {} as Record<AbilityKey, boolean>;
-  if (form.value.backgroundId === "custom") {
-    console.log("Custom background allows boosting for all abilities.");
-    for (const key of Object.keys(finalAbilityScores.value) as AbilityKey[]) {
-      result[key] = true;
-    }
-    return result;
-  }
-  const backgroundData = backgrounds.find((b) => b.id === form.value.backgroundId);
-  if (!backgroundData) return result;
-  (Object.keys(finalAbilityScores.value) as AbilityKey[]).forEach((key) => {
-    result[key] = backgroundData.boostableAbilityScores?.includes(key) ?? false;
-  });
-  return result;
-});
-
-const hasVersatilityTrait = computed(() => {
-  const speciesData = speciesList.find((s) => s.id === form.value.species);
-  return speciesData?.traits?.includes("versatility") ?? false;
-});
 
 //#endregion Computed properties
 
