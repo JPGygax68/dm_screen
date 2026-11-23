@@ -23,5 +23,6 @@ declare module 'vue' {
     RouterView: typeof import('vue-router')['RouterView']
     SchemaCollectionView: typeof import('./views/SchemaCollectionView.vue')['default']
     SchemaEntityView: typeof import('./views/SchemaEntityView.vue')['default']
+    VuSlider: typeof import('./components/VuSlider.vue')['default']
   }
 }

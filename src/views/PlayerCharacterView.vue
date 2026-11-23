@@ -6,6 +6,7 @@ import { ref, computed, watch, nextTick, useTemplateRef } from "vue";
 import { storeToRefs } from "pinia";
 import { onBeforeRouteLeave, onBeforeRouteUpdate, useRoute, useRouter } from "vue-router";
 import NumberStepper from "@/components/NumberStepper.vue";
+import VuSlider from "@/components/VuSlider.vue";
 import type { Campaign, PlayerCharacter } from "@/generated/models/data.schema";
 import type { AbilityKey } from "@/lib/dnd2024/base.ts";
 import { abilityKeys, abilityNamesMap_en } from "@/lib/dnd2024/base.ts";
@@ -84,8 +85,6 @@ const isEditorReady = ref(false);
 const isLoading = ref(true);
 const isSaving = ref(false);
 const errorMessage = ref("");
-
-const touchedAbilityScore = ref<AbilityKey>();
 
 const isDiscarding = ref(false);
 
@@ -265,53 +264,7 @@ const availableBackgrounds: Ref<BackgroundDef[]> = ref([
 
 //#endregion Methods
 
-// #region Event Handlers
-
-const handleAttributeDragStartEvent = (event: Event) => {
-  // The mouse down or touch start event could fall on a cell within the ability score bar,
-  // or between cells on the bar itself.
-  const target = event.target as HTMLElement;
-  const cell = target.closest(".ability-score-cell") as HTMLElement | null;
-  if (!cell) {
-    console.warn("No cell found for the drag start event.");
-    return;
-  }
-  const bar = cell.parentElement as HTMLElement | null;
-  if (!bar) {
-    console.warn("No parent element found for the drag start cell.");
-    return;
-  }
-  const attribKey = bar.dataset.abilityScoreName as AbilityKey;
-  if (!attribKey) return;
-  touchedAbilityScore.value = attribKey;
-};
-
-const handleAttributeDragTouchMove = (event: TouchEvent) => {
-  const touch = event.touches[0];
-  return handlePointerMove(touch.clientX, touch.clientY);
-};
-
-function handleAttributeDragMouseMove(event: MouseEvent) {
-  return handlePointerMove(event.clientX, event.clientY);
-}
-
-function handleAttributeDragMouseUp(event: MouseEvent) {
-  touchedAbilityScore.value = undefined;
-}
-
-function handlePointerMove(x: number, y: number) {
-  const cell = getElementAtLocation(x, y);
-  if (!cell) return;
-  const bar = cell.parentElement;
-  if (!bar) return;
-  const abilityScoreName = bar.dataset.abilityScoreName as AbilityKey;
-  if (!abilityScoreName || touchedAbilityScore.value !== abilityScoreName) return;
-  if (!cell.dataset.value) return;
-  const value = parseInt(cell.dataset.value, 10);
-  form.value.abilityScores[abilityScoreName] = value;
-}
-
-//#region Dialogs
+// #region Dialogs
 
 function confirmDiscard(): boolean {
   return (
@@ -322,16 +275,6 @@ function confirmDiscard(): boolean {
 }
 
 // #endregion Dialogs
-
-// #endregion Event Handlers
-
-// #region Helper Functions
-
-function getElementAtLocation(x: number, y: number): HTMLElement | null {
-  return document.elementFromPoint(x, y) as HTMLElement | null;
-}
-
-// #endregion Helper Functions
 </script>
 
 <template>
@@ -555,29 +498,13 @@ function getElementAtLocation(x: number, y: number): HTMLElement | null {
                 </svg>
               </td>
               <td class="hidden sm:table-cell align-middle">
-                <div
-                  @touchstart.prevent="handleAttributeDragStartEvent"
-                  @touchmove.prevent="handleAttributeDragTouchMove"
-                  @mousedown.prevent="handleAttributeDragStartEvent"
-                  @mousemove.prevent="handleAttributeDragMouseMove"
-                  @mouseup.prevent="handleAttributeDragMouseUp"
-                  :data-ability-score-name="key"
-                  class="flex flex-row gap-0.5"
-                >
-                  <span
-                    v-for="n in 13"
-                    :class="
-                      7 + n > finalAbilityScores[key]
-                        ? 'bg-ink/20'
-                        : 7 + n > form.abilityScores[key]
-                          ? 'bg-blue-600/50'
-                          : 'bg-ink/50'
-                    "
-                    :data-value="n + 7"
-                    class="ability-score-cell text-[0.5rem] text-ink/20 w-3 h-7 grow"
-                    >{{ n + 7 }}</span
-                  >
-                </div>
+                <VuSlider
+                  v-model="form.abilityScores[key]"
+                  :bonus="form.abilityBonuses[key]"
+                  :min="8"
+                  :max="20"
+                  :cell-count="13"
+                />
               </td>
               <td>
                 <NumberStepper
