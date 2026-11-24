@@ -55,7 +55,9 @@ const {
   // Class & background features
   savingThrows,
   backgroundAllowsBoosting,
+  availableBackgrounds,
   pcHasTrait,
+  editableFields,
 } = usePlayerCharacterForm();
 
 function hydrateEditor(): void {
@@ -151,31 +153,7 @@ onBeforeRouteUpdate((to, from) => {
 
 //#endregion Lifecycle hooks
 
-//#region Methods
-
 //#region Persistence Methods
-
-// Optional text fields are left out when empty, as the schema rejects empty strings.
-function editableFields(): Partial<PlayerCharacter> {
-  const fields: Partial<PlayerCharacter> = {
-    name: form.value.name.trim(),
-    abilityScores: { ...form.value.abilityScores },
-    abilityBonuses: { ...form.value.abilityBonuses },
-  };
-  const trimmedSurname = form.value.surname.trim();
-  const trimmedGender = form.value.gender.trim();
-  if (trimmedSurname) fields.surname = trimmedSurname;
-  if (form.value.pcClass) fields.classes = [form.value.pcClass];
-  if (form.value.species) fields.species = form.value.species;
-  if (form.value.versatilitySkill) fields.versatilitySkill = form.value.versatilitySkill;
-  if (form.value.ancestry) fields.ancestry = form.value.ancestry;
-  if (trimmedGender) fields.gender = trimmedGender;
-  if (form.value.backgroundId) fields.backgroundId = form.value.backgroundId;
-  if (form.value.customBackgroundName) fields.customBackgroundName = form.value.customBackgroundName;
-  if (form.value.customBackgroundSkills?.length) fields.customBackgroundSkills = [...form.value.customBackgroundSkills];
-  if (form.value.originStory) fields.originStory = form.value.originStory;
-  return fields;
-}
 
 async function createPlayerCharacter(): Promise<void> {
   const parent = campaign.value;
@@ -256,13 +234,6 @@ async function cancelEditing(): Promise<void> {
     params: { campaignId: campaignId.value },
   });
 }
-
-const availableBackgrounds: Ref<BackgroundDef[]> = ref([
-  ...freeBackgrounds,
-  { id: "custom", name_en: "Custom" },
-]);
-
-//#endregion Methods
 
 // #region Dialogs
 
@@ -544,6 +515,7 @@ function confirmDiscard(): boolean {
               </td>
               <td class="text-center">
                 <input
+                  :id="key + '-final'"
                   type="number"
                   readonly
                   tabindex="-1"
@@ -553,6 +525,7 @@ function confirmDiscard(): boolean {
               </td>
               <td class="text-center">
                 <input
+                  :id="key + '-modifier'"
                   type="text"
                   readonly
                   tabindex="-1"
@@ -627,7 +600,7 @@ function confirmDiscard(): boolean {
           <span class="font-bold">Skills</span>
           <span class="hidden group-open:inline">&nbsp;(TODO: Skill List)</span>
         </template>
-        <div
+        <section
           class="grid w-full grid-cols-[minmax(5rem,auto)_minmax(120px,auto)_minmax(100px,auto)] items-baseline gap-1"
         >
           <template v-if="hasVersatilityTrait">
@@ -677,7 +650,7 @@ function confirmDiscard(): boolean {
               readonly
             />
           </template>
-        </div>
+        </section>
         <div v-if="!isNew" class="flex justify-end">
           <input
             type="button"
@@ -806,7 +779,7 @@ input {
     @apply bg-error-light border-error text-error-dark;
   }
   &.thick {
-    @apply border-3 border-ink/60 font-bold;
+    @apply outline outline-3 outline-ink/60 font-bold;
   }
 }
 

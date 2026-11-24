@@ -1,3 +1,5 @@
+/** @format */
+
 import { computed, ref } from "vue";
 import type { Ref } from "vue";
 import {
@@ -11,17 +13,17 @@ import type { AbilityKey } from "@/lib/dnd2024/base.ts";
 import { abilityKeys } from "@/lib/dnd2024/base.ts";
 import { classes } from "@/lib/dnd2024/classFeatures.ts";
 import type { BackgroundDef } from "@/lib/dnd2024/backgrounds.ts";
-import { backgrounds } from "@/lib/dnd2024/backgrounds.ts";
+import { backgrounds, freeBackgrounds } from "@/lib/dnd2024/backgrounds.ts";
 import { speciesList } from "@/lib/dnd2024/species.ts";
 
 /**
  * Composable for managing PlayerCharacter form state and all derived computations.
- * 
+ *
  * Generated base (from schema) handles:
  * - Form state shape and defaults
  * - Change tracking
  * - Type definitions
- * 
+ *
  * Handwritten logic adds:
  * - Visibility rules (which fields are shown when)
  * - Ability score calculations and validations
@@ -44,7 +46,7 @@ export function usePlayerCharacterForm() {
   }
 
   const hasChanges = computed(() =>
-    formStateChanged(snapshotFormState(form.value), originalSnapshot.value)
+    formStateChanged(snapshotFormState(form.value), originalSnapshot.value),
   );
 
   // ===== VISIBILITY RULES =====
@@ -57,9 +59,7 @@ export function usePlayerCharacterForm() {
   /**
    * Whether custom background details should be shown.
    */
-  const isCustomBackgroundDetailsVisible = computed(
-    () => form.value.backgroundId === "custom"
-  );
+  const isCustomBackgroundDetailsVisible = computed(() => form.value.backgroundId === "custom");
 
   /**
    * Whether character has the versatility trait (checks species data).
@@ -287,6 +287,11 @@ export function usePlayerCharacterForm() {
     return result;
   });
 
+  const availableBackgrounds: Ref<BackgroundDef[]> = ref([
+    ...freeBackgrounds,
+    { id: "custom", name_en: "Custom" },
+  ]);
+
   // ===== HELPER FUNCTIONS =====
 
   /**
@@ -297,18 +302,45 @@ export function usePlayerCharacterForm() {
     return (trait: string): boolean => item?.traits.includes(trait) ?? false;
   });
 
+  /**
+   * Extract editable fields from form state for persistence.
+   * Optional text fields are left out when empty, as the schema rejects empty strings.
+   */
+  function editableFields(): Partial<PlayerCharacter> {
+    const fields: Partial<PlayerCharacter> = {
+      name: form.value.name.trim(),
+      abilityScores: { ...form.value.abilityScores },
+      abilityBonuses: { ...form.value.abilityBonuses },
+    };
+    const trimmedSurname = form.value.surname.trim();
+    const trimmedGender = form.value.gender.trim();
+    if (trimmedSurname) fields.surname = trimmedSurname;
+    if (form.value.pcClass) fields.classes = [form.value.pcClass];
+    if (form.value.species) fields.species = form.value.species;
+    if (form.value.versatilitySkill) fields.versatilitySkill = form.value.versatilitySkill;
+    if (form.value.ancestry) fields.ancestry = form.value.ancestry;
+    if (trimmedGender) fields.gender = trimmedGender;
+    if (form.value.backgroundId) fields.backgroundId = form.value.backgroundId;
+    if (form.value.customBackgroundName)
+      fields.customBackgroundName = form.value.customBackgroundName;
+    if (form.value.customBackgroundSkills?.length)
+      fields.customBackgroundSkills = [...form.value.customBackgroundSkills];
+    if (form.value.originStory) fields.originStory = form.value.originStory;
+    return fields;
+  }
+
   return {
     // State
     form,
-    
+
     // Core computeds
     hasChanges,
-    
+
     // Visibility rules
     isAncestryVisible,
     isCustomBackgroundDetailsVisible,
     hasVersatilityTrait,
-    
+
     // Identity & display formatting
     identityClassName,
     identitySpeciesName,
@@ -317,7 +349,7 @@ export function usePlayerCharacterForm() {
     identityBackground,
     backgroundName,
     backgroundSkills,
-    
+
     // Ability score calculations
     primaryClassAbilities,
     baseAbilityScoresTotal,
@@ -328,15 +360,15 @@ export function usePlayerCharacterForm() {
     abilityModifiers,
     abilityModifiersAsText,
     baseAbilityScoreUiProps,
-    
+
     // Class & background features
     savingThrows,
     backgroundAllowsBoosting,
-    
+    availableBackgrounds,
+
     // Functions
     pcHasTrait,
     resetForm,
+    editableFields,
   };
 }
-
-
