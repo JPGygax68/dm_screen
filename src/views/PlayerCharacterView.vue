@@ -81,6 +81,12 @@ function hydrateEditor(): void {
   isLoading.value = false;
 }
 
+/**
+ * Because the JSON to TS generator does not support fixed-length arrays, we need help managing the dynamic list of custom background skills.
+ * (However, though the number of skills that can be defined for a custom background is usually fixed to 2, the DM
+ * may allow more or fewer, so that's another reason for handling the list dynamically.)
+ */
+
 const isCustomBackgroundSkillLast = (index: number) =>
   index === form.value.customBackgroundSkills.length - 1;
 
@@ -667,7 +673,9 @@ function confirmDiscard(): boolean {
               :value="form.customBackgroundSkills[n - 1]"
               @change="onCustomBackgroundSkillChange(n - 1, $event)"
             >
-              <option default value="" v-if="canCustomBackgroundSkillBeDeleted(n - 1)">(Remove)</option>
+              <option default value="" v-if="canCustomBackgroundSkillBeDeleted(n - 1)">
+                (Remove)
+              </option>
               <option default value="" v-if="canCustomBackgroundSkillBeAdded(n - 1)">Add</option>
               <optgroup
                 v-for="attr in abilityKeys.filter((a) => skillsByAbility[a].length > 0)"
