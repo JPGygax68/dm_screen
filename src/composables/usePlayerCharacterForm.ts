@@ -250,6 +250,16 @@ export function usePlayerCharacterForm() {
     return props;
   });
 
+  const customBackgroundSkillStates = computed(() => {
+    console.log(form.value.customBackgroundSkills)
+    return form.value.customBackgroundSkills.map((skill, index) => {
+      const isLast = index === form.value.customBackgroundSkills.length - 1;
+      return {
+        enabled: isLast,
+      };
+    });
+  });
+
   // ===== CLASS & BACKGROUND FEATURES =====
 
   /**
@@ -365,6 +375,7 @@ export function usePlayerCharacterForm() {
     savingThrows,
     backgroundAllowsBoosting,
     availableBackgrounds,
+    customBackgroundSkillStates,
 
     // Functions
     pcHasTrait,

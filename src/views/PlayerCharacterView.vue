@@ -17,6 +17,7 @@ import { draconicAncestries, speciesList } from "@/lib/dnd2024/species.ts";
 import { useDataStore } from "@/stores/data-store.ts";
 import { useSkills } from "@/lib/dnd2024/skills";
 import { usePlayerCharacterForm } from "@/composables/usePlayerCharacterForm";
+import { on } from "pouchdb";
 
 const route = useRoute();
 const router = useRouter();
@@ -56,6 +57,7 @@ const {
   savingThrows,
   backgroundAllowsBoosting,
   availableBackgrounds,
+  customBackgroundSkillStates,
   pcHasTrait,
   editableFields,
 } = usePlayerCharacterForm();
@@ -77,6 +79,29 @@ function hydrateEditor(): void {
     isEditorReady.value = true;
   }
   isLoading.value = false;
+}
+
+const isCustomBackgroundSkillLast = (index: number) =>
+  index === form.value.customBackgroundSkills.length - 1;
+
+const canCustomBackgroundSkillBeAdded = (index: number) =>
+  (index === 0 && form.value.customBackgroundSkills.length === 0) ||
+  isCustomBackgroundSkillLast(index - 1);
+
+const canCustomBackgroundSkillBeDeleted = (index: number) => isCustomBackgroundSkillLast(index);
+
+const canCustomBackgroundSkillBeEdited = (index: number) =>
+  canCustomBackgroundSkillBeAdded(index) || index < form.value.customBackgroundSkills.length;
+
+function onCustomBackgroundSkillChange(index: number, event: Event): void {
+  const target = event.target as HTMLSelectElement;
+  if (!target.value) {
+    console.assert(index == form.value.customBackgroundSkills.length - 1);
+    form.value.customBackgroundSkills.pop();
+  } else {
+    form.value.customBackgroundSkills[index] = target.value;
+  }
+  console.log(form.value.customBackgroundSkills);
 }
 
 //#endregion
@@ -232,6 +257,8 @@ async function cancelEditing(): Promise<void> {
     params: { campaignId: campaignId.value },
   });
 }
+
+//#endregion
 
 // #region Dialogs
 
@@ -599,12 +626,12 @@ function confirmDiscard(): boolean {
           <span class="inline group-open:hidden">&nbsp;(TODO: Skill List)</span>
         </template>
         <section
-          class="pb-2 grid w-full grid-cols-[minmax(5rem,auto)_minmax(120px,auto)_minmax(100px,auto)] items-baseline gap-1"
+          class="pb-2 grid w-full grid-cols-[minmax(5rem,auto)_minmax(120px,auto)_minmax(120px,auto)] items-baseline gap-1"
         >
           <template v-if="hasVersatilityTrait">
             <label for="versatility-skill" class="mt-1 -mb-1">Versatility</label>
             <select id="versatility-skill" v-model="form.versatilitySkill" class="truncate">
-              <option default value="">Select a versatility skill</option>
+              <option default value="">(versatility skill)</option>
               <optgroup
                 v-for="attr in abilityKeys.filter((a) => skillsByAbility[a].length > 0)"
                 :key="attr"
@@ -618,27 +645,41 @@ function confirmDiscard(): boolean {
             </select>
           </template>
           <template v-if="!form.backgroundId">
-            <label class="mt-1 -mb-1 break-before-column col-start-1"
-              >Background:</label
-            ><label class="mt-1 -mb-1 col-span-2"
-              >No background selected yet</label
-            >
+            <label class="mt-1 -mb-1 break-before-column col-start-1">Background:</label
+            ><label class="mt-1 -mb-1 col-span-2">No background selected yet</label>
           </template>
           <template v-else-if="form.backgroundId === 'custom'">
             <template v-if="!form.customBackgroundName">
               <!-- TODO: link to custom background name input -->
-              <label class="mt-1 -mb-1 break-before-column col-start-1 col-span-full"
-                >Custom background (not yet named):</label
+              <span class="mt-1 -mb-1 break-before-column col-start-1 col-span-full"
+                >Custom background (not yet named):</span
               >
             </template>
             <template v-else>
-              <label class="mt-1 -mb-1 break-before-column col-start-1"
-                >{{ form.customBackgroundName }} (custom)</label
-              >
+              <span class="mt-1 -mb-1 break-before-column col-start-1">{{
+                form.customBackgroundName
+              }}</span>
             </template>
-            <div class="mt-2 text-sm text-ink/70 col-span-full">
-              TODO: Implement custom background skills selection here.
-            </div>
+            <select
+              v-for="n in 2"
+              :key="n"
+              :disabled="!canCustomBackgroundSkillBeEdited(n - 1)"
+              :value="form.customBackgroundSkills[n - 1]"
+              @change="onCustomBackgroundSkillChange(n - 1, $event)"
+            >
+              <option default value="" v-if="canCustomBackgroundSkillBeDeleted(n - 1)">(Remove)</option>
+              <option default value="" v-if="canCustomBackgroundSkillBeAdded(n - 1)">Add</option>
+              <optgroup
+                v-for="attr in abilityKeys.filter((a) => skillsByAbility[a].length > 0)"
+                :key="attr"
+                :label="abilityNamesMap_en[attr]"
+                class="capitalize"
+              >
+                <option v-for="skillId in skillsByAbility[attr]" :key="skillId" :value="skillId">
+                  {{ skillNamesMap_en[skillId] }}
+                </option>
+              </optgroup>
+            </select>
           </template>
           <template v-else>
             <label class="mt-1 -mb-1 break-before-column col-start-1"
@@ -759,7 +800,8 @@ input[type="number"] {
   /* @apply h-7; */
 }
 
-input {
+input,
+select {
   &.score-field {
     @apply h-7;
     @apply w-[4ch];
@@ -781,6 +823,9 @@ input {
   }
   &.dashed {
     @apply outline outline-1 outline-dashed border-transparent outline-ink/60 font-bold;
+  }
+  &[disabled] {
+    opacity: 0.5;
   }
 }
 
