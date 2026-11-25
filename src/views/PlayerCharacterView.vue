@@ -598,10 +598,10 @@ function confirmDiscard(): boolean {
       >
         <template #summary>
           <span class="font-bold">Skills</span>
-          <span class="hidden group-open:inline">&nbsp;(TODO: Skill List)</span>
+          <span class="inline group-open:hidden">&nbsp;(TODO: Skill List)</span>
         </template>
         <section
-          class="grid w-full grid-cols-[minmax(5rem,auto)_minmax(120px,auto)_minmax(100px,auto)] items-baseline gap-1"
+          class="py-2 grid w-full grid-cols-[minmax(5rem,auto)_minmax(120px,auto)_minmax(100px,auto)] items-baseline gap-1"
         >
           <template v-if="hasVersatilityTrait">
             <label for="versatility-skill" class="mt-1 -mb-1">Versatility</label>
