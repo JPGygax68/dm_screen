@@ -436,7 +436,7 @@ function confirmDiscard(): boolean {
           id="ability-scores"
           class="w-[calc(100%+1rem)] max-w-none table-fixed border-separate border-spacing-x-2 border-spacing-y-1 -mx-2 overflow-x-auto"
         >
-          <thead>
+          <thead class="text-[80%]">
             <tr class="*:overflow-x-hidden *:text-ellipsis">
               <th class="w-6/48 text-left">Ability</th>
               <th class="w-10/24 hidden sm:table-cell">Score</th>
@@ -532,7 +532,7 @@ function confirmDiscard(): boolean {
                   class="w-[5ch] text-center"
                   :class="{
                     thick: !!abilityModifiers[key],
-                    'border-dashed': abilityModifiers[key] < 0,
+                    'dashed': abilityModifiers[key] < 0,
                   }"
                 />
               </td>
@@ -774,7 +774,10 @@ input {
     @apply bg-error-light border-error text-error-dark;
   }
   &.thick {
-    @apply outline outline-3 outline-ink/60 font-bold;
+    @apply outline outline-1 outline-ink/60 font-bold;
+  }
+  &.dashed {
+    @apply outline outline-1 outline-dashed border-transparent outline-ink/60 font-bold;
   }
 }
 
