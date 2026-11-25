@@ -120,9 +120,7 @@ const playerCharacter = computed(() =>
  * Combines form state's hasChanges with editor ready state.
  * Shows unsaved changes only when editor is actively displayed.
  */
-const hasUnsavedChanges = computed(
-  () => isEditorReady.value && hasChanges.value,
-);
+const hasUnsavedChanges = computed(() => isEditorReady.value && hasChanges.value);
 
 //#endregion Computed properties
 
@@ -671,16 +669,14 @@ function confirmDiscard(): boolean {
           <div class="w-full">
             <span class="font-bold"
               >Origin
-              <span class="font-light"
+              <span v-if="form.backgroundId === 'custom'" class="font-light"
                 >({{ form.customBackgroundName || "yet unnamed background" }})</span
               ></span
             >
           </div>
         </template>
         <section>
-          <label class="mt-1 -mb-1"
-            >Story</label
-          >
+          <label class="mt-1 -mb-1">Story</label>
           <textarea
             v-model="form.originStory"
             class="w-full border border-ink/20 rounded-md p-2"
@@ -735,7 +731,6 @@ function confirmDiscard(): boolean {
 </template>
 
 <style scoped lang="css">
-
 @reference "@/styles/tailwind.css";
 
 table tr > *[bonus-points] {
