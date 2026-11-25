@@ -532,7 +532,7 @@ function confirmDiscard(): boolean {
                   class="w-[5ch] text-center"
                   :class="{
                     thick: !!abilityModifiers[key],
-                    'dashed': abilityModifiers[key] < 0,
+                    dashed: abilityModifiers[key] < 0,
                   }"
                 />
               </td>
@@ -599,11 +599,12 @@ function confirmDiscard(): boolean {
           <span class="inline group-open:hidden">&nbsp;(TODO: Skill List)</span>
         </template>
         <section
-          class="py-2 grid w-full grid-cols-[minmax(5rem,auto)_minmax(120px,auto)_minmax(100px,auto)] items-baseline gap-1"
+          class="pb-2 grid w-full grid-cols-[minmax(5rem,auto)_minmax(120px,auto)_minmax(100px,auto)] items-baseline gap-1"
         >
           <template v-if="hasVersatilityTrait">
             <label for="versatility-skill" class="mt-1 -mb-1">Versatility</label>
             <select id="versatility-skill" v-model="form.versatilitySkill" class="truncate">
+              <option default value="">Select a versatility skill</option>
               <optgroup
                 v-for="attr in abilityKeys.filter((a) => skillsByAbility[a].length > 0)"
                 :key="attr"
@@ -617,8 +618,10 @@ function confirmDiscard(): boolean {
             </select>
           </template>
           <template v-if="!form.backgroundId">
-            <label class="mt-1 -mb-1 break-before-column col-start-1 col-span-full"
-              >No Background selected yet</label
+            <label class="mt-1 -mb-1 break-before-column col-start-1"
+              >Background:</label
+            ><label class="mt-1 -mb-1 col-span-2"
+              >No background selected yet</label
             >
           </template>
           <template v-else-if="form.backgroundId === 'custom'">
