@@ -5,6 +5,7 @@ import type { Ref } from "vue";
 import { ref, computed, watch, nextTick, useTemplateRef } from "vue";
 import { storeToRefs } from "pinia";
 import { onBeforeRouteLeave, onBeforeRouteUpdate, useRoute, useRouter } from "vue-router";
+import ArrayItemsInput from "@/components/ArrayItemsInput.vue";
 import NumberStepper from "@/components/NumberStepper.vue";
 import VuSlider from "@/components/VuSlider.vue";
 import type { Campaign, PlayerCharacter } from "@/generated/models/data.schema";
@@ -57,7 +58,6 @@ const {
   savingThrows,
   backgroundAllowsBoosting,
   availableBackgrounds,
-  customBackgroundSkillStates,
   pcHasTrait,
   editableFields,
 } = usePlayerCharacterForm();
@@ -81,33 +81,17 @@ function hydrateEditor(): void {
   isLoading.value = false;
 }
 
-/**
- * Because the JSON to TS generator does not support fixed-length arrays, we need help managing the dynamic list of custom background skills.
- * (However, though the number of skills that can be defined for a custom background is usually fixed to 2, the DM
- * may allow more or fewer, so that's another reason for handling the list dynamically.)
- */
-
-const isCustomBackgroundSkillLast = (index: number) =>
-  index === form.value.customBackgroundSkills.length - 1;
-
-const canCustomBackgroundSkillBeAdded = (index: number) =>
-  (index === 0 && form.value.customBackgroundSkills.length === 0) ||
-  isCustomBackgroundSkillLast(index - 1);
-
-const canCustomBackgroundSkillBeDeleted = (index: number) => isCustomBackgroundSkillLast(index);
-
-const canCustomBackgroundSkillBeEdited = (index: number) =>
-  canCustomBackgroundSkillBeAdded(index) || index < form.value.customBackgroundSkills.length;
-
-function onCustomBackgroundSkillChange(index: number, event: Event): void {
+function onCustomBackgroundSkillChange(
+  event: Event,
+  addOrUpdate: (value: string) => void,
+  remove: () => void,
+): void {
   const target = event.target as HTMLSelectElement;
   if (!target.value) {
-    console.assert(index == form.value.customBackgroundSkills.length - 1);
-    form.value.customBackgroundSkills.pop();
+    remove();
   } else {
-    form.value.customBackgroundSkills[index] = target.value;
+    addOrUpdate(target.value);
   }
-  console.log(form.value.customBackgroundSkills);
 }
 
 //#endregion
@@ -666,28 +650,28 @@ function confirmDiscard(): boolean {
                 form.customBackgroundName
               }}</span>
             </template>
-            <select
-              v-for="n in 2"
-              :key="n"
-              :disabled="!canCustomBackgroundSkillBeEdited(n - 1)"
-              :value="form.customBackgroundSkills[n - 1]"
-              @change="onCustomBackgroundSkillChange(n - 1, $event)"
-            >
-              <option default value="" v-if="canCustomBackgroundSkillBeDeleted(n - 1)">
-                (Remove)
-              </option>
-              <option default value="" v-if="canCustomBackgroundSkillBeAdded(n - 1)">Add</option>
-              <optgroup
-                v-for="attr in abilityKeys.filter((a) => skillsByAbility[a].length > 0)"
-                :key="attr"
-                :label="abilityNamesMap_en[attr]"
-                class="capitalize"
-              >
-                <option v-for="skillId in skillsByAbility[attr]" :key="skillId" :value="skillId">
-                  {{ skillNamesMap_en[skillId] }}
-                </option>
-              </optgroup>
-            </select>
+            <ArrayItemsInput v-model="form.customBackgroundSkills" :slot-count="2">
+              <template #default="{ value, canAdd, canRemove, canEdit, addOrUpdate, remove }">
+                <select
+                  :disabled="!canEdit"
+                  :value="value"
+                  @change="onCustomBackgroundSkillChange($event, addOrUpdate, remove)"
+                >
+                  <option v-if="canRemove" default value="">(Remove)</option>
+                  <option v-if="canAdd" default value="">Add</option>
+                  <optgroup
+                    v-for="attr in abilityKeys.filter((a) => skillsByAbility[a].length > 0)"
+                    :key="attr"
+                    :label="abilityNamesMap_en[attr]"
+                    class="capitalize"
+                  >
+                    <option v-for="skillId in skillsByAbility[attr]" :key="skillId" :value="skillId">
+                      {{ skillNamesMap_en[skillId] }}
+                    </option>
+                  </optgroup>
+                </select>
+              </template>
+            </ArrayItemsInput>
           </template>
           <template v-else>
             <label class="mt-1 -mb-1 break-before-column col-start-1"

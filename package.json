@@ -55,6 +55,8 @@
     "@vitejs/plugin-vue": "^6.0.7",
     "json-schema-defaults": "^0.4.0",
     "json-schema-to-typescript": "^16.0.0",
+    "prettier": "^3.10.1",
+    "prettier-plugin-jsdoc": "^1.8.1",
     "pug": "^3.0.4",
     "sass": "^1.101.0",
     "tailwindcss": "^4.1.11",

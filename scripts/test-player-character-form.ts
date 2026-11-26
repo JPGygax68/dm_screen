@@ -1,7 +1,8 @@
 import assert from "node:assert/strict";
-import { reactive } from "vue";
+import { computed, reactive, ref } from "vue";
 import type { PlayerCharacter } from "../src/generated/models/data.schema";
 import { usePlayerCharacterForm } from "../src/composables/usePlayerCharacterForm.ts";
+import { useArrayItems } from "../src/composables/useArrayItems.ts";
 
 const character: PlayerCharacter = reactive({
   id: "character-1",
@@ -45,5 +46,60 @@ resetForm();
 assert.equal(form.value.name, "");
 assert.equal(form.value.pcClass, "");
 assert.equal(hasChanges.value, false);
+
+const items = ref<string[]>([]);
+const slotCount = ref(2);
+const arrayInput = useArrayItems(items, slotCount);
+assert.deepEqual(
+  arrayInput.slots.value.map(({ canAdd, canRemove, canEdit }) => [
+    canAdd,
+    canRemove,
+    canEdit,
+  ]),
+  [
+    [true, false, true],
+    [false, false, false],
+  ],
+);
+assert.throws(() => arrayInput.addOrUpdate(1, "history"), RangeError);
+const emptyItems = items.value;
+arrayInput.addOrUpdate(0, "arcana");
+assert.deepEqual(emptyItems, []);
+assert.deepEqual(items.value, ["arcana"]);
+assert.equal(arrayInput.slots.value[0].canRemove, true);
+assert.equal(arrayInput.slots.value[1].canAdd, true);
+arrayInput.addOrUpdate(1, "history");
+assert.throws(() => arrayInput.remove(0), RangeError);
+arrayInput.addOrUpdate(0, "religion");
+assert.deepEqual(items.value, ["religion", "history"]);
+assert.throws(() => arrayInput.addOrUpdate(2, "nature"), RangeError);
+arrayInput.remove(1);
+arrayInput.remove(0);
+assert.deepEqual(items.value, []);
+
+items.value = ["arcana", "history", "nature"];
+assert.equal(arrayInput.slots.value[1].canRemove, false);
+assert.throws(() => arrayInput.remove(1), RangeError);
+arrayInput.addOrUpdate(0, "religion");
+assert.deepEqual(items.value, ["religion", "history", "nature"]);
+slotCount.value = 3;
+arrayInput.remove(2);
+assert.deepEqual(items.value, ["religion", "history"]);
+slotCount.value = -1;
+assert.throws(() => arrayInput.slots.value, RangeError);
+
+resetForm(character);
+const formItems = useArrayItems(
+  computed({
+    get: () => form.value.customBackgroundSkills,
+    set: (value) => {
+      form.value.customBackgroundSkills = value;
+    },
+  }),
+  2,
+);
+formItems.addOrUpdate(1, "history");
+assert.equal(hasChanges.value, true);
+assert.deepEqual(character.customBackgroundSkills, ["arcana"]);
 
 console.log("Player character form tests passed.");
