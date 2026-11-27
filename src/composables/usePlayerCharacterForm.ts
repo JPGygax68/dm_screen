@@ -135,6 +135,19 @@ export function usePlayerCharacterForm() {
     return backgrounds.find((bg) => bg.id === bgId)?.skills ?? [];
   });
 
+  const allSkills = computed(() => {
+    const skills: string[] = [];
+    if (hasVersatilityTrait.value && form.value.versatilitySkill) {
+      skills.push(form.value.versatilitySkill);
+    }
+    if (form.value.backgroundId === "custom") {
+      skills.push(...(form.value.customBackgroundSkills ?? []));
+    } else {
+      skills.push(...(backgroundSkills.value ?? []));
+    }
+    return skills;
+  });
+
   // ===== ABILITY SCORE CALCULATIONS & VALIDATIONS =====
 
   /**
@@ -250,15 +263,15 @@ export function usePlayerCharacterForm() {
     return props;
   });
 
-  const customBackgroundSkillStates = computed(() => {
-    console.log(form.value.customBackgroundSkills)
-    return form.value.customBackgroundSkills.map((skill, index) => {
-      const isLast = index === form.value.customBackgroundSkills.length - 1;
-      return {
-        enabled: isLast,
-      };
-    });
-  });
+  // const customBackgroundSkillStates = computed(() => {
+  //   console.log(form.value.customBackgroundSkills)
+  //   return form.value.customBackgroundSkills.map((skill, index) => {
+  //     const isLast = index === form.value.customBackgroundSkills.length - 1;
+  //     return {
+  //       enabled: isLast,
+  //     };
+  //   });
+  // });
 
   // ===== CLASS & BACKGROUND FEATURES =====
 
@@ -375,7 +388,9 @@ export function usePlayerCharacterForm() {
     savingThrows,
     backgroundAllowsBoosting,
     availableBackgrounds,
-    customBackgroundSkillStates,
+
+    // Miscellaneous
+    allSkills,
 
     // Functions
     pcHasTrait,

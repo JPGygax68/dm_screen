@@ -58,6 +58,9 @@ const {
   savingThrows,
   backgroundAllowsBoosting,
   availableBackgrounds,
+  // Miscellaneous
+  allSkills,
+  // Functions
   pcHasTrait,
   editableFields,
 } = usePlayerCharacterForm();
@@ -665,7 +668,12 @@ function confirmDiscard(): boolean {
                     :label="abilityNamesMap_en[attr]"
                     class="capitalize"
                   >
-                    <option v-for="skillId in skillsByAbility[attr]" :key="skillId" :value="skillId">
+                    <option
+                      v-for="skillId in skillsByAbility[attr]"
+                      :key="skillId"
+                      :value="skillId"
+                      :disabled="allSkills.includes(skillId)"
+                    >
                       {{ skillNamesMap_en[skillId] }}
                     </option>
                   </optgroup>
